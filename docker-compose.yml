@@ -1,0 +1,41 @@
+version: "3"
+services:
+  web:
+    container_name: animar
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - MYSQL_ROOT_PASSWORD: root
+      - MYSQL_DATABASE: db_go
+      - MYSQL_USER: db_test
+      - MYSQL_PASSWORD: MYSQL_PASSWORD
+      - TZ: 'Asia/Tokyo'
+    volumes:
+      - .:/go/src/app
+    ports:
+      - 8080:8080
+    networks:
+      - network
+
+  db:
+    container_name: animar_db
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD: root
+      - MYSQL_DATABASE: db_go
+      - MYSQL_USER: db_test
+      - MYSQL_PASSWORD: MYSQL_PASSWORD
+      - TZ: 'Asia/Tokyo'
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./tmp/db:/var/lib/mysql
+      - ./db/my.cnf:/etc/mysql/conf.d/my.cnf
+    ports:
+      - 3306:3306
+    networks:
+      - network
+
+networks:
+  network:
+    driver: bridge
