@@ -21,7 +21,9 @@ services:
 
   db:
     container_name: animar_db
-    image: mysql:8.0
+    build:
+      context: .
+      dockerfile: Dockerfile_mysql
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=db_go
@@ -29,10 +31,11 @@ services:
       - MYSQL_PASSWORD=password
       - TZ="Asia/Tokyo"
     tty: true
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command: --default-authentication-plugin=mysql_native_password
+    #command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     volumes:
       - ./tmp/db:/var/lib/mysql
-      - ./db/my.cnf:/etc/mysql/conf.d/my.cnf
+      #- ./db/my.cnf:/etc/mysql/conf.d/my.cnf
     ports:
       - 3306:3306
     networks:
