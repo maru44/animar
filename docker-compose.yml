@@ -5,12 +5,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    tty: true
     environment:
-      - MYSQL_ROOT_PASSWORD: root
-      - MYSQL_DATABASE: db_go
-      - MYSQL_USER: db_test
-      - MYSQL_PASSWORD: MYSQL_PASSWORD
-      - TZ: 'Asia/Tokyo'
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=db_go
+      - MYSQL_USER=db_test
+      - MYSQL_PASSWORD=password
+      - TZ="Asia/Tokyo"
     volumes:
       - .:/go/src/app
     ports:
@@ -22,11 +23,12 @@ services:
     container_name: animar_db
     image: mysql:8.0
     environment:
-      - MYSQL_ROOT_PASSWORD: root
-      - MYSQL_DATABASE: db_go
-      - MYSQL_USER: db_test
-      - MYSQL_PASSWORD: MYSQL_PASSWORD
-      - TZ: 'Asia/Tokyo'
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=db_go
+      - MYSQL_USER=db_test
+      - MYSQL_PASSWORD=password
+      - TZ="Asia/Tokyo"
+    tty: true
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     volumes:
       - ./tmp/db:/var/lib/mysql
