@@ -12,6 +12,7 @@ type TAnime struct {
 	Title     string
 	Content   string
 	CreatedAt string
+	UpdatedAt string
 }
 
 func ListAnime() *sql.Rows {
@@ -30,7 +31,7 @@ func DetailAnime(id int) TAnime {
 
 	var ani TAnime
 	nullContent := new(sql.NullString)
-	err := db.QueryRow("SELECT * FROM anime WHERE id = ?", id).Scan(&ani.ID, &ani.Title, nullContent, &ani.CreatedAt)
+	err := db.QueryRow("SELECT * FROM anime WHERE id = ?", id).Scan(&ani.ID, &ani.Title, nullContent, &ani.CreatedAt, &ani.UpdatedAt)
 
 	switch {
 	case err == sql.ErrNoRows:
