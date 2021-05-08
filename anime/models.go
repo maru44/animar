@@ -3,7 +3,6 @@ package anime
 import (
 	"animar/v1/helper"
 	"database/sql"
-	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -15,21 +14,8 @@ type TAnime struct {
 	CreatedAt string
 }
 
-var MysqlUser = helper.GetenvOrDefault("MYSQL_USER", "go")
-var MysqlPassword = helper.GetenvOrDefault("MYSQL_PASSWORD", "Go1234_test")
-var MysqlDataBase = helper.GetenvOrDefault("MYSQL_DB", "go_test")
-
-func AccessDB() *sql.DB {
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", MysqlUser, MysqlPassword, MysqlDataBase))
-	if err != nil {
-		panic(err.Error())
-	}
-
-	return db
-}
-
 func ListAnime() *sql.Rows {
-	db := AccessDB()
+	db := helper.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select * from anime")
 	if err != nil {
@@ -39,7 +25,7 @@ func ListAnime() *sql.Rows {
 }
 
 func DetailAnime(id int) TAnime {
-	db := AccessDB()
+	db := helper.AccessDB()
 	defer db.Close()
 
 	var ani TAnime
@@ -57,19 +43,19 @@ func DetailAnime(id int) TAnime {
 	return ani
 }
 
-func InsertAnime(title string, content string) sql.Result {
-	db := AccessDB()
+func InsertAnime(title string, content string) int {
+	db := helper.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare("INSERT INTO anime (title, content) VALUES (:title, :content)")
-	if err != nil {
-		panic(err.Error())
-	}
+	stmtInsert, err := db.Prepare("INSERT INTO anime(title, content) VALUES(?, ?)")
 	defer stmtInsert.Close()
 
-	exe, err := stmtInsert.Exec(title, content)
+	exe, err := stmtInsert.Exec(title, helper.NewNullString(content))
+
+	insertedId, err := exe.LastInsertId()
 	if err != nil {
 		panic(err.Error())
 	}
-	return exe
+
+	return int(insertedId)
 }
