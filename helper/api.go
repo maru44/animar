@@ -56,6 +56,21 @@ func SetCookiePackage(w http.ResponseWriter, key string, value string) bool {
 	return true
 }
 
+func DestroyCookie(w http.ResponseWriter, key string) bool {
+	cookie := &http.Cookie{
+		Name:     key,
+		Value:    "",
+		Path:     "",
+		Domain:   "localhost",
+		MaxAge:   -1,
+		SameSite: http.SameSiteLaxMode,
+		Secure:   false,
+		HttpOnly: true,
+	}
+	http.SetCookie(w, cookie)
+	return true
+}
+
 func SetDefaultResponseHeader(w http.ResponseWriter) bool {
 	protocol := "http://"
 	host := "localhost:3000"
