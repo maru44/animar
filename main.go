@@ -18,7 +18,7 @@ func main() {
 	/**/
 
 	/*   auth   */
-	http.HandleFunc("/auth/sample/", auth.UserListView)
+	http.HandleFunc("/auth/sample/", auth.SampleGetUser)
 
 	http.ListenAndServe(":8080", nil)
 }

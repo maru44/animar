@@ -2,6 +2,7 @@ package auth
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -26,4 +27,13 @@ func UserListView(w http.ResponseWriter, r *http.Request) {
 	defer resp.Body.Close()
 
 	fmt.Fprintln(w, resp)
+}
+
+func SampleGetUser(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	uid := query.Get("uid")
+	ctx := context.Background()
+
+	user := GetUserFirebase(ctx, uid)
+	fmt.Fprintln(w, user.Email, user.EmailVerified, user.UID, user.DisplayName)
 }

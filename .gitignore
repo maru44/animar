@@ -18,3 +18,4 @@ go.sum
 
 tmp/*
 helper/env.go
+secret_key.json
