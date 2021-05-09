@@ -3,7 +3,11 @@ package helper
 import (
 	"database/sql"
 	"fmt"
+	"math/rand"
+	"time"
 )
+
+const slugLetters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 
 type NullInt struct {
 	Int   int
@@ -43,4 +47,13 @@ func NewNullInt(i int) NullInt {
 		Int:   i,
 		Valid: true,
 	}
+}
+
+func GenRandSlug(n int) string {
+	b := make([]byte, n)
+	rand.Seed(time.Now().UnixNano())
+	for i := range b {
+		b[i] = slugLetters[rand.Intn(len(slugLetters))]
+	}
+	return string(b)
 }

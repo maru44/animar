@@ -116,14 +116,12 @@ func RenewTokenView(w http.ResponseWriter, r *http.Request) error {
 
 	// get refresh token from cookie
 	refreshToken, _ := r.Cookie("refreshToken")
-	//idToken, _ := r.Cookie("idToken")
 	if refreshToken.Value == "" {
 		result.Status = 402
 		return nil
 	}
 
 	jsonStr := `{"grant_type": "refresh_token", "refresh_token": "` + refreshToken.Value + `"}`
-
 	url := `https://securetoken.googleapis.com/v1/token?key=` + os.Getenv("FIREBASE_API_KEY")
 	req, err := http.NewRequest(
 		"POST",
@@ -131,10 +129,8 @@ func RenewTokenView(w http.ResponseWriter, r *http.Request) error {
 		bytes.NewBuffer([]byte(jsonStr)),
 	)
 	req.Header.Set("Content-Type", "application/json")
-
 	client := &http.Client{}
 	resp, err := client.Do(req)
-
 	if err != nil {
 		fmt.Print(err.Error())
 	}
@@ -147,8 +143,7 @@ func RenewTokenView(w http.ResponseWriter, r *http.Request) error {
 	fmt.Print(tokens)
 
 	if tokens.IdToken != "" {
-		// idToken がすでにあれば削除
-		helper.DestroyCookie(w, "idToken")
+		helper.DestroyCookie(w, "idToken") // destroy cookie
 		helper.SetCookiePackage(w, "idToken", tokens.IdToken)
 	} else {
 		result.Status = 401

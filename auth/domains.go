@@ -7,6 +7,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+
+	"github.com/dgrijalva/jwt-go"
+	jwt "github.com/dgrijalva/jwt-go"
 )
 
 func GetJWTFromGoogle(posted TLoginForm) TTokensForm {
@@ -38,4 +41,13 @@ func GetJWTFromGoogle(posted TLoginForm) TTokensForm {
 	}
 
 	return tokens
+}
+
+func GetJWTPayload(token string) {
+	//hCS := strings.split(token, ".")
+	parsedToken, err := jwt.Parse(token)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+	fmt.Print(parsedToken)
 }

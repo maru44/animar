@@ -9,6 +9,7 @@ import (
 
 type TAnime struct {
 	ID        int
+	Slug      string
 	Title     string
 	Content   string
 	CreatedAt string
@@ -31,7 +32,26 @@ func DetailAnime(id int) TAnime {
 
 	var ani TAnime
 	nullContent := new(sql.NullString)
-	err := db.QueryRow("SELECT * FROM anime WHERE id = ?", id).Scan(&ani.ID, &ani.Title, nullContent, &ani.CreatedAt, &ani.UpdatedAt)
+	err := db.QueryRow("SELECT * FROM anime WHERE id = ?", id).Scan(&ani.ID, &ani.Slug, &ani.Title, nullContent, &ani.CreatedAt, &ani.UpdatedAt)
+
+	switch {
+	case err == sql.ErrNoRows:
+		ani.ID = 0
+	case err != nil:
+		panic(err.Error())
+	default:
+		ani.Content = nullContent.String
+	}
+	return ani
+}
+
+func DetailAnimeBySlug(slug string) TAnime {
+	db := helper.AccessDB()
+	defer db.Close()
+
+	var ani TAnime
+	nullContent := new(sql.NullString)
+	err := db.QueryRow("SELECT * FROM anime WHERE slug = ?", slug).Scan(&ani.ID, &ani.Slug, &ani.Title, nullContent, &ani.CreatedAt, &ani.UpdatedAt)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -48,10 +68,11 @@ func InsertAnime(title string, content string) int {
 	db := helper.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare("INSERT INTO anime(title, content) VALUES(?, ?)")
+	stmtInsert, err := db.Prepare("INSERT INTO anime(title, slug, content) VALUES(?, ?, ?)")
 	defer stmtInsert.Close()
 
-	exe, err := stmtInsert.Exec(title, helper.NewNullString(content))
+	slug := helper.GenRandSlug(12)
+	exe, err := stmtInsert.Exec(title, slug, helper.NewNullString(content))
 
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
@@ -59,4 +80,28 @@ func InsertAnime(title string, content string) int {
 	}
 
 	return int(insertedId)
+}
+
+func UpdateAnime(slug string, title string, content string) int {
+	db := helper.AccessDB()
+	defer db.Close()
+
+	exe, err := db.Exec("UPDATE anime SET title = ?, content = ? WHERE slug = ?", title, content, slug)
+	if err != nil {
+		panic(err.Error())
+	}
+	updatedId, _ := exe.RowsAffected()
+	return int(updatedId)
+}
+
+func DeleteAnime(id int) int {
+	db := helper.AccessDB()
+	defer db.Close()
+
+	exe, err := db.Exec("DELETE FROM anime WHERE id = ?", id)
+	if err != nil {
+		panic(err.Error())
+	}
+	rowsAffect, _ := exe.RowsAffected()
+	return int(rowsAffect)
 }

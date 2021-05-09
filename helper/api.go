@@ -41,6 +41,7 @@ type TVoidJsonResponse struct {
 	Status int `json:"Status"`
 }
 
+// @TODO env使う
 func SetCookiePackage(w http.ResponseWriter, key string, value string) bool {
 	cookie := &http.Cookie{
 		Name:     key,
@@ -56,6 +57,7 @@ func SetCookiePackage(w http.ResponseWriter, key string, value string) bool {
 	return true
 }
 
+// @TODO env使う
 func DestroyCookie(w http.ResponseWriter, key string) bool {
 	cookie := &http.Cookie{
 		Name:     key,
