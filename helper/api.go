@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+
+	"firebase.google.com/go/v4/auth"
 )
 
 func IsProductionEnv() bool {
@@ -30,6 +32,30 @@ type TIntJsonReponse struct {
 	Num    int `json:"ID"`
 }
 
+type TUserJsonResponse struct {
+	Status int           `json:"Status"`
+	User   auth.UserInfo `json:"User"`
+}
+
+type TVoidJsonResponse struct {
+	Status int `json:"Status"`
+}
+
+func SetCookiePackage(w http.ResponseWriter, key string, value string) bool {
+	cookie := &http.Cookie{
+		Name:     key,
+		Value:    value,
+		Path:     "/",
+		Domain:   "localhost",
+		MaxAge:   60 * 60 * 24,
+		SameSite: http.SameSiteLaxMode,
+		Secure:   false,
+		HttpOnly: true,
+	}
+	http.SetCookie(w, cookie)
+	return true
+}
+
 func SetDefaultResponseHeader(w http.ResponseWriter) bool {
 	protocol := "http://"
 	host := "localhost:3000"
@@ -47,6 +73,34 @@ func SetDefaultResponseHeader(w http.ResponseWriter) bool {
 }
 
 func (result TIntJsonReponse) ResponseWrite(w http.ResponseWriter) bool {
+	res, err := json.Marshal(result)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return false
+	}
+
+	SetDefaultResponseHeader(w)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+	return true
+}
+
+func (result TUserJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
+	res, err := json.Marshal(result)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return false
+	}
+
+	SetDefaultResponseHeader(w)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+	return true
+}
+
+func (result TVoidJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 	res, err := json.Marshal(result)
 
 	if err != nil {

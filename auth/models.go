@@ -8,11 +8,12 @@ import (
 	"firebase.google.com/go/v4/auth"
 )
 
-func GetUserFirebase(ctx context.Context, uid string) *auth.UserRecord {
+// *auth.UserRecord
+func GetUserFirebase(ctx context.Context, uid string) *auth.UserInfo {
 	client := helper.FirebaseClient(ctx)
 	u, err := client.GetUser(ctx, uid)
 	if err != nil {
 		log.Fatalf("%s", err)
 	}
-	return u
+	return u.UserInfo
 }

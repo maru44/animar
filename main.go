@@ -18,7 +18,9 @@ func main() {
 	/**/
 
 	/*   auth   */
-	http.HandleFunc("/auth/sample/", auth.SampleGetUser)
+	//http.HandleFunc("/auth/sample/", auth.SampleGetUser)
+	http.HandleFunc("/auth/sample/", helper.Handle(auth.SampleGetUserJson)) // ?uid=<UID>
+	http.HandleFunc("/auth/login/post/", helper.Handle(auth.SetJWTCookie))
 
 	http.ListenAndServe(":8080", nil)
 }
