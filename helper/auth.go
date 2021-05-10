@@ -2,7 +2,9 @@ package helper
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net/http"
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
@@ -25,4 +27,22 @@ func FirebaseClient(ctx context.Context) *auth.Client {
 		log.Panic(err.Error())
 	}
 	return client
+}
+
+func GetIdFromCookie(r *http.Request) string {
+	idToken, err := r.Cookie("idToken")
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+
+	ctx := context.Background()
+	client := FirebaseClient(ctx)
+	token, err := client.VerifyIDToken(ctx, idToken.Value)
+	if err != nil {
+		log.Fatalf("%s", err)
+	}
+	claims := token.Claims
+	id := claims["user_id"]
+
+	return id.(string)
 }

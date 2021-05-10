@@ -1,7 +1,10 @@
 package helper
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"runtime"
@@ -129,4 +132,21 @@ func (result TVoidJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 	return true
+}
+
+func GetClaimsFromCookie(r *http.Request) map[string]interface{} {
+	idToken, err := r.Cookie("idToken")
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+
+	ctx := context.Background()
+	client := FirebaseClient(ctx)
+	token, err := client.VerifyIDToken(ctx, idToken.Value)
+	if err != nil {
+		log.Fatalf("%s", err)
+	}
+	claims := token.Claims
+
+	return claims
 }

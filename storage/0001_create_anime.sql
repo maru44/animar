@@ -1,3 +1,4 @@
+truncate table if exists go_test.tbl_reviews;
 drop table if exists go_test.anime;
 create table anime (
     id INT unsigned AUTO_INCREMENT NOT NULL PRIMARY KEY,

@@ -10,6 +10,7 @@ type TReview struct {
 	Content   string
 	Star      int
 	AnimeId   int
+	UserId    string
 	CreatedAt string
 	UpdatedAt string
 }
@@ -31,7 +32,8 @@ func DetailReview(id int) TReview {
 	var rev TReview
 	nullStar := new(helper.NullInt)
 	nullContent := new(sql.NullString)
-	err := db.QueryRow("SELECT * FROM tbl_reviews WHERE id = ?", id).Scan(&rev.ID, nullStar, nullContent, &rev.AnimeId, &rev.CreatedAt, &rev.UpdatedAt)
+	nullUserId := new(sql.NullString)
+	err := db.QueryRow("SELECT * FROM tbl_reviews WHERE id = ?", id).Scan(&rev.ID, nullStar, nullContent, &rev.AnimeId, nullUserId, &rev.CreatedAt, &rev.UpdatedAt)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -41,6 +43,17 @@ func DetailReview(id int) TReview {
 	default:
 		rev.Content = nullContent.String
 		rev.Star = nullStar.Int
+		rev.UserId = nullUserId.String
 	}
 	return rev
+}
+
+func OnesReviewsList(userId string) *sql.Rows {
+	db := helper.AccessDB()
+	defer db.Close()
+	rows, err := db.Query("Select * from tbl_review")
+	if err != nil {
+		panic(err.Error())
+	}
+	return rows
 }

@@ -153,12 +153,12 @@ func RenewTokenView(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func TestGetCookie(w http.ResponseWriter, r *http.Request) {
-	cookies := r.Cookies()
-	idToken, err := r.Cookie("idToken")
-	if err != nil {
-		fmt.Print(err.Error())
-	}
-	fmt.Println(cookies)
-	fmt.Println(idToken.Value)
+// この流れでtoken取得
+func TestGetCookie(w http.ResponseWriter, r *http.Request) error {
+	result := helper.TVoidJsonResponse{Status: 200}
+
+	claims := helper.GetClaimsFromCookie(r)
+	fmt.Print(claims)
+	result.ResponseWrite(w)
+	return nil
 }

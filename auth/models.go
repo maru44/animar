@@ -17,3 +17,14 @@ func GetUserFirebase(ctx context.Context, uid string) *auth.UserInfo {
 	}
 	return u.UserInfo
 }
+
+func VerifyFirebase(ctx context.Context, idToken string) map[string]interface{} {
+	client := helper.FirebaseClient(ctx)
+	token, err := client.VerifyIDToken(ctx, idToken)
+	if err != nil {
+		log.Fatalf("%s", err)
+	}
+	claims := token.Claims
+
+	return claims
+}

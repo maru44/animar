@@ -21,8 +21,8 @@ func main() {
 	//http.HandleFunc("/auth/sample/", auth.SampleGetUser)
 	http.HandleFunc("/auth/sample/", helper.Handle(auth.SampleGetUserJson)) // ?uid=<UID>
 	http.HandleFunc("/auth/login/post/", helper.Handle(auth.SetJWTCookie))
-
 	http.HandleFunc("/auth/refresh/", helper.Handle(auth.RenewTokenView))
+	http.HandleFunc("/auth/cookie/", helper.Handle(auth.TestGetCookie))
 
 	http.ListenAndServe(":8080", nil)
 }
