@@ -51,9 +51,26 @@ func DetailReview(id int) TReview {
 func OnesReviewsList(userId string) *sql.Rows {
 	db := helper.AccessDB()
 	defer db.Close()
-	rows, err := db.Query("Select * from tbl_review")
+	rows, err := db.Query("Select * from tbl_reviews WHERE user_id = ?", userId)
 	if err != nil {
 		panic(err.Error())
 	}
 	return rows
+}
+
+func InsertReview(animeId int, content string, star int, user_id string) int {
+	db := helper.AccessDB()
+	defer db.Close()
+
+	stmtInsert, err := db.Prepare("INSERT INTO tbl_reviews(anime_id, content, star, user_id) VALUES(?, ?, ?, ?)")
+	defer stmtInsert.Close()
+
+	exe, err := stmtInsert.Exec(animeId, helper.NewNullString(content), helper.NewNullInt(star), user_id)
+
+	insertedId, err := exe.LastInsertId()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return int(insertedId)
 }

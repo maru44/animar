@@ -1,10 +1,7 @@
 package helper
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"runtime"
@@ -42,6 +39,11 @@ type TUserJsonResponse struct {
 
 type TVoidJsonResponse struct {
 	Status int `json:"Status"`
+}
+
+type TBaseJsonResponse struct {
+	Status int         `json:"Status"`
+	Data   interface{} `json:"Data"`
 }
 
 // @TODO env使う
@@ -134,19 +136,16 @@ func (result TVoidJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 	return true
 }
 
-func GetClaimsFromCookie(r *http.Request) map[string]interface{} {
-	idToken, err := r.Cookie("idToken")
+func (result TBaseJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
+	res, err := json.Marshal(result)
+
 	if err != nil {
-		fmt.Print(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return false
 	}
 
-	ctx := context.Background()
-	client := FirebaseClient(ctx)
-	token, err := client.VerifyIDToken(ctx, idToken.Value)
-	if err != nil {
-		log.Fatalf("%s", err)
-	}
-	claims := token.Claims
-
-	return claims
+	SetDefaultResponseHeader(w)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+	return true
 }

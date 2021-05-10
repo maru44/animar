@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
@@ -29,7 +30,7 @@ func FirebaseClient(ctx context.Context) *auth.Client {
 	return client
 }
 
-func GetIdFromCookie(r *http.Request) string {
+func GetClaimsFromCookie(r *http.Request) map[string]interface{} {
 	idToken, err := r.Cookie("idToken")
 	if err != nil {
 		fmt.Print(err.Error())
@@ -40,6 +41,26 @@ func GetIdFromCookie(r *http.Request) string {
 	token, err := client.VerifyIDToken(ctx, idToken.Value)
 	if err != nil {
 		log.Fatalf("%s", err)
+	}
+	claims := token.Claims
+
+	return claims
+}
+
+func GetIdFromCookie(r *http.Request) string {
+	idToken, err := r.Cookie("idToken")
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+
+	ctx := context.Background()
+	client := FirebaseClient(ctx)
+	token, err := client.VerifyIDToken(ctx, idToken.Value)
+	if err != nil {
+		fmt.Printf("%s%s", err.Error(), err)
+		if strings.Contains(err.Error(), "ID token has expired at:") {
+			return ""
+		}
 	}
 	claims := token.Claims
 	id := claims["user_id"]

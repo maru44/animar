@@ -1,7 +1,6 @@
 package review
 
 import (
-	"animar/v1/helper"
 	"database/sql"
 )
 
@@ -11,15 +10,15 @@ func OnesReviewsDomain(userId string) []TReview {
 	for rows.Next() {
 		var rev TReview
 		nullContent := new(sql.NullString)
-		nullStar := new(helper.NullInt)
+		nullStar := new(sql.NullInt32)
 		nullUserId := new(sql.NullString)
 		err := rows.Scan(&rev.ID, nullContent, nullStar, &rev.AnimeId, nullUserId, &rev.CreatedAt, &rev.UpdatedAt)
 		if err != nil {
 			panic(err.Error())
 		}
 		rev.Content = nullContent.String
-		rev.Star = nullStar.Int
-		rev.UserId = nullContent.String
+		rev.Star = int(nullStar.Int32)
+		rev.UserId = nullUserId.String
 		revs = append(revs, rev)
 	}
 
