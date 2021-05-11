@@ -87,9 +87,9 @@ func SetDefaultResponseHeader(w http.ResponseWriter) bool {
 	}
 	w.Header().Set("Access-Control-Allow-Origin", protocol+host)
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	// w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Headers", "X-Requested-With, Origin, X-Csrftoken, Content-Type, Accept")
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, Origin, X-Csrftoken, Accept, Cookie")
+	//w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELTE, PUT")
 	return true
 }

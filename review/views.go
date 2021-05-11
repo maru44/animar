@@ -3,7 +3,9 @@ package review
 import (
 	"animar/v1/helper"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strconv"
 )
 
 /*
@@ -57,6 +59,19 @@ func GetYourReviews(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+func GetAnimeReviews(w http.ResponseWriter, r *http.Request) error {
+	result := TReviewsJsonResponse{Status: 200}
+	animeIdStr := r.URL.Query().Get("anime")
+	animeId, _ := strconv.Atoi(animeIdStr)
+
+	var revs []TReview
+	revs = AnimeReviewsDomain(animeId)
+
+	result.Data = revs
+	result.ResponseWrite(w)
+	return nil
+}
+
 func ReviewPostView(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TIntJsonReponse{Status: 200}
 
@@ -72,6 +87,17 @@ func ReviewPostView(w http.ResponseWriter, r *http.Request) error {
 	insertedId := InsertReview(posted.AnimeId, posted.Content, posted.Star, userId)
 
 	result.Num = insertedId
+
+	fmt.Print(userId)
+	result.ResponseWrite(w)
+	return nil
+}
+
+func ReviewTest(w http.ResponseWriter, r *http.Request) error {
+	result := TReviewsJsonResponse{Status: 200}
+	userId := helper.GetIdFromCookie(r)
+
+	fmt.Print(userId)
 	result.ResponseWrite(w)
 	return nil
 }

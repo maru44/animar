@@ -17,8 +17,10 @@ func main() {
 	http.HandleFunc("/db/anime/post/", helper.Handle(anime.AnimePostView))
 
 	/*   reviews   */
-	http.HandleFunc("/reviews/post/", helper.Handle(review.ReviewPostView))
 	http.HandleFunc("/reviews/", helper.Handle(review.GetYourReviews))
+	//http.HandleFunc("/reviews/post/", helper.Handle(review.ReviewTest))
+	http.HandleFunc("/reviews/post/", helper.Handle(review.ReviewPostView))
+	http.HandleFunc("/reviews/anime/", helper.Handle(review.GetAnimeReviews))
 
 	/*   auth   */
 	//http.HandleFunc("/auth/sample/", auth.SampleGetUser)
