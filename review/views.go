@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strconv"
 )
 
@@ -21,9 +22,9 @@ type TReviewsJsonResponse struct {
 }
 
 type TReviewInput struct {
-	AnimeId int    `json:"AnimeId"`
+	AnimeId int    `json:"AnimeId,string"`
 	Content string `json:"Content"`
-	Star    int    `json:"Star"`
+	Star    int    `json:"Star,string"`
 	UserId  string `json:"UserId"`
 }
 
@@ -72,7 +73,7 @@ func GetAnimeReviews(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func ReviewPostView(w http.ResponseWriter, r *http.Request) error {
+func ReviewPostJsonView(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TIntJsonReponse{Status: 200}
 
 	userId := helper.GetIdFromCookie(r)
@@ -89,6 +90,41 @@ func ReviewPostView(w http.ResponseWriter, r *http.Request) error {
 	result.Num = insertedId
 
 	fmt.Print(userId)
+	result.ResponseWrite(w)
+	return nil
+}
+
+func ReviewPostView(w http.ResponseWriter, r *http.Request) error {
+	result := helper.TIntJsonReponse{Status: 200}
+
+	userId := helper.GetIdFromCookie(r)
+	if userId == "" {
+		result.Status = 5000
+		result.ResponseWrite(w)
+		return nil
+	}
+
+	var posted TReviewInput
+	json.NewDecoder(r.Body).Decode(&posted)
+	insertedId := InsertReview(posted.AnimeId, posted.Content, posted.Star, userId)
+
+	result.Num = insertedId
+
+	result.ResponseWrite(w)
+	return nil
+}
+
+func ReviewPostSample(w http.ResponseWriter, r *http.Request) error {
+	result := helper.TIntJsonReponse{Status: 200}
+
+	var posted TReviewInput
+	json.NewDecoder(r.Body).Decode(&posted)
+
+	// nullAnimeId = new(sql.NullInt32)
+	// nullStar = new(sql.NullInt32)
+	fmt.Print(posted)
+	fmt.Print(reflect.TypeOf(posted.AnimeId))
+
 	result.ResponseWrite(w)
 	return nil
 }

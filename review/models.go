@@ -42,7 +42,7 @@ func DetailReview(id int) TReview {
 		panic(err.Error())
 	default:
 		rev.Content = nullContent.String
-		rev.Star = nullStar.Int
+		rev.Star = *nullStar.Int
 		rev.UserId = nullUserId.String
 	}
 	return rev
@@ -75,7 +75,7 @@ func InsertReview(animeId int, content string, star int, user_id string) int {
 	stmtInsert, err := db.Prepare("INSERT INTO tbl_reviews(anime_id, content, star, user_id) VALUES(?, ?, ?, ?)")
 	defer stmtInsert.Close()
 
-	exe, err := stmtInsert.Exec(animeId, helper.NewNullString(content), helper.NewNullInt(star), user_id)
+	exe, err := stmtInsert.Exec(animeId, helper.NewNullString(content).String, helper.NewNullInt(star).Int, user_id)
 
 	insertedId, err := exe.LastInsertId()
 	if err != nil {

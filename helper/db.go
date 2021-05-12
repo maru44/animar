@@ -10,8 +10,13 @@ import (
 const slugLetters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 
 type NullInt struct {
-	Int   int
+	Int   *int
 	Valid bool
+}
+
+type NullStringMine struct {
+	String *string
+	Valid  bool
 }
 
 var (
@@ -29,22 +34,30 @@ func AccessDB() *sql.DB {
 	return db
 }
 
-func NewNullString(s string) sql.NullString {
+// insert & update用
+func NewNullString(s string) NullStringMine {
 	if s == "" {
-		return sql.NullString{}
+		return NullStringMine{
+			String: nil,
+			Valid:  false,
+		}
 	}
-	return sql.NullString{
-		String: s,
+	return NullStringMine{
+		String: &s,
 		Valid:  true,
 	}
 }
 
+// insert & update用
 func NewNullInt(i int) NullInt {
 	if i == 0 {
-		return NullInt{}
+		return NullInt{
+			Int:   nil,
+			Valid: false,
+		}
 	}
 	return NullInt{
-		Int:   i,
+		Int:   &i,
 		Valid: true,
 	}
 }

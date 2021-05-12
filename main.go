@@ -18,7 +18,7 @@ func main() {
 
 	/*   reviews   */
 	http.HandleFunc("/reviews/", helper.Handle(review.GetYourReviews))
-	//http.HandleFunc("/reviews/post/", helper.Handle(review.ReviewTest))
+	//http.HandleFunc("/reviews/post/", helper.Handle(review.ReviewPostSample))
 	http.HandleFunc("/reviews/post/", helper.Handle(review.ReviewPostView))
 	http.HandleFunc("/reviews/anime/", helper.Handle(review.GetAnimeReviews))
 
