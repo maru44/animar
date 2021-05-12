@@ -31,19 +31,24 @@ func (animeJson TAnimesJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 	return true
 }
 
+// list and detail
 func AnimeView(w http.ResponseWriter, r *http.Request) error {
 	result := TAnimesJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	strId := query.Get("id")
+	slug := query.Get("slug")
 
 	var animes []TAnime
 	if strId != "" {
-		id, err := strconv.Atoi(strId)
-		if err != nil {
-			panic(err.Error())
-		}
+		id, _ := strconv.Atoi(strId)
 		ani := DetailAnime(id)
+		if ani.ID == 0 {
+			result.Status = 404
+		}
+		animes = append(animes, ani)
+	} else if slug != "" {
+		ani := DetailAnimeBySlug(slug)
 		if ani.ID == 0 {
 			result.Status = 404
 		}
