@@ -22,7 +22,7 @@ type TReviewsJsonResponse struct {
 }
 
 type TReviewInput struct {
-	AnimeId int    `json:"AnimeId,string"` // text/plainのpostに対応
+	AnimeId int    `json:"AnimeId"`
 	Content string `json:"Content"`
 	Star    int    `json:"Star,string"` // text/plainのpostに対応
 	UserId  string `json:"UserId"`
