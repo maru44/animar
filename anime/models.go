@@ -11,7 +11,7 @@ type TAnime struct {
 	ID        int
 	Slug      string
 	Title     string
-	Content   string
+	Content   *string
 	CreatedAt string
 	UpdatedAt string
 }
@@ -31,16 +31,13 @@ func DetailAnime(id int) TAnime {
 	defer db.Close()
 
 	var ani TAnime
-	nullContent := new(sql.NullString)
-	err := db.QueryRow("SELECT * FROM anime WHERE id = ?", id).Scan(&ani.ID, &ani.Slug, &ani.Title, nullContent, &ani.CreatedAt, &ani.UpdatedAt)
+	err := db.QueryRow("SELECT * FROM anime WHERE id = ?", id).Scan(&ani.ID, &ani.Slug, &ani.Title, &ani.Content, &ani.CreatedAt, &ani.UpdatedAt)
 
 	switch {
 	case err == sql.ErrNoRows:
 		ani.ID = 0
 	case err != nil:
 		panic(err.Error())
-	default:
-		ani.Content = nullContent.String
 	}
 	return ani
 }
@@ -50,16 +47,13 @@ func DetailAnimeBySlug(slug string) TAnime {
 	defer db.Close()
 
 	var ani TAnime
-	nullContent := new(sql.NullString)
-	err := db.QueryRow("SELECT * FROM anime WHERE slug = ?", slug).Scan(&ani.ID, &ani.Slug, &ani.Title, nullContent, &ani.CreatedAt, &ani.UpdatedAt)
+	err := db.QueryRow("SELECT * FROM anime WHERE slug = ?", slug).Scan(&ani.ID, &ani.Slug, &ani.Title, &ani.Content, &ani.CreatedAt, &ani.UpdatedAt)
 
 	switch {
 	case err == sql.ErrNoRows:
 		ani.ID = 0
 	case err != nil:
 		panic(err.Error())
-	default:
-		ani.Content = nullContent.String
 	}
 	return ani
 }

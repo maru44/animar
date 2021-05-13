@@ -1,18 +1,14 @@
 package anime
 
-import "database/sql"
-
 func ListAnimeDomain() []TAnime {
 	rows := ListAnime()
 	var animes []TAnime
 	for rows.Next() {
 		var ani TAnime
-		nullContent := new(sql.NullString)
-		err := rows.Scan(&ani.ID, &ani.Slug, &ani.Title, nullContent, &ani.CreatedAt, &ani.UpdatedAt)
+		err := rows.Scan(&ani.ID, &ani.Slug, &ani.Title, &ani.Content, &ani.CreatedAt, &ani.UpdatedAt)
 		if err != nil {
 			panic(err.Error())
 		}
-		ani.Content = nullContent.String
 		animes = append(animes, ani)
 	}
 
