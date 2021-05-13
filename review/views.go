@@ -22,9 +22,9 @@ type TReviewsJsonResponse struct {
 }
 
 type TReviewInput struct {
-	AnimeId int    `json:"AnimeId,string"`
+	AnimeId int    `json:"AnimeId,string"` // text/plainのpostに対応
 	Content string `json:"Content"`
-	Star    int    `json:"Star,string"`
+	Star    int    `json:"Star,string"` // text/plainのpostに対応
 	UserId  string `json:"UserId"`
 }
 
@@ -120,8 +120,6 @@ func ReviewPostSample(w http.ResponseWriter, r *http.Request) error {
 	var posted TReviewInput
 	json.NewDecoder(r.Body).Decode(&posted)
 
-	// nullAnimeId = new(sql.NullInt32)
-	// nullStar = new(sql.NullInt32)
 	fmt.Print(posted)
 	fmt.Print(reflect.TypeOf(posted.AnimeId))
 

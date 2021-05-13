@@ -5,6 +5,7 @@ import (
 	"database/sql"
 )
 
+// nullableはpointerにしてnilを受け取れるようにする
 type TReview struct {
 	ID        int
 	Content   *string
@@ -15,6 +16,7 @@ type TReview struct {
 	UpdatedAt string
 }
 
+// all
 func ListReviews() *sql.Rows {
 	db := helper.AccessDB()
 	defer db.Close()
@@ -25,6 +27,8 @@ func ListReviews() *sql.Rows {
 	return rows
 }
 
+// retrieve
+// by id
 func DetailReview(id int) TReview {
 	db := helper.AccessDB()
 	defer db.Close()
@@ -41,6 +45,8 @@ func DetailReview(id int) TReview {
 	return rev
 }
 
+// List
+// fiter by userId
 func OnesReviewsList(userId string) *sql.Rows {
 	db := helper.AccessDB()
 	defer db.Close()
@@ -51,6 +57,8 @@ func OnesReviewsList(userId string) *sql.Rows {
 	return rows
 }
 
+// List
+// filter by animeId
 func AnimeReviewsList(animeId int) *sql.Rows {
 	db := helper.AccessDB()
 	defer db.Close()
@@ -61,6 +69,7 @@ func AnimeReviewsList(animeId int) *sql.Rows {
 	return rows
 }
 
+// Post
 func InsertReview(animeId int, content string, star int, user_id string) int {
 	db := helper.AccessDB()
 	defer db.Close()

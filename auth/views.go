@@ -48,15 +48,8 @@ func UserListView(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, resp)
 }
 
-func SampleGetUser(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
-	uid := query.Get("uid")
-	ctx := context.Background()
-
-	user := GetUserFirebase(ctx, uid)
-	fmt.Fprintln(w, user)
-}
-
+// user info from userId
+// url query params(uid)
 func SampleGetUserJson(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TUserJsonResponse{Status: 200}
 	query := r.URL.Query()
@@ -66,11 +59,12 @@ func SampleGetUserJson(w http.ResponseWriter, r *http.Request) error {
 	user := GetUserFirebase(ctx, uid)
 	result.User = *user
 
-	helper.SetCookiePackage(w, "aaa", "bbbbb")
 	result.ResponseWrite(w)
 	return nil
 }
 
+// login処理
+// cookie
 func SetJWTCookie(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TVoidJsonResponse{Status: 200}
 
@@ -111,6 +105,8 @@ func SetJWTCookie(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// refresh idToken
+// cookie
 func RenewTokenView(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TVoidJsonResponse{Status: 200}
 
@@ -137,10 +133,8 @@ func RenewTokenView(w http.ResponseWriter, r *http.Request) error {
 	defer resp.Body.Close()
 
 	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Print(string(body))
 	var tokens TRefreshReturn
 	err = json.Unmarshal(body, &tokens)
-	fmt.Print(tokens)
 
 	if tokens.IdToken != "" {
 		helper.DestroyCookie(w, "idToken") // destroy cookie
@@ -153,7 +147,8 @@ func RenewTokenView(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-// この流れでtoken取得
+// この流れでclaim取得
+// cookie
 func TestGetCookie(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TVoidJsonResponse{Status: 200}
 

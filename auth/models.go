@@ -18,6 +18,7 @@ func GetUserFirebase(ctx context.Context, uid string) *auth.UserInfo {
 	return u.UserInfo
 }
 
+// user info from token
 func VerifyFirebase(ctx context.Context, idToken string) map[string]interface{} {
 	client := helper.FirebaseClient(ctx)
 	token, err := client.VerifyIDToken(ctx, idToken)
