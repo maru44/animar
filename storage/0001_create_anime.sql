@@ -1,4 +1,5 @@
-truncate table if exists go_test.tbl_reviews;
+drop table if exists go_test.tbl_reviews;
+drop table if exists go_test.watch_states;
 drop table if exists go_test.anime;
 create table anime (
     id INT unsigned AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -12,3 +13,6 @@ create table anime (
 
 INSERT INTO go_test.anime (title, slug, content) VALUES ('天元突破グレンラガン', 'aaaaaaaaaaaa', 'ガイナックス');
 INSERT INTO go_test.anime (title, slug) VALUES ('ガールズアンドパンツァー', 'aaaaaaaaaaab');
+INSERT INTO go_test.anime (title, slug) VALUES ('宇宙よりも遠い場所', 'aaaaaaaaaaac');
+INSERT INTO go_test.anime (title, slug) VALUES ('ゾンビランドサガ', 'aaaaaaaaaaad');
+INSERT INTO go_test.anime (title, slug, content) VALUES ('あしたのジョー', 'aaaaaaaaaaae', '明日はどっちだ?');
