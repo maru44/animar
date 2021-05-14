@@ -6,6 +6,7 @@ create table anime (
     slug CHAR(12) NOT NULL UNIQUE,
     title VARCHAR(128) NOT NULL,
     content TEXT NULL,
+    on_air_state TINYINT NULL COMMENT '0: 打ち切り, 1: 放送終了, 2: 放送中, 3: 放送前',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     -- INDEX anime_slug (slug)

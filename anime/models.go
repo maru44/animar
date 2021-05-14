@@ -8,12 +8,13 @@ import (
 )
 
 type TAnime struct {
-	ID        int
-	Slug      string
-	Title     string
-	Content   *string
-	CreatedAt string
-	UpdatedAt string
+	ID         int
+	Slug       string
+	Title      string
+	Content    *string
+	OnAirState *int
+	CreatedAt  string
+	UpdatedAt  string
 }
 
 func ListAnime() *sql.Rows {
@@ -31,7 +32,9 @@ func DetailAnime(id int) TAnime {
 	defer db.Close()
 
 	var ani TAnime
-	err := db.QueryRow("SELECT * FROM anime WHERE id = ?", id).Scan(&ani.ID, &ani.Slug, &ani.Title, &ani.Content, &ani.CreatedAt, &ani.UpdatedAt)
+	err := db.QueryRow("SELECT * FROM anime WHERE id = ?", id).Scan(
+		&ani.ID, &ani.Slug, &ani.Title, &ani.Content, &ani.OnAirState, &ani.CreatedAt, &ani.UpdatedAt,
+	)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -47,7 +50,9 @@ func DetailAnimeBySlug(slug string) TAnime {
 	defer db.Close()
 
 	var ani TAnime
-	err := db.QueryRow("SELECT * FROM anime WHERE slug = ?", slug).Scan(&ani.ID, &ani.Slug, &ani.Title, &ani.Content, &ani.CreatedAt, &ani.UpdatedAt)
+	err := db.QueryRow("SELECT * FROM anime WHERE slug = ?", slug).Scan(
+		&ani.ID, &ani.Slug, &ani.Title, &ani.Content, &ani.OnAirState, &ani.CreatedAt, &ani.UpdatedAt,
+	)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -58,7 +63,7 @@ func DetailAnimeBySlug(slug string) TAnime {
 	return ani
 }
 
-func InsertAnime(title string, content string) int {
+func InsertAnime(title string, content string, onAirState int) int {
 	db := helper.AccessDB()
 	defer db.Close()
 
@@ -66,7 +71,9 @@ func InsertAnime(title string, content string) int {
 	defer stmtInsert.Close()
 
 	slug := helper.GenRandSlug(12)
-	exe, err := stmtInsert.Exec(title, slug, helper.NewNullString(content))
+	exe, err := stmtInsert.Exec(
+		title, slug, helper.NewNullString(content), helper.NewNullInt(onAirState),
+	)
 
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
@@ -76,11 +83,14 @@ func InsertAnime(title string, content string) int {
 	return int(insertedId)
 }
 
-func UpdateAnime(slug string, title string, content string) int {
+func UpdateAnime(slug string, title string, content string, onAirState int) int {
 	db := helper.AccessDB()
 	defer db.Close()
 
-	exe, err := db.Exec("UPDATE anime SET title = ?, content = ? WHERE slug = ?", title, content, slug)
+	exe, err := db.Exec(
+		"UPDATE anime SET title = ?, content = ?, on_air_state = ? WHERE slug = ?",
+		title, content, slug, onAirState,
+	)
 	if err != nil {
 		panic(err.Error())
 	}
