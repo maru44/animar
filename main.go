@@ -5,6 +5,7 @@ import (
 	"animar/v1/auth"
 	"animar/v1/helper"
 	"animar/v1/review"
+	"animar/v1/watch"
 	"net/http"
 )
 
@@ -22,11 +23,15 @@ func main() {
 	http.HandleFunc("/reviews/post/", helper.Handle(review.ReviewPostView))
 	http.HandleFunc("/reviews/anime/", helper.Handle(review.GetAnimeReviews))
 
+	/*   watches count   */
+	http.HandleFunc("/watch/", helper.Handle(watch.AnimeWatchCountView))
+	http.HandleFunc("/watch/u/", helper.Handle(watch.UserWatchStatusView))
+
 	/*   auth   */
 	http.HandleFunc("/auth/sample/", helper.Handle(auth.SampleGetUserJson)) // ?uid=<UID>
 	http.HandleFunc("/auth/login/post/", helper.Handle(auth.SetJWTCookie))
 	http.HandleFunc("/auth/refresh/", helper.Handle(auth.RenewTokenView))
 	http.HandleFunc("/auth/cookie/", helper.Handle(auth.TestGetCookie))
 
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8000", nil)
 }

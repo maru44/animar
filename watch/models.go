@@ -16,9 +16,8 @@ type TWatch struct {
 }
 
 type TWatchCount struct {
-	AnimeId int
-	Watch   int // watch state
-	Watcher int // count of watcher
+	State int // watch state
+	Count int // count of watcher
 }
 
 // Count group by animeId
@@ -26,7 +25,7 @@ type TWatchCount struct {
 func AnimeWatchCounts(animeId int) *sql.Rows {
 	db := helper.AccessDB()
 	defer db.Close()
-	rows, err := db.Query("Select anime_id, watch, count(watch) from watch_states WHERE anime_id = ? GROUP BY WATCH", animeId)
+	rows, err := db.Query("Select watch, count(watch) from watch_states WHERE anime_id = ? GROUP BY WATCH", animeId)
 	if err != nil {
 		panic(err.Error())
 	}
