@@ -76,6 +76,33 @@ func InsertWatch(animeId int, watch int, userId string) int {
 	}
 	fmt.Print(insertedId)
 
-	//return int(insertedId)
+	return watch
+}
+
+// create or update
+func UpsertWatch(animeId int, watch int, userId string) int {
+	db := helper.AccessDB()
+	defer db.Close()
+
+	var w TWatch
+	err := db.QueryRow("Select * from watch_states WHERE user_id = ?, anime_id = ?", userId, animeId).Scan(&w.ID, &w.Watch, &w.AnimeId, &w.UserId, &w.CreatedAt, &w.UpdatedAt)
+	switch {
+	case err == sql.ErrNoRows:
+		// create
+		return InsertWatch(animeId, watch, userId)
+	case err != nil:
+		panic(err.Error())
+	}
+
+	// update
+	stmtUpdate, err := db.Prepare("UPDATE watch_states SET watch = ? WHERE user_id = ?, anim_id = ?")
+	defer stmtUpdate.Close()
+
+	exe, err := stmtUpdate.Exec(watch, userId, animeId)
+	if err != nil {
+		panic(err.Error())
+	}
+	fmt.Print(exe)
+
 	return watch
 }

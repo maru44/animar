@@ -18,8 +18,8 @@ type TUserWatchStatusResponse struct {
 }
 
 type TWatchInput struct {
-	AnimeId int    `json:"AnimeId,string"`
-	Watch   int    `json:"Watch,string"`
+	AnimeId int    `json:"AnimeId"`
+	Watch   int    `json:"Watch,string"` // form
 	UserId  string `json:"UserId"`
 }
 
@@ -86,7 +86,7 @@ func WatchPostView(w http.ResponseWriter, r *http.Request) error {
 
 	var posted TWatchInput
 	json.NewDecoder(r.Body).Decode(&posted)
-	watch := InsertWatch(posted.AnimeId, posted.Watch, posted.UserId)
+	watch := InsertWatch(posted.AnimeId, posted.Watch, userId)
 	result.Num = watch
 
 	result.ResponseWrite(w)
