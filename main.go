@@ -19,13 +19,13 @@ func main() {
 
 	/*   reviews   */
 	http.HandleFunc("/reviews/", helper.Handle(review.GetYourReviews))
-	//http.HandleFunc("/reviews/post/", helper.Handle(review.ReviewPostSample))
 	http.HandleFunc("/reviews/post/", helper.Handle(review.ReviewPostView))
 	http.HandleFunc("/reviews/anime/", helper.Handle(review.GetAnimeReviews))
 
 	/*   watches count   */
 	http.HandleFunc("/watch/", helper.Handle(watch.AnimeWatchCountView))
 	http.HandleFunc("/watch/u/", helper.Handle(watch.UserWatchStatusView))
+	http.HandleFunc("/watch/post/", helper.Handle(watch.WatchPostView))
 
 	/*   auth   */
 	http.HandleFunc("/auth/sample/", helper.Handle(auth.SampleGetUserJson)) // ?uid=<UID>

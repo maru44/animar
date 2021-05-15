@@ -61,7 +61,7 @@ func WatchDetail(userId string, animeId int) *TWatch {
 }
 
 // Post
-func InsertReview(animeId int, watch int, userId string) int {
+func InsertWatch(animeId int, watch int, userId string) int {
 	db := helper.AccessDB()
 	defer db.Close()
 

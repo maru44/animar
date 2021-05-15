@@ -3,7 +3,6 @@ package watch
 import (
 	"animar/v1/helper"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -16,6 +15,12 @@ type TWatchCountJsonResponse struct {
 type TUserWatchStatusResponse struct {
 	Status int      `json:"Status"`
 	Data   []TWatch `json:"Data"`
+}
+
+type TWatchInput struct {
+	AnimeId int    `json:"AnimeId,string"`
+	Watch   int    `json:"Watch,string"`
+	UserId  string `json:"UserId"`
 }
 
 func (result TWatchCountJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
@@ -42,16 +47,6 @@ func (result TUserWatchStatusResponse) ResponseWrite(w http.ResponseWriter) bool
 	return true
 }
 
-func GetWatchCountOfAnime(w http.ResponseWriter, r *http.Request) {
-	animeIdStr := r.URL.Query().Get("anime")
-	animeId, _ := strconv.Atoi(animeIdStr)
-
-	var watches []TWatchCount
-	watches = AnimeWatchCountDomain(animeId)
-
-	fmt.Print(watches)
-}
-
 // by anime
 func AnimeWatchCountView(w http.ResponseWriter, r *http.Request) error {
 	result := TWatchCountJsonResponse{Status: 200}
@@ -75,6 +70,25 @@ func UserWatchStatusView(w http.ResponseWriter, r *http.Request) error {
 	watches = OnesWatchStatusDomain(userId)
 
 	result.Data = watches
+	result.ResponseWrite(w)
+	return nil
+}
+
+//
+func WatchPostView(w http.ResponseWriter, r *http.Request) error {
+	result := helper.TIntJsonReponse{Status: 200}
+	userId := helper.GetIdFromCookie(r)
+	if userId == "" {
+		result.Status = 5000
+		result.ResponseWrite(w)
+		return nil
+	}
+
+	var posted TWatchInput
+	json.NewDecoder(r.Body).Decode(&posted)
+	watch := InsertWatch(posted.AnimeId, posted.Watch, posted.UserId)
+	result.Num = watch
+
 	result.ResponseWrite(w)
 	return nil
 }
