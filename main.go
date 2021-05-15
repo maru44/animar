@@ -33,6 +33,7 @@ func main() {
 	http.HandleFunc("/auth/login/post/", helper.Handle(auth.SetJWTCookie))
 	http.HandleFunc("/auth/refresh/", helper.Handle(auth.RenewTokenView))
 	http.HandleFunc("/auth/cookie/", helper.Handle(auth.TestGetCookie))
+	http.HandleFunc("/auth/user/cookie/", helper.Handle(auth.GetUserModelJson)) // get user model from cookie
 
 	http.ListenAndServe(":8000", nil)
 }

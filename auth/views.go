@@ -63,6 +63,27 @@ func SampleGetUserJson(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// user info from userId
+// from cookie
+func GetUserModelJson(w http.ResponseWriter, r *http.Request) error {
+	result := helper.TUserJsonResponse{Status: 200}
+	userId := helper.GetIdFromCookie(r)
+	// tokenがキレてたらblankが帰ってくる
+	if userId == "" {
+		fmt.Print("blank")
+		result.Status = 4001
+		result.ResponseWrite(w)
+		return nil
+	}
+	ctx := context.Background()
+
+	user := GetUserFirebase(ctx, userId)
+	result.User = *user
+
+	result.ResponseWrite(w)
+	return nil
+}
+
 // login処理
 // cookie
 func SetJWTCookie(w http.ResponseWriter, r *http.Request) error {
