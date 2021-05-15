@@ -25,15 +25,15 @@ func main() {
 	/*   watches count   */
 	http.HandleFunc("/watch/", helper.Handle(watch.AnimeWatchCountView))
 	http.HandleFunc("/watch/u/", helper.Handle(watch.UserWatchStatusView))
-	http.HandleFunc("/watch/post/", helper.Handle(watch.WatchPostView))
+	http.HandleFunc("/watch/post/", helper.Handle(watch.WatchPostView)) // upsert
 	http.HandleFunc("/watch/delete/", helper.Handle(watch.WatchDeleteView))
 
 	/*   auth   */
-	http.HandleFunc("/auth/sample/", helper.Handle(auth.SampleGetUserJson)) // ?uid=<UID>
-	http.HandleFunc("/auth/login/post/", helper.Handle(auth.SetJWTCookie))
-	http.HandleFunc("/auth/refresh/", helper.Handle(auth.RenewTokenView))
+	http.HandleFunc("/auth/sample/", helper.Handle(auth.SampleGetUserJsonView)) // ?uid=<UID>
+	http.HandleFunc("/auth/login/post/", helper.Handle(auth.SetJWTCookieView))
+	http.HandleFunc("/auth/refresh/", helper.Handle(auth.RenewTokenFCView))
 	http.HandleFunc("/auth/cookie/", helper.Handle(auth.TestGetCookie))
-	http.HandleFunc("/auth/user/cookie/", helper.Handle(auth.GetUserModelJson)) // get user model from cookie
+	http.HandleFunc("/auth/user/cookie/", helper.Handle(auth.GetUserModelFCView))
 
 	http.ListenAndServe(":8000", nil)
 }

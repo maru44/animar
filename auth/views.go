@@ -50,7 +50,7 @@ func UserListView(w http.ResponseWriter, r *http.Request) {
 
 // user info from userId
 // url query params(uid)
-func SampleGetUserJson(w http.ResponseWriter, r *http.Request) error {
+func SampleGetUserJsonView(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TUserJsonResponse{Status: 200}
 	query := r.URL.Query()
 	uid := query.Get("uid")
@@ -65,7 +65,7 @@ func SampleGetUserJson(w http.ResponseWriter, r *http.Request) error {
 
 // user info from userId
 // from cookie
-func GetUserModelJson(w http.ResponseWriter, r *http.Request) error {
+func GetUserModelFCView(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TUserJsonResponse{Status: 200}
 	userId := helper.GetIdFromCookie(r)
 	// tokenがキレてたらblankが帰ってくる
@@ -86,7 +86,7 @@ func GetUserModelJson(w http.ResponseWriter, r *http.Request) error {
 
 // login処理
 // cookie
-func SetJWTCookie(w http.ResponseWriter, r *http.Request) error {
+func SetJWTCookieView(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TVoidJsonResponse{Status: 200}
 
 	var posted TLoginForm
@@ -128,7 +128,7 @@ func SetJWTCookie(w http.ResponseWriter, r *http.Request) error {
 
 // refresh idToken
 // cookie
-func RenewTokenView(w http.ResponseWriter, r *http.Request) error {
+func RenewTokenFCView(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TVoidJsonResponse{Status: 200}
 
 	// get refresh token from cookie
