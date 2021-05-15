@@ -26,6 +26,7 @@ func main() {
 	http.HandleFunc("/watch/", helper.Handle(watch.AnimeWatchCountView))
 	http.HandleFunc("/watch/u/", helper.Handle(watch.UserWatchStatusView))
 	http.HandleFunc("/watch/post/", helper.Handle(watch.WatchPostView))
+	http.HandleFunc("/watch/delete/", helper.Handle(watch.WatchDeleteView))
 
 	/*   auth   */
 	http.HandleFunc("/auth/sample/", helper.Handle(auth.SampleGetUserJson)) // ?uid=<UID>

@@ -85,24 +85,35 @@ func UpsertWatch(animeId int, watch int, userId string) int {
 	defer db.Close()
 
 	var w TWatch
-	err := db.QueryRow("Select * from watch_states WHERE user_id = ?, anime_id = ?", userId, animeId).Scan(&w.ID, &w.Watch, &w.AnimeId, &w.UserId, &w.CreatedAt, &w.UpdatedAt)
+	err := db.QueryRow("Select * from watch_states WHERE user_id = ? AND anime_id = ?", userId, animeId).Scan(&w.ID, &w.Watch, &w.AnimeId, &w.UserId, &w.CreatedAt, &w.UpdatedAt)
 	switch {
 	case err == sql.ErrNoRows:
 		// create
 		return InsertWatch(animeId, watch, userId)
 	case err != nil:
 		panic(err.Error())
+	default:
+		// update
+		stmtUpdate, err := db.Prepare("UPDATE watch_states SET watch = ? WHERE user_id = ? AND anime_id = ?")
+		defer stmtUpdate.Close()
+		exe, err := stmtUpdate.Exec(watch, userId, animeId)
+		if err != nil {
+			panic(err.Error())
+		}
+		fmt.Print(exe)
+		return watch
 	}
+}
 
-	// update
-	stmtUpdate, err := db.Prepare("UPDATE watch_states SET watch = ? WHERE user_id = ?, anim_id = ?")
-	defer stmtUpdate.Close()
+func DeleteWatch(animeId int, userId string) bool {
+	db := helper.AccessDB()
+	defer db.Close()
 
-	exe, err := stmtUpdate.Exec(watch, userId, animeId)
+	exe, err := db.Exec("DELETE FROM watch_states WHERE anime_id = ? AND user_id = ?", animeId, userId)
 	if err != nil {
-		panic(err.Error())
+		//panic(err.Error())
+		return false
 	}
-	fmt.Print(exe)
-
-	return watch
+	fmt.Print(exe.RowsAffected())
+	return true
 }
