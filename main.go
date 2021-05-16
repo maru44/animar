@@ -15,6 +15,7 @@ func main() {
 
 	/*   Anime database   */
 	http.HandleFunc("/db/anime/", helper.Handle(anime.AnimeView))
+	http.HandleFunc("/db/anime/wc/", helper.Handle(anime.AnimeWithUserWatchView)) // 動かず
 	http.HandleFunc("/db/anime/post/", helper.Handle(anime.AnimePostView))
 
 	/*   reviews   */
@@ -27,6 +28,7 @@ func main() {
 	http.HandleFunc("/watch/u/", helper.Handle(watch.UserWatchStatusView))
 	http.HandleFunc("/watch/post/", helper.Handle(watch.WatchPostView)) // upsert
 	http.HandleFunc("/watch/delete/", helper.Handle(watch.WatchDeleteView))
+	http.HandleFunc("/watch/ua/", helper.Handle(watch.WatchAnimeStateOfUserView))
 
 	/*   auth   */
 	http.HandleFunc("/auth/sample/", helper.Handle(auth.SampleGetUserJsonView)) // ?uid=<UID>

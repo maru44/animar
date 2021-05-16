@@ -4,6 +4,7 @@ import (
 	"animar/v1/helper"
 	"database/sql"
 	"fmt"
+	"reflect"
 )
 
 type TWatch struct {
@@ -44,20 +45,24 @@ func OnesAnimeWatchList(userId string) *sql.Rows {
 	return rows
 }
 
-func WatchDetail(userId string, animeId int) *TWatch {
+func WatchDetail(userId string, animeId int) int {
 	db := helper.AccessDB()
 	defer db.Close()
 
 	var watch TWatch
-	err := db.QueryRow("Select * from watch_states WHERE user_id = ?, animeId = ?", userId, animeId).Scan(&watch.ID, &watch.Watch, &watch.AnimeId, &watch.UserId, &watch.CreatedAt, &watch.UpdatedAt)
+	fmt.Println(userId, reflect.TypeOf(animeId))
+	err := db.QueryRow("Select * from watch_states WHERE user_id = ? AND anime_id = ?", userId, animeId).Scan(
+		&watch.ID, &watch.Watch, &watch.AnimeId, &watch.UserId, &watch.CreatedAt, &watch.UpdatedAt,
+	)
 
 	switch {
 	case err == sql.ErrNoRows:
-		return nil
+		return -1
 	case err != nil:
 		panic(err.Error())
+	default:
+		return watch.Watch
 	}
-	return &watch
 }
 
 // Post
@@ -85,7 +90,9 @@ func UpsertWatch(animeId int, watch int, userId string) int {
 	defer db.Close()
 
 	var w TWatch
-	err := db.QueryRow("Select * from watch_states WHERE user_id = ? AND anime_id = ?", userId, animeId).Scan(&w.ID, &w.Watch, &w.AnimeId, &w.UserId, &w.CreatedAt, &w.UpdatedAt)
+	err := db.QueryRow("Select * from watch_states WHERE user_id = ? AND anime_id = ?", userId, animeId).Scan(
+		&w.ID, &w.Watch, &w.AnimeId, &w.UserId, &w.CreatedAt, &w.UpdatedAt,
+	)
 	switch {
 	case err == sql.ErrNoRows:
 		// create

@@ -17,6 +17,17 @@ type TAnime struct {
 	UpdatedAt  string
 }
 
+type TAnimeWithUserWatch struct {
+	ID         int
+	Slug       string
+	Title      string
+	Content    *string
+	OnAirState *int
+	CreatedAt  string
+	UpdatedAt  string
+	Watch      int
+}
+
 func ListAnime() *sql.Rows {
 	db := helper.AccessDB()
 	defer db.Close()
@@ -52,6 +63,24 @@ func DetailAnimeBySlug(slug string) TAnime {
 	var ani TAnime
 	err := db.QueryRow("SELECT * FROM anime WHERE slug = ?", slug).Scan(
 		&ani.ID, &ani.Slug, &ani.Title, &ani.Content, &ani.OnAirState, &ani.CreatedAt, &ani.UpdatedAt,
+	)
+
+	switch {
+	case err == sql.ErrNoRows:
+		ani.ID = 0
+	case err != nil:
+		panic(err.Error())
+	}
+	return ani
+}
+
+func DetailAnimeBySlugWithUserWatch(slug string, userId string) TAnimeWithUserWatch {
+	db := helper.AccessDB()
+	defer db.Close()
+
+	var ani TAnimeWithUserWatch
+	err := db.QueryRow("SELECT * FROM anime AS T1 WHERE slug = ? LEFT JOIN watch_states AS T2 ON T1.id = T2.anime_id AND T2.user_id = ?", slug, userId).Scan(
+		&ani.ID, &ani.Slug, &ani.Title, &ani.Content, &ani.OnAirState, &ani.CreatedAt, &ani.UpdatedAt, &ani.Watch,
 	)
 
 	switch {

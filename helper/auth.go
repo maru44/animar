@@ -51,6 +51,7 @@ func GetIdFromCookie(r *http.Request) string {
 	idToken, err := r.Cookie("idToken")
 	if err != nil {
 		fmt.Print(err.Error())
+		return ""
 	}
 
 	ctx := context.Background()

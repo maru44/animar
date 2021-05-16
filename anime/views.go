@@ -12,6 +12,11 @@ type TAnimesJsonResponse struct {
 	Data   []TAnime `json:"Data"`
 }
 
+type TAnimesWithUserWatchResponse struct {
+	Status int                   `json:"Status"`
+	Data   []TAnimeWithUserWatch `json:"Data"`
+}
+
 type TAnimeInput struct {
 	Title      string `json:"Title"`
 	Content    string `json:"Content"`
@@ -20,6 +25,20 @@ type TAnimeInput struct {
 
 func (animeJson TAnimesJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 	res, err := json.Marshal(animeJson)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return false
+	}
+
+	helper.SetDefaultResponseHeader(w)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+	return true
+}
+
+func (animeWUWCJson TAnimesWithUserWatchResponse) ResponseWrite(w http.ResponseWriter) bool {
+	res, err := json.Marshal(animeWUWCJson)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -56,6 +75,41 @@ func AnimeView(w http.ResponseWriter, r *http.Request) error {
 		animes = append(animes, ani)
 	} else {
 		animes = ListAnimeDomain()
+	}
+
+	result.Data = animes
+	result.ResponseWrite(w)
+
+	return nil
+}
+
+// anime data + user's watch
+func AnimeWithUserWatchView(w http.ResponseWriter, r *http.Request) error {
+	result := TAnimesWithUserWatchResponse{Status: 200}
+
+	query := r.URL.Query()
+	strId := query.Get("id")
+	slug := query.Get("slug")
+	userId := helper.GetIdFromCookie(r)
+
+	var animes []TAnimeWithUserWatch
+	if strId != "" {
+		/*
+			id, _ := strconv.Atoi(strId)
+			ani := DetailAnime(id)
+			if ani.ID == 0 {
+				result.Status = 404
+			}
+			animes = append(animes, ani)
+		*/
+	} else if slug != "" {
+		ani := DetailAnimeBySlugWithUserWatch(slug, userId)
+		if ani.ID == 0 {
+			result.Status = 404
+		}
+		animes = append(animes, ani)
+	} else {
+		// animes = ListAnimeDomain()
 	}
 
 	result.Data = animes

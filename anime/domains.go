@@ -19,3 +19,9 @@ func ListAnimeDomain() []TAnime {
 
 	return animes
 }
+
+/*
+func ListAnimeWithUserWatchDomain() []TAnimeWithUserWatch {
+	rows := ListAnime()
+}
+*/

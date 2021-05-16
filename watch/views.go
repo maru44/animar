@@ -74,6 +74,26 @@ func UserWatchStatusView(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// anime by ?anime=
+// user by cookie
+func WatchAnimeStateOfUserView(w http.ResponseWriter, r *http.Request) error {
+	result := helper.TIntJsonReponse{Status: 200}
+
+	animeIdStr := r.URL.Query().Get("anime")
+	animeId, _ := strconv.Atoi(animeIdStr)
+
+	userId := helper.GetIdFromCookie(r)
+	if userId == "" {
+		result.Status = 4001
+	} else {
+		watch := WatchDetail(userId, animeId)
+		result.Num = watch
+	}
+
+	result.ResponseWrite(w)
+	return nil
+}
+
 // watch post view
 func WatchPostView(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TIntJsonReponse{Status: 200}
@@ -87,7 +107,7 @@ func WatchPostView(w http.ResponseWriter, r *http.Request) error {
 	var posted TWatchInput
 	json.NewDecoder(r.Body).Decode(&posted)
 	// watch := InsertWatch(posted.AnimeId, posted.Watch, userId)
-	watch := UpsertWatch(posted.AnimeId, posted.Watch, posted.UserId)
+	watch := UpsertWatch(posted.AnimeId, posted.Watch, userId)
 	result.Num = watch
 
 	result.ResponseWrite(w)
