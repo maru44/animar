@@ -17,15 +17,17 @@ type TAnime struct {
 	UpdatedAt  string
 }
 
-type TAnimeWithUserWatch struct {
-	ID         int
-	Slug       string
-	Title      string
-	Content    *string
-	OnAirState *int
-	CreatedAt  string
-	UpdatedAt  string
-	Watch      int
+type TAnimeWithUserWatchReview struct {
+	ID            int
+	Slug          string
+	Title         string
+	Content       *string
+	OnAirState    *int
+	CreatedAt     string
+	UpdatedAt     string
+	Watch         int
+	Star          int
+	ReviewContent string
 }
 
 func ListAnime() *sql.Rows {
@@ -74,13 +76,18 @@ func DetailAnimeBySlug(slug string) TAnime {
 	return ani
 }
 
-func DetailAnimeBySlugWithUserWatch(slug string, userId string) TAnimeWithUserWatch {
+// not be used to
+func DetailAnimeBySlugWithUserWatchReview(slug string, userId string) TAnimeWithUserWatchReview {
 	db := helper.AccessDB()
 	defer db.Close()
 
-	var ani TAnimeWithUserWatch
-	err := db.QueryRow("SELECT * FROM anime AS T1 WHERE slug = ? LEFT JOIN watch_states AS T2 ON T1.id = T2.anime_id AND T2.user_id = ?", slug, userId).Scan(
-		&ani.ID, &ani.Slug, &ani.Title, &ani.Content, &ani.OnAirState, &ani.CreatedAt, &ani.UpdatedAt, &ani.Watch,
+	var ani TAnimeWithUserWatchReview
+	err := db.QueryRow(
+		"SELECT anime.*, watch_states.watch, tbl_reviews.star, tbl_reviews.content AS review_content FROM anime "+
+			"LEFT JOIN watch_states ON anime.id = watch_states.anime_id AND watch_states.user_id = ? "+
+			"LEFT JOIN tbl_reviews ON anime.id = tbl_reviews.anime_id AND tbl_reviews.user_id = ? WHERE slug = ?",
+		slug, userId, userId).Scan(
+		&ani.ID, &ani.Slug, &ani.Title, &ani.Content, &ani.OnAirState, &ani.CreatedAt, &ani.UpdatedAt, &ani.Watch, &ani.Star, &ani.ReviewContent,
 	)
 
 	switch {
@@ -101,7 +108,7 @@ func InsertAnime(title string, content string, onAirState int) int {
 
 	slug := helper.GenRandSlug(12)
 	exe, err := stmtInsert.Exec(
-		title, slug, helper.NewNullString(content), helper.NewNullInt(onAirState),
+		title, slug, helper.NewNullString(content).String, helper.NewNullInt(onAirState).Int,
 	)
 
 	insertedId, err := exe.LastInsertId()
@@ -118,7 +125,7 @@ func UpdateAnime(slug string, title string, content string, onAirState int) int 
 
 	exe, err := db.Exec(
 		"UPDATE anime SET title = ?, content = ?, on_air_state = ? WHERE slug = ?",
-		title, content, slug, onAirState,
+		title, helper.NewNullString(content).String, slug, helper.NewNullInt(onAirState).Int,
 	)
 	if err != nil {
 		panic(err.Error())

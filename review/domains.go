@@ -15,8 +15,8 @@ func OnesReviewsDomain(userId string) []TReview {
 	return revs
 }
 
-func AnimeReviewsDomain(animeId int) []TReview {
-	rows := AnimeReviewsList(animeId)
+func AnimeReviewsDomain(animeId int, userId string) []TReview {
+	rows := AnimeReviewsList(animeId, userId)
 	var revs []TReview
 	for rows.Next() {
 		var rev TReview

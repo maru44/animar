@@ -13,8 +13,8 @@ type TAnimesJsonResponse struct {
 }
 
 type TAnimesWithUserWatchResponse struct {
-	Status int                   `json:"Status"`
-	Data   []TAnimeWithUserWatch `json:"Data"`
+	Status int                         `json:"Status"`
+	Data   []TAnimeWithUserWatchReview `json:"Data"`
 }
 
 type TAnimeInput struct {
@@ -83,7 +83,8 @@ func AnimeView(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-// anime data + user's watch
+// not be used to
+// anime data + user's watch + review
 func AnimeWithUserWatchView(w http.ResponseWriter, r *http.Request) error {
 	result := TAnimesWithUserWatchResponse{Status: 200}
 
@@ -92,7 +93,7 @@ func AnimeWithUserWatchView(w http.ResponseWriter, r *http.Request) error {
 	slug := query.Get("slug")
 	userId := helper.GetIdFromCookie(r)
 
-	var animes []TAnimeWithUserWatch
+	var animes []TAnimeWithUserWatchReview
 	if strId != "" {
 		/*
 			id, _ := strconv.Atoi(strId)
@@ -103,7 +104,7 @@ func AnimeWithUserWatchView(w http.ResponseWriter, r *http.Request) error {
 			animes = append(animes, ani)
 		*/
 	} else if slug != "" {
-		ani := DetailAnimeBySlugWithUserWatch(slug, userId)
+		ani := DetailAnimeBySlugWithUserWatchReview(slug, userId)
 		if ani.ID == 0 {
 			result.Status = 404
 		}

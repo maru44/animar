@@ -32,6 +32,11 @@ type TIntJsonReponse struct {
 	Num    int `json:"ID"`
 }
 
+type TStringJsonResponse struct {
+	Status int    `json:"Status"`
+	String string `json:"String"`
+}
+
 type TUserJsonResponse struct {
 	Status int           `json:"Status"`
 	User   auth.UserInfo `json:"User"`
@@ -137,6 +142,20 @@ func (result TVoidJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 }
 
 func (result TBaseJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
+	res, err := json.Marshal(result)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return false
+	}
+
+	SetDefaultResponseHeader(w)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+	return true
+}
+
+func (result TStringJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 	res, err := json.Marshal(result)
 
 	if err != nil {

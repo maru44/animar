@@ -3,9 +3,7 @@ package review
 import (
 	"animar/v1/helper"
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"reflect"
 	"strconv"
 )
 
@@ -64,74 +62,32 @@ func GetAnimeReviews(w http.ResponseWriter, r *http.Request) error {
 	result := TReviewsJsonResponse{Status: 200}
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
+	userId := helper.GetIdFromCookie(r)
 
 	var revs []TReview
-	revs = AnimeReviewsDomain(animeId)
+	revs = AnimeReviewsDomain(animeId, userId)
 
 	result.Data = revs
 	result.ResponseWrite(w)
 	return nil
 }
 
-func ReviewPostJsonView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TIntJsonReponse{Status: 200}
-
-	userId := helper.GetIdFromCookie(r)
-	if userId == "" {
-		result.Status = 5000
-		result.ResponseWrite(w)
-		return nil
-	}
-
-	var posted TReviewInput
-	json.NewDecoder(r.Body).Decode(&posted)
-	insertedId := InsertReview(posted.AnimeId, posted.Content, posted.Star, userId)
-
-	result.Num = insertedId
-
-	fmt.Print(userId)
-	result.ResponseWrite(w)
-	return nil
-}
-
-func ReviewPostView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TIntJsonReponse{Status: 200}
-
-	userId := helper.GetIdFromCookie(r)
-	if userId == "" {
-		result.Status = 5000
-		result.ResponseWrite(w)
-		return nil
-	}
-
-	var posted TReviewInput
-	json.NewDecoder(r.Body).Decode(&posted)
-	insertedId := InsertReview(posted.AnimeId, posted.Content, posted.Star, userId)
-
-	result.Num = insertedId
-
-	result.ResponseWrite(w)
-	return nil
-}
-
-func ReviewPostSample(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TIntJsonReponse{Status: 200}
-
-	var posted TReviewInput
-	json.NewDecoder(r.Body).Decode(&posted)
-
-	fmt.Print(posted)
-	fmt.Print(reflect.TypeOf(posted.AnimeId))
-
-	result.ResponseWrite(w)
-	return nil
-}
-
-func ReviewTest(w http.ResponseWriter, r *http.Request) error {
+// user's anime's review
+func GetAnimeUserReviewView(w http.ResponseWriter, r *http.Request) error {
 	result := TReviewsJsonResponse{Status: 200}
-	userId := helper.GetIdFromCookie(r)
 
-	fmt.Print(userId)
+	animeIdStr := r.URL.Query().Get("anime")
+	animeId, _ := strconv.Atoi(animeIdStr)
+
+	userId := helper.GetIdFromCookie(r)
+	if userId == "" {
+		result.Status = 4001
+	} else {
+		var revs []TReview
+		rev := DetailReviewAnimeUser(animeId, userId)
+		revs = append(revs, rev)
+		result.Data = revs
+	}
 	result.ResponseWrite(w)
 	return nil
 }
@@ -155,7 +111,7 @@ func UpsertReviewStarView(w http.ResponseWriter, r *http.Request) error {
 
 //upsert content
 func UpsertReviewContentView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TIntJsonReponse{Status: 200}
+	result := helper.TStringJsonResponse{Status: 200}
 	userId := helper.GetIdFromCookie(r)
 
 	if userId == "" {
@@ -163,8 +119,8 @@ func UpsertReviewContentView(w http.ResponseWriter, r *http.Request) error {
 	} else {
 		var posted TReviewInput
 		json.NewDecoder(r.Body).Decode(&posted)
-		upsertedId := UpsertReviewContent(posted.AnimeId, posted.Content, userId)
-		result.Num = upsertedId
+		upsertedString := UpsertReviewContent(posted.AnimeId, posted.Content, userId)
+		result.String = upsertedString
 	}
 	result.ResponseWrite(w)
 	return nil
