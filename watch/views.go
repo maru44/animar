@@ -12,9 +12,9 @@ type TWatchCountJsonResponse struct {
 	Data   []TWatchCount `json:"Data"`
 }
 
-type TUserWatchStatusResponse struct {
-	Status int      `json:"Status"`
-	Data   []TWatch `json:"Data"`
+type TUserWatchJoinResponse struct {
+	Status int               `json:"Status"`
+	Data   []TWatchJoinAnime `json:"Data"`
 }
 
 type TWatchInput struct {
@@ -35,7 +35,7 @@ func (result TWatchCountJsonResponse) ResponseWrite(w http.ResponseWriter) bool 
 	return true
 }
 
-func (result TUserWatchStatusResponse) ResponseWrite(w http.ResponseWriter) bool {
+func (result TUserWatchJoinResponse) ResponseWrite(w http.ResponseWriter) bool {
 	res, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -62,11 +62,12 @@ func AnimeWatchCountView(w http.ResponseWriter, r *http.Request) error {
 }
 
 // by userId
+// ?user=userId
 func UserWatchStatusView(w http.ResponseWriter, r *http.Request) error {
-	result := TUserWatchStatusResponse{Status: 200}
+	result := TUserWatchJoinResponse{Status: 200}
 	userId := r.URL.Query().Get("user")
 
-	var watches []TWatch
+	var watches []TWatchJoinAnime
 	watches = OnesWatchStatusDomain(userId)
 
 	result.Data = watches
@@ -99,7 +100,7 @@ func WatchPostView(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TIntJsonReponse{Status: 200}
 	userId := helper.GetIdFromCookie(r)
 	if userId == "" {
-		result.Status = 5000
+		result.Status = 4001
 		result.ResponseWrite(w)
 		return nil
 	}

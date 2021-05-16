@@ -4,7 +4,6 @@ import (
 	"animar/v1/helper"
 	"database/sql"
 	"fmt"
-	"reflect"
 )
 
 type TWatch struct {
@@ -19,6 +18,19 @@ type TWatch struct {
 type TWatchCount struct {
 	State int // watch state
 	Count int // count of watcher
+}
+
+type TWatchJoinAnime struct {
+	ID         int
+	Watch      int
+	AnimeId    int
+	UserId     string
+	CreatedAt  string // watch
+	UpdatedAt  string // watch
+	Title      string
+	Slug       string
+	Content    *string
+	OnAirState *int
 }
 
 // Count group by animeId
@@ -45,12 +57,24 @@ func OnesAnimeWatchList(userId string) *sql.Rows {
 	return rows
 }
 
+func OnesAnimeWatchJoinList(userId string) *sql.Rows {
+	db := helper.AccessDB()
+	defer db.Close()
+	rows, err := db.Query(
+		"SELECT watch_states.*, anime.title, anime.slug, anime.content, anime.on_air_state "+
+			"FROM watch_states LEFT JOIN anime ON watch_states.anime_id = anime.id WHERE user_id = ?", userId,
+	)
+	if err != nil {
+		panic(err.Error())
+	}
+	return rows
+}
+
 func WatchDetail(userId string, animeId int) int {
 	db := helper.AccessDB()
 	defer db.Close()
 
 	var watch TWatch
-	fmt.Println(userId, reflect.TypeOf(animeId))
 	err := db.QueryRow("Select * from watch_states WHERE user_id = ? AND anime_id = ?", userId, animeId).Scan(
 		&watch.ID, &watch.Watch, &watch.AnimeId, &watch.UserId, &watch.CreatedAt, &watch.UpdatedAt,
 	)
