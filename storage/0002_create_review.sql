@@ -16,4 +16,4 @@ ALTER TABLE tbl_reviews
     ON DELETE CASCADE ON UPDATE CASCADE;
 
 INSERT INTO go_test.tbl_reviews (content, star, anime_id) VALUES ('戦車\n国柄デフォルメ', 5, 2);
-INSERT INTO go_test.tbl_reviews (content, user_id, anime_id) VALUES ('iine', 'NiimLADqi5RJaRqCdatNFgKLKnK2', 2);
+

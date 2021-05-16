@@ -14,7 +14,7 @@ ALTER TABLE watch_states
     REFERENCES anime (id)
     ON DELETE CASCADE ON UPDATE CASCADE;
 
-INSERT INTO go_test.watch_states (watch, anime_id, user_id) VALUES (4, 1, 'NiimLADqi5RJaRqCdatNFgKLKnK2');
+INSERT INTO go_test.watch_states (watch, anime_id, user_id) VALUES (4, 1, 'sample4');
 INSERT INTO go_test.watch_states (watch, anime_id, user_id) VALUES (4, 2, 'sample1');
 INSERT INTO go_test.watch_states (watch, anime_id, user_id) VALUES (3, 1, 'sample1');
 INSERT INTO go_test.watch_states (watch, anime_id, user_id) VALUES (2, 1, 'sample2');

@@ -135,3 +135,37 @@ func ReviewTest(w http.ResponseWriter, r *http.Request) error {
 	result.ResponseWrite(w)
 	return nil
 }
+
+// upsert star
+func UpsertReviewStarView(w http.ResponseWriter, r *http.Request) error {
+	result := helper.TIntJsonReponse{Status: 200}
+	userId := helper.GetIdFromCookie(r)
+
+	if userId == "" {
+		result.Status = 4001
+	} else {
+		var posted TReviewInput
+		json.NewDecoder(r.Body).Decode(&posted)
+		value := UpsertReviewStar(posted.AnimeId, posted.Star, userId)
+		result.Num = value
+	}
+	result.ResponseWrite(w)
+	return nil
+}
+
+//upsert content
+func UpsertReviewContentView(w http.ResponseWriter, r *http.Request) error {
+	result := helper.TIntJsonReponse{Status: 200}
+	userId := helper.GetIdFromCookie(r)
+
+	if userId == "" {
+		result.Status = 4001
+	} else {
+		var posted TReviewInput
+		json.NewDecoder(r.Body).Decode(&posted)
+		upsertedId := UpsertReviewContent(posted.AnimeId, posted.Content, userId)
+		result.Num = upsertedId
+	}
+	result.ResponseWrite(w)
+	return nil
+}
