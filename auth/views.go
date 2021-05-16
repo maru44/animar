@@ -17,6 +17,12 @@ type TLoginForm struct {
 	ReturnSecureToken bool   `json:"returnSecureToken"`
 }
 
+type TRegistForm struct {
+	Email             string `json:"email"`
+	Password          string `json:"password"`
+	ReturnSecureToken bool   `json:"returnSecureToken"`
+}
+
 type TTokensForm struct {
 	IdToken      string `json:"idToken"`
 	RefreshToken string `json:"refreshToken"`
@@ -67,7 +73,7 @@ func SampleGetUserJsonView(w http.ResponseWriter, r *http.Request) error {
 // from cookie
 func GetUserModelFCView(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TUserJsonResponse{Status: 200}
-	userId := helper.GetIdFromCookie(r)
+	userId := helper.GetIdFromCookie(r) //@TODO ここで emailverifiedか確認
 	// tokenがキレてたらblankが帰ってくる
 	if userId == "" {
 		fmt.Print("blank")
@@ -121,6 +127,37 @@ func SetJWTCookieView(w http.ResponseWriter, r *http.Request) error {
 	} else {
 		result.Status = 401
 	}
+	result.ResponseWrite(w)
+
+	return nil
+}
+
+func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
+	result := helper.TVoidJsonResponse{Status: 200}
+
+	var posted TLoginForm
+	json.NewDecoder(r.Body).Decode(&posted)
+	posted.ReturnSecureToken = true
+
+	posted_json, _ := json.Marshal(posted)
+	url := `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=` + os.Getenv("FIREBASE_API_KEY")
+	req, err := http.NewRequest(
+		"POST",
+		url,
+		bytes.NewBuffer(posted_json),
+	)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		result.Status = 400
+		return nil
+	}
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	fmt.Print(body)
 	result.ResponseWrite(w)
 
 	return nil

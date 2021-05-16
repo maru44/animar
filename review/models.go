@@ -17,6 +17,20 @@ type TReview struct {
 	UpdatedAt string
 }
 
+type TReviewJoinAnime struct {
+	ID           int
+	Content      *string
+	Star         *int
+	AnimeId      int
+	UserId       *string
+	CreatedAt    string
+	UpdatedAt    string
+	Title        string
+	Slug         string
+	AnimeContent *string
+	OnAirState   *int
+}
+
 // all
 func ListReviews() *sql.Rows {
 	db := helper.AccessDB()
@@ -73,6 +87,21 @@ func OnesReviewsList(userId string) *sql.Rows {
 	db := helper.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select * from tbl_reviews WHERE user_id = ?", userId)
+	if err != nil {
+		panic(err.Error())
+	}
+	return rows
+}
+
+// filter by userId
+// joined anime detail
+func OnesReviewsJoinAnime(userId string) *sql.Rows {
+	db := helper.AccessDB()
+	defer db.Close()
+	rows, err := db.Query(
+		"SELECT tbl_reviews.*, anime.title, anime.slug, anime.content, anime.on_air_state "+
+			"FROM tbl_reviews LEFT JOIN anime ON tbl_reviews.anime_id = anime.id WHERE user_id = ?", userId,
+	)
 	if err != nil {
 		panic(err.Error())
 	}
