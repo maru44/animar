@@ -109,6 +109,7 @@ func GetUserModelFCView(w http.ResponseWriter, r *http.Request) error {
 		user := GetUserFirebase(ctx, userId)
 		result.User = *user
 	default:
+		// if emai is not verified
 		result.Status = 4002
 	}
 
@@ -200,7 +201,7 @@ func RenewTokenFCView(w http.ResponseWriter, r *http.Request) error {
 	// get refresh token from cookie
 	refreshToken, _ := r.Cookie("refreshToken")
 	if refreshToken.Value == "" {
-		result.Status = 402
+		result.Status = 4002
 		return nil
 	}
 

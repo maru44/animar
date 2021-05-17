@@ -1,12 +1,16 @@
 package auth
 
 import (
+	"animar/v1/helper"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
+
+	"firebase.google.com/go/v4/auth"
 )
 
 func GetJWTFromGoogle(posted TLoginForm) TTokensForm {
@@ -52,3 +56,20 @@ func GetJWTPayload(token string) {
 	fmt.Print(parsedToken)
 }
 */
+
+// send email link
+func SendVerifyEmailAtRegister(ctx context.Context, client *auth.Client, email string) error {
+	// @TODO Use env!!
+	actionCodeSettings := &auth.ActionCodeSettings{
+		URL:             "http://localhost:3000/",
+		HandleCodeInApp: false,
+	}
+
+	link, err := client.EmailVerificationLinkWithSettings(ctx, email, actionCodeSettings)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+
+	sended := helper.SendVerifyEmail(email, link)
+	return sended
+}

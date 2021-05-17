@@ -32,62 +32,16 @@ func VerifyFirebase(ctx context.Context, idToken string) map[string]interface{} 
 	return claims
 }
 
-// 不要では?
-func CreateUser(
-	ctx context.Context, client *auth.Client,
-	email string, password string, // name string,
-) *auth.UserRecord {
-	params := (&auth.UserToCreate{}).
-		Email(email).
-		EmailVerified(false).
-		Password(password).
-		//PhoneNumber(phoneNumber).
-		//DisplayName(name).
-		//PhotoURL(photo).
-		Disabled(false)
-	u, err := client.CreateUser(ctx, params)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	// @TODO Use env!!
-	actionCodeSettings := &auth.ActionCodeSettings{
-		URL:             "http://localhost:3000/auth/verify/",
-		HandleCodeInApp: false,
-	}
-
-	link, err := client.EmailVerificationLinkWithSettings(ctx, email, actionCodeSettings)
-	fmt.Print(link)
-
-	return u
-}
-
-// send email link
-func SendVerifyEmailAtRegister(ctx context.Context, client *auth.Client, email string) error {
-	// @TODO Use env!!
-	actionCodeSettings := &auth.ActionCodeSettings{
-		URL:             "http://localhost:3000/",
-		HandleCodeInApp: false,
-	}
-
-	link, err := client.EmailVerificationLinkWithSettings(ctx, email, actionCodeSettings)
-	if err != nil {
-		fmt.Print(err.Error())
-	}
-
-	sended := helper.SendVerifyEmail(email, link)
-	return sended
-}
-
 func SetAdminClaim(ctx context.Context, client *auth.Client, uid string) {
 	claims := map[string]interface{}{"is_admin": false}
 	err := client.SetCustomUserClaims(ctx, uid, claims)
 	if err != nil {
-		panic(err.Error())
+		fmt.Print(err.Error())
 	}
 }
 
-// 不要
+//
+/*
 func VerifyEmail(ctx context.Context, client *auth.Client, uid string) {
 	params := (&auth.UserToUpdate{}).
 		EmailVerified(true)
@@ -97,3 +51,4 @@ func VerifyEmail(ctx context.Context, client *auth.Client, uid string) {
 	}
 	fmt.Print(u)
 }
+*/
