@@ -76,9 +76,6 @@ func SendVerifyEmailAtRegister(ctx context.Context, client *auth.Client, email s
 	}
 
 	sended := helper.SendVerifyEmail(email, link)
-	if sended != nil {
-		fmt.Print(sended)
-	}
 	return sended
 }
 
@@ -90,6 +87,7 @@ func SetAdminClaim(ctx context.Context, client *auth.Client, uid string) {
 	}
 }
 
+// 不要
 func VerifyEmail(ctx context.Context, client *auth.Client, uid string) {
 	params := (&auth.UserToUpdate{}).
 		EmailVerified(true)
