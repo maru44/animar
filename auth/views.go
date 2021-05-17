@@ -108,6 +108,8 @@ func GetUserModelFCView(w http.ResponseWriter, r *http.Request) error {
 		ctx := context.Background()
 		user := GetUserFirebase(ctx, userId)
 		result.User = *user
+	default:
+		result.Status = 4002
 	}
 
 	result.ResponseWrite(w)
