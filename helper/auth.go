@@ -2,7 +2,6 @@ package helper
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -33,14 +32,15 @@ func FirebaseClient(ctx context.Context) *auth.Client {
 func GetClaimsFromCookie(r *http.Request) map[string]interface{} {
 	idToken, err := r.Cookie("idToken")
 	if err != nil {
-		fmt.Print(err.Error())
+		return nil
 	}
 
 	ctx := context.Background()
 	client := FirebaseClient(ctx)
 	token, err := client.VerifyIDToken(ctx, idToken.Value)
 	if err != nil {
-		log.Fatalf("%s", err)
+		//log.Fatalf("%s", err)
+		return nil
 	}
 	claims := token.Claims
 
@@ -50,7 +50,7 @@ func GetClaimsFromCookie(r *http.Request) map[string]interface{} {
 func GetIdFromCookie(r *http.Request) string {
 	idToken, err := r.Cookie("idToken")
 	if err != nil {
-		fmt.Print(err.Error())
+		//fmt.Print(err.Error())
 		return ""
 	}
 
@@ -58,7 +58,7 @@ func GetIdFromCookie(r *http.Request) string {
 	client := FirebaseClient(ctx)
 	token, err := client.VerifyIDToken(ctx, idToken.Value)
 	if err != nil {
-		fmt.Printf("%s%s", err.Error(), err)
+		//fmt.Printf("%s%s", err.Error(), err)
 		if strings.Contains(err.Error(), "ID token has expired at:") {
 			return ""
 		}

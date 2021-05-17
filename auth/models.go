@@ -4,7 +4,6 @@ import (
 	"animar/v1/helper"
 	"context"
 	"fmt"
-	"log"
 
 	"firebase.google.com/go/v4/auth"
 )
@@ -24,7 +23,9 @@ func VerifyFirebase(ctx context.Context, idToken string) map[string]interface{} 
 	client := helper.FirebaseClient(ctx)
 	token, err := client.VerifyIDToken(ctx, idToken)
 	if err != nil {
-		log.Fatalf("%s", err)
+		//log.Fatalf("%s", err)
+		fmt.Print(err)
+		return nil
 	}
 	claims := token.Claims
 

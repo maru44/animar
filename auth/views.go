@@ -71,6 +71,7 @@ func SampleGetUserJsonView(w http.ResponseWriter, r *http.Request) error {
 
 // user info from userId
 // from cookie
+/*
 func GetUserModelFCView(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TUserJsonResponse{Status: 200}
 	userId := helper.GetIdFromCookie(r) //@TODO ここで emailverifiedか確認
@@ -78,13 +79,36 @@ func GetUserModelFCView(w http.ResponseWriter, r *http.Request) error {
 	if userId == "" {
 		fmt.Print("blank")
 		result.Status = 4001
-		result.ResponseWrite(w)
-		return nil
-	}
-	ctx := context.Background()
+	} else {
+		ctx := context.Background()
 
-	user := GetUserFirebase(ctx, userId)
-	result.User = *user
+		claims := helper.GetClaimsFromCookie(r)
+		is_verified := claims["email_verified"]
+		user := GetUserFirebase(ctx, userId)
+		result.User = *user
+	}
+
+	result.ResponseWrite(w)
+	return nil
+}
+*/
+
+// user info from userId
+// from cookie
+func GetUserModelFCView(w http.ResponseWriter, r *http.Request) error {
+	result := helper.TUserJsonResponse{Status: 200}
+	userId := helper.GetIdFromCookie(r)
+	claims := helper.GetClaimsFromCookie(r)
+	// tokenがキレてたらblankが帰ってくる
+
+	switch {
+	case userId == "":
+		result.Status = 4001
+	case claims["email_verified"]:
+		ctx := context.Background()
+		user := GetUserFirebase(ctx, userId)
+		result.User = *user
+	}
 
 	result.ResponseWrite(w)
 	return nil
