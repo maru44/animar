@@ -185,7 +185,7 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 
 	ctx := context.Background()
 	clientAuth := helper.FirebaseClient(ctx)
-	SendVerifyEmailAtRegister(ctx, clientAuth, *&posted.Email)
+	SendVerifyEmailAtRegister(ctx, clientAuth, posted.Email)
 
 	result.ResponseWrite(w)
 

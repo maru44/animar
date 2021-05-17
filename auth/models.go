@@ -63,7 +63,7 @@ func CreateUser(
 }
 
 // send email link
-func SendVerifyEmailAtRegister(ctx context.Context, client *auth.Client, email string) {
+func SendVerifyEmailAtRegister(ctx context.Context, client *auth.Client, email string) error {
 	// @TODO Use env!!
 	actionCodeSettings := &auth.ActionCodeSettings{
 		URL:             "http://localhost:3000/",
@@ -74,7 +74,12 @@ func SendVerifyEmailAtRegister(ctx context.Context, client *auth.Client, email s
 	if err != nil {
 		fmt.Print(err.Error())
 	}
-	fmt.Print(link)
+
+	sended := helper.SendVerifyEmail(email, link)
+	if sended != nil {
+		fmt.Print(sended)
+	}
+	return sended
 }
 
 func SetAdminClaim(ctx context.Context, client *auth.Client, uid string) {
