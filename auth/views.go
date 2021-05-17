@@ -181,9 +181,12 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
+	ioutil.ReadAll(resp.Body)
 
-	fmt.Print(body)
+	ctx := context.Background()
+	clientAuth := helper.FirebaseClient(ctx)
+	SendVerifyEmailAtRegister(ctx, clientAuth, *&posted.Email)
+
 	result.ResponseWrite(w)
 
 	return nil

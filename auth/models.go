@@ -35,10 +35,10 @@ func VerifyFirebase(ctx context.Context, idToken string) map[string]interface{} 
 // 不要では?
 func CreateUser(
 	ctx context.Context, client *auth.Client,
-	emai string, password string, // name string,
+	email string, password string, // name string,
 ) *auth.UserRecord {
 	params := (&auth.UserToCreate{}).
-		Email(emai).
+		Email(email).
 		EmailVerified(false).
 		Password(password).
 		//PhoneNumber(phoneNumber).
@@ -50,7 +50,31 @@ func CreateUser(
 		panic(err.Error())
 	}
 
+	// @TODO Use env!!
+	actionCodeSettings := &auth.ActionCodeSettings{
+		URL:             "http://localhost:3000/auth/verify/",
+		HandleCodeInApp: false,
+	}
+
+	link, err := client.EmailVerificationLinkWithSettings(ctx, email, actionCodeSettings)
+	fmt.Print(link)
+
 	return u
+}
+
+// send email link
+func SendVerifyEmailAtRegister(ctx context.Context, client *auth.Client, email string) {
+	// @TODO Use env!!
+	actionCodeSettings := &auth.ActionCodeSettings{
+		URL:             "http://localhost:3000/",
+		HandleCodeInApp: false,
+	}
+
+	link, err := client.EmailVerificationLinkWithSettings(ctx, email, actionCodeSettings)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+	fmt.Print(link)
 }
 
 func SetAdminClaim(ctx context.Context, client *auth.Client, uid string) {
