@@ -14,21 +14,6 @@ import (
 )
 
 func S3Session() *session.Session {
-	/*
-		sess, err := session.NewSessionWithOptions(session.Options{
-			Config: aws.Config{
-				Region: aws.String("ap-northeast-1"),
-				Credentials: aws.Config{
-					Credentials: credentials.NewStaticCredentialsFromCreds(credentials.Value{
-						os.Getenv("S3_ACCESS_KEY_ID"),
-						os.Getenv("S3_SECRET_KEY"),
-					}),
-				},
-			},
-			Profile: os.Getenv(""),
-		})
-	*/
-
 	creds := credentials.NewStaticCredentials(
 		os.Getenv("S3_ACCESS_KEY_ID"),
 		os.Getenv("S3_SECRET_KEY"),
