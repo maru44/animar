@@ -5,6 +5,7 @@ import (
 	"animar/v1/auth"
 	"animar/v1/helper"
 	"animar/v1/review"
+	"animar/v1/test"
 	"animar/v1/watch"
 	"net/http"
 )
@@ -40,6 +41,9 @@ func main() {
 	http.HandleFunc("/auth/cookie/", helper.Handle(auth.TestGetCookie))
 	http.HandleFunc("/auth/user/cookie/", helper.Handle(auth.GetUserModelFCView))
 	http.HandleFunc("/auth/register/", helper.Handle(auth.CreateUserFirstView))
+
+	/*   test   */
+	http.HandleFunc("/test/upload/", helper.Handle(test.Uploader))
 
 	http.ListenAndServe(":8000", nil)
 }

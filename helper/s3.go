@@ -44,7 +44,7 @@ func S3Session() *session.Session {
 	return sess
 }
 
-func UploadS3(file []byte, fileName string) (string, error) {
+func UploadS3(file []byte, fileName string, path string) (string, error) {
 	contentType := getContentType(filepath.Ext(fileName))
 	if contentType == "" {
 		return "", errors.New("Unknown type")
@@ -52,8 +52,9 @@ func UploadS3(file []byte, fileName string) (string, error) {
 
 	sess := S3Session()
 	u := s3manager.NewUploader(sess)
+	slug := GenRandSlug(12)
 
-	key := fmt.Sprintf("test/%s", fileName)
+	key := fmt.Sprintf("%s/%s__%s", path, slug, fileName)
 
 	_, err := u.Upload(&s3manager.UploadInput{
 		Body:        bytes.NewReader(file),
@@ -65,17 +66,17 @@ func UploadS3(file []byte, fileName string) (string, error) {
 		return "", err
 	}
 
-	fileUrl := fmt.Sprintf("https://s3-%s.amazonaws.com/%s/%s", "ap-northeast-1", os.Getenv("BUCKET"), key)
+	fileUrl := fmt.Sprintf("https://%s.s3-%s.amazonaws.com/%s", os.Getenv("BUCKET"), "ap-northeast-1", key)
 	return fileUrl, nil
 }
 
 func getContentType(extension string) string {
 	switch extension {
-	case "jpg":
+	case ".jpg":
 		return "image/jpg"
-	case "jpeg":
+	case ".jpeg":
 		return "image/jpg"
-	case "png":
+	case ".png":
 		return "image/png"
 	default:
 		return ""
