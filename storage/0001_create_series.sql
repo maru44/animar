@@ -5,6 +5,7 @@ CREATE TABLE series (
     series_name VARCHAR(128) NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
-INSERT INTO go_test.series (eng_name, series_name) VALUES ("girls_und_panzer", "ガールズアンドパンツァー");
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+-- add dummy
+INSERT INTO go_test.series (eng_name, series_name)
+VALUES ("girls_und_panzer", "ガールズアンドパンツァー");

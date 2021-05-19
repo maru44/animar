@@ -12,18 +12,19 @@ create table anime (
     season VARCHAR(256) NULL,
     stories INT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    -- INDEX anime_slug (slug)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- INDEX anime_slug (slug)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 ALTER TABLE anime
-    ADD CONSTRAINT fk_anime_series
-    FOREIGN KEY (series_id)
-    REFERENCES series (id)
-    ON DELETE SET NULL ON UPDATE CASCADE;
-
-INSERT INTO go_test.anime (title, slug, content) VALUES ('天元突破グレンラガン', 'aaaaaaaaaaaa', 'ガイナックス');
-INSERT INTO go_test.anime (title, slug, series_id) VALUES ('ガールズアンドパンツァー', 'aaaaaaaaaaab', 1);
-INSERT INTO go_test.anime (title, slug) VALUES ('宇宙よりも遠い場所', 'aaaaaaaaaaac');
-INSERT INTO go_test.anime (title, slug) VALUES ('ゾンビランドサガ', 'aaaaaaaaaaad');
-INSERT INTO go_test.anime (title, slug, content) VALUES ('あしたのジョー', 'aaaaaaaaaaae', '明日はどっちだ?');
+ADD CONSTRAINT fk_anime_series FOREIGN KEY (series_id) REFERENCES series (id) ON DELETE
+SET NULL ON UPDATE CASCADE;
+-- add dummy
+INSERT INTO go_test.anime (title, slug, content)
+VALUES ('天元突破グレンラガン', 'aaaaaaaaaaaa', 'ガイナックス');
+INSERT INTO go_test.anime (title, slug, series_id)
+VALUES ('ガールズアンドパンツァー', 'aaaaaaaaaaab', 1);
+INSERT INTO go_test.anime (title, slug)
+VALUES ('宇宙よりも遠い場所', 'aaaaaaaaaaac');
+INSERT INTO go_test.anime (title, slug)
+VALUES ('ゾンビランドサガ', 'aaaaaaaaaaad');
+INSERT INTO go_test.anime (title, slug, content)
+VALUES ('あしたのジョー', 'aaaaaaaaaaae', '明日はどっちだ?');
