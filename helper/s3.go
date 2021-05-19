@@ -38,7 +38,7 @@ func UploadS3(file []byte, fileName string, pathList []string) (string, error) {
 
 	sess := S3Session()
 	u := s3manager.NewUploader(sess)
-	slug := GenRandSlug(12)
+	slug := GenRandSlug(6)
 
 	path := strings.Join(pathList, "/")
 	key := fmt.Sprintf("%s/%s__%s", path, slug, fileName)
