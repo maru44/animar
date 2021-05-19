@@ -3,6 +3,7 @@ package helper
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 
 	firebase "firebase.google.com/go/v4"
@@ -12,7 +13,7 @@ import (
 
 func CloudStorageSession() *firebase.App {
 	config := &firebase.Config{
-		StorageBucket: "animar-local.appspot.com",
+		StorageBucket: os.Getenv("FIREBASE_STORAGE"),
 	}
 	opt := option.WithCredentialsFile("secret_key.json")
 	app, err := firebase.NewApp(context.Background(), config, opt)

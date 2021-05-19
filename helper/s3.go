@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -29,7 +30,7 @@ func S3Session() *session.Session {
 	return sess
 }
 
-func UploadS3(file []byte, fileName string, path string) (string, error) {
+func UploadS3(file []byte, fileName string, pathList []string) (string, error) {
 	contentType := getContentType(filepath.Ext(fileName))
 	if contentType == "" {
 		return "", errors.New("Unknown type")
@@ -39,6 +40,7 @@ func UploadS3(file []byte, fileName string, path string) (string, error) {
 	u := s3manager.NewUploader(sess)
 	slug := GenRandSlug(12)
 
+	path := strings.Join(pathList, "/")
 	key := fmt.Sprintf("%s/%s__%s", path, slug, fileName)
 
 	_, err := u.Upload(&s3manager.UploadInput{

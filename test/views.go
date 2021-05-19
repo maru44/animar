@@ -17,7 +17,7 @@ func Uploader(w http.ResponseWriter, r *http.Request) error {
 	var posted TInputFile
 	json.NewDecoder(r.Body).Decode(&posted)
 
-	fileName, err := helper.UploadS3([]byte(posted.File), posted.FileName, "test")
+	fileName, err := helper.UploadS3([]byte(posted.File), posted.FileName, []string{"test"})
 	if err != nil {
 		fmt.Print(err)
 	}
