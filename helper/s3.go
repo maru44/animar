@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,7 +32,7 @@ func S3Session() *session.Session {
 	return sess
 }
 
-func UploadS3(file []byte, fileName string, pathList []string) (string, error) {
+func UploadS3(file multipart.File, fileName string, pathList []string) (string, error) {
 	contentType := getContentType(filepath.Ext(fileName))
 	if contentType == "" {
 		return "", errors.New("Unknown type")
@@ -40,11 +42,16 @@ func UploadS3(file []byte, fileName string, pathList []string) (string, error) {
 	u := s3manager.NewUploader(sess)
 	slug := GenRandSlug(6)
 
+	buf := bytes.NewBuffer(nil)
+	if _, err := io.Copy(buf, file); err != nil {
+		fmt.Print(err)
+	}
+
 	path := strings.Join(pathList, "/")
 	key := fmt.Sprintf("%s/%s__%s", path, slug, fileName)
 
 	_, err := u.Upload(&s3manager.UploadInput{
-		Body:        bytes.NewReader(file),
+		Body:        buf,
 		Bucket:      aws.String(os.Getenv("BUCKET")),
 		ContentType: aws.String(contentType),
 		Key:         aws.String(key),
