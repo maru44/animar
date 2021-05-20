@@ -33,6 +33,10 @@ type TRefreshReturn struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+type TCreateReturn struct {
+	IdToken string `json:"idToken"`
+}
+
 func UserListView(w http.ResponseWriter, r *http.Request) {
 	jsonStr := `{"grant_type": "client_credentials", "client_id": "` + os.Getenv("AUTH0_CLIENT_ID") + `", "client_secret": "` + os.Getenv("AUTH0_SECRET") + `", "audience": "https://` + os.Getenv("AUTH0_DOMAIN") + `/api/v2/"}`
 	url := `https://` + os.Getenv("AUTH0_DOMAIN") + `/oauth/token`
@@ -71,35 +75,12 @@ func SampleGetUserJsonView(w http.ResponseWriter, r *http.Request) error {
 
 // user info from userId
 // from cookie
-/*
-func GetUserModelFCView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TUserJsonResponse{Status: 200}
-	userId := helper.GetIdFromCookie(r) //@TODO ここで emailverifiedか確認
-	// tokenがキレてたらblankが帰ってくる
-	if userId == "" {
-		fmt.Print("blank")
-		result.Status = 4001
-	} else {
-		ctx := context.Background()
-
-		claims := helper.GetClaimsFromCookie(r)
-		is_verified := claims["email_verified"]
-		user := GetUserFirebase(ctx, userId)
-		result.User = *user
-	}
-
-	result.ResponseWrite(w)
-	return nil
-}
-*/
-
-// user info from userId
-// from cookie
 func GetUserModelFCView(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TUserJsonResponse{Status: 200}
 	userId := helper.GetIdFromCookie(r)
 	claims := helper.GetClaimsFromCookie(r)
 	// tokenがキレてたらblankが帰ってくる
+	fmt.Print(claims)
 
 	switch {
 	case userId == "":
@@ -182,10 +163,17 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 	defer resp.Body.Close()
-	ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 
+	//var d map[string]interface{}
+	var d TCreateReturn
+	err = json.Unmarshal(body, &d)
+
+	// mail 認証 & add claim(is_admin: false)
 	ctx := context.Background()
 	clientAuth := helper.FirebaseClient(ctx)
+	userId := helper.GetUserIdFromToken(ctx, clientAuth, d.IdToken)
+	SetAdminClaim(ctx, clientAuth, userId)
 	SendVerifyEmailAtRegister(ctx, clientAuth, posted.Email)
 
 	result.ResponseWrite(w)

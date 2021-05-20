@@ -56,7 +56,22 @@ func GetIdFromCookie(r *http.Request) string {
 
 	ctx := context.Background()
 	client := FirebaseClient(ctx)
+	// @TODO getUserIdFromToken使う
 	token, err := client.VerifyIDToken(ctx, idToken.Value)
+	if err != nil {
+		//fmt.Printf("%s%s", err.Error(), err)
+		if strings.Contains(err.Error(), "ID token has expired at:") {
+			return ""
+		}
+	}
+	claims := token.Claims
+	id := claims["user_id"]
+
+	return id.(string)
+}
+
+func GetUserIdFromToken(ctx context.Context, client *auth.Client, idToken string) string {
+	token, err := client.VerifyIDToken(ctx, idToken)
 	if err != nil {
 		//fmt.Printf("%s%s", err.Error(), err)
 		if strings.Contains(err.Error(), "ID token has expired at:") {

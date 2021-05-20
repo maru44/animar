@@ -36,7 +36,7 @@ func SetAdminClaim(ctx context.Context, client *auth.Client, uid string) {
 	claims := map[string]interface{}{"is_admin": false}
 	err := client.SetCustomUserClaims(ctx, uid, claims)
 	if err != nil {
-		fmt.Print(err.Error())
+		fmt.Print("failure set custom claims")
 	}
 }
 
