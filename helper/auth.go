@@ -2,6 +2,7 @@ package helper
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -71,7 +72,9 @@ func GetIdFromCookie(r *http.Request) string {
 }
 
 func GetUserIdFromToken(ctx context.Context, client *auth.Client, idToken string) string {
+	// ココがnilになってる
 	token, err := client.VerifyIDToken(ctx, idToken)
+	fmt.Print(token)
 	if err != nil {
 		//fmt.Printf("%s%s", err.Error(), err)
 		if strings.Contains(err.Error(), "ID token has expired at:") {

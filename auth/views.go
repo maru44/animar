@@ -172,8 +172,10 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 	// mail 認証 & add claim(is_admin: false)
 	ctx := context.Background()
 	clientAuth := helper.FirebaseClient(ctx)
+	fmt.Print(d.IdToken)
 	userId := helper.GetUserIdFromToken(ctx, clientAuth, d.IdToken)
-	SetAdminClaim(ctx, clientAuth, userId)
+	fmt.Print(userId)
+	// SetAdminClaim(ctx, clientAuth, userId)
 	SendVerifyEmailAtRegister(ctx, clientAuth, posted.Email)
 
 	result.ResponseWrite(w)
