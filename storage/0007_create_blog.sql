@@ -1,9 +1,10 @@
 DROP TABLE IF EXISTS go_test.tbl_blog;
 create table tbl_blog (
     id INT unsigned AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    content TEXT NULL,
-    star TINYINT NULL,
-    anime_ids INT unsigned NULL,
+    slug VARCHAR(16) NOT NULL,
+    title VARCHAR(64) NOT NULL,
+    abstract VARCHAR(160) NULL,
+    content TEXT NOT NULL,
     user_id VARCHAR(128) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

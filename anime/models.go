@@ -3,6 +3,7 @@ package anime
 import (
 	"animar/v1/helper"
 	"database/sql"
+	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -114,7 +115,10 @@ func InsertAnime(title string, content string, onAirState int, seriesId int, sea
 	db := helper.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare("INSERT INTO anime(title, slug, content) VALUES(?, ?, ?)")
+	stmtInsert, err := db.Prepare(
+		"INSERT INTO anime(title, slug, content, on_air_state, series_id, season, stories) " +
+			"VALUES(?, ?, ?, ?, ?, ?, ?)",
+	)
 	defer stmtInsert.Close()
 
 	slug := helper.GenRandSlug(12)
@@ -126,12 +130,14 @@ func InsertAnime(title string, content string, onAirState int, seriesId int, sea
 
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
-		panic(err.Error())
+		//panic(err.Error())
+		fmt.Print(err)
 	}
 
 	return int(insertedId)
 }
 
+// @TODO insertにしたがってcolumn追加
 func UpdateAnime(slug string, title string, content string, onAirState int) int {
 	db := helper.AccessDB()
 	defer db.Close()
@@ -139,7 +145,7 @@ func UpdateAnime(slug string, title string, content string, onAirState int) int 
 	exe, err := db.Exec(
 		"UPDATE anime SET title = ?, content = ?, on_air_state = ? WHERE slug = ?",
 		title, helper.NewNullString(content).String,
-		slug, helper.NewNullInt(onAirState).Int,
+		helper.NewNullInt(onAirState).Int, slug,
 	)
 	if err != nil {
 		panic(err.Error())
