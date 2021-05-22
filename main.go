@@ -3,6 +3,7 @@ package main
 import (
 	"animar/v1/anime"
 	"animar/v1/auth"
+	"animar/v1/blog"
 	"animar/v1/helper"
 	"animar/v1/review"
 	"animar/v1/test"
@@ -17,7 +18,12 @@ func main() {
 	/*   Anime database   */
 	http.HandleFunc("/db/anime/", helper.Handle(anime.AnimeView))
 	http.HandleFunc("/db/anime/wc/", helper.Handle(anime.AnimeWithUserWatchView)) // 動かず
-	http.HandleFunc("/db/anime/post/", helper.Handle(anime.AnimePostView))
+	http.HandleFunc("/db/anime/post/", helper.Handle(anime.AnimePostView))        // admin only
+
+	/*   blogs   */
+	http.HandleFunc("/blog/", helper.Handle(blog.ListBlogView))
+	//http.HandleFunc("/blog/", )
+	http.HandleFunc("/blog/post/", helper.Handle(blog.InsertBlogView))
 
 	/*   reviews   */
 	http.HandleFunc("/reviews/", helper.Handle(review.GetYourReviews))

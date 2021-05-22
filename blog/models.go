@@ -17,6 +17,24 @@ type TBlog struct {
 	UpdatedAt string
 }
 
+type TJoinedAnime struct {
+	AnimeId int
+	Slug    string
+	Title   string
+}
+
+type TBlogJoinAnimes struct {
+	ID        int
+	Slug      string
+	Title     string
+	Abstract  string
+	Content   string
+	UserId    string
+	CreatedAt string
+	UpdatedAt string
+	Animes    []TJoinedAnime
+}
+
 func ListBlog() *sql.Rows {
 	db := helper.AccessDB()
 	defer db.Close()
@@ -27,15 +45,26 @@ func ListBlog() *sql.Rows {
 	return rows
 }
 
-func DetailBlog(id int) TBlog {
+func DetailBlog(id int) TBlogJoinAnimes {
 	db := helper.AccessDB()
 	defer db.Close()
 
-	var blog TBlog
-	err := db.QueryRow("SELECT * FROM tbl_blog WHERE id = ?", id).Scan(
-		&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
-		&blog.Content, &blog.UserId, &blog.CreatedAt,
-		&blog.UpdatedAt,
+	var blog TBlogJoinAnimes
+	/*
+		err := db.QueryRow("SELECT * FROM tbl_blog WHERE id = ?", id).Scan(
+			&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
+			&blog.Content, &blog.UserId, &blog.CreatedAt,
+			&blog.UpdatedAt,
+		)
+	*/
+	err := db.QueryRow(
+		"SELECT tbl_blog.*, anime.id, anime.slug, anime.title FROM tbl_blog "+
+			"LEFT JOIN relation_blog_animes ON tbl_blog.id = relation_blog_animes.blog_id "+
+			"LEFT JOIN anime ON anime.id = relation_blog_animes.anime_id"+
+			"WHERE id = ?", id,
+	).Scan(
+		&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract, &blog.Content,
+		&blog.CreatedAt, &blog.UserId, &blog.UpdatedAt, &blog.Animes,
 	)
 
 	switch {
