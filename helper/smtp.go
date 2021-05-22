@@ -42,10 +42,10 @@ func SendVerifyEmail(to string, link string) error {
 		`loveAni.meへのご登録ありがとうございます
 		
 仮登録が完了しました。
-以下のリンクをクリックして本登録を完了してください。
+以下のリンクをクリックすることで本登録が完了します。
 
 %s
-*** Google社の提供するサービスへのリンクとなっております。
+*** Google社の提供するfirebaseへのリンクとなっております。
 
 loveAni.me
 		`, link,

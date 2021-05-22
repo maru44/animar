@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	firebase "firebase.google.com/go/v4"
@@ -71,8 +72,9 @@ func GetIdFromCookie(r *http.Request) string {
 	return id.(string)
 }
 
-func GetUserIdFromToken(ctx context.Context, client *auth.Client, idToken string) string {
-	// ココがnilになってる
+func GetUserIdFromToken(idToken string) string {
+	ctx := context.Background()
+	client := FirebaseClient(ctx)
 	token, err := client.VerifyIDToken(ctx, idToken)
 	fmt.Print(token)
 	if err != nil {
@@ -82,7 +84,15 @@ func GetUserIdFromToken(ctx context.Context, client *auth.Client, idToken string
 		}
 	}
 	claims := token.Claims
+	fmt.Print(claims)
 	id := claims["user_id"]
 
 	return id.(string)
+}
+
+func IsAdmin(userId string) bool {
+	strAdmins := os.Getenv("ADMIN_USERS")
+	admins := strings.Split(strAdmins, ", ")
+
+	return IsContainString(admins, userId)
 }

@@ -35,6 +35,7 @@ type TRefreshReturn struct {
 
 type TCreateReturn struct {
 	IdToken string `json:"idToken"`
+	Email   string `json:"email"`
 }
 
 func UserListView(w http.ResponseWriter, r *http.Request) {
@@ -80,7 +81,6 @@ func GetUserModelFCView(w http.ResponseWriter, r *http.Request) error {
 	userId := helper.GetIdFromCookie(r)
 	claims := helper.GetClaimsFromCookie(r)
 	// tokenがキレてたらblankが帰ってくる
-	fmt.Print(claims)
 
 	switch {
 	case userId == "":
@@ -165,21 +165,17 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 
-	//var d map[string]interface{}
 	var d TCreateReturn
 	err = json.Unmarshal(body, &d)
 
-	// mail 認証 & add claim(is_admin: false)
 	ctx := context.Background()
 	clientAuth := helper.FirebaseClient(ctx)
-	fmt.Print(d.IdToken)
-	userId := helper.GetUserIdFromToken(ctx, clientAuth, d.IdToken)
-	fmt.Print(userId)
-	// SetAdminClaim(ctx, clientAuth, userId)
+
+	// idToken := &d.IdToken
+	// defer SetAdminClaim(ctx, clientAuth, *idToken) // set is_admin false
 	SendVerifyEmailAtRegister(ctx, clientAuth, posted.Email)
 
 	result.ResponseWrite(w)
-
 	return nil
 }
 
