@@ -1,7 +1,7 @@
 drop table if exists go_test.tbl_reviews;
 create table tbl_reviews (
     id INT unsigned AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    content TEXT NULL,
+    content VARCHAR(160) NULL,
     star TINYINT NULL,
     anime_id INT unsigned NOT NULL,
     user_id VARCHAR(128) NULL,
