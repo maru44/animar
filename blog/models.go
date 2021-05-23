@@ -102,7 +102,7 @@ func InsertBlog(title string, abstract string, content string, userId string) in
 
 	stmtInsert, err := db.Prepare(
 		"INSERT INTO tbl_blog(slug, title, abstract, content, user_id) " +
-			"VALUES(?, ?, ?, ?)",
+			"VALUES(?, ?, ?, ?, ?)",
 	)
 	defer stmtInsert.Close()
 

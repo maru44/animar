@@ -12,7 +12,8 @@ type TAnime struct {
 	ID          int
 	Slug        string
 	Title       string
-	Abbribation string
+	ThumbUrl    *string
+	Abbribation *string
 	Content     *string
 	OnAirState  *int
 	SeriesId    *int
@@ -26,7 +27,8 @@ type TAnimeWithUserWatchReview struct {
 	ID          int
 	Slug        string
 	Title       string
-	Abbribation string
+	Abbribation *string
+	ThumbUrl    *string
 	Content     *string
 	OnAirState  *int
 	SeriesId    *int
@@ -56,7 +58,7 @@ func DetailAnime(id int) TAnime {
 
 	var ani TAnime
 	err := db.QueryRow("SELECT * FROM anime WHERE id = ?", id).Scan(
-		&ani.ID, &ani.Slug, &ani.Title, &ani.Abbribation, &ani.Content,
+		&ani.ID, &ani.Slug, &ani.Title, &ani.Abbribation, &ani.ThumbUrl, &ani.Content,
 		&ani.OnAirState, &ani.SeriesId, &ani.Season,
 		&ani.Stories, &ani.CreatedAt, &ani.UpdatedAt,
 	)
@@ -76,7 +78,7 @@ func DetailAnimeBySlug(slug string) TAnime {
 
 	var ani TAnime
 	err := db.QueryRow("SELECT * FROM anime WHERE slug = ?", slug).Scan(
-		&ani.ID, &ani.Slug, &ani.Title, &ani.Abbribation, &ani.Content,
+		&ani.ID, &ani.Slug, &ani.Title, &ani.Abbribation, &ani.ThumbUrl, &ani.Content,
 		&ani.OnAirState, &ani.SeriesId, &ani.Season,
 		&ani.Stories, &ani.CreatedAt, &ani.UpdatedAt,
 	)
@@ -113,7 +115,7 @@ func DetailAnimeBySlugWithUserWatchReview(slug string, userId string) TAnimeWith
 	return ani
 }
 
-func InsertAnime(title string, abbrevation string, content string, onAirState int, seriesId int, season string, stories int) int {
+func InsertAnime(title string, abbrevation string, content string, onAirState int, seriesId int, season string, stories int, thumb_url string) int {
 	db := helper.AccessDB()
 	defer db.Close()
 
@@ -125,7 +127,8 @@ func InsertAnime(title string, abbrevation string, content string, onAirState in
 
 	slug := helper.GenRandSlug(12)
 	exe, err := stmtInsert.Exec(
-		title, slug, helper.NewNullString(abbrevation).String, helper.NewNullString(content).String,
+		title, slug, helper.NewNullString(abbrevation).String,
+		helper.NewNullString(thumb_url).String, helper.NewNullString(content).String,
 		helper.NewNullInt(onAirState).Int, helper.NewNullInt(seriesId).Int,
 		helper.NewNullString(season).String, helper.NewNullInt(stories).Int,
 	)

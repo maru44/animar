@@ -15,7 +15,6 @@ type TBlogInput struct {
 	Title    string `json:"Title"`
 	Abstract string `json:"Abstract"`
 	Content  string `json:"Content"`
-	UserId   string `json:"UserId"`
 }
 
 func (result TBlogResponse) ResponseWrite(w http.ResponseWriter) bool {
@@ -50,7 +49,7 @@ func InsertBlogView(w http.ResponseWriter, r *http.Request) error {
 	} else {
 		var posted TBlogInput
 		json.NewDecoder(r.Body).Decode(&posted)
-		value := InsertBlog(posted.Title, posted.Abstract, posted.Content, posted.UserId)
+		value := InsertBlog(posted.Title, posted.Abstract, posted.Content, userId)
 		result.Num = value
 	}
 	result.ResponseWrite(w)

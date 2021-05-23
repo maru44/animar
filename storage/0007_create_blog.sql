@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS go_test.relation_blog_animes;
 DROP TABLE IF EXISTS go_test.tbl_blog;
 create table tbl_blog (
     id INT unsigned AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -10,7 +11,6 @@ create table tbl_blog (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 -- relation MM
-DROP TABLE IF EXISTS go_test.relation_blog_animes;
 CREATE TABLE relation_blog_animes (
     blog_id INT UNSIGNED NOT NULL,
     anime_id INT UNSIGNED NOT NULL,

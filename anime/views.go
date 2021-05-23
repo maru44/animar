@@ -20,6 +20,7 @@ type TAnimesWithUserWatchResponse struct {
 type TAnimeInput struct {
 	Title       string `json:"Title"`
 	Abbrevation string `json:"Abbrevation"`
+	ThumbUrl    string `json:"ThumbUrl"`
 	Content     string `json:"Content"`
 	OnAirState  int    `json:"OnAirState"`
 	SeriesId    int    `json:"Series"`
@@ -130,7 +131,7 @@ func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 	json.NewDecoder(r.Body).Decode(&posted)
 	insertedId := InsertAnime(
 		posted.Title, posted.Abbrevation, posted.Content, posted.OnAirState,
-		posted.SeriesId, posted.Season, posted.Stories,
+		posted.SeriesId, posted.Season, posted.Stories, posted.ThumbUrl,
 	)
 
 	result.Num = insertedId
