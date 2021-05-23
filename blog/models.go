@@ -24,6 +24,14 @@ type TJoinedAnime struct {
 	Title   string
 }
 
+type TJoinedBlog struct {
+	BlogId    int
+	Title     string
+	Slug      string
+	Abstract  string
+	CreatedAt string
+}
+
 type TBlogJoinAnimes struct {
 	ID        int
 	Slug      string
@@ -155,7 +163,8 @@ func DeleteBlog(id int) int {
 	return int(rowsAffect)
 }
 
-func RelationBlogAnimes(blogId int) *sql.Rows {
+// animes of blog
+func RelationAnimeByBlog(blogId int) *sql.Rows {
 	db := helper.AccessDB()
 	defer db.Close()
 
@@ -163,6 +172,23 @@ func RelationBlogAnimes(blogId int) *sql.Rows {
 		"SELECT relation_blog_animes.anime_id, anime.slug, anime.title FROM relation_blog_animes " +
 			"LEFT JOIN anime ON anime.id = relation_blog_animes.anime_id " +
 			"WHERE blog_id = " + strconv.Itoa(blogId),
+	)
+	if err != nil {
+		panic(err.Error())
+	}
+	return rows
+}
+
+// blogs by anime
+func RelationBlogByAnime(animeId int) *sql.Rows {
+	db := helper.AccessDB()
+	defer db.Close()
+
+	rows, err := db.Query(
+		"SELECT relation_blog_animes.blog_id, blog.slug, blog.title, " +
+			"blog.abstract, blog.created_at FROM relation_blog_animes " +
+			"LEFT JOIN blog ON blog.id = relation_blog_animes.blog_id " +
+			"WHERE anime_id = " + strconv.Itoa(animeId),
 	)
 	if err != nil {
 		panic(err.Error())

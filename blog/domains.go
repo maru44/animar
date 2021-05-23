@@ -51,7 +51,7 @@ func DetailBlogJoinAnimeDomain(slug string) TBlogJoinAnimes {
 }
 
 func RelationBlogAnimesDomain(blogId int) []TJoinedAnime {
-	rows := RelationBlogAnimes(blogId)
+	rows := RelationAnimeByBlog(blogId)
 	var ret []TJoinedAnime
 
 	for rows.Next() {
