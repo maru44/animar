@@ -21,7 +21,8 @@ func main() {
 	http.HandleFunc("/db/anime/post/", helper.Handle(anime.AnimePostView))        // admin only
 
 	/*   blogs   */
-	http.HandleFunc("/blog/", helper.Handle(blog.ListBlogView))
+	//http.HandleFunc("/blog/", helper.Handle(blog.ListBlogView))
+	http.HandleFunc("/blog/", helper.Handle(blog.BlogJoinAnimeView))
 	//http.HandleFunc("/blog/", )
 	http.HandleFunc("/blog/post/", helper.Handle(blog.InsertBlogView))
 

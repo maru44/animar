@@ -4,13 +4,14 @@ import (
 	"animar/v1/helper"
 	"database/sql"
 	"fmt"
+	"strconv"
 )
 
 type TBlog struct {
 	ID        int
 	Slug      string
 	Title     string
-	Abstract  string
+	Abstract  *string
 	Content   string
 	UserId    string
 	CreatedAt string
@@ -27,7 +28,7 @@ type TBlogJoinAnimes struct {
 	ID        int
 	Slug      string
 	Title     string
-	Abstract  string
+	Abstract  *string
 	Content   string
 	UserId    string
 	CreatedAt string
@@ -45,26 +46,33 @@ func ListBlog() *sql.Rows {
 	return rows
 }
 
-func DetailBlog(id int) TBlogJoinAnimes {
+// 使ってない Many to many のjoinに失敗
+func ListBlogJoinAnime() *sql.Rows {
+	db := helper.AccessDB()
+	defer db.Close()
+	// fail
+	rows, err := db.Query(
+		"SELECT tbl_blog.*, anime.id FROM tbl_blog " +
+			"LEFT JOIN relation_blog_animes ON tbl_blog.id = relation_blog_animes.blog_id " +
+			"LEFT JOIN anime ON anime.id = relation_blog_animes.anime_id",
+	)
+	if err != nil {
+		panic(err.Error())
+	}
+	return rows
+}
+
+func DetailBlog(id int) TBlog {
 	db := helper.AccessDB()
 	defer db.Close()
 
-	var blog TBlogJoinAnimes
-	/*
-		err := db.QueryRow("SELECT * FROM tbl_blog WHERE id = ?", id).Scan(
-			&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
-			&blog.Content, &blog.UserId, &blog.CreatedAt,
-			&blog.UpdatedAt,
-		)
-	*/
+	var blog TBlog
 	err := db.QueryRow(
 		"SELECT tbl_blog.*, anime.id, anime.slug, anime.title FROM tbl_blog "+
-			"LEFT JOIN relation_blog_animes ON tbl_blog.id = relation_blog_animes.blog_id "+
-			"LEFT JOIN anime ON anime.id = relation_blog_animes.anime_id"+
 			"WHERE id = ?", id,
 	).Scan(
 		&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract, &blog.Content,
-		&blog.CreatedAt, &blog.UserId, &blog.UpdatedAt, &blog.Animes,
+		&blog.CreatedAt, &blog.UserId, &blog.UpdatedAt,
 	)
 
 	switch {
@@ -76,11 +84,11 @@ func DetailBlog(id int) TBlogJoinAnimes {
 	return blog
 }
 
-func DetailBlogBySlug(slug string) TBlog {
+func DetailBlogBySlug(slug string) TBlogJoinAnimes {
 	db := helper.AccessDB()
 	defer db.Close()
 
-	var blog TBlog
+	var blog TBlogJoinAnimes
 	err := db.QueryRow("SELECT * FROM tbl_blog WHERE slug = ?", slug).Scan(
 		&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
 		&blog.Content, &blog.UserId, &blog.CreatedAt,
@@ -145,4 +153,19 @@ func DeleteBlog(id int) int {
 	}
 	rowsAffect, _ := exe.RowsAffected()
 	return int(rowsAffect)
+}
+
+func RelationBlogAnimes(blogId int) *sql.Rows {
+	db := helper.AccessDB()
+	defer db.Close()
+
+	rows, err := db.Query(
+		"SELECT relation_blog_animes.anime_id, anime.slug, anime.title FROM relation_blog_animes " +
+			"LEFT JOIN anime ON anime.id = relation_blog_animes.anime_id " +
+			"WHERE blog_id = " + strconv.Itoa(blogId),
+	)
+	if err != nil {
+		panic(err.Error())
+	}
+	return rows
 }
