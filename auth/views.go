@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"firebase.google.com/go/v4/auth"
 )
 
 type TLoginForm struct {
@@ -39,6 +41,11 @@ type TRefreshReturn struct {
 type TCreateReturn struct {
 	IdToken string `json:"idToken"`
 	Email   string `json:"email"`
+}
+
+type TProfileForm struct {
+	DisplayName string `json:"displayName"`
+	PhotoUrl    string `json:"photoUrl"`
 }
 
 func UserListView(w http.ResponseWriter, r *http.Request) {
@@ -150,6 +157,7 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 	json.NewDecoder(r.Body).Decode(&posted)
 	posted.ReturnSecureToken = true
 	// if not displayName ===> YYYY@XXXX.XX  >> YYYY
+	fmt.Print(posted.DisplayName)
 	if posted.DisplayName == "" {
 		posted.DisplayName = strings.Split(posted.Email, "@")[0]
 	}
@@ -230,11 +238,29 @@ func RenewTokenFCView(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-/*
+// profile 変更
 func UserUpdateView(w http.ResponseWriter, r *http.Request) error {
-params:
+	result := helper.TUserJsonResponse{Status: 200}
+
+	userId := helper.GetIdFromCookie(r)
+	var posted TProfileForm
+	json.NewDecoder(r.Body).Decode(&posted)
+
+	ctx := context.Background()
+	clientAuth := helper.FirebaseClient(ctx)
+	params := (&auth.UserToUpdate{}).
+		DisplayName(posted.DisplayName).
+		PhotoURL(posted.PhotoUrl)
+
+	u, err := clientAuth.UpdateUser(ctx, userId, params)
+	if err != nil {
+		fmt.Print(err)
+	}
+	result.User = *u.UserInfo
+
+	result.ResponseWrite(w)
+	return nil
 }
-*/
 
 // この流れでclaim取得
 // cookie
