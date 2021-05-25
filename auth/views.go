@@ -244,13 +244,30 @@ func UserUpdateView(w http.ResponseWriter, r *http.Request) error {
 
 	userId := helper.GetIdFromCookie(r)
 	var posted TProfileForm
-	json.NewDecoder(r.Body).Decode(&posted)
+
+	r.Body = http.MaxBytesReader(w, r.Body, 20*1024*1024) // 20MB
+	posted.DisplayName = r.FormValue("dname")
+	file, fileHeader, err := r.FormFile("image")
+
+	params := (&auth.UserToUpdate{}).
+		DisplayName(posted.DisplayName)
+
+	if err == nil {
+		defer file.Close()
+
+		returnFileName, err := helper.UploadS3(file, fileHeader.Filename, []string{"auth"})
+		if err != nil {
+			fmt.Print(err)
+		}
+		posted.PhotoUrl = returnFileName
+
+		params = (&auth.UserToUpdate{}).
+			DisplayName(posted.DisplayName).
+			PhotoURL(posted.PhotoUrl)
+	}
 
 	ctx := context.Background()
 	clientAuth := helper.FirebaseClient(ctx)
-	params := (&auth.UserToUpdate{}).
-		DisplayName(posted.DisplayName).
-		PhotoURL(posted.PhotoUrl)
 
 	u, err := clientAuth.UpdateUser(ctx, userId, params)
 	if err != nil {
