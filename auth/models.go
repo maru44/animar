@@ -14,6 +14,7 @@ func GetUserFirebase(ctx context.Context, uid string) *auth.UserInfo {
 	u, err := client.GetUser(ctx, uid)
 	if err != nil {
 		fmt.Println(err.Error(), err)
+		return nil
 	}
 	return u.UserInfo
 }

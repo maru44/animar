@@ -70,15 +70,17 @@ func UserListView(w http.ResponseWriter, r *http.Request) {
 }
 
 // user info from userId
-// url query params(uid)
-func SampleGetUserJsonView(w http.ResponseWriter, r *http.Request) error {
+// url query params(?uid=)
+func GetUserModelView(w http.ResponseWriter, r *http.Request) error {
 	result := helper.TUserJsonResponse{Status: 200}
 	query := r.URL.Query()
 	uid := query.Get("uid")
 	ctx := context.Background()
 
 	user := GetUserFirebase(ctx, uid)
-	result.User = *user
+	if user != nil {
+		result.User = *user
+	}
 
 	result.ResponseWrite(w)
 	return nil

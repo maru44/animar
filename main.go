@@ -42,7 +42,7 @@ func main() {
 	http.HandleFunc("/watch/ua/", helper.Handle(watch.WatchAnimeStateOfUserView))
 
 	/*   auth   */
-	http.HandleFunc("/auth/sample/", helper.Handle(auth.SampleGetUserJsonView)) // ?uid=<UID>
+	http.HandleFunc("/auth/user/", helper.Handle(auth.GetUserModelView)) // ?uid=<UID>
 	http.HandleFunc("/auth/login/post/", helper.Handle(auth.SetJWTCookieView))
 	http.HandleFunc("/auth/refresh/", helper.Handle(auth.RenewTokenFCView))
 	http.HandleFunc("/auth/cookie/", helper.Handle(auth.TestGetCookie))
