@@ -9,12 +9,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type TLoginForm struct {
-	Email             string `json:"email"`
-	Password          string `json:"password"`
-	ReturnSecureToken bool   `json:"returnSecureToken"`
+	Email       string `json:"email"`
+	DisplayName string `json:"displayName"` //
+	Password    string `json:"password"`
+	//PhotoUrl          string `json:"photoUrl"`
+	ReturnSecureToken bool `json:"returnSecureToken"`
 }
 
 type TRegistForm struct {
@@ -146,6 +149,12 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 	var posted TLoginForm
 	json.NewDecoder(r.Body).Decode(&posted)
 	posted.ReturnSecureToken = true
+	// if not displayName ===> YYYY@XXXX.XX  >> YYYY
+	if posted.DisplayName == "" {
+		posted.DisplayName = strings.Split(posted.Email, "@")[0]
+	}
+	// @TODO 後でちゃんとした画像にする
+	// posted.PhotoUrl = fmt.Sprintf("https://%s.s3-%s.amazonaws.com/%s", os.Getenv("BUCKET"), "ap-northeast-1", "auth/ogp.png")
 
 	posted_json, _ := json.Marshal(posted)
 	url := `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=` + os.Getenv("FIREBASE_API_KEY")
@@ -220,6 +229,12 @@ func RenewTokenFCView(w http.ResponseWriter, r *http.Request) error {
 	result.ResponseWrite(w)
 	return nil
 }
+
+/*
+func UserUpdateView(w http.ResponseWriter, r *http.Request) error {
+params:
+}
+*/
 
 // この流れでclaim取得
 // cookie
