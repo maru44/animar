@@ -38,8 +38,9 @@ type TStringJsonResponse struct {
 }
 
 type TUserJsonResponse struct {
-	Status int           `json:"Status"`
-	User   auth.UserInfo `json:"User"`
+	Status     int           `json:"Status"`
+	User       auth.UserInfo `json:"User"`
+	IsVerified bool          `json:"IsVerify"`
 }
 
 type TVoidJsonResponse struct {

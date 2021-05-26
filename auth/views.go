@@ -97,10 +97,22 @@ func GetUserModelFCView(w http.ResponseWriter, r *http.Request) error {
 	switch {
 	case userId == "":
 		result.Status = 4001
-	case claims["email_verified"]:
+		/*
+			// メール未承認入れない場合
+			case claims["email_verified"]:
+				ctx := context.Background()
+				user := GetUserFirebase(ctx, userId)
+				result.User = *user
+		*/
+	case userId != "":
 		ctx := context.Background()
 		user := GetUserFirebase(ctx, userId)
 		result.User = *user
+		if claims["email_verified"] == true {
+			result.IsVerified = true
+		} else {
+			result.IsVerified = false
+		}
 	default:
 		// if emai is not verified
 		result.Status = 4002

@@ -47,6 +47,7 @@ func main() {
 	http.HandleFunc("/auth/refresh/", helper.Handle(auth.RenewTokenFCView))
 	http.HandleFunc("/auth/cookie/", helper.Handle(auth.TestGetCookie))
 	http.HandleFunc("/auth/user/cookie/", helper.Handle(auth.GetUserModelFCView))
+	//http.HandleFunc("/auth/user/cookie/", helper.Handle(auth.GetUserModelFCWithVerifiedView))
 	http.HandleFunc("/auth/register/", helper.Handle(auth.CreateUserFirstView))
 	http.HandleFunc("/auth/profile/update/", helper.Handle(auth.UserUpdateView))
 
