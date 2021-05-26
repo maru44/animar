@@ -16,11 +16,20 @@ type TBlogJoinAnimesResponse struct {
 	Data   []TBlogJoinAnimes `json:"Data"`
 }
 
+type TBlogJoinAnimesUserResponse struct {
+	Status int                   `json:"Status"`
+	Data   []TBlogJoinAnimesUser `json:"Data"`
+}
+
 type TBlogInput struct {
 	Title    string `json:"Title"`
 	Abstract string `json:"Abstract"`
 	Content  string `json:"Content"`
 }
+
+// @TODO
+// retrieve(list)とretrieve(detail)で型を分けて
+// select して最適化
 
 func (result TBlogResponse) ResponseWrite(w http.ResponseWriter) bool {
 	res, err := json.Marshal(result)
@@ -46,6 +55,18 @@ func (result TBlogJoinAnimesResponse) ResponseWrite(w http.ResponseWriter) bool 
 	return true
 }
 
+func (result TBlogJoinAnimesUserResponse) ResponseWrite(w http.ResponseWriter) bool {
+	res, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return false
+	}
+	helper.SetDefaultResponseHeader(w)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+	return true
+}
+
 func ListBlogView(w http.ResponseWriter, r *http.Request) error {
 	result := TBlogResponse{Status: 200}
 
@@ -57,22 +78,21 @@ func ListBlogView(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-// list or detail(?s=)
 func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
-	result := TBlogJoinAnimesResponse{Status: 200}
+	result := TBlogJoinAnimesUserResponse{Status: 200}
 
 	query := r.URL.Query()
 	slug := query.Get("s")
 
-	var blogs []TBlogJoinAnimes
+	var blogs []TBlogJoinAnimesUser
 	if slug != "" {
-		blog := DetailBlogJoinAnimeDomain(slug)
+		blog := DetailBlogJoinAnimeUserDomain(slug)
 		if blog.ID == 0 {
 			result.Status = 404
 		}
 		blogs = append(blogs, blog)
 	} else {
-		blogs = ListBlogJoinAnimeDomain()
+		blogs = ListBlogJoinAnimeUserDomain()
 	}
 
 	result.Data = blogs

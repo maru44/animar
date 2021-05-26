@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"strconv"
+
+	"firebase.google.com/go/v4/auth"
 )
 
 type TBlog struct {
@@ -42,6 +44,19 @@ type TBlogJoinAnimes struct {
 	CreatedAt string
 	UpdatedAt string
 	Animes    []TJoinedAnime
+}
+
+type TBlogJoinAnimesUser struct {
+	ID        int
+	Slug      string
+	Title     string
+	Abstract  *string
+	Content   string
+	UserId    string
+	CreatedAt string
+	UpdatedAt string
+	Animes    []TJoinedAnime
+	User      *auth.UserInfo
 }
 
 func ListBlog() *sql.Rows {
@@ -97,6 +112,26 @@ func DetailBlogBySlug(slug string) TBlogJoinAnimes {
 	defer db.Close()
 
 	var blog TBlogJoinAnimes
+	err := db.QueryRow("SELECT * FROM tbl_blog WHERE slug = ?", slug).Scan(
+		&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
+		&blog.Content, &blog.UserId, &blog.CreatedAt,
+		&blog.UpdatedAt,
+	)
+
+	switch {
+	case err == sql.ErrNoRows:
+		blog.ID = 0
+	case err != nil:
+		panic(err.Error())
+	}
+	return blog
+}
+
+func DetailBlogWithUserBySlug(slug string) TBlogJoinAnimesUser {
+	db := helper.AccessDB()
+	defer db.Close()
+
+	var blog TBlogJoinAnimesUser
 	err := db.QueryRow("SELECT * FROM tbl_blog WHERE slug = ?", slug).Scan(
 		&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
 		&blog.Content, &blog.UserId, &blog.CreatedAt,

@@ -159,7 +159,6 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 	json.NewDecoder(r.Body).Decode(&posted)
 	posted.ReturnSecureToken = true
 	// if not displayName ===> YYYY@XXXX.XX  >> YYYY
-	fmt.Print(posted.DisplayName)
 	if posted.DisplayName == "" {
 		posted.DisplayName = strings.Split(posted.Email, "@")[0]
 	}
@@ -186,6 +185,11 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 
 	var d TCreateReturn
 	err = json.Unmarshal(body, &d)
+	if err != nil {
+		result.Status = 400
+		return nil
+	}
+	helper.SetCookiePackage(w, "idToken", d.IdToken)
 
 	ctx := context.Background()
 	clientAuth := helper.FirebaseClient(ctx)

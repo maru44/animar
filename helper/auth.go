@@ -49,6 +49,8 @@ func GetClaimsFromCookie(r *http.Request) map[string]interface{} {
 	return claims
 }
 
+// post や update deleteは
+// これがblankであれば問答無用で400
 func GetIdFromCookie(r *http.Request) string {
 	idToken, err := r.Cookie("idToken")
 	if err != nil {
