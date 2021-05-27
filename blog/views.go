@@ -83,6 +83,7 @@ func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
 
 	query := r.URL.Query()
 	slug := query.Get("s")
+	uid := query.Get("u")
 
 	var blogs []TBlogJoinAnimesUser
 	if slug != "" {
@@ -91,6 +92,8 @@ func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
 			result.Status = 404
 		}
 		blogs = append(blogs, blog)
+	} else if uid != "" {
+		blogs = ListBlogByUserJoinAnimeUserDomain(uid)
 	} else {
 		blogs = ListBlogJoinAnimeUserDomain()
 	}

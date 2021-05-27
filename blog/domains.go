@@ -74,6 +74,32 @@ func ListBlogJoinAnimeUserDomain() []TBlogJoinAnimesUser {
 	return blogs
 }
 
+func ListBlogByUserJoinAnimeUserDomain(uid string) []TBlogJoinAnimesUser {
+	ctx := context.Background()
+	rows := ListUsersBlog(uid)
+	var blogs []TBlogJoinAnimesUser
+	for rows.Next() {
+		var blog TBlogJoinAnimesUser
+		err := rows.Scan(
+			&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
+			&blog.Content, &blog.UserId, &blog.CreatedAt, &blog.UpdatedAt,
+		)
+
+		blogID := blog.ID
+		blog.Animes = RelationBlogAnimesDomain(blogID)
+
+		user := auth.GetUserFirebase(ctx, blog.UserId)
+		blog.User = user
+
+		if err != nil {
+			fmt.Print(err)
+		}
+		blogs = append(blogs, blog)
+	}
+	defer rows.Close()
+	return blogs
+}
+
 func DetailBlogJoinAnimeDomain(slug string) TBlogJoinAnimes {
 	blog := DetailBlogBySlug(slug)
 	fmt.Print(blog)

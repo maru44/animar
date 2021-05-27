@@ -69,6 +69,16 @@ func ListBlog() *sql.Rows {
 	return rows
 }
 
+func ListUsersBlog(uid string) *sql.Rows {
+	db := helper.AccessDB()
+	defer db.Close()
+	rows, err := db.Query("SELECT * from tbl_blog where user_id = ?", uid)
+	if err != nil {
+		panic(err.Error())
+	}
+	return rows
+}
+
 // 使ってない Many to many のjoinに失敗
 func ListBlogJoinAnime() *sql.Rows {
 	db := helper.AccessDB()
