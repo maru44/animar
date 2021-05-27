@@ -26,7 +26,25 @@ func ListAnimeMinimumDomain() []TAnimeMinimum {
 	for rows.Next() {
 		var ani TAnimeMinimum
 		err := rows.Scan(
-			&ani.ID, &ani.Title,
+			&ani.ID, &ani.Slug, &ani.Title,
+		)
+		if err != nil {
+			panic(err.Error())
+		}
+		animes = append(animes, ani)
+	}
+
+	defer rows.Close()
+	return animes
+}
+
+func ListAnimeMinimumDomainByTitle(title string) []TAnimeMinimum {
+	rows := SearchAnime(title)
+	var animes []TAnimeMinimum
+	for rows.Next() {
+		var ani TAnimeMinimum
+		err := rows.Scan(
+			&ani.ID, &ani.Slug, &ani.Title,
 		)
 		if err != nil {
 			panic(err.Error())

@@ -167,3 +167,16 @@ func ListAnimeMinimumView(w http.ResponseWriter, r *http.Request) error {
 	result.ResponseWrite(w)
 	return nil
 }
+
+func SearchAnimeView(w http.ResponseWriter, r *http.Request) error {
+	result := TAnimeMinimumResponse{Status: 200}
+	var animes []TAnimeMinimum
+
+	query := r.URL.Query()
+	title := query.Get("t")
+
+	animes = ListAnimeMinimumDomainByTitle(title)
+	result.Data = animes
+	result.ResponseWrite(w)
+	return nil
+}
