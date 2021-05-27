@@ -17,12 +17,23 @@ func ListAnimeDomain() []TAnime {
 	}
 
 	defer rows.Close()
-
 	return animes
 }
 
-/*
-func ListAnimeWithUserWatchDomain() []TAnimeWithUserWatch {
-	rows := ListAnime()
+func ListAnimeMinimumDomain() []TAnimeMinimum {
+	rows := ListAnimeMinimum()
+	var animes []TAnimeMinimum
+	for rows.Next() {
+		var ani TAnimeMinimum
+		err := rows.Scan(
+			&ani.ID, &ani.Title,
+		)
+		if err != nil {
+			panic(err.Error())
+		}
+		animes = append(animes, ani)
+	}
+
+	defer rows.Close()
+	return animes
 }
-*/

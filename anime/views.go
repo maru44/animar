@@ -28,6 +28,11 @@ type TAnimeInput struct {
 	Stories     int    `jsoin:"Stories"`
 }
 
+type TAnimeMinimumResponse struct {
+	Status int             `json:"Status"`
+	Data   []TAnimeMinimum `json:"Data"`
+}
+
 func (animeJson TAnimesJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 	res, err := json.Marshal(animeJson)
 
@@ -50,6 +55,18 @@ func (animeWUWCJson TAnimesWithUserWatchResponse) ResponseWrite(w http.ResponseW
 		return false
 	}
 
+	helper.SetDefaultResponseHeader(w)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+	return true
+}
+
+func (result TAnimeMinimumResponse) ResponseWrite(w http.ResponseWriter) bool {
+	res, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return false
+	}
 	helper.SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
@@ -137,5 +154,16 @@ func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 	result.Num = insertedId
 	result.ResponseWrite(w)
 
+	return nil
+}
+
+func ListAnimeMinimumView(w http.ResponseWriter, r *http.Request) error {
+	result := TAnimeMinimumResponse{Status: 200}
+	var animes []TAnimeMinimum
+
+	animes = ListAnimeMinimumDomain()
+
+	result.Data = animes
+	result.ResponseWrite(w)
 	return nil
 }

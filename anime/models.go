@@ -42,10 +42,36 @@ type TAnimeWithUserWatchReview struct {
 	ReviewContent string
 }
 
+type TAnimeMinimum struct {
+	ID    int
+	Title string
+}
+
 func ListAnime() *sql.Rows {
 	db := helper.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select * from anime")
+	if err != nil {
+		panic(err.Error())
+	}
+	return rows
+}
+
+func ListAnimeMinimum() *sql.Rows {
+	db := helper.AccessDB()
+	defer db.Close()
+	rows, err := db.Query("SELECT id, title from anime")
+	if err != nil {
+		panic(err.Error())
+	}
+	return rows
+}
+
+// タイトル検索
+func SearchAnime(title string) *sql.Rows {
+	db := helper.AccessDB()
+	defer db.Close()
+	rows, err := db.Query("SELECT id, slug, title from anime where title like '%?%'", title)
 	if err != nil {
 		panic(err.Error())
 	}
