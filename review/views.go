@@ -19,6 +19,11 @@ type TReviewsJsonResponse struct {
 	Data   []TReview `json:"Data"`
 }
 
+type TReviewsWithUserInfoResponse struct {
+	Status int               `json:"Status"`
+	Data   []TReviewJoinUser `json:"Data"`
+}
+
 type TReviewInput struct {
 	AnimeId int    `json:"AnimeId"`
 	Content string `json:"Content"`
@@ -44,6 +49,18 @@ func (result TReviewsJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 }
 
 func (result TReviewJoinAnimeResponse) ResponseWrite(w http.ResponseWriter) bool {
+	res, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return false
+	}
+	helper.SetDefaultResponseHeader(w)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+	return true
+}
+
+func (result TReviewsWithUserInfoResponse) ResponseWrite(w http.ResponseWriter) bool {
 	res, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -94,6 +111,20 @@ func GetAnimeReviews(w http.ResponseWriter, r *http.Request) error {
 
 	var revs []TReview
 	revs = AnimeReviewsDomain(animeId, userId)
+
+	result.Data = revs
+	result.ResponseWrite(w)
+	return nil
+}
+
+func GetAnimeReviewsWithUserInfoView(w http.ResponseWriter, r *http.Request) error {
+	result := TReviewsWithUserInfoResponse{Status: 200}
+	animeIdStr := r.URL.Query().Get("anime")
+	animeId, _ := strconv.Atoi(animeIdStr)
+	userId := helper.GetIdFromCookie(r)
+
+	var revs []TReviewJoinUser
+	revs = AnimeReviewsWithUserInfoDomain(animeId, userId)
 
 	result.Data = revs
 	result.ResponseWrite(w)

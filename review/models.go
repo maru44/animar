@@ -4,6 +4,8 @@ import (
 	"animar/v1/helper"
 	"database/sql"
 	"fmt"
+
+	"firebase.google.com/go/v4/auth"
 )
 
 // nullableはpointerにしてnilを受け取れるようにする
@@ -29,6 +31,17 @@ type TReviewJoinAnime struct {
 	Slug         string
 	AnimeContent *string
 	OnAirState   *int
+}
+
+type TReviewJoinUser struct {
+	ID        int
+	Content   *string
+	Star      *int
+	AnimeId   int
+	UserId    *string
+	CreatedAt string
+	UpdatedAt string
+	User      *auth.UserInfo
 }
 
 // all
