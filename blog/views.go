@@ -27,6 +27,13 @@ type TBlogInput struct {
 	Content  string `json:"Content"`
 }
 
+type TBlogInputWithResponse struct {
+	Title    string `json:"Title"`
+	Abstract string `json:"Abstract"`
+	Content  string `json:"Content"`
+	AnimeIds []int  `json:"anime_ids"`
+}
+
 // @TODO
 // retrieve(list)とretrieve(detail)で型を分けて
 // select して最適化
@@ -114,6 +121,26 @@ func InsertBlogView(w http.ResponseWriter, r *http.Request) error {
 		json.NewDecoder(r.Body).Decode(&posted)
 		value := InsertBlog(posted.Title, posted.Abstract, posted.Content, userId)
 		result.Num = value
+	}
+	result.ResponseWrite(w)
+	return nil
+}
+
+func InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
+	result := helper.TIntJsonReponse{Status: 200}
+	userId := helper.GetIdFromCookie(r)
+
+	if userId == "" {
+		result.Status = 4001
+	} else {
+		var posted TBlogInputWithResponse
+		json.NewDecoder(r.Body).Decode(&posted)
+		value := InsertBlog(posted.Title, posted.Abstract, posted.Content, userId)
+		result.Num = value
+
+		for _, animeId := range posted.AnimeIds {
+			InsertRelationAnimeBlog(animeId, value)
+		}
 	}
 	result.ResponseWrite(w)
 	return nil

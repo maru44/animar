@@ -240,3 +240,21 @@ func RelationBlogByAnime(animeId int) *sql.Rows {
 	}
 	return rows
 }
+
+func InsertRelationAnimeBlog(animeId int, blogId int) bool {
+	db := helper.AccessDB()
+	defer db.Close()
+	stmtInsert, err := db.Prepare(
+		"INSERT INTO relation_blog_animes(anime_id, blog_id) " +
+			"VALUES(?, ?)",
+	)
+	defer stmtInsert.Close()
+
+	_, err = stmtInsert.Exec(
+		animeId, blogId,
+	)
+	if err != nil {
+		return false
+	}
+	return true
+}
