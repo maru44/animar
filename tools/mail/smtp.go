@@ -1,16 +1,10 @@
-package helper
+package tools
 
 import (
 	"fmt"
 	"net/smtp"
 	"os"
 )
-
-// cannot use
-// var hostUser = os.Getenv("EMAIL_HOST_USER")
-// var hostPass = os.Getenv("EMAIL_HOST_PASS")
-// var host = os.Getenv("EMAIL_HOST")
-// var port = os.Getenv("EMAIL_PORT")
 
 func BaseSendMail(subject string, message string, to string) error {
 	smtpAuth := smtp.PlainAuth(
