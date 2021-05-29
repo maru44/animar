@@ -25,8 +25,8 @@ func main() {
 	/*   blogs   */
 	//http.HandleFunc("/blog/", helper.Handle(blog.ListBlogView))
 	http.HandleFunc("/blog/", helper.Handle(blog.BlogJoinAnimeView))
-	//http.HandleFunc("/blog/", )
-	http.HandleFunc("/blog/post/", helper.Handle(blog.InsertBlogView))
+	//http.HandleFunc("/blog/post/", helper.Handle(blog.InsertBlogView))
+	http.HandleFunc("/blog/post/", helper.Handle(blog.InsertBlogWithRelationView))
 
 	/*   reviews   */
 	http.HandleFunc("/reviews/", helper.Handle(review.GetYourReviews))
