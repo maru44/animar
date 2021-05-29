@@ -1,4 +1,4 @@
-package helper
+package tools
 
 func IsContainString(s []string, e string) bool {
 	for _, v := range s {

@@ -1,4 +1,4 @@
-package helper
+package tools
 
 import (
 	"context"
@@ -15,7 +15,7 @@ func CloudStorageSession() *firebase.App {
 	config := &firebase.Config{
 		StorageBucket: os.Getenv("FIREBASE_STORAGE"),
 	}
-	opt := option.WithCredentialsFile("secret_key.json")
+	opt := option.WithCredentialsFile("../../configs/secret_key.json")
 	app, err := firebase.NewApp(context.Background(), config, opt)
 	if err != nil {
 		fmt.Print(err)

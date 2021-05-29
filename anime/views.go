@@ -1,7 +1,7 @@
 package anime
 
 import (
-	"animar/v1/helper"
+	"animar/v1/tools"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -41,7 +41,7 @@ func (animeJson TAnimesJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 		return false
 	}
 
-	helper.SetDefaultResponseHeader(w)
+	tools.SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 	return true
@@ -55,7 +55,7 @@ func (animeWUWCJson TAnimesWithUserWatchResponse) ResponseWrite(w http.ResponseW
 		return false
 	}
 
-	helper.SetDefaultResponseHeader(w)
+	tools.SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 	return true
@@ -67,7 +67,7 @@ func (result TAnimeMinimumResponse) ResponseWrite(w http.ResponseWriter) bool {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false
 	}
-	helper.SetDefaultResponseHeader(w)
+	tools.SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 	return true
@@ -113,7 +113,7 @@ func AnimeWithUserWatchView(w http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query()
 	strId := query.Get("id")
 	slug := query.Get("slug")
-	userId := helper.GetIdFromCookie(r)
+	userId := tools.GetIdFromCookie(r)
 
 	var animes []TAnimeWithUserWatchReview
 	if strId != "" {
@@ -142,7 +142,7 @@ func AnimeWithUserWatchView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func AnimePostView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TIntJsonReponse{Status: 200}
+	result := tools.TIntJsonReponse{Status: 200}
 
 	var posted TAnimeInput
 	json.NewDecoder(r.Body).Decode(&posted)

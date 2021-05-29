@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"animar/v1/helper"
+	"animar/v1/tools"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -70,12 +70,12 @@ func SendVerifyEmailAtRegister(ctx context.Context, client *auth.Client, email s
 		fmt.Print(err.Error())
 	}
 
-	sended := helper.SendVerifyEmail(email, link)
+	sended := tools.SendVerifyEmail(email, link)
 	return sended
 }
 
 func SetAdminClaimExe(ctx context.Context, client *auth.Client, idToken *string) {
-	userId := helper.GetUserIdFromToken(*idToken)
+	userId := tools.GetUserIdFromToken(*idToken)
 	fmt.Print(userId)
 	SetAdminClaim(ctx, client, userId)
 }

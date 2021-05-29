@@ -1,7 +1,7 @@
 package watch
 
 import (
-	"animar/v1/helper"
+	"animar/v1/tools"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -29,7 +29,7 @@ func (result TWatchCountJsonResponse) ResponseWrite(w http.ResponseWriter) bool 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false
 	}
-	helper.SetDefaultResponseHeader(w)
+	tools.SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 	return true
@@ -41,7 +41,7 @@ func (result TUserWatchJoinResponse) ResponseWrite(w http.ResponseWriter) bool {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false
 	}
-	helper.SetDefaultResponseHeader(w)
+	tools.SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 	return true
@@ -78,12 +78,12 @@ func UserWatchStatusView(w http.ResponseWriter, r *http.Request) error {
 // anime by ?anime=
 // user by cookie
 func WatchAnimeStateOfUserView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TIntJsonReponse{Status: 200}
+	result := tools.TIntJsonReponse{Status: 200}
 
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
-	userId := helper.GetIdFromCookie(r)
+	userId := tools.GetIdFromCookie(r)
 	if userId == "" {
 		result.Status = 4001
 	} else {
@@ -97,8 +97,8 @@ func WatchAnimeStateOfUserView(w http.ResponseWriter, r *http.Request) error {
 
 // watch post view
 func WatchPostView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TIntJsonReponse{Status: 200}
-	userId := helper.GetIdFromCookie(r)
+	result := tools.TIntJsonReponse{Status: 200}
+	userId := tools.GetIdFromCookie(r)
 	if userId == "" {
 		result.Status = 4001
 		result.ResponseWrite(w)
@@ -118,8 +118,8 @@ func WatchPostView(w http.ResponseWriter, r *http.Request) error {
 // watch delete view
 // ?anime=
 func WatchDeleteView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TVoidJsonResponse{Status: 200}
-	userId := helper.GetIdFromCookie(r)
+	result := tools.TVoidJsonResponse{Status: 200}
+	userId := tools.GetIdFromCookie(r)
 	if userId == "" {
 		result.Status = 5000
 		result.ResponseWrite(w)

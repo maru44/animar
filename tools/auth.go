@@ -1,4 +1,4 @@
-package helper
+package tools
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 )
 
 func FirebaseApp(ctx context.Context) *firebase.App {
-	opt := option.WithCredentialsFile("secret_key.json")
+	opt := option.WithCredentialsFile("../../configs/secret_key.json")
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {
 		log.Panic(err.Error())

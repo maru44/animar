@@ -1,7 +1,7 @@
 package anime
 
 import (
-	"animar/v1/helper"
+	"animar/v1/tools"
 	"database/sql"
 	"fmt"
 
@@ -49,7 +49,7 @@ type TAnimeMinimum struct {
 }
 
 func ListAnime() *sql.Rows {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select * from anime")
 	if err != nil {
@@ -59,7 +59,7 @@ func ListAnime() *sql.Rows {
 }
 
 func ListAnimeMinimum() *sql.Rows {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("SELECT id, slug, title from anime")
 	if err != nil {
@@ -70,7 +70,7 @@ func ListAnimeMinimum() *sql.Rows {
 
 // タイトル検索
 func SearchAnime(title string) *sql.Rows {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("SELECT id, slug, title from anime where title like ?", "%"+title+"%")
 	if err != nil {
@@ -80,7 +80,7 @@ func SearchAnime(title string) *sql.Rows {
 }
 
 func DetailAnime(id int) TAnime {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 
 	var ani TAnime
@@ -100,7 +100,7 @@ func DetailAnime(id int) TAnime {
 }
 
 func DetailAnimeBySlug(slug string) TAnime {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 
 	var ani TAnime
@@ -121,7 +121,7 @@ func DetailAnimeBySlug(slug string) TAnime {
 
 // not be used to
 func DetailAnimeBySlugWithUserWatchReview(slug string, userId string) TAnimeWithUserWatchReview {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 
 	var ani TAnimeWithUserWatchReview
@@ -143,7 +143,7 @@ func DetailAnimeBySlugWithUserWatchReview(slug string, userId string) TAnimeWith
 }
 
 func InsertAnime(title string, abbrevation string, content string, onAirState int, seriesId int, season string, stories int, thumb_url string) int {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 
 	stmtInsert, err := db.Prepare(
@@ -152,12 +152,12 @@ func InsertAnime(title string, abbrevation string, content string, onAirState in
 	)
 	defer stmtInsert.Close()
 
-	slug := helper.GenRandSlug(12)
+	slug := tools.GenRandSlug(12)
 	exe, err := stmtInsert.Exec(
-		title, slug, helper.NewNullString(abbrevation).String,
-		helper.NewNullString(thumb_url).String, helper.NewNullString(content).String,
-		helper.NewNullInt(onAirState).Int, helper.NewNullInt(seriesId).Int,
-		helper.NewNullString(season).String, helper.NewNullInt(stories).Int,
+		title, slug, tools.NewNullString(abbrevation).String,
+		tools.NewNullString(thumb_url).String, tools.NewNullString(content).String,
+		tools.NewNullInt(onAirState).Int, tools.NewNullInt(seriesId).Int,
+		tools.NewNullString(season).String, tools.NewNullInt(stories).Int,
 	)
 
 	insertedId, err := exe.LastInsertId()
@@ -171,14 +171,14 @@ func InsertAnime(title string, abbrevation string, content string, onAirState in
 
 // @TODO insertにしたがってcolumn追加
 func UpdateAnime(slug string, abbrevation string, title string, content string, onAirState int, seriesId int, season string, stories int) int {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 
 	exe, err := db.Exec(
 		"UPDATE anime SET title = ?, abbrevation = ?, content = ?, on_air_state = ?, series_id = ?, season = ?, stories = ? WHERE slug = ?",
-		title, helper.NewNullString(abbrevation).String, helper.NewNullString(content).String,
-		helper.NewNullInt(onAirState).Int, helper.NewNullInt(seriesId).Int,
-		helper.NewNullString(season).String, helper.NewNullInt(stories).Int, slug,
+		title, tools.NewNullString(abbrevation).String, tools.NewNullString(content).String,
+		tools.NewNullInt(onAirState).Int, tools.NewNullInt(seriesId).Int,
+		tools.NewNullString(season).String, tools.NewNullInt(stories).Int, slug,
 	)
 	if err != nil {
 		panic(err.Error())
@@ -188,7 +188,7 @@ func UpdateAnime(slug string, abbrevation string, title string, content string, 
 }
 
 func DeleteAnime(id int) int {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 
 	exe, err := db.Exec("DELETE FROM anime WHERE id = ?", id)

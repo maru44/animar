@@ -1,7 +1,7 @@
 package blog
 
 import (
-	"animar/v1/helper"
+	"animar/v1/tools"
 	"database/sql"
 	"fmt"
 	"strconv"
@@ -60,7 +60,7 @@ type TBlogJoinAnimesUser struct {
 }
 
 func ListBlog() *sql.Rows {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select * from tbl_blog")
 	if err != nil {
@@ -70,7 +70,7 @@ func ListBlog() *sql.Rows {
 }
 
 func ListUsersBlog(uid string) *sql.Rows {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("SELECT * from tbl_blog where user_id = ?", uid)
 	if err != nil {
@@ -81,7 +81,7 @@ func ListUsersBlog(uid string) *sql.Rows {
 
 // 使ってない Many to many のjoinに失敗
 func ListBlogJoinAnime() *sql.Rows {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 	// fail
 	rows, err := db.Query(
@@ -96,7 +96,7 @@ func ListBlogJoinAnime() *sql.Rows {
 }
 
 func DetailBlog(id int) TBlog {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 
 	var blog TBlog
@@ -118,7 +118,7 @@ func DetailBlog(id int) TBlog {
 }
 
 func DetailBlogBySlug(slug string) TBlogJoinAnimes {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 
 	var blog TBlogJoinAnimes
@@ -138,7 +138,7 @@ func DetailBlogBySlug(slug string) TBlogJoinAnimes {
 }
 
 func DetailBlogWithUserBySlug(slug string) TBlogJoinAnimesUser {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 
 	var blog TBlogJoinAnimesUser
@@ -158,7 +158,7 @@ func DetailBlogWithUserBySlug(slug string) TBlogJoinAnimesUser {
 }
 
 func InsertBlog(title string, abstract string, content string, userId string) int {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 
 	stmtInsert, err := db.Prepare(
@@ -167,9 +167,9 @@ func InsertBlog(title string, abstract string, content string, userId string) in
 	)
 	defer stmtInsert.Close()
 
-	slug := helper.GenRandSlug(8)
+	slug := tools.GenRandSlug(8)
 	exe, err := stmtInsert.Exec(
-		slug, title, helper.NewNullString(abstract).String,
+		slug, title, tools.NewNullString(abstract).String,
 		content, userId,
 	)
 
@@ -182,12 +182,12 @@ func InsertBlog(title string, abstract string, content string, userId string) in
 
 // validation by userId @domain or view
 func UpdateBlog(id int, title string, abstract string, content string) int {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 
 	exe, err := db.Exec(
 		"UPDATE tbl_blog SET title = ?, abstract = ?, content = ? WHERE id = ?",
-		title, helper.NewNullString(abstract).String, content, id,
+		title, tools.NewNullString(abstract).String, content, id,
 	)
 	if err != nil {
 		fmt.Print(err)
@@ -197,7 +197,7 @@ func UpdateBlog(id int, title string, abstract string, content string) int {
 }
 
 func DeleteBlog(id int) int {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 
 	exe, err := db.Exec("DELETE FROM tbl_blog WHERE id = ?")
@@ -210,7 +210,7 @@ func DeleteBlog(id int) int {
 
 // animes of blog
 func RelationAnimeByBlog(blogId int) *sql.Rows {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 
 	rows, err := db.Query(
@@ -226,7 +226,7 @@ func RelationAnimeByBlog(blogId int) *sql.Rows {
 
 // blogs by anime
 func RelationBlogByAnime(animeId int) *sql.Rows {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 
 	rows, err := db.Query(
@@ -242,7 +242,7 @@ func RelationBlogByAnime(animeId int) *sql.Rows {
 }
 
 func InsertRelationAnimeBlog(animeId int, blogId int) bool {
-	db := helper.AccessDB()
+	db := tools.AccessDB()
 	defer db.Close()
 	stmtInsert, err := db.Prepare(
 		"INSERT INTO relation_blog_animes(anime_id, blog_id) " +

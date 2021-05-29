@@ -1,7 +1,7 @@
 package review
 
 import (
-	"animar/v1/helper"
+	"animar/v1/tools"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -42,7 +42,7 @@ func (result TReviewsJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false
 	}
-	helper.SetDefaultResponseHeader(w)
+	tools.SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 	return true
@@ -54,7 +54,7 @@ func (result TReviewJoinAnimeResponse) ResponseWrite(w http.ResponseWriter) bool
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false
 	}
-	helper.SetDefaultResponseHeader(w)
+	tools.SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 	return true
@@ -66,7 +66,7 @@ func (result TReviewsWithUserInfoResponse) ResponseWrite(w http.ResponseWriter) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false
 	}
-	helper.SetDefaultResponseHeader(w)
+	tools.SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 	return true
@@ -76,7 +76,7 @@ func (result TReviewsWithUserInfoResponse) ResponseWrite(w http.ResponseWriter) 
 func GetYourReviews(w http.ResponseWriter, r *http.Request) error {
 	result := TReviewsJsonResponse{Status: 200}
 
-	userId := helper.GetIdFromCookie(r)
+	userId := tools.GetIdFromCookie(r)
 	if userId == "" {
 		result.Status = 5000
 		result.ResponseWrite(w)
@@ -107,7 +107,7 @@ func GetAnimeReviews(w http.ResponseWriter, r *http.Request) error {
 	result := TReviewsJsonResponse{Status: 200}
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
-	userId := helper.GetIdFromCookie(r)
+	userId := tools.GetIdFromCookie(r)
 
 	var revs []TReview
 	revs = AnimeReviewsDomain(animeId, userId)
@@ -121,7 +121,7 @@ func GetAnimeReviewsWithUserInfoView(w http.ResponseWriter, r *http.Request) err
 	result := TReviewsWithUserInfoResponse{Status: 200}
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
-	userId := helper.GetIdFromCookie(r)
+	userId := tools.GetIdFromCookie(r)
 
 	var revs []TReviewJoinUser
 	revs = AnimeReviewsWithUserInfoDomain(animeId, userId)
@@ -138,7 +138,7 @@ func GetAnimeUserReviewView(w http.ResponseWriter, r *http.Request) error {
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
-	userId := helper.GetIdFromCookie(r)
+	userId := tools.GetIdFromCookie(r)
 	if userId == "" {
 		result.Status = 4001
 	} else {
@@ -153,8 +153,8 @@ func GetAnimeUserReviewView(w http.ResponseWriter, r *http.Request) error {
 
 // upsert star
 func UpsertReviewStarView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TIntJsonReponse{Status: 200}
-	userId := helper.GetIdFromCookie(r)
+	result := tools.TIntJsonReponse{Status: 200}
+	userId := tools.GetIdFromCookie(r)
 
 	if userId == "" {
 		result.Status = 4001
@@ -170,8 +170,8 @@ func UpsertReviewStarView(w http.ResponseWriter, r *http.Request) error {
 
 //upsert content
 func UpsertReviewContentView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TStringJsonResponse{Status: 200}
-	userId := helper.GetIdFromCookie(r)
+	result := tools.TStringJsonResponse{Status: 200}
+	userId := tools.GetIdFromCookie(r)
 
 	if userId == "" {
 		result.Status = 4001
@@ -181,6 +181,18 @@ func UpsertReviewContentView(w http.ResponseWriter, r *http.Request) error {
 		upsertedString := UpsertReviewContent(posted.AnimeId, posted.Content, userId)
 		result.String = upsertedString
 	}
+	result.ResponseWrite(w)
+	return nil
+}
+
+// anime star avarage view
+func AnimeStarAvgView(w http.ResponseWriter, r *http.Request) error {
+	result := tools.TStringJsonResponse{Status: 200}
+	animeIdStr := r.URL.Query().Get("anime")
+	animeId, _ := strconv.Atoi(animeIdStr)
+
+	avg := AnimeStarAvg(animeId)
+	result.String = avg
 	result.ResponseWrite(w)
 	return nil
 }

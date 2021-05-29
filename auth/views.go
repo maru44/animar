@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"animar/v1/helper"
+	"animar/v1/tools"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -72,7 +72,7 @@ func UserListView(w http.ResponseWriter, r *http.Request) {
 // user info from userId
 // url query params(?uid=)
 func GetUserModelView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TUserJsonResponse{Status: 200}
+	result := tools.TUserJsonResponse{Status: 200}
 	query := r.URL.Query()
 	uid := query.Get("uid")
 	ctx := context.Background()
@@ -89,9 +89,9 @@ func GetUserModelView(w http.ResponseWriter, r *http.Request) error {
 // user info from userId
 // from cookie
 func GetUserModelFCView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TUserJsonResponse{Status: 200}
-	userId := helper.GetIdFromCookie(r)
-	claims := helper.GetClaimsFromCookie(r)
+	result := tools.TUserJsonResponse{Status: 200}
+	userId := tools.GetIdFromCookie(r)
+	claims := tools.GetClaimsFromCookie(r)
 	// tokenがキレてたらblankが帰ってくる
 
 	switch {
@@ -125,7 +125,7 @@ func GetUserModelFCView(w http.ResponseWriter, r *http.Request) error {
 // login処理
 // cookie
 func SetJWTCookieView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TVoidJsonResponse{Status: 200}
+	result := tools.TVoidJsonResponse{Status: 200}
 
 	var posted TLoginForm
 	json.NewDecoder(r.Body).Decode(&posted)
@@ -154,8 +154,8 @@ func SetJWTCookieView(w http.ResponseWriter, r *http.Request) error {
 
 	// email か password が間違っていれば blankが帰ってくる
 	if tokens.IdToken != "" {
-		helper.SetCookiePackage(w, "idToken", tokens.IdToken)
-		helper.SetCookiePackage(w, "refreshToken", tokens.RefreshToken)
+		tools.SetCookiePackage(w, "idToken", tokens.IdToken)
+		tools.SetCookiePackage(w, "refreshToken", tokens.RefreshToken)
 	} else {
 		result.Status = 401
 	}
@@ -165,7 +165,7 @@ func SetJWTCookieView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TVoidJsonResponse{Status: 200}
+	result := tools.TVoidJsonResponse{Status: 200}
 
 	var posted TLoginForm
 	json.NewDecoder(r.Body).Decode(&posted)
@@ -201,10 +201,10 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 		result.Status = 400
 		return nil
 	}
-	helper.SetCookiePackage(w, "idToken", d.IdToken)
+	tools.SetCookiePackage(w, "idToken", d.IdToken)
 
 	ctx := context.Background()
-	clientAuth := helper.FirebaseClient(ctx)
+	clientAuth := tools.FirebaseClient(ctx)
 
 	// idToken := &d.IdToken
 	// defer SetAdminClaim(ctx, clientAuth, *idToken) // set is_admin false
@@ -217,7 +217,7 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 // refresh idToken
 // cookie
 func RenewTokenFCView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TVoidJsonResponse{Status: 200}
+	result := tools.TVoidJsonResponse{Status: 200}
 
 	// get refresh token from cookie
 	refreshToken, _ := r.Cookie("refreshToken")
@@ -246,8 +246,8 @@ func RenewTokenFCView(w http.ResponseWriter, r *http.Request) error {
 	err = json.Unmarshal(body, &tokens)
 
 	if tokens.IdToken != "" {
-		helper.DestroyCookie(w, "idToken") // destroy cookie
-		helper.SetCookiePackage(w, "idToken", tokens.IdToken)
+		tools.DestroyCookie(w, "idToken") // destroy cookie
+		tools.SetCookiePackage(w, "idToken", tokens.IdToken)
 	} else {
 		result.Status = 401
 	}
@@ -258,9 +258,9 @@ func RenewTokenFCView(w http.ResponseWriter, r *http.Request) error {
 
 // profile 変更
 func UserUpdateView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TUserJsonResponse{Status: 200}
+	result := tools.TUserJsonResponse{Status: 200}
 
-	userId := helper.GetIdFromCookie(r)
+	userId := tools.GetIdFromCookie(r)
 	var posted TProfileForm
 
 	r.Body = http.MaxBytesReader(w, r.Body, 20*1024*1024) // 20MB
@@ -273,7 +273,7 @@ func UserUpdateView(w http.ResponseWriter, r *http.Request) error {
 	if err == nil {
 		defer file.Close()
 
-		returnFileName, err := helper.UploadS3(file, fileHeader.Filename, []string{"auth"})
+		returnFileName, err := tools.UploadS3(file, fileHeader.Filename, []string{"auth"})
 		if err != nil {
 			fmt.Print(err)
 		}
@@ -285,7 +285,7 @@ func UserUpdateView(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	ctx := context.Background()
-	clientAuth := helper.FirebaseClient(ctx)
+	clientAuth := tools.FirebaseClient(ctx)
 
 	u, err := clientAuth.UpdateUser(ctx, userId, params)
 	if err != nil {
@@ -300,9 +300,9 @@ func UserUpdateView(w http.ResponseWriter, r *http.Request) error {
 // この流れでclaim取得
 // cookie
 func TestGetCookie(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TVoidJsonResponse{Status: 200}
+	result := tools.TVoidJsonResponse{Status: 200}
 
-	claims := helper.GetClaimsFromCookie(r)
+	claims := tools.GetClaimsFromCookie(r)
 	fmt.Print(claims)
 	result.ResponseWrite(w)
 	return nil

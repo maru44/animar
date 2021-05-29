@@ -1,7 +1,7 @@
 package blog
 
 import (
-	"animar/v1/helper"
+	"animar/v1/tools"
 	"encoding/json"
 	"net/http"
 )
@@ -44,7 +44,7 @@ func (result TBlogResponse) ResponseWrite(w http.ResponseWriter) bool {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false
 	}
-	helper.SetDefaultResponseHeader(w)
+	tools.SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 	return true
@@ -56,7 +56,7 @@ func (result TBlogJoinAnimesResponse) ResponseWrite(w http.ResponseWriter) bool 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false
 	}
-	helper.SetDefaultResponseHeader(w)
+	tools.SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 	return true
@@ -68,7 +68,7 @@ func (result TBlogJoinAnimesUserResponse) ResponseWrite(w http.ResponseWriter) b
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false
 	}
-	helper.SetDefaultResponseHeader(w)
+	tools.SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 	return true
@@ -111,8 +111,8 @@ func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func InsertBlogView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TIntJsonReponse{Status: 200}
-	userId := helper.GetIdFromCookie(r)
+	result := tools.TIntJsonReponse{Status: 200}
+	userId := tools.GetIdFromCookie(r)
 
 	if userId == "" {
 		result.Status = 4001
@@ -127,8 +127,8 @@ func InsertBlogView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
-	result := helper.TIntJsonReponse{Status: 200}
-	userId := helper.GetIdFromCookie(r)
+	result := tools.TIntJsonReponse{Status: 200}
+	userId := tools.GetIdFromCookie(r)
 
 	if userId == "" {
 		result.Status = 4001
