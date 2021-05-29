@@ -17,5 +17,5 @@
 go.sum
 
 tmp/*
-configs/env.go
+**/env.go
 secret_key.json
