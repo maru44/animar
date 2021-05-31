@@ -198,3 +198,5 @@ func DeleteAnime(id int) int {
 	rowsAffect, _ := exe.RowsAffected()
 	return int(rowsAffect)
 }
+
+// @TODO use omitempty

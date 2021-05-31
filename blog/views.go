@@ -120,6 +120,7 @@ func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// @TODO delete
 func InsertBlogView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TIntJsonReponse{Status: 200}
 	userId := tools.GetIdFromCookie(r)

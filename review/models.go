@@ -142,7 +142,7 @@ func InsertReview(animeId int, content string, star int, user_id string) int {
 	stmtInsert, err := db.Prepare("INSERT INTO tbl_reviews(anime_id, content, star, user_id) VALUES(?, ?, ?, ?)")
 	defer stmtInsert.Close()
 
-	exe, err := stmtInsert.Exec(animeId, tools.NewNullString(content).String, tools.NewNullInt(star).Int, user_id)
+	exe, err := stmtInsert.Exec(animeId, content, star, user_id)
 
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
@@ -160,7 +160,7 @@ func InsertReviewContent(animeId int, userId string, content string) string {
 	stmtInsert, err := db.Prepare("INSERT INTO tbl_reviews(anime_id, content, user_id) VALUES(?, ?, ?)")
 	defer stmtInsert.Close()
 
-	exe, err := stmtInsert.Exec(animeId, tools.NewNullString(content).String, userId)
+	exe, err := stmtInsert.Exec(animeId, content, userId)
 	insertedId, err := exe.LastInsertId()
 	fmt.Print(int(insertedId))
 	if err != nil {
@@ -205,7 +205,7 @@ func InsertReviewStar(animeId int, userId string, star int) int {
 	stmtInsert, err := db.Prepare("INSERT INTO tbl_reviews(anime_id, star, user_id) VALUES(?, ?, ?)")
 	defer stmtInsert.Close()
 
-	exe, err := stmtInsert.Exec(animeId, tools.NewNullInt(star).Int, userId)
+	exe, err := stmtInsert.Exec(animeId, star, userId)
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
 		panic(err.Error())

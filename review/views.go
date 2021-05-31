@@ -26,8 +26,8 @@ type TReviewsWithUserInfoResponse struct {
 
 type TReviewInput struct {
 	AnimeId int    `json:"AnimeId"`
-	Content string `json:"Content"`
-	Star    int    `json:"Star,string"` // text/plainのpostに対応
+	Content string `json:"Content,omitempty"`
+	Star    int    `json:"Star,string,omitempty"` // text/plainのpostに対応
 	UserId  string `json:"UserId"`
 }
 

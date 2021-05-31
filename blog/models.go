@@ -179,7 +179,7 @@ func InsertBlog(title string, abstract string, content string, userId string) in
 
 	slug := tools.GenRandSlug(8)
 	exe, err := stmtInsert.Exec(
-		slug, title, tools.NewNullString(abstract).String,
+		slug, title, abstract,
 		content, userId,
 	)
 
@@ -197,7 +197,7 @@ func UpdateBlog(id int, title string, abstract string, content string) int {
 
 	exe, err := db.Exec(
 		"UPDATE tbl_blog SET title = ?, abstract = ?, content = ? WHERE id = ?",
-		title, tools.NewNullString(abstract).String, content, id,
+		title, abstract, content, id,
 	)
 	if err != nil {
 		fmt.Print(err)
