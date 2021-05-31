@@ -95,17 +95,27 @@ func ListBlogJoinAnime() *sql.Rows {
 	return rows
 }
 
-func DetailBlog(id int) TBlog {
+func BlogUserId(id int) string {
+	db := tools.AccessDB()
+	defer db.Close()
+	var userId string
+	err := db.QueryRow("SELECT user_id FROM tbl_blog WHERE id = ?", id).Scan(&userId)
+	if err != nil {
+		fmt.Print(err)
+	}
+	return userId
+}
+
+func DetailBlog(id int) TBlogJoinAnimesUser {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	var blog TBlog
+	var blog TBlogJoinAnimesUser
 	err := db.QueryRow(
-		"SELECT tbl_blog.*, anime.id, anime.slug, anime.title FROM tbl_blog "+
-			"WHERE id = ?", id,
+		"SELECT tbl_blog.* FROM tbl_blog WHERE id = ?", id,
 	).Scan(
 		&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract, &blog.Content,
-		&blog.CreatedAt, &blog.UserId, &blog.UpdatedAt,
+		&blog.UserId, &blog.CreatedAt, &blog.UpdatedAt,
 	)
 
 	switch {
@@ -200,7 +210,7 @@ func DeleteBlog(id int) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	exe, err := db.Exec("DELETE FROM tbl_blog WHERE id = ?")
+	exe, err := db.Exec("DELETE FROM tbl_blog WHERE id = ?", id)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -257,4 +267,21 @@ func InsertRelationAnimeBlog(animeId int, blogId int) bool {
 		return false
 	}
 	return true
+}
+
+func DeleteRelationAnimeBlog(animeId int, blogId int) error {
+	db := tools.AccessDB()
+	defer db.Close()
+
+	stmtDelete, err := db.Prepare("DELETE FROM relation_blog_animes WHERE anime_id = ? AND blog_id = ?")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer stmtDelete.Close()
+
+	_, err = stmtDelete.Exec(animeId, blogId)
+	if err != nil {
+		return err
+	}
+	return nil
 }

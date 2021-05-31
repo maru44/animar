@@ -2,6 +2,7 @@ package blog
 
 import (
 	"animar/v1/auth"
+	"animar/v1/tools"
 	"context"
 	"fmt"
 )
@@ -102,13 +103,21 @@ func ListBlogByUserJoinAnimeUserDomain(uid string) []TBlogJoinAnimesUser {
 
 func DetailBlogJoinAnimeDomain(slug string) TBlogJoinAnimes {
 	blog := DetailBlogBySlug(slug)
-	fmt.Print(blog)
 	blog.Animes = RelationBlogAnimesDomain(blog.ID)
 	return blog
 }
 
 func DetailBlogJoinAnimeUserDomain(slug string) TBlogJoinAnimesUser {
 	blog := DetailBlogWithUserBySlug(slug)
+	blog.Animes = RelationBlogAnimesDomain(blog.ID)
+	ctx := context.Background()
+	user := auth.GetUserFirebase(ctx, blog.UserId)
+	blog.User = user
+	return blog
+}
+
+func DetailBlogJoinAnimeUserFromIdDomain(id int) TBlogJoinAnimesUser {
+	blog := DetailBlog(id)
 	blog.Animes = RelationBlogAnimesDomain(blog.ID)
 	ctx := context.Background()
 	user := auth.GetUserFirebase(ctx, blog.UserId)
@@ -132,4 +141,35 @@ func RelationBlogAnimesDomain(blogId int) []TJoinedAnime {
 	}
 	defer rows.Close()
 	return ret
+}
+
+func UpdateRelationBlogAnimesDomain(animeIds []int, blogId int) {
+	rows := RelationAnimeByBlog(blogId)
+	var originAnimeIds []int
+	for rows.Next() {
+		var ani TJoinedAnime
+		err := rows.Scan(
+			&ani.AnimeId, &ani.Slug, &ani.Title,
+		)
+		if err != nil {
+			fmt.Print(err)
+		}
+		originAnimeIds = append(originAnimeIds, ani.AnimeId)
+	}
+	defer rows.Close()
+
+	for _, animeId := range animeIds {
+		containIdx := tools.IsContainInt(originAnimeIds, animeId)
+		if containIdx == -1 {
+			// もともとのに無ければ新規作成
+			InsertRelationAnimeBlog(animeId, blogId)
+		} else {
+			// もともとのにあれば何もしないでもともとのリストから削除
+			originAnimeIds = tools.SliceRemove(originAnimeIds, containIdx)
+		}
+	}
+	// originで余ってるものはdelete対象
+	for _, originId := range originAnimeIds {
+		DeleteRelationAnimeBlog(originId, blogId)
+	}
 }

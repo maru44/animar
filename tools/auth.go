@@ -74,6 +74,7 @@ func GetIdFromCookie(r *http.Request) string {
 	return id.(string)
 }
 
+// userID from idToken
 func GetUserIdFromToken(idToken string) string {
 	ctx := context.Background()
 	client := FirebaseClient(ctx)
@@ -97,4 +98,35 @@ func IsAdmin(userId string) bool {
 	admins := strings.Split(strAdmins, ", ")
 
 	return IsContainString(admins, userId)
+}
+
+// isAdmin required
+// anonymous & not admin >> blank
+// else >> return userId
+func GetAdminIdFromCookie(r *http.Request) string {
+	idToken, err := r.Cookie("idToken")
+	if err != nil {
+		//fmt.Print(err.Error())
+		return ""
+	}
+
+	ctx := context.Background()
+	client := FirebaseClient(ctx)
+	// @TODO getUserIdFromToken使う
+	token, err := client.VerifyIDToken(ctx, idToken.Value)
+	if err != nil {
+		//fmt.Printf("%s%s", err.Error(), err)
+		if strings.Contains(err.Error(), "ID token has expired at:") {
+			return ""
+		}
+	}
+	claims := token.Claims
+	id := claims["user_id"].(string)
+
+	isAdmin := IsAdmin(id)
+	if !isAdmin {
+		return ""
+	}
+
+	return id
 }

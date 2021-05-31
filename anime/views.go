@@ -141,19 +141,22 @@ func AnimeWithUserWatchView(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// add anime (only admin)
 func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TIntJsonReponse{Status: 200}
-
-	var posted TAnimeInput
-	json.NewDecoder(r.Body).Decode(&posted)
-	insertedId := InsertAnime(
-		posted.Title, posted.Abbrevation, posted.Content, posted.OnAirState,
-		posted.SeriesId, posted.Season, posted.Stories, posted.ThumbUrl,
-	)
-
-	result.Num = insertedId
+	userId := tools.GetAdminIdFromCookie(r)
+	if userId == "" {
+		result.Status = 4003
+	} else {
+		var posted TAnimeInput
+		json.NewDecoder(r.Body).Decode(&posted)
+		insertedId := InsertAnime(
+			posted.Title, posted.Abbrevation, posted.Content, posted.OnAirState,
+			posted.SeriesId, posted.Season, posted.Stories, posted.ThumbUrl,
+		)
+		result.Num = insertedId
+	}
 	result.ResponseWrite(w)
-
 	return nil
 }
 

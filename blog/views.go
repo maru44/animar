@@ -3,7 +3,9 @@ package blog
 import (
 	"animar/v1/tools"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strconv"
 )
 
 type TBlogResponse struct {
@@ -27,9 +29,9 @@ type TBlogInput struct {
 	Content  string `json:"Content"`
 }
 
-type TBlogInputWithResponse struct {
+type TBlogInputWith struct {
 	Title    string `json:"Title"`
-	Abstract string `json:"Abstract"`
+	Abstract string `json:"Abstract,omitempty"`
 	Content  string `json:"Content"`
 	AnimeIds []int  `json:"anime_ids"`
 }
@@ -90,11 +92,19 @@ func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
 
 	query := r.URL.Query()
 	slug := query.Get("s")
+	id := query.Get("id")
 	uid := query.Get("u")
 
 	var blogs []TBlogJoinAnimesUser
 	if slug != "" {
 		blog := DetailBlogJoinAnimeUserDomain(slug)
+		if blog.ID == 0 {
+			result.Status = 404
+		}
+		blogs = append(blogs, blog)
+	} else if id != "" {
+		i, _ := strconv.Atoi(id)
+		blog := DetailBlogJoinAnimeUserFromIdDomain(i)
 		if blog.ID == 0 {
 			result.Status = 404
 		}
@@ -133,8 +143,11 @@ func InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
 	if userId == "" {
 		result.Status = 4001
 	} else {
-		var posted TBlogInputWithResponse
+		var posted TBlogInputWith
 		json.NewDecoder(r.Body).Decode(&posted)
+		// @TODO delete
+		fmt.Print(posted)
+
 		value := InsertBlog(posted.Title, posted.Abstract, posted.Content, userId)
 		result.Num = value
 
@@ -142,6 +155,54 @@ func InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
 			InsertRelationAnimeBlog(animeId, value)
 		}
 	}
+	result.ResponseWrite(w)
+	return nil
+}
+
+func UpdateBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
+	result := tools.TIntJsonReponse{Status: 200}
+	userId := tools.GetIdFromCookie(r)
+
+	query := r.URL.Query()
+	strId := query.Get("id")
+	id, _ := strconv.Atoi(strId)
+
+	// user 不一致
+	blogUserId := BlogUserId(id)
+	if blogUserId != userId {
+		result.Status = 4003
+		result.ResponseWrite(w)
+		return nil
+	}
+
+	var posted TBlogInputWith
+	json.NewDecoder(r.Body).Decode(&posted)
+	value := UpdateBlog(id, posted.Title, posted.Abstract, posted.Content)
+	UpdateRelationBlogAnimesDomain(posted.AnimeIds, id)
+	result.Num = value
+
+	result.ResponseWrite(w)
+	return nil
+}
+
+func DeleteBlogView(w http.ResponseWriter, r *http.Request) error {
+	result := tools.TIntJsonReponse{Status: 200}
+	userId := tools.GetIdFromCookie(r)
+
+	query := r.URL.Query()
+	strId := query.Get("id")
+	id, _ := strconv.Atoi(strId)
+
+	// user 不一致
+	blogUserId := BlogUserId(id)
+	if blogUserId != userId {
+		result.Status = 4003
+		result.ResponseWrite(w)
+		return nil
+	}
+
+	deletedRow := DeleteBlog(id)
+	result.Num = deletedRow
 	result.ResponseWrite(w)
 	return nil
 }
