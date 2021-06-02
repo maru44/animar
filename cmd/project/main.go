@@ -6,6 +6,7 @@ import (
 	"animar/v1/blog"
 	"animar/v1/configs"
 	"animar/v1/review"
+	"animar/v1/series"
 	"animar/v1/tools"
 	"animar/v1/watch"
 	"net/http"
@@ -63,6 +64,9 @@ func main() {
 	http.HandleFunc("/admin/anime/post/", tools.Handle(anime.AnimePostView))
 	http.HandleFunc("/admin/anime/update/", tools.Handle(anime.AnimeUpdateView))
 	http.HandleFunc("/admin/anime/delete/", tools.Handle(anime.AnimeDeleteView))
+
+	/*   series   */
+	http.HandleFunc("/series/", tools.Handle(series.ListSeriesView))
 
 	http.ListenAndServe(":8000", nil)
 }
