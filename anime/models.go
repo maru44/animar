@@ -247,3 +247,13 @@ func DeleteAnime(id int) int {
 	rowsAffect, _ := exe.RowsAffected()
 	return int(rowsAffect)
 }
+
+func ListAnimeAdmin() *sql.Rows {
+	db := tools.AccessDB()
+	defer db.Close()
+	rows, err := db.Query("Select * from anime")
+	if err != nil {
+		panic(err.Error())
+	}
+	return rows
+}

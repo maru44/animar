@@ -55,3 +55,28 @@ func ListAnimeMinimumDomainByTitle(title string) []TAnimeMinimum {
 	defer rows.Close()
 	return animes
 }
+
+/************************************
+             for admin
+************************************/
+
+func ListAnimeAdminDomain() []TAnimeAdmin {
+	rows := ListAnimeAdmin()
+	var animes []TAnimeAdmin
+	for rows.Next() {
+		var ani TAnimeAdmin
+		err := rows.Scan(
+			&ani.ID, &ani.Slug, &ani.Title, &ani.Abbreviation,
+			&ani.Kana, &ani.EngName, &ani.ThumbUrl, &ani.Content,
+			&ani.OnAirState, &ani.SeriesId, &ani.Season,
+			&ani.Stories, &ani.CreatedAt, &ani.UpdatedAt,
+		)
+		if err != nil {
+			panic(err.Error())
+		}
+		animes = append(animes, ani)
+	}
+
+	defer rows.Close()
+	return animes
+}

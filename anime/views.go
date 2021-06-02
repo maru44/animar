@@ -188,10 +188,35 @@ func SearchAnimeView(w http.ResponseWriter, r *http.Request) error {
              for admin
 ************************************/
 
+type TUserToken struct {
+	Token string `json:"token,omitempty"`
+}
+
+func AnimeListAdminView(w http.ResponseWriter, r *http.Request) error {
+	result := TAnimesJsonResponse{Status: 200}
+
+	var posted TUserToken
+	json.NewDecoder(r.Body).Decode(&posted)
+	userId := tools.GetUserIdFromToken(posted.Token)
+
+	var animes []TAnime
+	if userId == "" {
+		result.Status = 4003
+	} else {
+		animes = ListAnimeDomain()
+	}
+	result.Data = animes
+	result.ResponseWrite(w)
+	return nil
+}
+
 // anime detail ?=<id>
 func AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) error {
 	result := TAnimeAdminResponse{Status: 200}
-	userId := tools.GetAdminIdFromCookie(r)
+
+	var posted TUserToken
+	json.NewDecoder(r.Body).Decode(&posted)
+	userId := tools.GetUserIdFromToken(posted.Token)
 
 	query := r.URL.Query()
 	strId := query.Get("id")

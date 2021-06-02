@@ -2,7 +2,6 @@ package tools
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -79,7 +78,6 @@ func GetUserIdFromToken(idToken string) string {
 	ctx := context.Background()
 	client := FirebaseClient(ctx)
 	token, err := client.VerifyIDToken(ctx, idToken)
-	fmt.Print(token)
 	if err != nil {
 		//fmt.Printf("%s%s", err.Error(), err)
 		if strings.Contains(err.Error(), "ID token has expired at:") {
@@ -87,7 +85,6 @@ func GetUserIdFromToken(idToken string) string {
 		}
 	}
 	claims := token.Claims
-	fmt.Print(claims)
 	id := claims["user_id"]
 
 	return id.(string)
