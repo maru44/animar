@@ -15,6 +15,7 @@ type TBlog struct {
 	Title     string
 	Abstract  *string
 	Content   string
+	IsPublic  bool
 	UserId    string
 	CreatedAt string
 	UpdatedAt string
@@ -40,6 +41,7 @@ type TBlogJoinAnimes struct {
 	Title     string
 	Abstract  *string
 	Content   string
+	IsPublic  bool
 	UserId    string
 	CreatedAt string
 	UpdatedAt string
@@ -52,6 +54,7 @@ type TBlogJoinAnimesUser struct {
 	Title     string
 	Abstract  *string
 	Content   string
+	IsPublic  bool
 	UserId    string
 	CreatedAt string
 	UpdatedAt string
@@ -115,7 +118,7 @@ func DetailBlog(id int) TBlogJoinAnimesUser {
 		"SELECT tbl_blog.* FROM tbl_blog WHERE id = ?", id,
 	).Scan(
 		&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract, &blog.Content,
-		&blog.UserId, &blog.CreatedAt, &blog.UpdatedAt,
+		&blog.IsPublic, &blog.UserId, &blog.CreatedAt, &blog.UpdatedAt,
 	)
 
 	switch {
@@ -134,8 +137,8 @@ func DetailBlogBySlug(slug string) TBlogJoinAnimes {
 	var blog TBlogJoinAnimes
 	err := db.QueryRow("SELECT * FROM tbl_blog WHERE slug = ?", slug).Scan(
 		&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
-		&blog.Content, &blog.UserId, &blog.CreatedAt,
-		&blog.UpdatedAt,
+		&blog.Content, &blog.IsPublic, &blog.UserId,
+		&blog.CreatedAt, &blog.UpdatedAt,
 	)
 
 	switch {
@@ -154,7 +157,7 @@ func DetailBlogWithUserBySlug(slug string) TBlogJoinAnimesUser {
 	var blog TBlogJoinAnimesUser
 	err := db.QueryRow("SELECT * FROM tbl_blog WHERE slug = ?", slug).Scan(
 		&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
-		&blog.Content, &blog.UserId, &blog.CreatedAt,
+		&blog.Content, &blog.IsPublic, &blog.UserId, &blog.CreatedAt,
 		&blog.UpdatedAt,
 	)
 

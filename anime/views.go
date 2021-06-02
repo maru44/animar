@@ -19,18 +19,25 @@ type TAnimesWithUserWatchResponse struct {
 
 type TAnimeInput struct {
 	Title       string `json:"Title"`
-	Abbrevation string `json:"Abbrevation"`
-	ThumbUrl    string `json:"ThumbUrl"`
-	Content     string `json:"Content"`
-	OnAirState  int    `json:"OnAirState"`
-	SeriesId    int    `json:"Series"`
-	Season      string `jsoin:"Season"`
-	Stories     int    `jsoin:"Stories"`
+	Abbrevation string `json:"Abbrevation,omitempty"`
+	Kana        string `json:"Kana,omitempty"`
+	EngName     string `json:"EngName:omitempty"`
+	ThumbUrl    string `json:"ThumbUrl,omitempty"`
+	Content     string `json:"Content,omitempty"`
+	OnAirState  int    `json:"OnAirState,omitempty"`
+	SeriesId    int    `json:"Series,omitempty"`
+	Season      string `jsoin:"Season,omitempty"`
+	Stories     int    `jsoin:"Stories,omitempty"`
 }
 
 type TAnimeMinimumResponse struct {
 	Status int             `json:"Status"`
 	Data   []TAnimeMinimum `json:"Data"`
+}
+
+type TAnimeAdminResponse struct {
+	Status int           `json:"Status"`
+	Data   []TAnimeAdmin `json:"Data"`
 }
 
 func (animeJson TAnimesJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
@@ -62,6 +69,18 @@ func (animeWUWCJson TAnimesWithUserWatchResponse) ResponseWrite(w http.ResponseW
 }
 
 func (result TAnimeMinimumResponse) ResponseWrite(w http.ResponseWriter) bool {
+	res, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return false
+	}
+	tools.SetDefaultResponseHeader(w)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+	return true
+}
+
+func (result TAnimeAdminResponse) ResponseWrite(w http.ResponseWriter) bool {
 	res, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -129,33 +148,14 @@ func AnimeWithUserWatchView(w http.ResponseWriter, r *http.Request) error {
 		ani := DetailAnimeBySlugWithUserWatchReview(slug, userId)
 		if ani.ID == 0 {
 			result.Status = 404
+		} else {
+			animes = append(animes, ani)
+			result.Data = animes
 		}
-		animes = append(animes, ani)
 	} else {
 		// animes = ListAnimeDomain()
 	}
 
-	result.Data = animes
-	result.ResponseWrite(w)
-
-	return nil
-}
-
-// add anime (only admin)
-func AnimePostView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
-	userId := tools.GetAdminIdFromCookie(r)
-	if userId == "" {
-		result.Status = 4003
-	} else {
-		var posted TAnimeInput
-		json.NewDecoder(r.Body).Decode(&posted)
-		insertedId := InsertAnime(
-			posted.Title, posted.Abbrevation, posted.Content, posted.OnAirState,
-			posted.SeriesId, posted.Season, posted.Stories, posted.ThumbUrl,
-		)
-		result.Num = insertedId
-	}
 	result.ResponseWrite(w)
 	return nil
 }
@@ -180,6 +180,99 @@ func SearchAnimeView(w http.ResponseWriter, r *http.Request) error {
 
 	animes = ListAnimeMinimumDomainByTitle(title)
 	result.Data = animes
+	result.ResponseWrite(w)
+	return nil
+}
+
+/************************************
+             for admin
+************************************/
+
+// anime detail ?=<id>
+func AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) error {
+	result := TAnimeAdminResponse{Status: 200}
+	userId := tools.GetAdminIdFromCookie(r)
+
+	query := r.URL.Query()
+	strId := query.Get("id")
+	id, _ := strconv.Atoi(strId)
+
+	var animes []TAnimeAdmin
+	if userId == "" {
+		result.Status = 4003
+	} else {
+		ani := DetailAnimeAdmin(id)
+		if ani.ID == 0 {
+			result.Status = 404
+		} else {
+			animes = append(animes, ani)
+		}
+	}
+	result.Data = animes
+	result.ResponseWrite(w)
+	return nil
+}
+
+// add anime (only admin)
+func AnimePostView(w http.ResponseWriter, r *http.Request) error {
+	result := tools.TIntJsonReponse{Status: 200}
+	userId := tools.GetAdminIdFromCookie(r)
+	if userId == "" {
+		result.Status = 4003
+	} else {
+		var posted TAnimeInput
+		json.NewDecoder(r.Body).Decode(&posted)
+		insertedId := InsertAnime(
+			posted.Title, posted.Abbrevation, posted.Kana, posted.EngName, posted.Content, posted.OnAirState,
+			posted.SeriesId, posted.Season, posted.Stories, posted.ThumbUrl,
+		)
+		result.Num = insertedId
+	}
+	result.ResponseWrite(w)
+	return nil
+}
+
+// update ?=<id>
+func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
+	result := tools.TIntJsonReponse{Status: 200}
+	userId := tools.GetAdminIdFromCookie(r)
+
+	query := r.URL.Query()
+	strId := query.Get("id")
+	id, _ := strconv.Atoi(strId)
+
+	if userId == "" {
+		result.Status = 4003
+	} else {
+		var posted TAnimeInput
+		json.NewDecoder(r.Body).Decode(&posted)
+		updatedId := UpdateAnime(
+			id, posted.Abbrevation, posted.Kana, posted.EngName,
+			posted.ThumbUrl, posted.Title, posted.Content, posted.OnAirState,
+			posted.SeriesId, posted.Season, posted.Stories,
+		)
+		result.Num = updatedId
+	}
+	result.ResponseWrite(w)
+	return nil
+}
+
+// delete anime ?=<id>
+func AnimeDeleteView(w http.ResponseWriter, r *http.Request) error {
+	result := tools.TIntJsonReponse{Status: 200}
+	userId := tools.GetAdminIdFromCookie(r)
+
+	query := r.URL.Query()
+	strId := query.Get("id")
+	id, _ := strconv.Atoi(strId)
+
+	if userId == "" {
+		result.Status = 4003
+	} else {
+		deletedRow := DeleteAnime(id)
+		result.Num = deletedRow
+	}
+
 	result.ResponseWrite(w)
 	return nil
 }

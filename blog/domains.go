@@ -14,7 +14,8 @@ func ListBlogDomain() []TBlog {
 		var blog TBlog
 		err := rows.Scan(
 			&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
-			&blog.Content, &blog.UserId, &blog.CreatedAt, &blog.UpdatedAt,
+			&blog.Content, &blog.IsPublic,
+			&blog.UserId, &blog.CreatedAt, &blog.UpdatedAt,
 		)
 		if err != nil {
 			panic(err.Error())
@@ -32,7 +33,8 @@ func ListBlogJoinAnimeDomain() []TBlogJoinAnimes {
 		var blog TBlogJoinAnimes
 		err := rows.Scan(
 			&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
-			&blog.Content, &blog.UserId, &blog.CreatedAt, &blog.UpdatedAt,
+			&blog.Content, &blog.IsPublic,
+			&blog.UserId, &blog.CreatedAt, &blog.UpdatedAt,
 		)
 
 		// anim info(minimum)
@@ -56,7 +58,8 @@ func ListBlogJoinAnimeUserDomain() []TBlogJoinAnimesUser {
 		var blog TBlogJoinAnimesUser
 		err := rows.Scan(
 			&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
-			&blog.Content, &blog.UserId, &blog.CreatedAt, &blog.UpdatedAt,
+			&blog.Content, &blog.IsPublic, &blog.UserId,
+			&blog.CreatedAt, &blog.UpdatedAt,
 		)
 
 		// anim info(minimum)
@@ -83,7 +86,8 @@ func ListBlogByUserJoinAnimeUserDomain(uid string) []TBlogJoinAnimesUser {
 		var blog TBlogJoinAnimesUser
 		err := rows.Scan(
 			&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
-			&blog.Content, &blog.UserId, &blog.CreatedAt, &blog.UpdatedAt,
+			&blog.Content, &blog.IsPublic, &blog.UserId,
+			&blog.CreatedAt, &blog.UpdatedAt,
 		)
 
 		blogID := blog.ID

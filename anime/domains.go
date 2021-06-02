@@ -6,7 +6,7 @@ func ListAnimeDomain() []TAnime {
 	for rows.Next() {
 		var ani TAnime
 		err := rows.Scan(
-			&ani.ID, &ani.Slug, &ani.Title, &ani.Abbribation, &ani.ThumbUrl, &ani.Content,
+			&ani.ID, &ani.Slug, &ani.Title, &ani.Abbreviation, &ani.ThumbUrl, &ani.Content,
 			&ani.OnAirState, &ani.SeriesId, &ani.Season,
 			&ani.Stories, &ani.CreatedAt, &ani.UpdatedAt,
 		)
