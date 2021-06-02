@@ -58,7 +58,8 @@ func main() {
 	http.HandleFunc("/auth/profile/update/", tools.Handle(auth.UserUpdateView))
 
 	/*   admin   */
-	http.HandleFunc("/admin/anime/", tools.Handle(anime.AnimeDetailAdminView))
+	http.HandleFunc("/admin/anime/", tools.Handle(anime.AnimeListAdminView))
+	http.HandleFunc("/admin/anime/detail/", tools.Handle(anime.AnimeDetailAdminView))
 	http.HandleFunc("/admin/anime/post/", tools.Handle(anime.AnimePostView))
 	http.HandleFunc("/admin/anime/update/", tools.Handle(anime.AnimeUpdateView))
 	http.HandleFunc("/admin/anime/delete/", tools.Handle(anime.AnimeDeleteView))
