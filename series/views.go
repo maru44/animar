@@ -4,6 +4,7 @@ import (
 	"animar/v1/tools"
 	"encoding/json"
 	"net/http"
+	"strconv"
 )
 
 type TSeriesResponse struct {
@@ -25,13 +26,30 @@ func (result TSeriesResponse) ResponseWrite(w http.ResponseWriter) bool {
 	return true
 }
 
-func ListSeriesView(w http.ResponseWriter, r *http.Request) error {
+func SeriesView(w http.ResponseWriter, r *http.Request) error {
 	result := TSeriesResponse{Status: 200}
+	userId := tools.GetAdminIdFromCookie(r)
 
-	var sers []TSeries
-	sers = ListSeriesDomain()
+	query := r.URL.Query()
+	id := query.Get("id")
 
-	result.Data = sers
+	if userId == "" {
+		result.Status = 4003
+	} else {
+		var sers []TSeries
+		if id != "" {
+			i, _ := strconv.Atoi(id)
+			ser := DetailSeries(i)
+			if ser.ID == 0 {
+				result.Status = 404
+			}
+			sers = append(sers, ser)
+		} else {
+			sers = ListSeriesDomain()
+		}
+		result.Data = sers
+	}
+
 	result.ResponseWrite(w)
 	return nil
 }
@@ -49,6 +67,27 @@ func InsertSeriesView(w http.ResponseWriter, r *http.Request) error {
 		)
 		result.Num = insertedId
 	}
+	result.ResponseWrite(w)
+	return nil
+}
+
+func UpdateSeriesView(w http.ResponseWriter, r *http.Request) error {
+	result := tools.TIntJsonReponse{Status: 200}
+	userId := tools.GetAdminIdFromCookie(r)
+
+	query := r.URL.Query()
+	strId := query.Get("id")
+	id, _ := strconv.Atoi(strId)
+
+	if userId == "" {
+		result.Status = 4003
+	} else {
+		var posted TSeriesInput
+		json.NewDecoder(r.Body).Decode(&posted)
+		value := UpdateSeries(posted.EngName, posted.SeriesName, id)
+		result.Num = value
+	}
+
 	result.ResponseWrite(w)
 	return nil
 }

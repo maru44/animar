@@ -66,7 +66,8 @@ func main() {
 	http.HandleFunc("/admin/anime/delete/", tools.Handle(anime.AnimeDeleteView))
 
 	/*   series   */
-	http.HandleFunc("/series/", tools.Handle(series.ListSeriesView))
+	http.HandleFunc("/series/", tools.Handle(series.SeriesView))
+	http.HandleFunc("/series/post/", tools.Handle(series.InsertSeriesView))
 
 	http.ListenAndServe(":8000", nil)
 }
