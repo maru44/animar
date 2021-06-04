@@ -28,7 +28,18 @@ func (result TSeriesResponse) ResponseWrite(w http.ResponseWriter) bool {
 
 func SeriesView(w http.ResponseWriter, r *http.Request) error {
 	result := TSeriesResponse{Status: 200}
-	userId := tools.GetAdminIdFromCookie(r)
+	var userId string
+
+	switch r.Method {
+	case "GET":
+		userId = tools.GetAdminIdFromCookie(r)
+	case "POST":
+		var posted tools.TUserIdCookieInput
+		json.NewDecoder(r.Body).Decode(&posted)
+		userId = tools.GetAdminIdFromIdToken(posted.UserId)
+	default:
+		userId = ""
+	}
 
 	query := r.URL.Query()
 	id := query.Get("id")

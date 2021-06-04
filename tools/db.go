@@ -9,16 +9,6 @@ import (
 
 const slugLetters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 
-type NullInt struct {
-	Int   *int
-	Valid bool
-}
-
-type NullStringMine struct {
-	String *string
-	Valid  bool
-}
-
 var (
 	MysqlUser     = GetenvOrDefault("MYSQL_USER", "go")
 	MysqlPassword = GetenvOrDefault("MYSQL_PASSWORD", "Go1234_test")
@@ -35,31 +25,19 @@ func AccessDB() *sql.DB {
 }
 
 // insert & update用
-func NewNullString(s string) NullStringMine {
+func NewNullString(s string) *string {
 	if s == "" {
-		return NullStringMine{
-			String: nil,
-			Valid:  false,
-		}
+		return nil
 	}
-	return NullStringMine{
-		String: &s,
-		Valid:  true,
-	}
+	return &s
 }
 
 // insert & update用
-func NewNullInt(i int) NullInt {
+func NewNullInt(i int) *int {
 	if i == 0 {
-		return NullInt{
-			Int:   nil,
-			Valid: false,
-		}
+		return nil
 	}
-	return NullInt{
-		Int:   &i,
-		Valid: true,
-	}
+	return &i
 }
 
 func GenRandSlug(n int) string {

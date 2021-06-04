@@ -199,15 +199,18 @@ func InsertAnime(title string, abbreviation string, kana string, eng_name string
 	defer db.Close()
 
 	stmtInsert, err := db.Prepare(
-		"INSERT INTO anime(title, slug, abbreviation, kana, eng_name, content, on_air_state, series_id, season, stories) " +
-			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		"INSERT INTO anime(title, slug, abbreviation, kana, eng_name, content, thumb_url, on_air_state, series_id, season, stories) " +
+			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 	)
 	defer stmtInsert.Close()
 
 	slug := tools.GenRandSlug(12)
 	exe, err := stmtInsert.Exec(
-		title, slug, abbreviation, kana, eng_name, thumb_url, content,
-		onAirState, seriesId, season, stories,
+		title, slug, tools.NewNullString(abbreviation),
+		tools.NewNullString(kana), tools.NewNullString(eng_name),
+		tools.NewNullString(content), tools.NewNullString(thumb_url),
+		tools.NewNullInt(onAirState), tools.NewNullInt(seriesId),
+		tools.NewNullString(season), tools.NewNullInt(stories),
 	)
 
 	insertedId, err := exe.LastInsertId()
@@ -215,7 +218,6 @@ func InsertAnime(title string, abbreviation string, kana string, eng_name string
 		//panic(err.Error())
 		fmt.Print(err)
 	}
-
 	return int(insertedId)
 }
 
@@ -226,8 +228,11 @@ func UpdateAnime(id int, abbreviation string, kana string, eng_name string, thum
 
 	exe, err := db.Exec(
 		"UPDATE anime SET title = ?, abbreviation = ?, kana = ?, eng_name = ?, thumb_url = ?, content = ?, on_air_state = ?, series_id = ?, season = ?, stories = ? WHERE id = ?",
-		title, abbreviation, kana, eng_name, thumb_url, content,
-		onAirState, seriesId, season, stories, id,
+		title, tools.NewNullString(abbreviation), tools.NewNullString(kana),
+		tools.NewNullString(eng_name), tools.NewNullString(thumb_url),
+		tools.NewNullString(content), tools.NewNullInt(onAirState),
+		tools.NewNullInt(seriesId), tools.NewNullString(season),
+		tools.NewNullInt(stories), tools.NewNullInt(id),
 	)
 	if err != nil {
 		panic(err.Error())

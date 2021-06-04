@@ -12,6 +12,10 @@ import (
 	"google.golang.org/api/option"
 )
 
+type TUserIdCookieInput struct {
+	UserId string `json:"user_id"`
+}
+
 func FirebaseApp(ctx context.Context) *firebase.App {
 	opt := option.WithCredentialsFile("../../configs/secret_key.json")
 	app, err := firebase.NewApp(ctx, nil, opt)
@@ -48,31 +52,6 @@ func GetClaimsFromCookie(r *http.Request) map[string]interface{} {
 	return claims
 }
 
-// post や update deleteは
-// これがblankであれば問答無用で400
-func GetIdFromCookie(r *http.Request) string {
-	idToken, err := r.Cookie("idToken")
-	if err != nil {
-		//fmt.Print(err.Error())
-		return ""
-	}
-
-	ctx := context.Background()
-	client := FirebaseClient(ctx)
-	// @TODO getUserIdFromToken使う
-	token, err := client.VerifyIDToken(ctx, idToken.Value)
-	if err != nil {
-		//fmt.Printf("%s%s", err.Error(), err)
-		if strings.Contains(err.Error(), "ID token has expired at:") {
-			return ""
-		}
-	}
-	claims := token.Claims
-	id := claims["user_id"]
-
-	return id.(string)
-}
-
 // userID from idToken
 func GetUserIdFromToken(idToken string) string {
 	ctx := context.Background()
@@ -90,6 +69,19 @@ func GetUserIdFromToken(idToken string) string {
 	return id.(string)
 }
 
+// post や update deleteは
+// これがblankであれば問答無用で400
+func GetIdFromCookie(r *http.Request) string {
+	idToken, err := r.Cookie("idToken")
+	if err != nil {
+		//fmt.Print(err.Error())
+		return ""
+	}
+	id := GetUserIdFromToken(idToken.Value)
+
+	return id
+}
+
 func IsAdmin(userId string) bool {
 	strAdmins := os.Getenv("ADMIN_USERS")
 	admins := strings.Split(strAdmins, ", ")
@@ -103,27 +95,22 @@ func IsAdmin(userId string) bool {
 func GetAdminIdFromCookie(r *http.Request) string {
 	idToken, err := r.Cookie("idToken")
 	if err != nil {
-		//fmt.Print(err.Error())
 		return ""
 	}
-
-	ctx := context.Background()
-	client := FirebaseClient(ctx)
-	// @TODO getUserIdFromToken使う
-	token, err := client.VerifyIDToken(ctx, idToken.Value)
-	if err != nil {
-		//fmt.Printf("%s%s", err.Error(), err)
-		if strings.Contains(err.Error(), "ID token has expired at:") {
-			return ""
-		}
-	}
-	claims := token.Claims
-	id := claims["user_id"].(string)
-
+	id := GetUserIdFromToken(idToken.Value)
 	isAdmin := IsAdmin(id)
 	if !isAdmin {
 		return ""
 	}
+	return id
+}
 
+// is admin
+func GetAdminIdFromIdToken(idToken string) string {
+	id := GetUserIdFromToken(idToken)
+	isAdmin := IsAdmin(id)
+	if !isAdmin {
+		return ""
+	}
 	return id
 }

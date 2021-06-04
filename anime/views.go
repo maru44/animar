@@ -3,6 +3,7 @@ package anime
 import (
 	"animar/v1/tools"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -242,14 +243,33 @@ func AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) error {
 func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TIntJsonReponse{Status: 200}
 	userId := tools.GetAdminIdFromCookie(r)
+	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
 	if userId == "" {
 		result.Status = 4003
 	} else {
-		var posted TAnimeInput
-		json.NewDecoder(r.Body).Decode(&posted)
-		insertedId := InsertAnime(
-			posted.Title, posted.Abbrevation, posted.Kana, posted.EngName, posted.Content, posted.OnAirState,
-			posted.SeriesId, posted.Season, posted.Stories, posted.ThumbUrl,
+		// @TODO form dataに変える
+		file, fileHeader, err := r.FormFile("thumb")
+		var returnFileName string
+		var insertedId int
+		if err == nil {
+			// w/ thumb picture
+			defer file.Close()
+			returnFileName, err = tools.UploadS3(file, fileHeader.Filename, []string{"anime"})
+
+			if err != nil {
+				fmt.Print(err)
+			}
+		} else {
+			returnFileName = ""
+		}
+		onair, _ := strconv.Atoi(r.FormValue("onair"))
+		series, _ := strconv.Atoi(r.FormValue("series"))
+		stories, _ := strconv.Atoi(r.FormValue("stories"))
+		insertedId = InsertAnime(
+			r.FormValue("title"), r.FormValue("abbreviation"),
+			r.FormValue("kana"), r.FormValue("engName"),
+			r.FormValue("content"), onair, series, r.FormValue("season"),
+			stories, returnFileName,
 		)
 		result.Num = insertedId
 	}
