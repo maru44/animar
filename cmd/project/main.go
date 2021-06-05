@@ -5,6 +5,7 @@ import (
 	"animar/v1/auth"
 	"animar/v1/blog"
 	"animar/v1/configs"
+	"animar/v1/platform"
 	"animar/v1/review"
 	"animar/v1/series"
 	"animar/v1/tools"
@@ -67,6 +68,12 @@ func main() {
 	/*   series   */
 	http.HandleFunc("/series/", tools.Handle(series.SeriesView))
 	http.HandleFunc("/series/post/", tools.Handle(series.InsertSeriesView))
+
+	/*   platform   */
+	http.HandleFunc("/admin/platform/", tools.Handle(platform.PlatformView))
+	http.HandleFunc("/admin/platform/post/", tools.Handle(platform.InsertPlatformView))
+	http.HandleFunc("/admin/platform/update/", tools.Handle(platform.UpdatePlatformView))
+	http.HandleFunc("/admin/platform/delete/", tools.Handle(platform.DeletePlatformView))
 
 	http.ListenAndServe(":8000", nil)
 }

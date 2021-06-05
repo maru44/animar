@@ -14,12 +14,10 @@ type TSeriesResponse struct {
 
 func (result TSeriesResponse) ResponseWrite(w http.ResponseWriter) bool {
 	res, err := json.Marshal(result)
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false
 	}
-
 	tools.SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
