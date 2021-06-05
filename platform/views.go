@@ -87,12 +87,7 @@ func InsertPlatformView(w http.ResponseWriter, r *http.Request) error {
 			returnFileName = ""
 		}
 		validStr := r.FormValue("valid")
-		var isValid bool
-		if validStr == "" {
-			isValid = true
-		} else {
-			isValid, _ = strconv.ParseBool(validStr)
-		}
+		isValid, _ := strconv.ParseBool(validStr)
 		insertedId = InsertPlatform(
 			r.FormValue("engName"), r.FormValue("platName"), r.FormValue("baseUrl"),
 			returnFileName, isValid,
@@ -131,12 +126,7 @@ func UpdatePlatformView(w http.ResponseWriter, r *http.Request) error {
 			returnFileName = ""
 		}
 		validStr := r.FormValue("valid")
-		var isValid bool
-		if validStr == "" {
-			isValid = true
-		} else {
-			isValid, _ = strconv.ParseBool(validStr)
-		}
+		isValid, _ := strconv.ParseBool(validStr)
 		updatedId = UpdatePlatform(
 			r.FormValue("engName"), r.FormValue("platName"), r.FormValue("baseUrl"),
 			returnFileName, isValid, id,

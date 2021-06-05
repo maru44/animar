@@ -2,6 +2,7 @@ drop table if exists go_test.relation_anime_platform;
 create table relation_anime_platform (
     platform_id INT unsigned NOT NULL,
     anime_id INT unsigned NOT NULL,
+    link_url VARCHAR(128) NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(platform_id, anime_id)

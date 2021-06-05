@@ -45,7 +45,9 @@ func InsertPlatform(engName string, platName string, baseUrl string, image strin
 	defer stmtInsert.Close()
 
 	exe, err := stmtInsert.Exec(
-		engName, platName, baseUrl, image, isValid,
+		engName, tools.NewNullString(platName),
+		tools.NewNullString(baseUrl), tools.NewNullString(image),
+		isValid,
 	)
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
@@ -60,7 +62,7 @@ func DetailPlatfrom(id int) TPlatform {
 
 	var plat TPlatform
 	err := db.QueryRow(
-		"SELECT * FROM plat WHERE id = ?", id,
+		"SELECT * FROM platform WHERE id = ?", id,
 	).Scan(
 		&plat.ID, &plat.EngName, &plat.PlatName, &plat.BaseUrl,
 		&plat.Image, &plat.IsValid, &plat.CreatedAt, &plat.UpdatedAt,
@@ -82,7 +84,9 @@ func UpdatePlatform(engName string, platName string, baseUrl string, image strin
 
 	exe, err := db.Exec(
 		"UPDATE platform SET eng_name = ?, plat_name = ?, base_url = ?, image = ?, is_valid = ? WHERE id = ?",
-		engName, platName, baseUrl, image, isValid, id,
+		engName, tools.NewNullString(platName),
+		tools.NewNullString(baseUrl), tools.NewNullString(image),
+		isValid, id,
 	)
 	if err != nil {
 		fmt.Print(err)
