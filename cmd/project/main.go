@@ -21,7 +21,6 @@ func main() {
 	http.HandleFunc("/db/anime/search/", tools.Handle(anime.SearchAnimeView))
 	http.HandleFunc("/db/anime/minimum/", tools.Handle(anime.ListAnimeMinimumView))
 	http.HandleFunc("/db/anime/wc/", tools.Handle(anime.AnimeWithUserWatchView)) // 動かず
-	http.HandleFunc("/db/anime/post/", tools.Handle(anime.AnimePostView))        // admin only
 
 	/*   blogs   */
 	//http.HandleFunc("/blog/", tools.Handle(blog.ListBlogView))

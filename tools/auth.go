@@ -13,7 +13,7 @@ import (
 )
 
 type TUserIdCookieInput struct {
-	UserId string `json:"user_id"`
+	Token string `json:"token"`
 }
 
 func FirebaseApp(ctx context.Context) *firebase.App {

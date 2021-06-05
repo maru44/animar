@@ -109,7 +109,7 @@ func DetailAnime(id int) TAnime {
 	defer db.Close()
 
 	var ani TAnime
-	err := db.QueryRow("SELECT id, slug, title, abbrebiation, thumb_url, content, on_air_state, series_id, season, stories, created_at, updated_at FROM anime WHERE id = ?", id).Scan(
+	err := db.QueryRow("SELECT id, slug, title, abbreviation, thumb_url, content, on_air_state, series_id, season, stories, created_at, updated_at FROM anime WHERE id = ?", id).Scan(
 		&ani.ID, &ani.Slug, &ani.Title, &ani.Abbreviation, &ani.ThumbUrl, &ani.Content,
 		&ani.OnAirState, &ani.SeriesId, &ani.Season,
 		&ani.Stories, &ani.CreatedAt, &ani.UpdatedAt,
@@ -175,8 +175,6 @@ func DetailAnimeAdmin(id int) TAnimeAdmin {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	fmt.Print(id)
-
 	var ani TAnimeAdmin
 	err := db.QueryRow("SELECT * FROM anime WHERE id = ?", id).Scan(
 		&ani.ID, &ani.Slug, &ani.Title, &ani.Abbreviation,
@@ -222,17 +220,17 @@ func InsertAnime(title string, abbreviation string, kana string, eng_name string
 }
 
 // @TODO insertにしたがってcolumn追加
-func UpdateAnime(id int, abbreviation string, kana string, eng_name string, thumb_url string, title string, content string, onAirState int, seriesId int, season string, stories int) int {
+func UpdateAnime(id int, title string, abbreviation string, kana string, eng_name string, content string, onAirState int, seriesId int, season string, stories int, thumbUrl string) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
 	exe, err := db.Exec(
-		"UPDATE anime SET title = ?, abbreviation = ?, kana = ?, eng_name = ?, thumb_url = ?, content = ?, on_air_state = ?, series_id = ?, season = ?, stories = ? WHERE id = ?",
+		"UPDATE anime SET title = ?, abbreviation = ?, kana = ?, eng_name = ?, content = ?, thumb_url = ?, on_air_state = ?, series_id = ?, season = ?, stories = ? WHERE id = ?",
 		title, tools.NewNullString(abbreviation), tools.NewNullString(kana),
-		tools.NewNullString(eng_name), tools.NewNullString(thumb_url),
-		tools.NewNullString(content), tools.NewNullInt(onAirState),
+		tools.NewNullString(eng_name), tools.NewNullString(content),
+		tools.NewNullString(thumbUrl), tools.NewNullInt(onAirState),
 		tools.NewNullInt(seriesId), tools.NewNullString(season),
-		tools.NewNullInt(stories), tools.NewNullInt(id),
+		tools.NewNullInt(stories), id,
 	)
 	if err != nil {
 		panic(err.Error())

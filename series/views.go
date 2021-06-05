@@ -36,7 +36,7 @@ func SeriesView(w http.ResponseWriter, r *http.Request) error {
 	case "POST":
 		var posted tools.TUserIdCookieInput
 		json.NewDecoder(r.Body).Decode(&posted)
-		userId = tools.GetAdminIdFromIdToken(posted.UserId)
+		userId = tools.GetAdminIdFromIdToken(posted.Token)
 	default:
 		userId = ""
 	}

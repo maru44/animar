@@ -196,9 +196,17 @@ type TUserToken struct {
 func AnimeListAdminView(w http.ResponseWriter, r *http.Request) error {
 	result := TAnimesJsonResponse{Status: 200}
 
-	var posted TUserToken
-	json.NewDecoder(r.Body).Decode(&posted)
-	userId := tools.GetUserIdFromToken(posted.Token)
+	var userId string
+	switch r.Method {
+	case "GET":
+		userId = tools.GetAdminIdFromCookie(r)
+	case "POST":
+		var posted TUserToken
+		json.NewDecoder(r.Body).Decode(&posted)
+		userId = tools.GetAdminIdFromIdToken(posted.Token)
+	default:
+		userId = ""
+	}
 
 	var animes []TAnime
 	if userId == "" {
@@ -215,13 +223,24 @@ func AnimeListAdminView(w http.ResponseWriter, r *http.Request) error {
 func AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) error {
 	result := TAnimeAdminResponse{Status: 200}
 
-	var posted TUserToken
-	json.NewDecoder(r.Body).Decode(&posted)
-	userId := tools.GetUserIdFromToken(posted.Token)
+	var userId string
+	switch r.Method {
+	case "GET":
+		userId = tools.GetAdminIdFromCookie(r)
+	case "POST":
+		var posted TUserToken
+		json.NewDecoder(r.Body).Decode(&posted)
+		userId = tools.GetAdminIdFromIdToken(posted.Token)
+	default:
+		userId = ""
+	}
 
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
+
+	var posted TUserToken
+	json.NewDecoder(r.Body).Decode(&posted)
 
 	var animes []TAnimeAdmin
 	if userId == "" {
@@ -247,7 +266,6 @@ func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 	if userId == "" {
 		result.Status = 4003
 	} else {
-		// @TODO form dataに変える
 		file, fileHeader, err := r.FormFile("thumb")
 		var returnFileName string
 		var insertedId int
@@ -286,15 +304,34 @@ func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
 
+	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
+
 	if userId == "" {
 		result.Status = 4003
 	} else {
-		var posted TAnimeInput
-		json.NewDecoder(r.Body).Decode(&posted)
-		updatedId := UpdateAnime(
-			id, posted.Abbrevation, posted.Kana, posted.EngName,
-			posted.ThumbUrl, posted.Title, posted.Content, posted.OnAirState,
-			posted.SeriesId, posted.Season, posted.Stories,
+		file, fileHeader, err := r.FormFile("thumb")
+		var returnFileName string
+		var updatedId int
+
+		if err == nil {
+			// w/ thumb picture
+			defer file.Close()
+			returnFileName, err = tools.UploadS3(file, fileHeader.Filename, []string{"anime"})
+			if err != nil {
+				fmt.Print(err)
+			}
+		} else {
+			returnFileName = ""
+		}
+
+		onair, _ := strconv.Atoi(r.FormValue("onair"))
+		series, _ := strconv.Atoi(r.FormValue("series"))
+		stories, _ := strconv.Atoi(r.FormValue("stories"))
+		updatedId = UpdateAnime(
+			id, r.FormValue("title"), r.FormValue("abbreviation"),
+			r.FormValue("kana"), r.FormValue("engName"),
+			r.FormValue("content"), onair, series, r.FormValue("season"),
+			stories, returnFileName,
 		)
 		result.Num = updatedId
 	}
