@@ -13,7 +13,24 @@ type TPlatformResponse struct {
 	Data   []TPlatform `josn:"Data"`
 }
 
+type TRelationPlatformResponse struct {
+	Status int                 `json:"Status"`
+	Data   []TRelationPlatform `json:"Data"`
+}
+
 func (result TPlatformResponse) ResponseWrite(w http.ResponseWriter) bool {
+	res, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return false
+	}
+	tools.SetDefaultResponseHeader(w)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+	return true
+}
+
+func (result TRelationPlatformResponse) ResponseWrite(w http.ResponseWriter) bool {
 	res, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -151,6 +168,39 @@ func DeletePlatformView(w http.ResponseWriter, r *http.Request) error {
 	} else {
 		deletedRow := DeletePlatform(id)
 		result.Num = deletedRow
+	}
+	result.ResponseWrite(w)
+	return nil
+}
+
+/****************************
+*          relation		    *
+****************************/
+
+func RelationPlatformView(w http.ResponseWriter, r *http.Request) error {
+	result := TRelationPlatformResponse{Status: 200}
+	query := r.URL.Query()
+	id := query.Get("id") // animeId
+	i, _ := strconv.Atoi(id)
+	relations := ListRelationPlatformDomain(i)
+	result.Data = relations
+	result.ResponseWrite(w)
+	return nil
+}
+
+func InsertRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
+	result := tools.TIntJsonReponse{Status: 200}
+	userId := tools.GetAdminIdFromCookie(r)
+
+	if userId == "" {
+		result.Status = 4003
+	} else {
+		var p TRelationPlatformInput
+		json.NewDecoder(r.Body).Decode(&p)
+		value := InsertRelation(
+			p.PlatformId, p.AnimeId, p.LinkUrl,
+		)
+		result.Num = value
 	}
 	result.ResponseWrite(w)
 	return nil

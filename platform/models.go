@@ -25,6 +25,20 @@ type TPlatformInput struct {
 	IsValid  *bool   `json:"IsValid"`
 }
 
+type TRelationPlatform struct {
+	PlatformId int     `json:"platform_id"`
+	AnimeId    int     `json:"anime_id"`
+	LinkUrl    *string `json:"link_url"`
+	CreatedAt  *string `json:"created_at"`
+	UpdatedAt  *string `json:"updated_at"`
+}
+
+type TRelationPlatformInput struct {
+	PlatformId int    `json:"platform_id"`
+	AnimeId    int    `json:"anime_id"`
+	LinkUrl    string `json:"link_url,omitempty"`
+}
+
 func ListPlatform() *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
@@ -105,4 +119,40 @@ func DeletePlatform(id int) int {
 	}
 	rowsAffect, _ := exe.RowsAffected()
 	return int(rowsAffect)
+}
+
+/****************************
+*          relation		    *
+****************************/
+
+func RelationPlatformByAnime(animeId int) *sql.Rows {
+	db := tools.AccessDB()
+	defer db.Close()
+	rows, err := db.Query(
+		"Select * from relation_anime_platform where anime_id = ?",
+		animeId,
+	)
+	if err != nil {
+		panic(err.Error())
+	}
+	return rows
+}
+
+func InsertRelation(platformId int, animeId int, linkUrl string) int {
+	db := tools.AccessDB()
+	defer db.Close()
+
+	stmtInsert, err := db.Prepare(
+		"INSERT INTO relation_anime_platform(platform_id, anime_id, link_url) VALUES(?, ?, ?)",
+	)
+	defer stmtInsert.Close()
+
+	exe, err := stmtInsert.Exec(
+		platformId, animeId, tools.NewNullString(linkUrl),
+	)
+	insertedId, err := exe.LastInsertId()
+	if err != nil {
+		fmt.Print(err)
+	}
+	return int(insertedId)
 }

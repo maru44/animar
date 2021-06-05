@@ -74,6 +74,9 @@ func main() {
 	http.HandleFunc("/admin/platform/post/", tools.Handle(platform.InsertPlatformView))
 	http.HandleFunc("/admin/platform/update/", tools.Handle(platform.UpdatePlatformView))
 	http.HandleFunc("/admin/platform/delete/", tools.Handle(platform.DeletePlatformView))
+	// relations
+	http.HandleFunc("/relation/plat/", tools.Handle(platform.RelationPlatformView)) // ?id=<anime_id>
+	http.HandleFunc("/admin/relation/plat/post/", tools.Handle(platform.InsertRelationPlatformView))
 
 	http.ListenAndServe(":8000", nil)
 }
