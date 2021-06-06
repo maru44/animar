@@ -1,5 +1,5 @@
-drop table if exists go_test.tbl_reviews;
-drop table if exists go_test.watch_states;
+drop table if exists go_test.reviews;
+drop table if exists go_test.audiences;
 drop table if exists go_test.animes;
 DROP TABLE IF EXISTS go_test.series;
 CREATE TABLE series (

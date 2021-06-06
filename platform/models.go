@@ -7,42 +7,43 @@ import (
 )
 
 type TPlatform struct {
-	ID        int     `json:"ID"`
-	EngName   string  `json:"EngName"`
-	PlatName  *string `json:"PlatName"`
-	BaseUrl   *string `json:"BaseUrl"`
-	Image     *string `json:"Image"`
-	IsValid   bool    `json:"IsValid"`
-	CreatedAt string  `json:"CreatedAt"`
-	UpdatedAt string  `json:"UpdatedAt"`
+	ID        int     `json:"id"`
+	EngName   string  `json:"eng_name"`
+	PlatName  *string `json:"plat_name,omitempty"`
+	BaseUrl   *string `json:"base_url,omitempty"`
+	Image     *string `json:"image,omitempty"`
+	IsValid   bool    `json:"is_valid"`
+	CreatedAt string  `json:"created_at"`
+	UpdatedAt string  `json:"updated_at,omitempty"`
 }
 
+// @NOTUSED
 type TPlatformInput struct {
-	EngName  string  `json:"EngName"`
-	PlatName *string `json:"PlatName"`
-	BaseUrl  *string `json:"BaseUrl"`
-	Image    *string `json:"Image"`
-	IsValid  *bool   `json:"IsValid"`
+	EngName  string  `json:"eng_name"`
+	PlatName *string `json:"plat_name"`
+	BaseUrl  *string `json:"base_url"`
+	Image    *string `json:"image"`
+	IsValid  *bool   `json:"is_valid"`
 }
 
 type TRelationPlatform struct {
-	PlatformId int     `json:"PlatformId"`
-	AnimeId    int     `json:"AnimeId"`
-	LinkUrl    *string `json:"LinkUrl"`
-	CreatedAt  *string `json:"CreatedAt"`
-	UpdatedAt  *string `json:"UpdatedAt"`
+	PlatformId int     `json:"platform_id"`
+	AnimeId    int     `json:"anime_id"`
+	LinkUrl    *string `json:"link_url,omitempty"`
+	CreatedAt  *string `json:"created_at"`
+	UpdatedAt  *string `json:"updated_at,omitempty"`
 }
 
 type TRelationPlatformInput struct {
-	PlatformId int    `json:"PlatformId"`
-	AnimeId    int    `json:"AnimeId"`
-	LinkUrl    string `json:"LinkUrl,omitempty"`
+	PlatformId int    `json:"platform_id"`
+	AnimeId    int    `json:"anime_id"`
+	LinkUrl    string `json:"link_url,omitempty"`
 }
 
 func ListPlatform() *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
-	rows, err := db.Query("Select * from platform")
+	rows, err := db.Query("Select * from platforms")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -54,7 +55,7 @@ func InsertPlatform(engName string, platName string, baseUrl string, image strin
 	defer db.Close()
 
 	stmtInsert, err := db.Prepare(
-		"INSERT INTO platform(eng_name, plat_name, base_url, image, is_valid) VALUES(?, ?, ?, ?, ?)",
+		"INSERT INTO platforms(eng_name, plat_name, base_url, image, is_valid) VALUES(?, ?, ?, ?, ?)",
 	)
 	defer stmtInsert.Close()
 
@@ -74,21 +75,21 @@ func DetailPlatfrom(id int) TPlatform {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	var plat TPlatform
+	var p TPlatform
 	err := db.QueryRow(
-		"SELECT * FROM platform WHERE id = ?", id,
+		"SELECT * FROM platforms WHERE id = ?", id,
 	).Scan(
-		&plat.ID, &plat.EngName, &plat.PlatName, &plat.BaseUrl,
-		&plat.Image, &plat.IsValid, &plat.CreatedAt, &plat.UpdatedAt,
+		&p.ID, &p.EngName, &p.PlatName, &p.BaseUrl,
+		&p.Image, &p.IsValid, &p.CreatedAt, &p.UpdatedAt,
 	)
 
 	switch {
 	case err == sql.ErrNoRows:
-		plat.ID = 0
+		p.ID = 0
 	case err != nil:
 		panic(err.Error())
 	}
-	return plat
+	return p
 }
 
 // validation by userId @domain or view
@@ -97,7 +98,7 @@ func UpdatePlatform(engName string, platName string, baseUrl string, image strin
 	defer db.Close()
 
 	exe, err := db.Exec(
-		"UPDATE platform SET eng_name = ?, plat_name = ?, base_url = ?, image = ?, is_valid = ? WHERE id = ?",
+		"UPDATE platforms SET eng_name = ?, plat_name = ?, base_url = ?, image = ?, is_valid = ? WHERE id = ?",
 		engName, tools.NewNullString(platName),
 		tools.NewNullString(baseUrl), tools.NewNullString(image),
 		isValid, id,
@@ -113,7 +114,7 @@ func DeletePlatform(id int) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	exe, err := db.Exec("DELETE FROM platform WHERE id = ?", id)
+	exe, err := db.Exec("DELETE FROM platforms WHERE id = ?", id)
 	if err != nil {
 		panic(err.Error())
 	}

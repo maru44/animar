@@ -1,3 +1,4 @@
+drop table if exists go_test.seasons;
 CREATE TABLE seasons (
     id INT unsigned AUTO_INCREMENT NOT NULL PRIMARY KEY,
     year VARCHAR(4) NOT NULL,

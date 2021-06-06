@@ -11,16 +11,16 @@ func ListBlogDomain() []TBlog {
 	rows := ListBlog()
 	var blogs []TBlog
 	for rows.Next() {
-		var blog TBlog
+		var b TBlog
 		err := rows.Scan(
-			&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
-			&blog.Content, &blog.IsPublic,
-			&blog.UserId, &blog.CreatedAt, &blog.UpdatedAt,
+			&b.ID, &b.Slug, &b.Title, &b.Abstract,
+			&b.Content, &b.IsPublic,
+			&b.UserId, &b.CreatedAt, &b.UpdatedAt,
 		)
 		if err != nil {
 			panic(err.Error())
 		}
-		blogs = append(blogs, blog)
+		blogs = append(blogs, b)
 	}
 	defer rows.Close()
 	return blogs
@@ -31,21 +31,21 @@ func ListBlogJoinAnimeDomain() []TBlogJoinAnimes {
 	rows := ListBlog()
 	var blogs []TBlogJoinAnimes
 	for rows.Next() {
-		var blog TBlogJoinAnimes
+		var b TBlogJoinAnimes
 		err := rows.Scan(
-			&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
-			&blog.Content, &blog.IsPublic,
-			&blog.UserId, &blog.CreatedAt, &blog.UpdatedAt,
+			&b.ID, &b.Slug, &b.Title, &b.Abstract,
+			&b.Content, &b.IsPublic,
+			&b.UserId, &b.CreatedAt, &b.UpdatedAt,
 		)
 
 		// anim info(minimum)
-		blogID := blog.ID
-		blog.Animes = RelationBlogAnimesDomain(blogID)
+		blogID := b.ID
+		b.Animes = RelationBlogAnimesDomain(blogID)
 
 		if err != nil {
 			fmt.Print(err)
 		}
-		blogs = append(blogs, blog)
+		blogs = append(blogs, b)
 	}
 	defer rows.Close()
 	return blogs
@@ -58,24 +58,24 @@ func ListBlogJoinAnimeUserDomain() []TBlogJoinAnimesUser {
 	rows := ListBlog()
 	var blogs []TBlogJoinAnimesUser
 	for rows.Next() {
-		var blog TBlogJoinAnimesUser
+		var b TBlogJoinAnimesUser
 		err := rows.Scan(
-			&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
-			&blog.Content, &blog.IsPublic, &blog.UserId,
-			&blog.CreatedAt, &blog.UpdatedAt,
+			&b.ID, &b.Slug, &b.Title, &b.Abstract,
+			&b.Content, &b.IsPublic, &b.UserId,
+			&b.CreatedAt, &b.UpdatedAt,
 		)
 
 		// anim info(minimum)
-		blogID := blog.ID
-		blog.Animes = RelationBlogAnimesDomain(blogID)
+		blogID := b.ID
+		b.Animes = RelationBlogAnimesDomain(blogID)
 
-		user := auth.GetUserFirebase(ctx, blog.UserId)
-		blog.User = user
+		user := auth.GetUserFirebase(ctx, b.UserId)
+		b.User = user
 
 		if err != nil {
 			fmt.Print(err)
 		}
-		blogs = append(blogs, blog)
+		blogs = append(blogs, b)
 	}
 	defer rows.Close()
 	return blogs
@@ -86,19 +86,19 @@ func ListBlogByUserJoinAnimeDomain(uid string) []TBlogJoinAnimes {
 	rows := ListUsersBlog(uid)
 	var blogs []TBlogJoinAnimes
 	for rows.Next() {
-		var blog TBlogJoinAnimes
+		var b TBlogJoinAnimes
 		err := rows.Scan(
-			&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
-			&blog.Content, &blog.IsPublic, &blog.UserId,
-			&blog.CreatedAt, &blog.UpdatedAt,
+			&b.ID, &b.Slug, &b.Title, &b.Abstract,
+			&b.Content, &b.IsPublic, &b.UserId,
+			&b.CreatedAt, &b.UpdatedAt,
 		)
-		blogID := blog.ID
-		blog.Animes = RelationBlogAnimesDomain(blogID)
+		blogID := b.ID
+		b.Animes = RelationBlogAnimesDomain(blogID)
 
 		if err != nil {
 			fmt.Print(err)
 		}
-		blogs = append(blogs, blog)
+		blogs = append(blogs, b)
 	}
 	defer rows.Close()
 	return blogs
@@ -110,23 +110,23 @@ func ListBlogByUserJoinAnimeUserDomain(uid string) []TBlogJoinAnimesUser {
 	rows := ListUsersBlog(uid)
 	var blogs []TBlogJoinAnimesUser
 	for rows.Next() {
-		var blog TBlogJoinAnimesUser
+		var b TBlogJoinAnimesUser
 		err := rows.Scan(
-			&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
-			&blog.Content, &blog.IsPublic, &blog.UserId,
-			&blog.CreatedAt, &blog.UpdatedAt,
+			&b.ID, &b.Slug, &b.Title, &b.Abstract,
+			&b.Content, &b.IsPublic, &b.UserId,
+			&b.CreatedAt, &b.UpdatedAt,
 		)
 
-		blogID := blog.ID
-		blog.Animes = RelationBlogAnimesDomain(blogID)
+		blogID := b.ID
+		b.Animes = RelationBlogAnimesDomain(blogID)
 
-		user := auth.GetUserFirebase(ctx, blog.UserId)
-		blog.User = user
+		user := auth.GetUserFirebase(ctx, b.UserId)
+		b.User = user
 
 		if err != nil {
 			fmt.Print(err)
 		}
-		blogs = append(blogs, blog)
+		blogs = append(blogs, b)
 	}
 	defer rows.Close()
 	return blogs
@@ -186,14 +186,14 @@ func UpdateRelationBlogAnimesDomain(animeIds []int, blogId int) {
 	rows := RelationAnimeByBlog(blogId)
 	var originAnimeIds []int
 	for rows.Next() {
-		var ani TJoinedAnime
+		var a TJoinedAnime
 		err := rows.Scan(
-			&ani.AnimeId, &ani.Slug, &ani.Title,
+			&a.AnimeId, &a.Slug, &a.Title,
 		)
 		if err != nil {
 			fmt.Print(err)
 		}
-		originAnimeIds = append(originAnimeIds, ani.AnimeId)
+		originAnimeIds = append(originAnimeIds, a.AnimeId)
 	}
 	defer rows.Close()
 

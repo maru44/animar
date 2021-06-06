@@ -9,12 +9,9 @@ create table relation_anime_platform (
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 -- foreign key
 ALTER TABLE relation_anime_platform
-ADD CONSTRAINT fk_rel_plat_anime_id FOREIGN KEY (anime_id) REFERENCES anime (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ADD CONSTRAINT fk_rel_plat_anime_id FOREIGN KEY (anime_id) REFERENCES animes (id) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE relation_anime_platform
-ADD CONSTRAINT fk_rel_plat_platform_id FOREIGN KEY (platform_id) REFERENCES platform (id) ON DELETE CASCADE ON UPDATE CASCADE;
--- index
-ALTER TABLE relation_anime_platform
-ADD INDEX relation_anime_platform_anime (anime_id);
+ADD CONSTRAINT fk_rel_plat_platform_id FOREIGN KEY (platform_id) REFERENCES platforms (id) ON DELETE CASCADE ON UPDATE CASCADE;
 -- add dummy
 INSERT INTO go_test.relation_anime_platform (platform_id, anime_id)
 VALUES (3, 5);

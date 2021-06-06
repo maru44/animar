@@ -7,23 +7,23 @@ import (
 	"strconv"
 )
 
-type TWatchCountJsonResponse struct {
-	Status int           `json:"Status"`
-	Data   []TWatchCount `json:"Data"`
+type TAudienceCountJsonResponse struct {
+	Status int              `json:"status"`
+	Data   []TAudienceCount `json:"data"`
 }
 
 type TUserWatchJoinResponse struct {
-	Status int               `json:"Status"`
-	Data   []TWatchJoinAnime `json:"Data"`
+	Status int                  `json:"status"`
+	Data   []TAudienceJoinAnime `json:"data"`
 }
 
-type TWatchInput struct {
-	AnimeId int    `json:"AnimeId"`
-	Watch   int    `json:"Watch,string"` // form
-	UserId  string `json:"UserId"`
+type TAudienceInput struct {
+	AnimeId int    `json:"anime_id"`
+	State   int    `json:"state,string"` // form
+	UserId  string `json:"user_id"`
 }
 
-func (result TWatchCountJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
+func (result TAudienceCountJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 	res, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -49,11 +49,11 @@ func (result TUserWatchJoinResponse) ResponseWrite(w http.ResponseWriter) bool {
 
 // by anime
 func AnimeWatchCountView(w http.ResponseWriter, r *http.Request) error {
-	result := TWatchCountJsonResponse{Status: 200}
+	result := TAudienceCountJsonResponse{Status: 200}
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
-	var watches []TWatchCount
+	var watches []TAudienceCount
 	watches = AnimeWatchCountDomain(animeId)
 
 	result.Data = watches
@@ -67,7 +67,7 @@ func UserWatchStatusView(w http.ResponseWriter, r *http.Request) error {
 	result := TUserWatchJoinResponse{Status: 200}
 	userId := r.URL.Query().Get("user")
 
-	var watches []TWatchJoinAnime
+	var watches []TAudienceJoinAnime
 	watches = OnesWatchStatusDomain(userId)
 
 	result.Data = watches
@@ -105,10 +105,10 @@ func WatchPostView(w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 
-	var posted TWatchInput
-	json.NewDecoder(r.Body).Decode(&posted)
+	var p TAudienceInput
+	json.NewDecoder(r.Body).Decode(&p)
 	// watch := InsertWatch(posted.AnimeId, posted.Watch, userId)
-	watch := UpsertWatch(posted.AnimeId, posted.Watch, userId)
+	watch := UpsertWatch(p.AnimeId, p.State, userId)
 	result.Num = watch
 
 	result.ResponseWrite(w)

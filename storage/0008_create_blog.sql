@@ -17,7 +17,7 @@ ADD INDEX blog_user (user_id);
 ALTER TABLE blogs
 ADD INDEX blog_user_public (user_id, is_public);
 ALTER TABLE blogs
-ADD INDEX blog_slug (slug);
+ADD UNIQUE INDEX blog_slug (slug);
 -- relation MM
 CREATE TABLE relation_blog_animes (
     blog_id INT UNSIGNED NOT NULL,
@@ -25,6 +25,6 @@ CREATE TABLE relation_blog_animes (
     PRIMARY KEY (blog_id, anime_id)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 ALTER TABLE relation_blog_animes
-ADD CONSTRAINT fk_rel_blog_anime_id FOREIGN KEY (anime_id) REFERENCES anime (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ADD CONSTRAINT fk_rel_blog_anime_id FOREIGN KEY (anime_id) REFERENCES animes (id) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE relation_blog_animes
 ADD CONSTRAINT fk_rel_blog_blog_id FOREIGN KEY (blog_id) REFERENCES blogs (id) ON DELETE CASCADE ON UPDATE CASCADE;

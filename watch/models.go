@@ -6,31 +6,31 @@ import (
 	"fmt"
 )
 
-type TWatch struct {
-	ID        int
-	Watch     int
-	AnimeId   int
-	UserId    string
-	CreatedAt string
-	UpdatedAt string
+type TAudience struct {
+	ID        int    `json:"id"`
+	State     int    `json:"state"`
+	AnimeId   int    `json:"anime_id"`
+	UserId    string `json:"user_id"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
-type TWatchCount struct {
-	State int // watch state
-	Count int // count of watcher
+type TAudienceCount struct {
+	State int `json:"state"`
+	Count int `json:"count"`
 }
 
-type TWatchJoinAnime struct {
-	ID         int
-	Watch      int
-	AnimeId    int
-	UserId     string
-	CreatedAt  string // watch
-	UpdatedAt  string // watch
-	Title      string
-	Slug       string
-	Content    *string
-	OnAirState *int
+type TAudienceJoinAnime struct {
+	ID        int     `json:"id"`
+	State     int     `json:"state"`
+	AnimeId   int     `json:"anime_id"`
+	UserId    string  `json:"user_id"`
+	CreatedAt string  `json:"created_at"`
+	UpdatedAt string  `json:"updated_at,omitempty"`
+	Title     string  `json:"title"`
+	Slug      string  `json:"slug"`
+	Content   *string `json:"content,omitempty"`
+	AState    *int    `json:"anime_state"`
 }
 
 // Count group by animeId
@@ -38,7 +38,7 @@ type TWatchJoinAnime struct {
 func AnimeWatchCounts(animeId int) *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
-	rows, err := db.Query("Select watch, count(watch) from watch_states WHERE anime_id = ? GROUP BY WATCH", animeId)
+	rows, err := db.Query("Select state, count(state) from audiences WHERE anime_id = ? GROUP BY state", animeId)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -50,7 +50,7 @@ func AnimeWatchCounts(animeId int) *sql.Rows {
 func OnesAnimeWatchList(userId string) *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
-	rows, err := db.Query("Select * from watch_states WHERE user_id = ?", userId)
+	rows, err := db.Query("Select * from audiences WHERE user_id = ?", userId)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -61,8 +61,8 @@ func OnesAnimeWatchJoinList(userId string) *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
 	rows, err := db.Query(
-		"SELECT watch_states.*, anime.title, anime.slug, anime.content, anime.on_air_state "+
-			"FROM watch_states LEFT JOIN anime ON watch_states.anime_id = anime.id WHERE user_id = ?", userId,
+		"SELECT audiences.*, animes.title, animes.slug, animes.description, animes.state "+
+			"FROM audiences LEFT JOIN animes ON audiences.anime_id = anime.id WHERE user_id = ?", userId,
 	)
 	if err != nil {
 		panic(err.Error())
@@ -74,9 +74,9 @@ func WatchDetail(userId string, animeId int) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	var watch TWatch
-	err := db.QueryRow("Select * from watch_states WHERE user_id = ? AND anime_id = ?", userId, animeId).Scan(
-		&watch.ID, &watch.Watch, &watch.AnimeId, &watch.UserId, &watch.CreatedAt, &watch.UpdatedAt,
+	var w TAudience
+	err := db.QueryRow("Select * from audiences WHERE user_id = ? AND anime_id = ?", userId, animeId).Scan(
+		&w.ID, &w.State, &w.AnimeId, &w.UserId, &w.CreatedAt, &w.UpdatedAt,
 	)
 
 	switch {
@@ -85,19 +85,19 @@ func WatchDetail(userId string, animeId int) int {
 	case err != nil:
 		panic(err.Error())
 	default:
-		return watch.Watch
+		return w.State
 	}
 }
 
 // Post
-func InsertWatch(animeId int, watch int, userId string) int {
+func InsertWatch(animeId int, state int, userId string) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare("INSERT INTO watch_states(watch, anime_id, user_id) VALUES(?, ?, ?)")
+	stmtInsert, err := db.Prepare("INSERT INTO audiences(state, anime_id, user_id) VALUES(?, ?, ?)")
 	defer stmtInsert.Close()
 
-	exe, err := stmtInsert.Exec(watch, animeId, userId)
+	exe, err := stmtInsert.Exec(state, animeId, userId)
 
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
@@ -105,34 +105,34 @@ func InsertWatch(animeId int, watch int, userId string) int {
 	}
 	fmt.Print(insertedId)
 
-	return watch
+	return state
 }
 
 // create or update
-func UpsertWatch(animeId int, watch int, userId string) int {
+func UpsertWatch(animeId int, state int, userId string) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	var w TWatch
-	err := db.QueryRow("Select * from watch_states WHERE user_id = ? AND anime_id = ?", userId, animeId).Scan(
-		&w.ID, &w.Watch, &w.AnimeId, &w.UserId, &w.CreatedAt, &w.UpdatedAt,
+	var w TAudience
+	err := db.QueryRow("Select * from audiences WHERE user_id = ? AND anime_id = ?", userId, animeId).Scan(
+		&w.ID, &w.State, &w.AnimeId, &w.UserId, &w.CreatedAt, &w.UpdatedAt,
 	)
 	switch {
 	case err == sql.ErrNoRows:
 		// create
-		return InsertWatch(animeId, watch, userId)
+		return InsertWatch(animeId, state, userId)
 	case err != nil:
 		panic(err.Error())
 	default:
 		// update
-		stmtUpdate, err := db.Prepare("UPDATE watch_states SET watch = ? WHERE user_id = ? AND anime_id = ?")
+		stmtUpdate, err := db.Prepare("UPDATE audiences SET state = ? WHERE user_id = ? AND anime_id = ?")
 		defer stmtUpdate.Close()
-		exe, err := stmtUpdate.Exec(watch, userId, animeId)
+		exe, err := stmtUpdate.Exec(state, userId, animeId)
 		if err != nil {
 			panic(err.Error())
 		}
 		fmt.Print(exe)
-		return watch
+		return state
 	}
 }
 
@@ -140,7 +140,7 @@ func DeleteWatch(animeId int, userId string) bool {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	exe, err := db.Exec("DELETE FROM watch_states WHERE anime_id = ? AND user_id = ?", animeId, userId)
+	exe, err := db.Exec("DELETE FROM audiences WHERE anime_id = ? AND user_id = ?", animeId, userId)
 	if err != nil {
 		//panic(err.Error())
 		return false

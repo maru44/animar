@@ -10,37 +10,37 @@ import (
 
 // nullableはpointerにしてnilを受け取れるようにする
 type TReview struct {
-	ID        int
-	Content   *string
-	Star      *int
-	AnimeId   int
-	UserId    *string
-	CreatedAt string
-	UpdatedAt string
+	ID        int     `json:"id"`
+	Content   *string `json:"content,omitempty"`
+	Rating    *int    `json:"rating,omitempty"`
+	AnimeId   int     `json:"anime_id"`
+	UserId    *string `json:"user_id"`
+	CreatedAt string  `json:"created_at"`
+	UpdatedAt string  `json:"updated_at,omitempty"`
 }
 
 type TReviewJoinAnime struct {
-	ID           int
-	Content      *string
-	Star         *int
-	AnimeId      int
-	UserId       *string
-	CreatedAt    string
-	UpdatedAt    string
-	Title        string
-	Slug         string
-	AnimeContent *string
-	OnAirState   *int
+	ID           int     `json:"id"`
+	Content      *string `json:"content,omitempty"`
+	Rating       *int    `json:"rating,omitempty"`
+	AnimeId      int     `json:"anime_id"`
+	UserId       *string `json:"user_id"`
+	CreatedAt    string  `json:"created_at"`
+	UpdatedAt    string  `json:"updated_at,omitempty"`
+	Title        string  `json:"title"`
+	Slug         string  `json:"slug"`
+	AnimeContent *string `json:"anime_content,omitempty"`
+	AState       *int    `json:"anime_state,omitempty"`
 }
 
 type TReviewJoinUser struct {
-	ID        int
-	Content   *string
-	Star      *int
-	AnimeId   int
-	UserId    *string
-	CreatedAt string
-	UpdatedAt string
+	ID        int     `json:"id"`
+	Content   *string `json:"content,omitempty"`
+	Rating    *int    `json:"rating,omitempty"`
+	AnimeId   int     `json:"anime_id"`
+	UserId    *string `json:"user_id"`
+	CreatedAt string  `json:"created_at"`
+	UpdatedAt string  `json:"updated_at,omitempty"`
 	User      *auth.UserInfo
 }
 
@@ -48,7 +48,7 @@ type TReviewJoinUser struct {
 func ListReviews() *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
-	rows, err := db.Query("Select * from tbl_reviews")
+	rows, err := db.Query("Select * from reviews")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -62,7 +62,7 @@ func DetailReview(id int) TReview {
 	defer db.Close()
 
 	var rev TReview
-	err := db.QueryRow("SELECT * FROM tbl_reviews WHERE id = ?", id).Scan(&rev.ID, &rev.Star, &rev.Content, &rev.AnimeId, &rev.UserId, &rev.CreatedAt, &rev.UpdatedAt)
+	err := db.QueryRow("SELECT * FROM reviews WHERE id = ?", id).Scan(&rev.ID, &rev.Rating, &rev.Content, &rev.AnimeId, &rev.UserId, &rev.CreatedAt, &rev.UpdatedAt)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -80,9 +80,9 @@ func DetailReviewAnimeUser(animeId int, userId string) TReview {
 
 	var rev TReview
 	err := db.QueryRow(
-		"SELECT * FROM tbl_reviews WHERE anime_id = ? AND user_id = ?", animeId, userId,
+		"SELECT * FROM reviews WHERE anime_id = ? AND user_id = ?", animeId, userId,
 	).Scan(
-		&rev.ID, &rev.Content, &rev.Star, &rev.AnimeId, &rev.UserId, &rev.CreatedAt, &rev.UpdatedAt,
+		&rev.ID, &rev.Content, &rev.Rating, &rev.AnimeId, &rev.UserId, &rev.CreatedAt, &rev.UpdatedAt,
 	)
 
 	switch {
@@ -99,7 +99,7 @@ func DetailReviewAnimeUser(animeId int, userId string) TReview {
 func OnesReviewsList(userId string) *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
-	rows, err := db.Query("Select * from tbl_reviews WHERE user_id = ?", userId)
+	rows, err := db.Query("Select * from reviews WHERE user_id = ?", userId)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -112,8 +112,8 @@ func OnesReviewsJoinAnime(userId string) *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
 	rows, err := db.Query(
-		"SELECT tbl_reviews.*, anime.title, anime.slug, anime.content, anime.on_air_state "+
-			"FROM tbl_reviews LEFT JOIN anime ON tbl_reviews.anime_id = anime.id WHERE user_id = ?", userId,
+		"SELECT reviews.*, animes.title, animes.slug, animes.content, animes.on_air_state "+
+			"FROM reviews LEFT JOIN animes ON reviews.anime_id = animes.id WHERE user_id = ?", userId,
 	)
 	if err != nil {
 		panic(err.Error())
@@ -127,7 +127,7 @@ func OnesReviewsJoinAnime(userId string) *sql.Rows {
 func AnimeReviewsList(animeId int, userId string) *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
-	rows, err := db.Query("Select * from tbl_reviews WHERE anime_id = ? AND (user_id != ? OR user_id IS NULL)", animeId, userId)
+	rows, err := db.Query("Select * from reviews WHERE anime_id = ? AND (user_id != ? OR user_id IS NULL)", animeId, userId)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -135,20 +135,18 @@ func AnimeReviewsList(animeId int, userId string) *sql.Rows {
 }
 
 // Post
-func InsertReview(animeId int, content string, star int, user_id string) int {
+func InsertReview(animeId int, content string, rating int, user_id string) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare("INSERT INTO tbl_reviews(anime_id, content, star, user_id) VALUES(?, ?, ?, ?)")
+	stmtInsert, err := db.Prepare("INSERT INTO reviews(anime_id, content, rating, user_id) VALUES(?, ?, ?, ?)")
 	defer stmtInsert.Close()
 
-	exe, err := stmtInsert.Exec(animeId, content, star, user_id)
-
+	exe, err := stmtInsert.Exec(animeId, content, rating, user_id)
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
 		panic(err.Error())
 	}
-
 	return int(insertedId)
 }
 
@@ -157,7 +155,7 @@ func InsertReviewContent(animeId int, userId string, content string) string {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare("INSERT INTO tbl_reviews(anime_id, content, user_id) VALUES(?, ?, ?)")
+	stmtInsert, err := db.Prepare("INSERT INTO reviews(anime_id, content, user_id) VALUES(?, ?, ?)")
 	defer stmtInsert.Close()
 
 	exe, err := stmtInsert.Exec(animeId, content, userId)
@@ -176,7 +174,7 @@ func UpsertReviewContent(animeId int, content string, userId string) string {
 	defer db.Close()
 
 	var rev TReview
-	err := db.QueryRow("SELECT id from tbl_reviews WHERE user_id = ? AND anime_id = ?",
+	err := db.QueryRow("SELECT id from reviews WHERE user_id = ? AND anime_id = ?",
 		userId, animeId).Scan(&rev.ID)
 
 	switch {
@@ -186,7 +184,7 @@ func UpsertReviewContent(animeId int, content string, userId string) string {
 		panic(err.Error())
 	default:
 		// update
-		stmtUpdate, err := db.Prepare("UPDATE tbl_reviews SET content = ? WHERE id = ?")
+		stmtUpdate, err := db.Prepare("UPDATE reviews SET content = ? WHERE id = ?")
 		defer stmtUpdate.Close()
 		exe, err := stmtUpdate.Exec(content, &rev.ID)
 		fmt.Print(exe)
@@ -198,48 +196,48 @@ func UpsertReviewContent(animeId int, content string, userId string) string {
 }
 
 // insert star of review
-func InsertReviewStar(animeId int, userId string, star int) int {
+func InsertReviewStar(animeId int, userId string, rating int) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare("INSERT INTO tbl_reviews(anime_id, star, user_id) VALUES(?, ?, ?)")
+	stmtInsert, err := db.Prepare("INSERT INTO reviews(anime_id, rating, user_id) VALUES(?, ?, ?)")
 	defer stmtInsert.Close()
 
-	exe, err := stmtInsert.Exec(animeId, star, userId)
+	exe, err := stmtInsert.Exec(animeId, rating, userId)
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
 		panic(err.Error())
 	}
 
 	fmt.Print(insertedId)
-	return star
+	return rating
 }
 
 // upsert star of content
-func UpsertReviewStar(animeId int, star int, userId string) int {
+func UpsertReviewStar(animeId int, rating int, userId string) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
 	var rev TReview
-	err := db.QueryRow("SELECT id from tbl_reviews WHERE user_id = ? AND anime_id = ?",
+	err := db.QueryRow("SELECT id from reviews WHERE user_id = ? AND anime_id = ?",
 		userId, animeId).Scan(&rev.ID)
 
 	switch {
 	case err == sql.ErrNoRows:
-		return InsertReviewStar(animeId, userId, star)
+		return InsertReviewStar(animeId, userId, rating)
 	case err != nil:
 		panic(err.Error())
 	default:
 		// update
-		stmtUpdate, err := db.Prepare("UPDATE tbl_reviews SET star = ? WHERE id = ?")
+		stmtUpdate, err := db.Prepare("UPDATE reviews SET rating = ? WHERE id = ?")
 		defer stmtUpdate.Close()
-		exe, err := stmtUpdate.Exec(star, &rev.ID)
+		exe, err := stmtUpdate.Exec(rating, &rev.ID)
 		if err != nil {
 			panic(err.Error())
 		}
 		//insertedId, _ := exe.RowsAffected()
 		fmt.Print(exe)
-		return star
+		return rating
 	}
 }
 
@@ -248,7 +246,7 @@ func AnimeStarAvg(animeId int) string {
 	defer db.Close()
 
 	var avg float32
-	err := db.QueryRow("SELECT COALESCE(AVG(star), 0) FROM tbl_reviews WHERE anime_id = ?", animeId).Scan(&avg)
+	err := db.QueryRow("SELECT COALESCE(AVG(rating), 0) FROM reviews WHERE anime_id = ?", animeId).Scan(&avg)
 	if err != nil {
 		panic(err.Error())
 	}

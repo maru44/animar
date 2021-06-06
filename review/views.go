@@ -15,25 +15,25 @@ func GetOnesReviews(w http.ResponseWriter, r *http.Request) error {
 */
 
 type TReviewsJsonResponse struct {
-	Status int       `json:"Status"`
-	Data   []TReview `json:"Data"`
+	Status int       `json:"status"`
+	Data   []TReview `json:"data"`
 }
 
 type TReviewsWithUserInfoResponse struct {
-	Status int               `json:"Status"`
-	Data   []TReviewJoinUser `json:"Data"`
+	Status int               `json:"status"`
+	Data   []TReviewJoinUser `json:"data"`
 }
 
 type TReviewInput struct {
-	AnimeId int    `json:"AnimeId"`
-	Content string `json:"Content,omitempty"`
-	Star    int    `json:"Star,string,omitempty"` // text/plainのpostに対応
-	UserId  string `json:"UserId"`
+	AnimeId int    `json:"anime_id"`
+	Content string `json:"content,omitempty"`
+	Star    int    `json:"rating,string,omitempty"` // text/plainのpostに対応
+	UserId  string `json:"user_id"`
 }
 
 type TReviewJoinAnimeResponse struct {
-	Status int                `json:"Status"`
-	Data   []TReviewJoinAnime `json:"Data"`
+	Status int                `json:"status"`
+	Data   []TReviewJoinAnime `json:"data"`
 }
 
 func (result TReviewsJsonResponse) ResponseWrite(w http.ResponseWriter) bool {

@@ -4,15 +4,15 @@ func ListSeriesDomain() []TSeries {
 	rows := ListSeries()
 	var sers []TSeries
 	for rows.Next() {
-		var ser TSeries
+		var s TSeries
 		err := rows.Scan(
-			&ser.ID, &ser.EngName, &ser.SeriesName,
-			&ser.CreatedAt, &ser.UpdatedAt,
+			&s.ID, &s.EngName, &s.SeriesName,
+			&s.CreatedAt, &s.UpdatedAt,
 		)
 		if err != nil {
 			panic(err.Error())
 		}
-		sers = append(sers, ser)
+		sers = append(sers, s)
 	}
 
 	defer rows.Close()

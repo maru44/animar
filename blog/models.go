@@ -10,62 +10,62 @@ import (
 )
 
 type TBlog struct {
-	ID        int
-	Slug      string
-	Title     string
-	Abstract  *string
-	Content   string
-	IsPublic  bool
-	UserId    string
-	CreatedAt string
-	UpdatedAt string
+	ID        int     `json:"id"`
+	Slug      string  `json:"slug"`
+	Title     string  `json:"title"`
+	Abstract  *string `json:"abstract,omitempty"`
+	Content   string  `json:"content,omitempty"`
+	IsPublic  bool    `json:"is_public"`
+	UserId    string  `json:"user_id,omitempty"`
+	CreatedAt string  `json:"created_at"`
+	UpdatedAt string  `json:"updated_at,omitempty"`
 }
 
 type TJoinedAnime struct {
-	AnimeId int
-	Slug    string
-	Title   string
+	AnimeId int    `json:"anime_id"`
+	Slug    string `json:"slug"`
+	Title   string `json:"title"`
 }
 
 type TJoinedBlog struct {
-	BlogId    int
-	Title     string
-	Slug      string
-	Abstract  string
-	CreatedAt string
+	BlogId    int    `json:"blog_id"`
+	Title     string `json:"title"`
+	Slug      string `json:"slug"`
+	Abstract  string `json:"abstract,omitempty"`
+	CreatedAt string `json:"created_at"`
 }
 
 type TBlogJoinAnimes struct {
-	ID        int
-	Slug      string
-	Title     string
-	Abstract  *string
-	Content   string
-	IsPublic  bool
-	UserId    string
-	CreatedAt string
-	UpdatedAt string
-	Animes    []TJoinedAnime
+	ID        int            `json:"id"`
+	Slug      string         `json:"slug"`
+	Title     string         `json:"title"`
+	Abstract  *string        `json:"abstract,omitempty"`
+	Content   string         `json:"content,omitempty"`
+	IsPublic  bool           `json:"is_public"`
+	UserId    string         `json:"user_id,omitempty"`
+	CreatedAt string         `json:"created_at"`
+	UpdatedAt string         `json:"updated_at,omitempty"`
+	Animes    []TJoinedAnime `json:"animes,omitempty"`
 }
 
 type TBlogJoinAnimesUser struct {
-	ID        int
-	Slug      string
-	Title     string
-	Abstract  *string
-	Content   string
-	IsPublic  bool
-	UserId    string
-	CreatedAt string
-	UpdatedAt string
-	Animes    []TJoinedAnime
-	User      *auth.UserInfo
+	ID        int            `json:"id"`
+	Slug      string         `json:"slug"`
+	Title     string         `json:"title"`
+	Abstract  *string        `json:"abstract,omitempty"`
+	Content   string         `json:"content,omitempty"`
+	IsPublic  bool           `json:"is_public"`
+	UserId    string         `json:"user_id,omitempty"`
+	CreatedAt string         `json:"created_at"`
+	UpdatedAt string         `json:"updated_at,omitempty"`
+	Animes    []TJoinedAnime `json:"animes,omitempty"`
+	User      *auth.UserInfo `json:"user,omitempty"`
 }
 
 func ListBlog() *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
-	rows, err := db.Query("Select * from tbl_blog")
+	rows, err := db.Query("Select * from blogs")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -75,7 +75,7 @@ func ListBlog() *sql.Rows {
 func ListUsersBlog(uid string) *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
-	rows, err := db.Query("SELECT * from tbl_blog where user_id = ?", uid)
+	rows, err := db.Query("SELECT * from blogs where user_id = ?", uid)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -88,9 +88,9 @@ func ListBlogJoinAnime() *sql.Rows {
 	defer db.Close()
 	// fail
 	rows, err := db.Query(
-		"SELECT tbl_blog.*, anime.id FROM tbl_blog " +
-			"LEFT JOIN relation_blog_animes ON tbl_blog.id = relation_blog_animes.blog_id " +
-			"LEFT JOIN anime ON anime.id = relation_blog_animes.anime_id",
+		"SELECT blogs.*, animes.id FROM blogs " +
+			"LEFT JOIN relation_blog_animes ON blogs.id = relation_blog_animes.blog_id " +
+			"LEFT JOIN animes ON animes.id = relation_blog_animes.anime_id",
 	)
 	if err != nil {
 		panic(err.Error())
@@ -102,7 +102,7 @@ func BlogUserId(id int) string {
 	db := tools.AccessDB()
 	defer db.Close()
 	var userId string
-	err := db.QueryRow("SELECT user_id FROM tbl_blog WHERE id = ?", id).Scan(&userId)
+	err := db.QueryRow("SELECT user_id FROM blogs WHERE id = ?", id).Scan(&userId)
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -113,82 +113,81 @@ func DetailBlog(id int) TBlogJoinAnimes {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	var blog TBlogJoinAnimes
+	var b TBlogJoinAnimes
 	err := db.QueryRow(
-		"SELECT tbl_blog.* FROM tbl_blog WHERE id = ?", id,
+		"SELECT blogs.* FROM blogs WHERE id = ?", id,
 	).Scan(
-		&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract, &blog.Content,
-		&blog.IsPublic, &blog.UserId, &blog.CreatedAt, &blog.UpdatedAt,
+		&b.ID, &b.Slug, &b.Title, &b.Abstract, &b.Content,
+		&b.IsPublic, &b.UserId, &b.CreatedAt, &b.UpdatedAt,
 	)
 
 	switch {
 	case err == sql.ErrNoRows:
-		blog.ID = 0
+		b.ID = 0
 	case err != nil:
 		panic(err.Error())
 	}
-	return blog
+	return b
 }
 
 func DetailBlogWithUser(id int) TBlogJoinAnimesUser {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	var blog TBlogJoinAnimesUser
+	var b TBlogJoinAnimesUser
 	err := db.QueryRow(
-		"SELECT tbl_blog.* FROM tbl_blog WHERE id = ?", id,
+		"SELECT blogs.* FROM blogs WHERE id = ?", id,
 	).Scan(
-		&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract, &blog.Content,
-		&blog.IsPublic, &blog.UserId, &blog.CreatedAt, &blog.UpdatedAt,
+		&b.ID, &b.Slug, &b.Title, &b.Abstract, &b.Content,
+		&b.IsPublic, &b.UserId, &b.CreatedAt, &b.UpdatedAt,
 	)
 
 	switch {
 	case err == sql.ErrNoRows:
-		blog.ID = 0
+		b.ID = 0
 	case err != nil:
 		panic(err.Error())
 	}
-	return blog
+	return b
 }
 
 func DetailBlogBySlug(slug string) TBlogJoinAnimes {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	var blog TBlogJoinAnimes
-	err := db.QueryRow("SELECT * FROM tbl_blog WHERE slug = ?", slug).Scan(
-		&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
-		&blog.Content, &blog.IsPublic, &blog.UserId,
-		&blog.CreatedAt, &blog.UpdatedAt,
+	var b TBlogJoinAnimes
+	err := db.QueryRow("SELECT * FROM blogs WHERE slug = ?", slug).Scan(
+		&b.ID, &b.Slug, &b.Title, &b.Abstract,
+		&b.Content, &b.IsPublic, &b.UserId,
+		&b.CreatedAt, &b.UpdatedAt,
 	)
 
 	switch {
 	case err == sql.ErrNoRows:
-		blog.ID = 0
+		b.ID = 0
 	case err != nil:
 		panic(err.Error())
 	}
-	return blog
+	return b
 }
 
 func DetailBlogWithUserBySlug(slug string) TBlogJoinAnimesUser {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	var blog TBlogJoinAnimesUser
-	err := db.QueryRow("SELECT * FROM tbl_blog WHERE slug = ?", slug).Scan(
-		&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
-		&blog.Content, &blog.IsPublic, &blog.UserId, &blog.CreatedAt,
-		&blog.UpdatedAt,
+	var b TBlogJoinAnimesUser
+	err := db.QueryRow("SELECT * FROM blogs WHERE slug = ?", slug).Scan(
+		&b.ID, &b.Slug, &b.Title, &b.Abstract, &b.Content,
+		&b.IsPublic, &b.UserId, &b.CreatedAt, &b.UpdatedAt,
 	)
 
 	switch {
 	case err == sql.ErrNoRows:
-		blog.ID = 0
+		b.ID = 0
 	case err != nil:
 		panic(err.Error())
 	}
-	return blog
+	return b
 }
 
 func InsertBlog(title string, abstract string, content string, userId string) int {
@@ -196,7 +195,7 @@ func InsertBlog(title string, abstract string, content string, userId string) in
 	defer db.Close()
 
 	stmtInsert, err := db.Prepare(
-		"INSERT INTO tbl_blog(slug, title, abstract, content, user_id) " +
+		"INSERT INTO blogs(slug, title, abstract, content, user_id) " +
 			"VALUES(?, ?, ?, ?, ?)",
 	)
 	defer stmtInsert.Close()
@@ -220,7 +219,7 @@ func UpdateBlog(id int, title string, abstract string, content string) int {
 	defer db.Close()
 
 	exe, err := db.Exec(
-		"UPDATE tbl_blog SET title = ?, abstract = ?, content = ? WHERE id = ?",
+		"UPDATE blogs SET title = ?, abstract = ?, content = ? WHERE id = ?",
 		title, abstract, content, id,
 	)
 	if err != nil {
@@ -234,7 +233,7 @@ func DeleteBlog(id int) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	exe, err := db.Exec("DELETE FROM tbl_blog WHERE id = ?", id)
+	exe, err := db.Exec("DELETE FROM blogs WHERE id = ?", id)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -248,9 +247,9 @@ func RelationAnimeByBlog(blogId int) *sql.Rows {
 	defer db.Close()
 
 	rows, err := db.Query(
-		"SELECT relation_blog_animes.anime_id, anime.slug, anime.title FROM relation_blog_animes " +
-			"LEFT JOIN anime ON anime.id = relation_blog_animes.anime_id " +
-			"WHERE blog_id = " + strconv.Itoa(blogId),
+		"SELECT relation_blog_animes.anime_id, animes.slug, animes.title FROM relation_blog_animes " +
+			"LEFT JOIN animes ON anime.id = relation_blog_animes.anime_id " +
+			"WHERE blogs = " + strconv.Itoa(blogId),
 	)
 	if err != nil {
 		panic(err.Error())
@@ -264,9 +263,9 @@ func RelationBlogByAnime(animeId int) *sql.Rows {
 	defer db.Close()
 
 	rows, err := db.Query(
-		"SELECT relation_blog_animes.blog_id, blog.slug, blog.title, " +
-			"blog.abstract, blog.created_at FROM relation_blog_animes " +
-			"LEFT JOIN blog ON blog.id = relation_blog_animes.blog_id " +
+		"SELECT relation_blog_animes.blog_id, blogs.slug, blogs.title, " +
+			"blogs.abstract, blogs.created_at FROM relation_blog_animes " +
+			"LEFT JOIN blogs ON blogs.id = relation_blog_animes.blog_id " +
 			"WHERE anime_id = " + strconv.Itoa(animeId),
 	)
 	if err != nil {

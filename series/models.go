@@ -7,16 +7,16 @@ import (
 )
 
 type TSeries struct {
-	ID         int
-	EngName    string
-	SeriesName *string
-	CreatedAt  string
-	UpdatedAt  *string
+	ID         int     `json:"id"`
+	EngName    string  `json:"eng_name"`
+	SeriesName *string `json:"series_name,omitempty"`
+	CreatedAt  string  `json:"created_at"`
+	UpdatedAt  *string `json:"updated_at,omitempty"`
 }
 
 type TSeriesInput struct {
-	EngName    string `json:"EngName"`
-	SeriesName string `json:"SeriesName,omitempty"`
+	EngName    string `json:"eng_name"`
+	SeriesName string `json:"series_name,omitempty"`
 }
 
 func ListSeries() *sql.Rows {

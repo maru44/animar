@@ -9,7 +9,7 @@ create table audiences (
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 -- foreign key
 ALTER TABLE audiences
-ADD CONSTRAINT fk_anime_audience FOREIGN KEY (anime_id) REFERENCES anime (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ADD CONSTRAINT fk_anime_audience FOREIGN KEY (anime_id) REFERENCES animes (id) ON DELETE CASCADE ON UPDATE CASCADE;
 -- index
 ALTER TABLE audiences
 ADD INDEX audience_anime (anime_id);

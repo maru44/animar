@@ -1,7 +1,7 @@
 drop table if exists go_test.reviews;
-drop table if exists go_test.watch_states;
-drop table if exists go_test.animes;
+drop table if exists go_test.audiences;
 drop table if exists go_test.relation_anime_season;
+drop table if exists go_test.animes;
 create table animes (
     id INT unsigned AUTO_INCREMENT NOT NULL PRIMARY KEY,
     slug CHAR(12) NOT NULL UNIQUE,
@@ -23,7 +23,7 @@ create table animes (
 ALTER TABLE animes
 ADD UNIQUE INDEX anime_slug (slug);
 ALTER TABLE animes
-ADD UNIQUE INDEX anime_series (series_id);
+ADD INDEX anime_series (series_id);
 -- foreign key
 ALTER TABLE animes
 ADD CONSTRAINT fk_anime_series FOREIGN KEY (series_id) REFERENCES series (id) ON DELETE
@@ -35,10 +35,10 @@ CREATE TABLE relation_anime_season (
     anime_id INT UNSIGNED NOT NULL,
     PRIMARY KEY (season_id, anime_id)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
-ALTER TABLE relation_season_anime
+ALTER TABLE relation_anime_season
 ADD CONSTRAINT fk_relation_season_anime_id FOREIGN KEY (anime_id) REFERENCES animes (id) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE relation_season_season
-ADD CONSTRAINT fk_relation_season_season_id FOREIGN KEY (season_id) REFERENCES season (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE relation_anime_season
+ADD CONSTRAINT fk_relation_season_season_id FOREIGN KEY (season_id) REFERENCES seasons (id) ON DELETE CASCADE ON UPDATE CASCADE;
 -- add dummy
 INSERT INTO go_test.animes (title, slug, description)
 VALUES ('天元突破グレンラガン', 'aaaaaaaaaaaa', 'ガイナックス');

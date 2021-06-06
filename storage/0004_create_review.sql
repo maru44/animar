@@ -10,7 +10,7 @@ create table reviews (
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 -- foreign key
 ALTER TABLE reviews
-ADD CONSTRAINT fk_anime_reviews FOREIGN KEY (anime_id) REFERENCES anime (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ADD CONSTRAINT fk_anime_reviews FOREIGN KEY (anime_id) REFERENCES animes (id) ON DELETE CASCADE ON UPDATE CASCADE;
 -- index
 ALTER TABLE reviews
 ADD INDEX review_anime (anime_id);

@@ -28,28 +28,28 @@ func IsProductionEnv() bool {
 }
 
 type TIntJsonReponse struct {
-	Status int `json:"Status"`
-	Num    int `json:"ID"`
+	Status int `json:"status"`
+	Num    int `json:"data"`
 }
 
 type TStringJsonResponse struct {
-	Status int    `json:"Status"`
-	String string `json:"String"`
+	Status int    `json:"status"`
+	String string `json:"data"`
 }
 
 type TUserJsonResponse struct {
-	Status     int           `json:"Status"`
-	User       auth.UserInfo `json:"User"`
-	IsVerified bool          `json:"IsVerify"`
+	Status     int           `json:"status"`
+	User       auth.UserInfo `json:"user"`
+	IsVerified bool          `json:"is_verify"`
 }
 
 type TVoidJsonResponse struct {
-	Status int `json:"Status"`
+	Status int `json:"status"`
 }
 
 type TBaseJsonResponse struct {
-	Status int         `json:"Status"`
-	Data   interface{} `json:"Data"`
+	Status int         `json:"status"`
+	Data   interface{} `json:"data"`
 }
 
 // @TODO env使う

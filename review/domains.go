@@ -9,12 +9,12 @@ func OnesReviewsDomain(userId string) []TReview {
 	rows := OnesReviewsList(userId)
 	var revs []TReview
 	for rows.Next() {
-		var rev TReview
-		err := rows.Scan(&rev.ID, &rev.Content, &rev.Star, &rev.AnimeId, &rev.UserId, &rev.CreatedAt, &rev.UpdatedAt)
+		var r TReview
+		err := rows.Scan(&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt)
 		if err != nil {
 			panic(err.Error())
 		}
-		revs = append(revs, rev)
+		revs = append(revs, r)
 	}
 	defer rows.Close()
 	return revs
@@ -25,12 +25,12 @@ func AnimeReviewsDomain(animeId int, userId string) []TReview {
 	rows := AnimeReviewsList(animeId, userId)
 	var revs []TReview
 	for rows.Next() {
-		var rev TReview
-		err := rows.Scan(&rev.ID, &rev.Content, &rev.Star, &rev.AnimeId, &rev.UserId, &rev.CreatedAt, &rev.UpdatedAt)
+		var r TReview
+		err := rows.Scan(&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt)
 		if err != nil {
 			panic(err.Error())
 		}
-		revs = append(revs, rev)
+		revs = append(revs, r)
 	}
 
 	defer rows.Close()
@@ -42,22 +42,22 @@ func AnimeReviewsWithUserInfoDomain(animeId int, userId string) []TReviewJoinUse
 	rows := AnimeReviewsList(animeId, userId)
 	var reviews []TReviewJoinUser
 	for rows.Next() {
-		var rev TReviewJoinUser
+		var r TReviewJoinUser
 		err := rows.Scan(
-			&rev.ID, &rev.Content, &rev.Star, &rev.AnimeId, &rev.UserId, &rev.CreatedAt, &rev.UpdatedAt,
+			&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt,
 		)
-		if rev.UserId != nil {
-			user := auth.GetUserFirebase(ctx, *rev.UserId)
-			rev.User = user
+		if r.UserId != nil {
+			user := auth.GetUserFirebase(ctx, *r.UserId)
+			r.User = user
 		} else {
-			rev.User = nil
+			r.User = nil
 		}
 
 		if err != nil {
 			continue
 			//fmt.Print(err)
 		}
-		reviews = append(reviews, rev)
+		reviews = append(reviews, r)
 	}
 	defer rows.Close()
 	return reviews
@@ -67,15 +67,15 @@ func OnesReviewsJoinAnimeDomain(userId string) []TReviewJoinAnime {
 	rows := OnesReviewsJoinAnime(userId)
 	var revs []TReviewJoinAnime
 	for rows.Next() {
-		var rev TReviewJoinAnime
+		var r TReviewJoinAnime
 		err := rows.Scan(
-			&rev.ID, &rev.Content, &rev.Star, &rev.AnimeId, &rev.UserId,
-			&rev.CreatedAt, &rev.UpdatedAt, &rev.Title, &rev.Slug, &rev.AnimeContent, &rev.OnAirState,
+			&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId,
+			&r.CreatedAt, &r.UpdatedAt, &r.Title, &r.Slug, &r.AnimeContent, &r.AState,
 		)
 		if err != nil {
 			panic(err.Error())
 		}
-		revs = append(revs, rev)
+		revs = append(revs, r)
 	}
 	defer rows.Close()
 	return revs

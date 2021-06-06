@@ -9,60 +9,60 @@ import (
 )
 
 type TAnime struct {
-	ID            int
-	Slug          string
-	Title         string
-	ThumbUrl      *string
-	CopyRight     *string
-	Abbreviation  *string
-	Description   *string
-	State         *string
-	SeriesId      *int
-	CountEpisodes *int
-	CreatedAt     string
-	UpdatedAt     *string
+	ID            int     `json:"id,omitempty"`
+	Slug          string  `json:"slug,omitempty"`
+	Title         string  `json:"title,omitempty"`
+	ThumbUrl      *string `json:"thumb_url,omitempty"`
+	CopyRight     *string `json:"copyright,omitempty"`
+	Abbreviation  *string `json:"abbreviation,omitempty"`
+	Description   *string `json:"description,omitempty"`
+	State         *string `json:"state,omitempty"`
+	SeriesId      *int    `json:"series_id,omitempty"`
+	CountEpisodes *int    `json:"count_episodes,omitempty"`
+	CreatedAt     string  `json:"created_at,omitempty"`
+	UpdatedAt     *string `json:"updated_at,omitempty"`
 }
 
 type TAnimeWithUserWatchReview struct {
-	ID            int
-	Slug          string
-	Title         string
-	Abbreviation  *string
-	ThumbUrl      *string
-	CopyRight     *string
-	Description   *string
-	State         *string
-	SeriesId      *int
-	CountEpisodes *int
-	CreatedAt     string
-	UpdatedAt     *string
+	ID            int     `json:"id,omitempty"`
+	Slug          string  `json:"slug,omitempty"`
+	Title         string  `json:"title,omitempty"`
+	ThumbUrl      *string `json:"thumb_url,omitempty"`
+	CopyRight     *string `json:"copyright,omitempty"`
+	Abbreviation  *string `json:"abbreviation,omitempty"`
+	Description   *string `json:"description,omitempty"`
+	State         *string `json:"state,omitempty"`
+	SeriesId      *int    `json:"series_id,omitempty"`
+	CountEpisodes *int    `json:"count_episodes,omitempty"`
+	CreatedAt     string  `json:"created_at,omitempty"`
+	UpdatedAt     *string `json:"updated_at,omitempty"`
 	// watch from here
-	Watch         int
-	Star          int
-	ReviewContent string
+	Watch         int    `json:"watch"`
+	Star          int    `json:"star"`
+	ReviewContent string `json:"review_content"`
 }
 
 type TAnimeAdmin struct {
-	ID            int
-	Slug          string
-	Title         string
-	Abbreviation  *string
-	Kana          *string
-	EngName       *string
-	ThumbUrl      *string
-	CopyRight     *string
-	Description   *string
-	State         *string
-	SeriesId      *int
-	CountEpisodes *int
-	CreatedAt     string
-	UpdatedAt     *string
+	ID            int     `json:"id,omitempty"`
+	Slug          string  `json:"slug,omitempty"`
+	Title         string  `json:"title,omitempty"`
+	Abbreviation  *string `json:"abbreviation,omitempty"`
+	Kana          *string `json:"kana,omitempty"`
+	EngName       *string `json:"eng_name,omitempty"`
+	ThumbUrl      *string `json:"thumb_url,omitempty"`
+	CopyRight     *string `json:"copyright,omitempty"`
+	Description   *string `json:"description,omitempty"`
+	State         *string `json:"state,omitempty"`
+	SeriesId      *int    `json:"series_id,omitempty"`
+	CountEpisodes *int    `json:"count_episodes,omitempty"`
+	CreatedAt     string  `json:"created_at,omitempty"`
+	UpdatedAt     *string `json:"updated_at,omitempty"`
 }
 
 type TAnimeMinimum struct {
-	ID    int
-	Slug  string
-	Title string
+	ID    int    `json:"id,omitempty"`
+	Slug  string `json:"slug,omitempty"`
+	Title string `json:"title,omitempty"`
 }
 
 func ListAnime() *sql.Rows {
@@ -130,7 +130,7 @@ func DetailAnimeBySlug(slug string) TAnime {
 	defer db.Close()
 
 	var a TAnime
-	err := db.QueryRow("SELECT id, slug, title, abbreviation, thumb_url, description, on_air_state, series_id, count_episodes, created_at, updated_at FROM animes WHERE slug = ?", slug).Scan(
+	err := db.QueryRow("SELECT id, slug, title, abbreviation, thumb_url, description, state, series_id, count_episodes, created_at, updated_at FROM animes WHERE slug = ?", slug).Scan(
 		&a.ID, &a.Slug, &a.Title, &a.Abbreviation, &a.ThumbUrl, &a.CopyRight, &a.Description,
 		&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 	)
@@ -151,9 +151,9 @@ func DetailAnimeBySlugWithUserWatchReview(slug string, userId string) TAnimeWith
 
 	var a TAnimeWithUserWatchReview
 	err := db.QueryRow(
-		"SELECT anime.*, watch_states.watch, tbl_reviews.star, tbl_reviews.description AS review_content FROM anime "+
+		"SELECT anime.*, watch_states.watch, reviews.star, reviews.description AS review_content FROM animes "+
 			"LEFT JOIN watch_states ON animes.id = watch_states.anime_id AND watch_states.user_id = ? "+
-			"LEFT JOIN tbl_reviews ON animes.id = tbl_reviews.anime_id AND tbl_reviews.user_id = ? WHERE slug = ?",
+			"LEFT JOIN reviews ON animes.id = reviews.anime_id AND reviews.user_id = ? WHERE slug = ?",
 		slug, userId, userId).Scan(
 		&a.ID, &a.Slug, &a.Title, &a.Abbreviation, &a.Description, &a.State, &a.CreatedAt, &a.UpdatedAt, &a.Watch, &a.Star, &a.ReviewContent,
 	)

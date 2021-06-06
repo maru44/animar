@@ -9,30 +9,30 @@ import (
 )
 
 type TBlogResponse struct {
-	Status int     `json:"Status"`
-	Data   []TBlog `json:"Data"`
+	Status int     `json:"status"`
+	Data   []TBlog `json:"data"`
 }
 
 type TBlogJoinAnimesResponse struct {
-	Status int               `json:"Status"`
-	Data   []TBlogJoinAnimes `json:"Data"`
+	Status int               `json:"dtatus"`
+	Data   []TBlogJoinAnimes `json:"data"`
 }
 
 type TBlogJoinAnimesUserResponse struct {
-	Status int                   `json:"Status"`
-	Data   []TBlogJoinAnimesUser `json:"Data"`
+	Status int                   `json:"status"`
+	Data   []TBlogJoinAnimesUser `json:"data"`
 }
 
 type TBlogInput struct {
-	Title    string `json:"Title"`
-	Abstract string `json:"Abstract"`
-	Content  string `json:"Content"`
+	Title    string `json:"title"`
+	Abstract string `json:"abstract"`
+	Content  string `json:"content"`
 }
 
 type TBlogInputWith struct {
-	Title    string `json:"Title"`
-	Abstract string `json:"Abstract,omitempty"`
-	Content  string `json:"Content"`
+	Title    string `json:"title"`
+	Abstract string `json:"abstract,omitempty"`
+	Content  string `json:"content"`
 	AnimeIds []int  `json:"anime_ids"`
 }
 

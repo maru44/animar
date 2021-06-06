@@ -8,8 +8,8 @@ import (
 )
 
 type TSeriesResponse struct {
-	Status int       `json:"Status"`
-	Data   []TSeries `json:"Data"`
+	Status int       `json:"status"`
+	Data   []TSeries `json:"data"`
 }
 
 func (result TSeriesResponse) ResponseWrite(w http.ResponseWriter) bool {

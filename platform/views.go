@@ -9,13 +9,13 @@ import (
 )
 
 type TPlatformResponse struct {
-	Status int         `json:"Status"`
-	Data   []TPlatform `josn:"Data"`
+	Status int         `json:"status"`
+	Data   []TPlatform `josn:"data"`
 }
 
 type TRelationPlatformResponse struct {
-	Status int                 `json:"Status"`
-	Data   []TRelationPlatform `json:"Data"`
+	Status int                 `json:"status"`
+	Data   []TRelationPlatform `json:"data"`
 }
 
 func (result TPlatformResponse) ResponseWrite(w http.ResponseWriter) bool {

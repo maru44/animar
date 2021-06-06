@@ -9,13 +9,13 @@ import (
 )
 
 type TAnimesJsonResponse struct {
-	Status int      `json:"Status"`
-	Data   []TAnime `json:"Data"`
+	Status int      `json:"status"`
+	Data   []TAnime `json:"data"`
 }
 
 type TAnimesWithUserWatchResponse struct {
-	Status int                         `json:"Status"`
-	Data   []TAnimeWithUserWatchReview `json:"Data"`
+	Status int                         `json:"status"`
+	Data   []TAnimeWithUserWatchReview `json:"data"`
 }
 
 type TAnimeInput struct {
