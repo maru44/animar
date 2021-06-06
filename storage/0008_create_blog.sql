@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS go_test.relation_blog_animes;
-DROP TABLE IF EXISTS go_test.tbl_blog;
-create table tbl_blog (
+DROP TABLE IF EXISTS go_test.blogs;
+create table blogs (
     id INT unsigned AUTO_INCREMENT NOT NULL PRIMARY KEY,
     slug VARCHAR(16) NOT NULL,
     title VARCHAR(64) NOT NULL,
@@ -8,9 +8,16 @@ create table tbl_blog (
     content TEXT NOT NULL,
     user_id VARCHAR(128) NOT NULL,
     is_public BOOLEAN NOT NULL DEFAULT true,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+-- index
+ALTER TABLE blogs
+ADD INDEX blog_user (user_id);
+ALTER TABLE blogs
+ADD INDEX blog_user_public (user_id, is_public);
+ALTER TABLE blogs
+ADD INDEX blog_slug (slug);
 -- relation MM
 CREATE TABLE relation_blog_animes (
     blog_id INT UNSIGNED NOT NULL,
@@ -20,4 +27,4 @@ CREATE TABLE relation_blog_animes (
 ALTER TABLE relation_blog_animes
 ADD CONSTRAINT fk_rel_blog_anime_id FOREIGN KEY (anime_id) REFERENCES anime (id) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE relation_blog_animes
-ADD CONSTRAINT fk_rel_blog_blog_id FOREIGN KEY (blog_id) REFERENCES tbl_blog (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ADD CONSTRAINT fk_rel_blog_blog_id FOREIGN KEY (blog_id) REFERENCES blogs (id) ON DELETE CASCADE ON UPDATE CASCADE;

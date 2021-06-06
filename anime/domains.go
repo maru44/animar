@@ -4,16 +4,15 @@ func ListAnimeDomain() []TAnime {
 	rows := ListAnime()
 	var animes []TAnime
 	for rows.Next() {
-		var ani TAnime
+		var a TAnime
 		err := rows.Scan(
-			&ani.ID, &ani.Slug, &ani.Title, &ani.Abbreviation, &ani.ThumbUrl, &ani.Content,
-			&ani.OnAirState, &ani.SeriesId, &ani.Season,
-			&ani.Stories, &ani.CreatedAt, &ani.UpdatedAt,
+			&a.ID, &a.Slug, &a.Title, &a.Abbreviation, &a.ThumbUrl, &a.Description,
+			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
 			panic(err.Error())
 		}
-		animes = append(animes, ani)
+		animes = append(animes, a)
 	}
 
 	defer rows.Close()
@@ -24,14 +23,14 @@ func ListAnimeMinimumDomain() []TAnimeMinimum {
 	rows := ListAnimeMinimum()
 	var animes []TAnimeMinimum
 	for rows.Next() {
-		var ani TAnimeMinimum
+		var a TAnimeMinimum
 		err := rows.Scan(
-			&ani.ID, &ani.Slug, &ani.Title,
+			&a.ID, &a.Slug, &a.Title,
 		)
 		if err != nil {
 			panic(err.Error())
 		}
-		animes = append(animes, ani)
+		animes = append(animes, a)
 	}
 
 	defer rows.Close()
@@ -42,14 +41,14 @@ func ListAnimeMinimumDomainByTitle(title string) []TAnimeMinimum {
 	rows := SearchAnime(title)
 	var animes []TAnimeMinimum
 	for rows.Next() {
-		var ani TAnimeMinimum
+		var a TAnimeMinimum
 		err := rows.Scan(
-			&ani.ID, &ani.Slug, &ani.Title,
+			&a.ID, &a.Slug, &a.Title,
 		)
 		if err != nil {
 			panic(err.Error())
 		}
-		animes = append(animes, ani)
+		animes = append(animes, a)
 	}
 
 	defer rows.Close()
@@ -67,9 +66,9 @@ func ListAnimeAdminDomain() []TAnimeAdmin {
 		var ani TAnimeAdmin
 		err := rows.Scan(
 			&ani.ID, &ani.Slug, &ani.Title, &ani.Abbreviation,
-			&ani.Kana, &ani.EngName, &ani.ThumbUrl, &ani.Content,
-			&ani.OnAirState, &ani.SeriesId, &ani.Season,
-			&ani.Stories, &ani.CreatedAt, &ani.UpdatedAt,
+			&ani.Kana, &ani.EngName, &ani.ThumbUrl, &ani.Description,
+			&ani.State, &ani.SeriesId,
+			&ani.CountEpisodes, &ani.CreatedAt, &ani.UpdatedAt,
 		)
 		if err != nil {
 			panic(err.Error())

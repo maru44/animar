@@ -19,30 +19,29 @@ type TAnimesWithUserWatchResponse struct {
 }
 
 type TAnimeInput struct {
-	Title       string `json:"Title"`
-	Abbrevation string `json:"Abbrevation,omitempty"`
-	Kana        string `json:"Kana,omitempty"`
-	EngName     string `json:"EngName:omitempty"`
-	ThumbUrl    string `json:"ThumbUrl,omitempty"`
-	Content     string `json:"Content,omitempty"`
-	OnAirState  int    `json:"OnAirState,omitempty"`
-	SeriesId    int    `json:"Series,omitempty"`
-	Season      string `jsoin:"Season,omitempty"`
-	Stories     int    `jsoin:"Stories,omitempty"`
+	Title         string `json:"title"`
+	Abbrevation   string `json:"abbrevation,omitempty"`
+	Kana          string `json:"kana,omitempty"`
+	EngName       string `json:"eng_name:omitempty"`
+	ThumbUrl      string `json:"thumb_url,omitempty"`
+	Description   string `json:"description,omitempty"`
+	State         int    `json:"state,omitempty"`
+	SeriesId      int    `json:"series_id,omitempty"`
+	CountEpisodes int    `jsoin:"count_episodes,omitempty"`
 }
 
 type TAnimeMinimumResponse struct {
-	Status int             `json:"Status"`
-	Data   []TAnimeMinimum `json:"Data"`
+	Status int             `json:"status"`
+	Data   []TAnimeMinimum `json:"data"`
 }
 
 type TAnimeAdminResponse struct {
-	Status int           `json:"Status"`
-	Data   []TAnimeAdmin `json:"Data"`
+	Status int           `json:"status"`
+	Data   []TAnimeAdmin `json:"data"`
 }
 
-func (animeJson TAnimesJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(animeJson)
+func (result TAnimesJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
+	res, err := json.Marshal(result)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -55,14 +54,12 @@ func (animeJson TAnimesJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 	return true
 }
 
-func (animeWUWCJson TAnimesWithUserWatchResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(animeWUWCJson)
-
+func (result TAnimesWithUserWatchResponse) ResponseWrite(w http.ResponseWriter) bool {
+	res, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false
 	}
-
 	tools.SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
@@ -280,14 +277,13 @@ func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 		} else {
 			returnFileName = ""
 		}
-		onair, _ := strconv.Atoi(r.FormValue("onair"))
-		series, _ := strconv.Atoi(r.FormValue("series"))
-		stories, _ := strconv.Atoi(r.FormValue("stories"))
+		series, _ := strconv.Atoi(r.FormValue("series_id"))
+		episodes, _ := strconv.Atoi(r.FormValue("count_episodes"))
 		insertedId = InsertAnime(
 			r.FormValue("title"), r.FormValue("abbreviation"),
 			r.FormValue("kana"), r.FormValue("engName"),
-			r.FormValue("content"), onair, series, r.FormValue("season"),
-			stories, returnFileName,
+			r.FormValue("description"), r.FormValue("state"),
+			series, episodes, returnFileName,
 		)
 		result.Num = insertedId
 	}
@@ -324,14 +320,13 @@ func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
 			returnFileName = ""
 		}
 
-		onair, _ := strconv.Atoi(r.FormValue("onair"))
-		series, _ := strconv.Atoi(r.FormValue("series"))
-		stories, _ := strconv.Atoi(r.FormValue("stories"))
+		series, _ := strconv.Atoi(r.FormValue("series_id"))
+		episodes, _ := strconv.Atoi(r.FormValue("count_episodes"))
 		updatedId = UpdateAnime(
 			id, r.FormValue("title"), r.FormValue("abbreviation"),
 			r.FormValue("kana"), r.FormValue("engName"),
-			r.FormValue("content"), onair, series, r.FormValue("season"),
-			stories, returnFileName,
+			r.FormValue("description"), r.FormValue("state"),
+			series, episodes, returnFileName,
 		)
 		result.Num = updatedId
 	}

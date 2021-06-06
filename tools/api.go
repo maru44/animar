@@ -84,6 +84,10 @@ func DestroyCookie(w http.ResponseWriter, key string) bool {
 	return true
 }
 
+type Api interface {
+	ResponseWrite(w http.ResponseWriter) bool
+}
+
 func SetDefaultResponseHeader(w http.ResponseWriter) bool {
 	protocol := "http://"
 	host := "localhost:3000"
@@ -102,12 +106,10 @@ func SetDefaultResponseHeader(w http.ResponseWriter) bool {
 
 func (result TIntJsonReponse) ResponseWrite(w http.ResponseWriter) bool {
 	res, err := json.Marshal(result)
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false
 	}
-
 	SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
