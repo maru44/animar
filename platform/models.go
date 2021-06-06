@@ -26,17 +26,17 @@ type TPlatformInput struct {
 }
 
 type TRelationPlatform struct {
-	PlatformId int     `json:"platform_id"`
-	AnimeId    int     `json:"anime_id"`
-	LinkUrl    *string `json:"link_url"`
-	CreatedAt  *string `json:"created_at"`
-	UpdatedAt  *string `json:"updated_at"`
+	PlatformId int     `json:"PlatformId"`
+	AnimeId    int     `json:"AnimeId"`
+	LinkUrl    *string `json:"LinkUrl"`
+	CreatedAt  *string `json:"CreatedAt"`
+	UpdatedAt  *string `json:"UpdatedAt"`
 }
 
 type TRelationPlatformInput struct {
-	PlatformId int    `json:"platform_id"`
-	AnimeId    int    `json:"anime_id"`
-	LinkUrl    string `json:"link_url,omitempty"`
+	PlatformId int    `json:"PlatformId"`
+	AnimeId    int    `json:"AnimeId"`
+	LinkUrl    string `json:"LinkUrl,omitempty"`
 }
 
 func ListPlatform() *sql.Rows {
@@ -155,4 +155,18 @@ func InsertRelation(platformId int, animeId int, linkUrl string) int {
 		fmt.Print(err)
 	}
 	return int(insertedId)
+}
+
+func DeleteRelationPlatform(animeId int, platformId int) int {
+	db := tools.AccessDB()
+	defer db.Close()
+	exe, err := db.Exec(
+		"DELETE FROM relation_anime_platform WHERE anime_id = ? AND platform_id = ?",
+		animeId, platformId,
+	)
+	if err != nil {
+		panic(err.Error())
+	}
+	rowsAffect, _ := exe.RowsAffected()
+	return int(rowsAffect)
 }

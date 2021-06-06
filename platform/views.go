@@ -205,3 +205,24 @@ func InsertRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
 	result.ResponseWrite(w)
 	return nil
 }
+
+// delete platform ?=<id>
+func DeleteRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
+	result := tools.TIntJsonReponse{Status: 200}
+	userId := tools.GetAdminIdFromCookie(r)
+
+	query := r.URL.Query()
+	strAnimeId := query.Get("anime")
+	strPlatformId := query.Get("platform")
+	animeId, _ := strconv.Atoi(strAnimeId)
+	platformId, _ := strconv.Atoi(strPlatformId)
+
+	if userId == "" {
+		result.Status = 4003
+	} else {
+		deletedRow := DeleteRelationPlatform(animeId, platformId)
+		result.Num = deletedRow
+	}
+	result.ResponseWrite(w)
+	return nil
+}
