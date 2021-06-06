@@ -109,7 +109,28 @@ func BlogUserId(id int) string {
 	return userId
 }
 
-func DetailBlog(id int) TBlogJoinAnimesUser {
+func DetailBlog(id int) TBlogJoinAnimes {
+	db := tools.AccessDB()
+	defer db.Close()
+
+	var blog TBlogJoinAnimes
+	err := db.QueryRow(
+		"SELECT tbl_blog.* FROM tbl_blog WHERE id = ?", id,
+	).Scan(
+		&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract, &blog.Content,
+		&blog.IsPublic, &blog.UserId, &blog.CreatedAt, &blog.UpdatedAt,
+	)
+
+	switch {
+	case err == sql.ErrNoRows:
+		blog.ID = 0
+	case err != nil:
+		panic(err.Error())
+	}
+	return blog
+}
+
+func DetailBlogWithUser(id int) TBlogJoinAnimesUser {
 	db := tools.AccessDB()
 	defer db.Close()
 

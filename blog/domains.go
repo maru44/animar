@@ -26,6 +26,7 @@ func ListBlogDomain() []TBlog {
 	return blogs
 }
 
+// List (blog + anime)
 func ListBlogJoinAnimeDomain() []TBlogJoinAnimes {
 	rows := ListBlog()
 	var blogs []TBlogJoinAnimes
@@ -50,6 +51,8 @@ func ListBlogJoinAnimeDomain() []TBlogJoinAnimes {
 	return blogs
 }
 
+// List (blog + anime + user)
+// @NOTUSED
 func ListBlogJoinAnimeUserDomain() []TBlogJoinAnimesUser {
 	ctx := context.Background()
 	rows := ListBlog()
@@ -78,6 +81,30 @@ func ListBlogJoinAnimeUserDomain() []TBlogJoinAnimesUser {
 	return blogs
 }
 
+// List of users (blog + anime)
+func ListBlogByUserJoinAnimeDomain(uid string) []TBlogJoinAnimes {
+	rows := ListUsersBlog(uid)
+	var blogs []TBlogJoinAnimes
+	for rows.Next() {
+		var blog TBlogJoinAnimes
+		err := rows.Scan(
+			&blog.ID, &blog.Slug, &blog.Title, &blog.Abstract,
+			&blog.Content, &blog.IsPublic, &blog.UserId,
+			&blog.CreatedAt, &blog.UpdatedAt,
+		)
+		blogID := blog.ID
+		blog.Animes = RelationBlogAnimesDomain(blogID)
+
+		if err != nil {
+			fmt.Print(err)
+		}
+		blogs = append(blogs, blog)
+	}
+	defer rows.Close()
+	return blogs
+}
+
+// List of users (blog + anime + user)
 func ListBlogByUserJoinAnimeUserDomain(uid string) []TBlogJoinAnimesUser {
 	ctx := context.Background()
 	rows := ListUsersBlog(uid)
@@ -111,6 +138,13 @@ func DetailBlogJoinAnimeDomain(slug string) TBlogJoinAnimes {
 	return blog
 }
 
+func DetailBlogJoinAnimeFromIdDomain(id int) TBlogJoinAnimes {
+	blog := DetailBlog(id)
+	blog.Animes = RelationBlogAnimesDomain(id)
+	return blog
+}
+
+// @NOTUSED
 func DetailBlogJoinAnimeUserDomain(slug string) TBlogJoinAnimesUser {
 	blog := DetailBlogWithUserBySlug(slug)
 	blog.Animes = RelationBlogAnimesDomain(blog.ID)
@@ -120,8 +154,9 @@ func DetailBlogJoinAnimeUserDomain(slug string) TBlogJoinAnimesUser {
 	return blog
 }
 
+// @NOTUSED
 func DetailBlogJoinAnimeUserFromIdDomain(id int) TBlogJoinAnimesUser {
-	blog := DetailBlog(id)
+	blog := DetailBlogWithUser(id)
 	blog.Animes = RelationBlogAnimesDomain(blog.ID)
 	ctx := context.Background()
 	user := auth.GetUserFirebase(ctx, blog.UserId)

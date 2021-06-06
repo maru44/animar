@@ -37,7 +37,7 @@ func main() {
 	http.HandleFunc("/reviews/post/star/", tools.Handle(review.UpsertReviewStarView))
 	http.HandleFunc("/reviews/post/content/", tools.Handle(review.UpsertReviewContentView))
 	//http.HandleFunc("/reviews/anime/", tools.Handle(review.GetAnimeReviews))
-	http.HandleFunc("/reviews/anime/", tools.Handle(review.GetAnimeReviewsWithUserInfoView))
+	http.HandleFunc("/reviews/anime/", tools.Handle(review.GetAnimeReviewsView))
 	http.HandleFunc("/reviews/ua/", tools.Handle(review.GetAnimeUserReviewView))
 	http.HandleFunc("/reviews/star/", tools.Handle(review.AnimeStarAvgView)) // star average
 

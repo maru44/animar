@@ -87,7 +87,42 @@ func ListBlogView(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// retrieve blog + anime
 func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
+	result := TBlogJoinAnimesResponse{Status: 200}
+
+	query := r.URL.Query()
+	slug := query.Get("s")
+	id := query.Get("id")
+	uid := query.Get("u")
+
+	var blogs []TBlogJoinAnimes
+	if slug != "" {
+		blog := DetailBlogJoinAnimeDomain(slug)
+		if blog.ID == 0 {
+			result.Status = 404
+		}
+		blogs = append(blogs, blog)
+	} else if id != "" {
+		i, _ := strconv.Atoi(id)
+		blog := DetailBlogJoinAnimeFromIdDomain(i)
+		if blog.ID == 0 {
+			result.Status = 404
+		}
+		blogs = append(blogs, blog)
+	} else if uid != "" {
+		blogs = ListBlogByUserJoinAnimeDomain(uid)
+	} else {
+		blogs = ListBlogJoinAnimeDomain()
+	}
+
+	result.Data = blogs
+	result.ResponseWrite(w)
+	return nil
+}
+
+// retrieve blog + anime + user
+func BlogJoinAnimeUserView(w http.ResponseWriter, r *http.Request) error {
 	result := TBlogJoinAnimesUserResponse{Status: 200}
 
 	query := r.URL.Query()

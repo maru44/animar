@@ -103,7 +103,7 @@ func GetOnesReviewsView(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func GetAnimeReviews(w http.ResponseWriter, r *http.Request) error {
+func GetAnimeReviewsView(w http.ResponseWriter, r *http.Request) error {
 	result := TReviewsJsonResponse{Status: 200}
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
