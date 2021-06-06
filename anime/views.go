@@ -283,7 +283,7 @@ func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 			r.FormValue("title"), r.FormValue("abbreviation"),
 			r.FormValue("kana"), r.FormValue("engName"),
 			r.FormValue("description"), r.FormValue("state"),
-			series, episodes, returnFileName,
+			series, episodes, r.FormValue("copyright"), returnFileName,
 		)
 		result.Num = insertedId
 	}
@@ -326,7 +326,7 @@ func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
 			id, r.FormValue("title"), r.FormValue("abbreviation"),
 			r.FormValue("kana"), r.FormValue("engName"),
 			r.FormValue("description"), r.FormValue("state"),
-			series, episodes, returnFileName,
+			series, episodes, r.FormValue("copyright"), returnFileName,
 		)
 		result.Num = updatedId
 	}

@@ -10,6 +10,7 @@ create table animes (
     kana VARCHAR(64) NULL COMMENT 'カナ',
     eng_name VARCHAR(64) COMMENT 'roman',
     thumb_url VARCHAR(256) NULL,
+    copyright VARCHAR(256) NULL,
     description TEXT NULL,
     -- on_air_state TINYINT NULL COMMENT '0: 打ち切り, 1: 放送終了, 2: 放送中, 3: 放送前',
     state VARCHAR(16) NULL COMMENT 'cut: 打ち切り, fin: 放送終了, now: 放送中, pre: 放送前',
