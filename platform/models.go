@@ -9,12 +9,12 @@ import (
 type TPlatform struct {
 	ID        int     `json:"id"`
 	EngName   string  `json:"eng_name"`
-	PlatName  *string `json:"plat_name,omitempty"`
-	BaseUrl   *string `json:"base_url,omitempty"`
-	Image     *string `json:"image,omitempty"`
+	PlatName  *string `json:"plat_name"`
+	BaseUrl   *string `json:"base_url"`
+	Image     *string `json:"image"`
 	IsValid   bool    `json:"is_valid"`
 	CreatedAt string  `json:"created_at"`
-	UpdatedAt string  `json:"updated_at,omitempty"`
+	UpdatedAt string  `json:"updated_at"`
 }
 
 // @NOTUSED
@@ -29,15 +29,15 @@ type TPlatformInput struct {
 type TRelationPlatform struct {
 	PlatformId int     `json:"platform_id"`
 	AnimeId    int     `json:"anime_id"`
-	LinkUrl    *string `json:"link_url,omitempty"`
+	LinkUrl    *string `json:"link_url"`
 	CreatedAt  *string `json:"created_at"`
-	UpdatedAt  *string `json:"updated_at,omitempty"`
+	UpdatedAt  *string `json:"updated_at"`
 }
 
 type TRelationPlatformInput struct {
 	PlatformId int    `json:"platform_id"`
 	AnimeId    int    `json:"anime_id"`
-	LinkUrl    string `json:"link_url,omitempty"`
+	LinkUrl    string `json:"link_url"`
 }
 
 func ListPlatform() *sql.Rows {

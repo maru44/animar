@@ -12,51 +12,51 @@ type TAnime struct {
 	ID            int     `json:"id"`
 	Slug          string  `json:"slug"`
 	Title         string  `json:"title"`
-	ThumbUrl      *string `json:"thumb_url"`
-	CopyRight     *string `json:"copyright"`
-	Abbreviation  *string `json:"abbreviation"`
-	Description   *string `json:"description"`
-	State         *string `json:"state"`
-	SeriesId      *int    `json:"series_id"`
-	CountEpisodes *int    `json:"count_episodes"`
+	ThumbUrl      *string `json:"thumb_url,omitempty"`
+	CopyRight     *string `json:"copyright,omitempty"`
+	Abbreviation  *string `json:"abbreviation,omitempty"`
+	Description   *string `json:"description,omitempty"`
+	State         *string `json:"state,omitempty"`
+	SeriesId      *int    `json:"series_id,omitempty"`
+	CountEpisodes *int    `json:"count_episode,omitemptys"`
 	CreatedAt     string  `json:"created_at"`
-	UpdatedAt     *string `json:"updated_at"`
+	UpdatedAt     *string `json:"updated_at,omitempty"`
 }
 
 type TAnimeWithUserWatchReview struct {
 	ID            int     `json:"id"`
 	Slug          string  `json:"slug"`
 	Title         string  `json:"title"`
-	ThumbUrl      *string `json:"thumb_url"`
-	CopyRight     *string `json:"copyright"`
-	Abbreviation  *string `json:"abbreviation"`
-	Description   *string `json:"description"`
-	State         *string `json:"state"`
-	SeriesId      *int    `json:"series_id"`
-	CountEpisodes *int    `json:"count_episodes"`
+	ThumbUrl      *string `json:"thumb_url,omitempty"`
+	CopyRight     *string `json:"copyright,omitempty"`
+	Abbreviation  *string `json:"abbreviation,omitempty"`
+	Description   *string `json:"description,omitempty"`
+	State         *string `json:"state,omitempty"`
+	SeriesId      *int    `json:"series_id,omitempty"`
+	CountEpisodes *int    `json:"count_episodes,omitempty"`
 	CreatedAt     string  `json:"created_at"`
-	UpdatedAt     *string `json:"updated_at"`
+	UpdatedAt     *string `json:"updated_at,omitempty"`
 	// watch from here
-	Watch         int    `json:"watch"`
-	Star          int    `json:"star"`
-	ReviewContent string `json:"review_content"`
+	Watch         int    `json:"watch,omitempty"`
+	Star          int    `json:"star,omitempty"`
+	ReviewContent string `json:"review_content,omitempty"`
 }
 
 type TAnimeAdmin struct {
 	ID            int     `json:"id"`
 	Slug          string  `json:"slug"`
 	Title         string  `json:"title"`
-	Abbreviation  *string `json:"abbreviation"`
-	Kana          *string `json:"kana"`
-	EngName       *string `json:"eng_name"`
-	ThumbUrl      *string `json:"thumb_url"`
-	CopyRight     *string `json:"copyright"`
-	Description   *string `json:"description"`
-	State         *string `json:"state"`
-	SeriesId      *int    `json:"series_id"`
-	CountEpisodes *int    `json:"count_episodes"`
+	Abbreviation  *string `json:"abbreviation,omitempty"`
+	Kana          *string `json:"kana,omitempty"`
+	EngName       *string `json:"eng_name,omitempty"`
+	ThumbUrl      *string `json:"thumb_url,omitempty"`
+	CopyRight     *string `json:"copyright,omitempty"`
+	Description   *string `json:"description,omitempty"`
+	State         *string `json:"state,omitempty"`
+	SeriesId      *int    `json:"series_id,omitempty"`
+	CountEpisodes *int    `json:"count_episodes,omitempty"`
 	CreatedAt     string  `json:"created_at"`
-	UpdatedAt     *string `json:"updated_at"`
+	UpdatedAt     *string `json:"updated_at,omitempty"`
 }
 
 type TAnimeMinimum struct {
