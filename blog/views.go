@@ -3,7 +3,6 @@ package blog
 import (
 	"animar/v1/tools"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -181,8 +180,6 @@ func InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
 	} else {
 		var posted TBlogInputWith
 		json.NewDecoder(r.Body).Decode(&posted)
-		// @TODO delete
-		fmt.Print(posted)
 
 		value := InsertBlog(posted.Title, posted.Abstract, posted.Content, userId)
 		result.Num = value

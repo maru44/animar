@@ -159,8 +159,7 @@ func InsertReviewContent(animeId int, userId string, content string) string {
 	defer stmtInsert.Close()
 
 	exe, err := stmtInsert.Exec(animeId, content, userId)
-	insertedId, err := exe.LastInsertId()
-	fmt.Print(int(insertedId))
+	_, err = exe.LastInsertId()
 	if err != nil {
 		panic(err.Error())
 	}
@@ -204,12 +203,11 @@ func InsertReviewStar(animeId int, userId string, rating int) int {
 	defer stmtInsert.Close()
 
 	exe, err := stmtInsert.Exec(animeId, rating, userId)
-	insertedId, err := exe.LastInsertId()
+	_, err = exe.LastInsertId()
 	if err != nil {
 		panic(err.Error())
 	}
 
-	fmt.Print(insertedId)
 	return rating
 }
 

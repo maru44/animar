@@ -3,7 +3,6 @@ package watch
 import (
 	"animar/v1/tools"
 	"database/sql"
-	"fmt"
 )
 
 type TAudience struct {
@@ -99,11 +98,10 @@ func InsertWatch(animeId int, state int, userId string) int {
 
 	exe, err := stmtInsert.Exec(state, animeId, userId)
 
-	insertedId, err := exe.LastInsertId()
+	_, err = exe.LastInsertId()
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Print(insertedId)
 
 	return state
 }
@@ -127,11 +125,10 @@ func UpsertWatch(animeId int, state int, userId string) int {
 		// update
 		stmtUpdate, err := db.Prepare("UPDATE audiences SET state = ? WHERE user_id = ? AND anime_id = ?")
 		defer stmtUpdate.Close()
-		exe, err := stmtUpdate.Exec(state, userId, animeId)
+		_, err = stmtUpdate.Exec(state, userId, animeId)
 		if err != nil {
 			panic(err.Error())
 		}
-		fmt.Print(exe)
 		return state
 	}
 }
@@ -140,11 +137,10 @@ func DeleteWatch(animeId int, userId string) bool {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	exe, err := db.Exec("DELETE FROM audiences WHERE anime_id = ? AND user_id = ?", animeId, userId)
+	_, err := db.Exec("DELETE FROM audiences WHERE anime_id = ? AND user_id = ?", animeId, userId)
 	if err != nil {
 		//panic(err.Error())
 		return false
 	}
-	fmt.Print(exe.RowsAffected())
 	return true
 }

@@ -239,7 +239,7 @@ func UpdateAnime(id int, title string, abbreviation string, kana string, eng_nam
 	defer db.Close()
 
 	exe, err := db.Exec(
-		"UPDATE animes SET title = ?, abbreviation = ?, kana = ?, eng_name = ?, content = ?, thumb_url = ?, state = ?, series_id = ?, count_episodes = ?, copyright = ? WHERE id = ?",
+		"UPDATE animes SET title = ?, abbreviation = ?, kana = ?, eng_name = ?, description = ?, thumb_url = ?, state = ?, series_id = ?, count_episodes = ?, copyright = ? WHERE id = ?",
 		title, tools.NewNullString(abbreviation), tools.NewNullString(kana),
 		tools.NewNullString(eng_name), tools.NewNullString(content),
 		tools.NewNullString(thumbUrl), tools.NewNullString(state),

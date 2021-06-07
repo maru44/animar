@@ -76,6 +76,5 @@ func SendVerifyEmailAtRegister(ctx context.Context, client *auth.Client, email s
 
 func SetAdminClaimExe(ctx context.Context, client *auth.Client, idToken *string) {
 	userId := tools.GetUserIdFromToken(*idToken)
-	fmt.Print(userId)
 	SetAdminClaim(ctx, client, userId)
 }

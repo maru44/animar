@@ -7,7 +7,7 @@ create table animes (
     slug CHAR(12) NOT NULL UNIQUE,
     title VARCHAR(128) NOT NULL,
     abbreviation VARCHAR(64) NULL COMMENT '略称',
-    kana VARCHAR(64) NULL COMMENT 'カナ',
+    kana VARCHAR(64) NULL COMMENT 'かな',
     eng_name VARCHAR(64) COMMENT 'roman',
     thumb_url VARCHAR(256) NULL,
     copyright VARCHAR(256) NULL,
