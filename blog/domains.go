@@ -14,8 +14,8 @@ func ListBlogDomain() []TBlog {
 		var b TBlog
 		err := rows.Scan(
 			&b.ID, &b.Slug, &b.Title, &b.Abstract,
-			&b.Content, &b.IsPublic,
-			&b.UserId, &b.CreatedAt, &b.UpdatedAt,
+			&b.Content, &b.UserId, &b.IsPublic,
+			&b.CreatedAt, &b.UpdatedAt,
 		)
 		if err != nil {
 			panic(err.Error())
@@ -34,8 +34,8 @@ func ListBlogJoinAnimeDomain() []TBlogJoinAnimes {
 		var b TBlogJoinAnimes
 		err := rows.Scan(
 			&b.ID, &b.Slug, &b.Title, &b.Abstract,
-			&b.Content, &b.IsPublic,
-			&b.UserId, &b.CreatedAt, &b.UpdatedAt,
+			&b.Content, &b.UserId, &b.IsPublic,
+			&b.CreatedAt, &b.UpdatedAt,
 		)
 
 		// anim info(minimum)
@@ -61,7 +61,7 @@ func ListBlogJoinAnimeUserDomain() []TBlogJoinAnimesUser {
 		var b TBlogJoinAnimesUser
 		err := rows.Scan(
 			&b.ID, &b.Slug, &b.Title, &b.Abstract,
-			&b.Content, &b.IsPublic, &b.UserId,
+			&b.Content, &b.UserId, &b.IsPublic,
 			&b.CreatedAt, &b.UpdatedAt,
 		)
 
@@ -113,7 +113,7 @@ func ListBlogByUserJoinAnimeUserDomain(uid string) []TBlogJoinAnimesUser {
 		var b TBlogJoinAnimesUser
 		err := rows.Scan(
 			&b.ID, &b.Slug, &b.Title, &b.Abstract,
-			&b.Content, &b.IsPublic, &b.UserId,
+			&b.Content, &b.UserId, &b.IsPublic,
 			&b.CreatedAt, &b.UpdatedAt,
 		)
 
@@ -169,14 +169,14 @@ func RelationBlogAnimesDomain(blogId int) []TJoinedAnime {
 	var ret []TJoinedAnime
 
 	for rows.Next() {
-		var ani TJoinedAnime
+		var a TJoinedAnime
 		err := rows.Scan(
-			&ani.AnimeId, &ani.Slug, &ani.Title,
+			&a.AnimeId, &a.Slug, &a.Title,
 		)
 		if err != nil {
 			fmt.Print(err)
 		}
-		ret = append(ret, ani)
+		ret = append(ret, a)
 	}
 	defer rows.Close()
 	return ret

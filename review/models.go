@@ -78,20 +78,20 @@ func DetailReviewAnimeUser(animeId int, userId string) TReview {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	var rev TReview
+	var r TReview
 	err := db.QueryRow(
 		"SELECT * FROM reviews WHERE anime_id = ? AND user_id = ?", animeId, userId,
 	).Scan(
-		&rev.ID, &rev.Content, &rev.Rating, &rev.AnimeId, &rev.UserId, &rev.CreatedAt, &rev.UpdatedAt,
+		&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt,
 	)
 
 	switch {
 	case err == sql.ErrNoRows:
-		rev.ID = 0
+		r.ID = 0
 	case err != nil:
 		panic(err.Error())
 	}
-	return rev
+	return r
 }
 
 // List
@@ -112,7 +112,7 @@ func OnesReviewsJoinAnime(userId string) *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
 	rows, err := db.Query(
-		"SELECT reviews.*, animes.title, animes.slug, animes.content, animes.on_air_state "+
+		"SELECT reviews.*, animes.title, animes.slug, animes.description, animes.state "+
 			"FROM reviews LEFT JOIN animes ON reviews.anime_id = animes.id WHERE user_id = ?", userId,
 	)
 	if err != nil {

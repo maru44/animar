@@ -12,7 +12,7 @@ type TAudience struct {
 	AnimeId   int    `json:"anime_id"`
 	UserId    string `json:"user_id"`
 	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at,omitempty"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type TAudienceCount struct {
@@ -26,10 +26,10 @@ type TAudienceJoinAnime struct {
 	AnimeId   int     `json:"anime_id"`
 	UserId    string  `json:"user_id"`
 	CreatedAt string  `json:"created_at"`
-	UpdatedAt string  `json:"updated_at,omitempty"`
+	UpdatedAt string  `json:"updated_at"`
 	Title     string  `json:"title"`
 	Slug      string  `json:"slug"`
-	Content   *string `json:"content,omitempty"`
+	Content   *string `json:"content"`
 	AState    *int    `json:"anime_state"`
 }
 
@@ -62,7 +62,7 @@ func OnesAnimeWatchJoinList(userId string) *sql.Rows {
 	defer db.Close()
 	rows, err := db.Query(
 		"SELECT audiences.*, animes.title, animes.slug, animes.description, animes.state "+
-			"FROM audiences LEFT JOIN animes ON audiences.anime_id = anime.id WHERE user_id = ?", userId,
+			"FROM audiences LEFT JOIN animes ON audiences.anime_id = animes.id WHERE user_id = ?", userId,
 	)
 	if err != nil {
 		panic(err.Error())

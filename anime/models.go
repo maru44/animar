@@ -9,33 +9,33 @@ import (
 )
 
 type TAnime struct {
-	ID            int     `json:"id,omitempty"`
-	Slug          string  `json:"slug,omitempty"`
-	Title         string  `json:"title,omitempty"`
-	ThumbUrl      *string `json:"thumb_url,omitempty"`
-	CopyRight     *string `json:"copyright,omitempty"`
-	Abbreviation  *string `json:"abbreviation,omitempty"`
-	Description   *string `json:"description,omitempty"`
-	State         *string `json:"state,omitempty"`
-	SeriesId      *int    `json:"series_id,omitempty"`
-	CountEpisodes *int    `json:"count_episodes,omitempty"`
-	CreatedAt     string  `json:"created_at,omitempty"`
-	UpdatedAt     *string `json:"updated_at,omitempty"`
+	ID            int     `json:"id"`
+	Slug          string  `json:"slug"`
+	Title         string  `json:"title"`
+	ThumbUrl      *string `json:"thumb_url"`
+	CopyRight     *string `json:"copyright"`
+	Abbreviation  *string `json:"abbreviation"`
+	Description   *string `json:"description"`
+	State         *string `json:"state"`
+	SeriesId      *int    `json:"series_id"`
+	CountEpisodes *int    `json:"count_episodes"`
+	CreatedAt     string  `json:"created_at"`
+	UpdatedAt     *string `json:"updated_at"`
 }
 
 type TAnimeWithUserWatchReview struct {
-	ID            int     `json:"id,omitempty"`
-	Slug          string  `json:"slug,omitempty"`
-	Title         string  `json:"title,omitempty"`
-	ThumbUrl      *string `json:"thumb_url,omitempty"`
-	CopyRight     *string `json:"copyright,omitempty"`
-	Abbreviation  *string `json:"abbreviation,omitempty"`
-	Description   *string `json:"description,omitempty"`
-	State         *string `json:"state,omitempty"`
-	SeriesId      *int    `json:"series_id,omitempty"`
-	CountEpisodes *int    `json:"count_episodes,omitempty"`
-	CreatedAt     string  `json:"created_at,omitempty"`
-	UpdatedAt     *string `json:"updated_at,omitempty"`
+	ID            int     `json:"id"`
+	Slug          string  `json:"slug"`
+	Title         string  `json:"title"`
+	ThumbUrl      *string `json:"thumb_url"`
+	CopyRight     *string `json:"copyright"`
+	Abbreviation  *string `json:"abbreviation"`
+	Description   *string `json:"description"`
+	State         *string `json:"state"`
+	SeriesId      *int    `json:"series_id"`
+	CountEpisodes *int    `json:"count_episodes"`
+	CreatedAt     string  `json:"created_at"`
+	UpdatedAt     *string `json:"updated_at"`
 	// watch from here
 	Watch         int    `json:"watch"`
 	Star          int    `json:"star"`
@@ -43,26 +43,26 @@ type TAnimeWithUserWatchReview struct {
 }
 
 type TAnimeAdmin struct {
-	ID            int     `json:"id,omitempty"`
-	Slug          string  `json:"slug,omitempty"`
-	Title         string  `json:"title,omitempty"`
-	Abbreviation  *string `json:"abbreviation,omitempty"`
-	Kana          *string `json:"kana,omitempty"`
-	EngName       *string `json:"eng_name,omitempty"`
-	ThumbUrl      *string `json:"thumb_url,omitempty"`
-	CopyRight     *string `json:"copyright,omitempty"`
-	Description   *string `json:"description,omitempty"`
-	State         *string `json:"state,omitempty"`
-	SeriesId      *int    `json:"series_id,omitempty"`
-	CountEpisodes *int    `json:"count_episodes,omitempty"`
-	CreatedAt     string  `json:"created_at,omitempty"`
-	UpdatedAt     *string `json:"updated_at,omitempty"`
+	ID            int     `json:"id"`
+	Slug          string  `json:"slug"`
+	Title         string  `json:"title"`
+	Abbreviation  *string `json:"abbreviation"`
+	Kana          *string `json:"kana"`
+	EngName       *string `json:"eng_name"`
+	ThumbUrl      *string `json:"thumb_url"`
+	CopyRight     *string `json:"copyright"`
+	Description   *string `json:"description"`
+	State         *string `json:"state"`
+	SeriesId      *int    `json:"series_id"`
+	CountEpisodes *int    `json:"count_episodes"`
+	CreatedAt     string  `json:"created_at"`
+	UpdatedAt     *string `json:"updated_at"`
 }
 
 type TAnimeMinimum struct {
-	ID    int    `json:"id,omitempty"`
-	Slug  string `json:"slug,omitempty"`
-	Title string `json:"title,omitempty"`
+	ID    int    `json:"id"`
+	Slug  string `json:"slug"`
+	Title string `json:"title"`
 }
 
 func ListAnime() *sql.Rows {
@@ -90,14 +90,28 @@ func SearchAnime(title string) *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
 	rows, err := db.Query(
-		"SELECT DISTINCT id, slug, title from animes where title like ?",
-		"%"+title+"%",
-		"OR kana like ?",
-		"%"+title+"%",
-		"OR eng_name like ?",
-		"%"+title+"%",
-		"limit 12",
+		"SELECT DISTINCT id, slug, title from animes where title like " +
+			"'%" + title + "%' " +
+			"OR kana like " +
+			"'%" + title + "%' " +
+			"OR eng_name like " +
+			"'%" + title + "%' " +
+			"limit 12",
 	)
+
+	// 1つでも NULLだと引っかからない
+	// rows, err := db.Query(
+	// 	"SELECT id,slug, title FROM animes where " +
+	// 		"CONCAT(title,abbreviation,kana,eng_name) like" +
+	// 		"'%" + title + "%'",
+	// )
+
+	// FULLTEXT indexでないとダメ
+	// rows, err := db.Query(
+	// 	"SELECT DISTINCT id, slug, title FROM animes " +
+	// 		"WHERE MATCH (title,kana,eng_name,abbreviation) " +
+	// 		"AGAINST ('+" + title + "')",
+	// )
 	if err != nil {
 		panic(err.Error())
 	}
@@ -130,7 +144,7 @@ func DetailAnimeBySlug(slug string) TAnime {
 	defer db.Close()
 
 	var a TAnime
-	err := db.QueryRow("SELECT id, slug, title, abbreviation, thumb_url, description, state, series_id, count_episodes, created_at, updated_at FROM animes WHERE slug = ?", slug).Scan(
+	err := db.QueryRow("SELECT id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, created_at, updated_at FROM animes WHERE slug = ?", slug).Scan(
 		&a.ID, &a.Slug, &a.Title, &a.Abbreviation, &a.ThumbUrl, &a.CopyRight, &a.Description,
 		&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 	)

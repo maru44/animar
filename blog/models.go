@@ -13,12 +13,12 @@ type TBlog struct {
 	ID        int     `json:"id"`
 	Slug      string  `json:"slug"`
 	Title     string  `json:"title"`
-	Abstract  *string `json:"abstract,omitempty"`
-	Content   string  `json:"content,omitempty"`
+	Abstract  *string `json:"abstract"`
+	Content   string  `json:"content"`
 	IsPublic  bool    `json:"is_public"`
-	UserId    string  `json:"user_id,omitempty"`
+	UserId    string  `json:"user_id"`
 	CreatedAt string  `json:"created_at"`
-	UpdatedAt string  `json:"updated_at,omitempty"`
+	UpdatedAt string  `json:"updated_at"`
 }
 
 type TJoinedAnime struct {
@@ -31,7 +31,7 @@ type TJoinedBlog struct {
 	BlogId    int    `json:"blog_id"`
 	Title     string `json:"title"`
 	Slug      string `json:"slug"`
-	Abstract  string `json:"abstract,omitempty"`
+	Abstract  string `json:"abstract"`
 	CreatedAt string `json:"created_at"`
 }
 
@@ -39,13 +39,13 @@ type TBlogJoinAnimes struct {
 	ID        int            `json:"id"`
 	Slug      string         `json:"slug"`
 	Title     string         `json:"title"`
-	Abstract  *string        `json:"abstract,omitempty"`
-	Content   string         `json:"content,omitempty"`
+	Abstract  *string        `json:"abstract"`
+	Content   string         `json:"content"`
+	UserId    string         `json:"user_id"`
 	IsPublic  bool           `json:"is_public"`
-	UserId    string         `json:"user_id,omitempty"`
 	CreatedAt string         `json:"created_at"`
-	UpdatedAt string         `json:"updated_at,omitempty"`
-	Animes    []TJoinedAnime `json:"animes,omitempty"`
+	UpdatedAt string         `json:"updated_at"`
+	Animes    []TJoinedAnime `json:"animes"`
 }
 
 type TBlogJoinAnimesUser struct {
@@ -54,8 +54,8 @@ type TBlogJoinAnimesUser struct {
 	Title     string         `json:"title"`
 	Abstract  *string        `json:"abstract,omitempty"`
 	Content   string         `json:"content,omitempty"`
-	IsPublic  bool           `json:"is_public"`
 	UserId    string         `json:"user_id,omitempty"`
+	IsPublic  bool           `json:"is_public"`
 	CreatedAt string         `json:"created_at"`
 	UpdatedAt string         `json:"updated_at,omitempty"`
 	Animes    []TJoinedAnime `json:"animes,omitempty"`
@@ -88,9 +88,9 @@ func ListBlogJoinAnime() *sql.Rows {
 	defer db.Close()
 	// fail
 	rows, err := db.Query(
-		"SELECT blogs.*, animes.id FROM blogs " +
-			"LEFT JOIN relation_blog_animes ON blogs.id = relation_blog_animes.blog_id " +
-			"LEFT JOIN animes ON animes.id = relation_blog_animes.anime_id",
+		"SELECT blogs.*, animes FROM blogs " +
+			"LEFT JOIN relation_blog_animes ON blog.id = relation_blog_animes.blog_id " +
+			"LEFT JOIN animes ON anime.id = relation_blog_animes.anime_id",
 	)
 	if err != nil {
 		panic(err.Error())
@@ -118,7 +118,7 @@ func DetailBlog(id int) TBlogJoinAnimes {
 		"SELECT blogs.* FROM blogs WHERE id = ?", id,
 	).Scan(
 		&b.ID, &b.Slug, &b.Title, &b.Abstract, &b.Content,
-		&b.IsPublic, &b.UserId, &b.CreatedAt, &b.UpdatedAt,
+		&b.UserId, &b.IsPublic, &b.CreatedAt, &b.UpdatedAt,
 	)
 
 	switch {
@@ -139,7 +139,7 @@ func DetailBlogWithUser(id int) TBlogJoinAnimesUser {
 		"SELECT blogs.* FROM blogs WHERE id = ?", id,
 	).Scan(
 		&b.ID, &b.Slug, &b.Title, &b.Abstract, &b.Content,
-		&b.IsPublic, &b.UserId, &b.CreatedAt, &b.UpdatedAt,
+		&b.UserId, &b.IsPublic, &b.CreatedAt, &b.UpdatedAt,
 	)
 
 	switch {
@@ -158,7 +158,7 @@ func DetailBlogBySlug(slug string) TBlogJoinAnimes {
 	var b TBlogJoinAnimes
 	err := db.QueryRow("SELECT * FROM blogs WHERE slug = ?", slug).Scan(
 		&b.ID, &b.Slug, &b.Title, &b.Abstract,
-		&b.Content, &b.IsPublic, &b.UserId,
+		&b.Content, &b.UserId, &b.IsPublic,
 		&b.CreatedAt, &b.UpdatedAt,
 	)
 
@@ -178,7 +178,7 @@ func DetailBlogWithUserBySlug(slug string) TBlogJoinAnimesUser {
 	var b TBlogJoinAnimesUser
 	err := db.QueryRow("SELECT * FROM blogs WHERE slug = ?", slug).Scan(
 		&b.ID, &b.Slug, &b.Title, &b.Abstract, &b.Content,
-		&b.IsPublic, &b.UserId, &b.CreatedAt, &b.UpdatedAt,
+		&b.UserId, &b.IsPublic, &b.CreatedAt, &b.UpdatedAt,
 	)
 
 	switch {
@@ -248,8 +248,8 @@ func RelationAnimeByBlog(blogId int) *sql.Rows {
 
 	rows, err := db.Query(
 		"SELECT relation_blog_animes.anime_id, animes.slug, animes.title FROM relation_blog_animes " +
-			"LEFT JOIN animes ON anime.id = relation_blog_animes.anime_id " +
-			"WHERE blogs = " + strconv.Itoa(blogId),
+			"LEFT JOIN animes ON animes.id = relation_blog_animes.anime_id " +
+			"WHERE blog_id = " + strconv.Itoa(blogId),
 	)
 	if err != nil {
 		panic(err.Error())
