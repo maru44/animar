@@ -69,10 +69,10 @@ func InsertSeriesView(w http.ResponseWriter, r *http.Request) error {
 	if userId == "" {
 		result.Status = 4003
 	} else {
-		var posted TSeriesInput
-		json.NewDecoder(r.Body).Decode(&posted)
+		var p TSeriesInput
+		json.NewDecoder(r.Body).Decode(&p)
 		insertedId := InsertSeries(
-			posted.EngName, posted.SeriesName,
+			p.EngName, p.SeriesName,
 		)
 		result.Num = insertedId
 	}

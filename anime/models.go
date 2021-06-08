@@ -65,6 +65,12 @@ type TAnimeMinimum struct {
 	Title string `json:"title"`
 }
 
+type TSeason struct {
+	ID     int    `json:"id"`
+	Year   string `json:"year"`
+	Season string `json:"season"`
+}
+
 func ListAnime() *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
@@ -179,6 +185,24 @@ func DetailAnimeBySlugWithUserWatchReview(slug string, userId string) TAnimeWith
 		panic(err.Error())
 	}
 	return a
+}
+
+/************************************
+             relation
+************************************/
+
+func RelationSeasonByAnime(animeId int) *sql.Rows {
+	db := tools.AccessDB()
+	defer db.Close()
+	rows, err := db.Query(
+		"SELECT seasons.id, seasons.year, seasons.season FROM relation_anime_season "+
+			"LEFT JOIN seasons ON relation_anime_season.season_id = seasons.id"+
+			"WHERE anime_id = ?", animeId,
+	)
+	if err != nil {
+		panic(err.Error())
+	}
+	return rows
 }
 
 /************************************

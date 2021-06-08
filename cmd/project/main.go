@@ -7,6 +7,7 @@ import (
 	"animar/v1/configs"
 	"animar/v1/platform"
 	"animar/v1/review"
+	"animar/v1/seasons"
 	"animar/v1/series"
 	"animar/v1/tools"
 	"animar/v1/watch"
@@ -68,6 +69,11 @@ func main() {
 	/*   series   */
 	http.HandleFunc("/series/", tools.Handle(series.SeriesView))
 	http.HandleFunc("/series/post/", tools.Handle(series.InsertSeriesView))
+
+	/*   seasons   */
+	http.HandleFunc("/season/", tools.Handle(seasons.SeasonView))
+	http.HandleFunc("/season/post/", tools.Handle(seasons.InsertSeasonView))
+	// relations
 
 	/*   platform   */
 	http.HandleFunc("/admin/platform/", tools.Handle(platform.PlatformView))
