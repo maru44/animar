@@ -7,42 +7,13 @@ import (
 	"strconv"
 )
 
-type TSeasonRelationResponse struct {
-	Status int               `json:"status"`
-	Data   []TSeasonRelation `json:"data"`
-}
-
-type TSeasonResponse struct {
-	Status int       `json:"status"`
-	Data   []TSeason `json:"data"`
-}
-
-func (result TSeasonRelationResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-	tools.SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
-}
-
-func (result TSeasonResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-	tools.SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
+type TSeasonRelationInput struct {
+	SeasonId int `json:"season_id"`
+	AnimeId  int `json:"anime_id"`
 }
 
 func SeasonView(w http.ResponseWriter, r *http.Request) error {
-	result := TSeasonResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	var userId string
 
 	switch r.Method {
@@ -110,6 +81,24 @@ func SeasonByAnimeIdView(w http.ResponseWriter, r *http.Request) error {
 
 	seasons := SeasonByAnimeIdDomain(id)
 	result.Data = seasons
+	result.ResponseWrite(w)
+	return nil
+}
+
+func InsertRelationSeasonView(w http.ResponseWriter, r *http.Request) error {
+	result := tools.TBaseJsonResponse{Status: 200}
+	userId := tools.GetAdminIdFromCookie(r)
+
+	if userId == "" {
+		result.Status = 4003
+	} else {
+		var s TSeasonRelationInput
+		json.NewDecoder(r.Body).Decode(&s)
+		value := insertRelation(
+			s.SeasonId, s.AnimeId,
+		)
+		result.Data = value
+	}
 	result.ResponseWrite(w)
 	return nil
 }

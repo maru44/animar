@@ -72,8 +72,10 @@ func main() {
 
 	/*   seasons   */
 	http.HandleFunc("/season/", tools.Handle(seasons.SeasonView))
-	http.HandleFunc("/season/post/", tools.Handle(seasons.InsertSeasonView))
+	http.HandleFunc("/admin/season/post/", tools.Handle(seasons.InsertSeasonView))
 	// relations
+	http.HandleFunc("/admin/season/anime/post/", tools.Handle(seasons.InsertRelationSeasonView))
+	http.HandleFunc("/season/anime/", tools.Handle(seasons.SeasonByAnimeIdView)) // ?id=
 
 	/*   platform   */
 	http.HandleFunc("/admin/platform/", tools.Handle(platform.PlatformView))

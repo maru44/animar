@@ -31,7 +31,7 @@ func ListRelationPlatformDomain(animeId int) []TRelationPlatform {
 		var r TRelationPlatform
 		err := rows.Scan(
 			&r.PlatformId, &r.AnimeId, &r.LinkUrl,
-			&r.CreatedAt, &r.UpdatedAt,
+			&r.CreatedAt, &r.UpdatedAt, &r.PlatName,
 		)
 		if err != nil {
 			panic(err.Error())

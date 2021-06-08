@@ -83,7 +83,7 @@ func relationSeasonByAnime(animeId int) *sql.Rows {
 	defer db.Close()
 	rows, err := db.Query(
 		"SELECT seasons.id, seasons.year, seasons.season FROM relation_anime_season "+
-			"LEFT JOIN seasons ON relation_anime_season.season_id = seasons.id"+
+			"LEFT JOIN seasons ON relation_anime_season.season_id = seasons.id "+
 			"WHERE anime_id = ?", animeId,
 	)
 	if err != nil {

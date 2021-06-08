@@ -32,6 +32,7 @@ type TRelationPlatform struct {
 	LinkUrl    *string `json:"link_url"`
 	CreatedAt  *string `json:"created_at"`
 	UpdatedAt  *string `json:"updated_at"`
+	PlatName   *string `json:"plat_name"`
 }
 
 type TRelationPlatformInput struct {
@@ -130,8 +131,9 @@ func relationPlatformByAnime(animeId int) *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
 	rows, err := db.Query(
-		"Select * from relation_anime_platform where anime_id = ?",
-		animeId,
+		"Select relation_anime_platform.*, platforms.plat_name FROM relation_anime_platform "+
+			"LEFT JOIN platforms ON relation_anime_platform.platform_id = platforms.id "+
+			"WHERE anime_id = ?", animeId,
 	)
 	if err != nil {
 		panic(err.Error())
