@@ -7,25 +7,8 @@ import (
 	"strconv"
 )
 
-type TSeriesResponse struct {
-	Status int       `json:"status"`
-	Data   []TSeries `json:"data"`
-}
-
-func (result TSeriesResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-	tools.SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
-}
-
 func SeriesView(w http.ResponseWriter, r *http.Request) error {
-	result := TSeriesResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	var userId string
 
 	switch r.Method {
@@ -64,7 +47,7 @@ func SeriesView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func InsertSeriesView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetAdminIdFromCookie(r)
 	if userId == "" {
 		result.Status = 4003
@@ -74,14 +57,14 @@ func InsertSeriesView(w http.ResponseWriter, r *http.Request) error {
 		insertedId := InsertSeries(
 			p.EngName, p.SeriesName,
 		)
-		result.Num = insertedId
+		result.Data = insertedId
 	}
 	result.ResponseWrite(w)
 	return nil
 }
 
 func UpdateSeriesView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetAdminIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -94,7 +77,7 @@ func UpdateSeriesView(w http.ResponseWriter, r *http.Request) error {
 		var posted TSeriesInput
 		json.NewDecoder(r.Body).Decode(&posted)
 		value := UpdateSeries(posted.EngName, posted.SeriesName, id)
-		result.Num = value
+		result.Data = value
 	}
 
 	result.ResponseWrite(w)

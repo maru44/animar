@@ -29,7 +29,7 @@ type TAudienceJoinAnime struct {
 	Title     string  `json:"title"`
 	Slug      string  `json:"slug"`
 	Content   *string `json:"content"`
-	AState    *int    `json:"anime_state"`
+	AState    *string `json:"anime_state"`
 }
 
 // Count group by animeId

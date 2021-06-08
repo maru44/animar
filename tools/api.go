@@ -27,16 +27,6 @@ func IsProductionEnv() bool {
 	return true
 }
 
-type TIntJsonReponse struct {
-	Status int `json:"status"`
-	Num    int `json:"data"`
-}
-
-type TStringJsonResponse struct {
-	Status int    `json:"status"`
-	String string `json:"data"`
-}
-
 type TUserJsonResponse struct {
 	Status     int           `json:"status"`
 	User       auth.UserInfo `json:"user"`
@@ -104,16 +94,8 @@ func SetDefaultResponseHeader(w http.ResponseWriter) bool {
 	return true
 }
 
-func (result TIntJsonReponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-	SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
+func ApiWrapper(fn func()) {
+	fn()
 }
 
 func (result TUserJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
@@ -145,20 +127,6 @@ func (result TVoidJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 }
 
 func (result TBaseJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-
-	SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
-}
-
-func (result TStringJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 	res, err := json.Marshal(result)
 
 	if err != nil {

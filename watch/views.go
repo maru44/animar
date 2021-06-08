@@ -7,49 +7,15 @@ import (
 	"strconv"
 )
 
-type TAudienceCountJsonResponse struct {
-	Status int              `json:"status"`
-	Data   []TAudienceCount `json:"data"`
-}
-
-type TUserWatchJoinResponse struct {
-	Status int                  `json:"status"`
-	Data   []TAudienceJoinAnime `json:"data"`
-}
-
 type TAudienceInput struct {
 	AnimeId int    `json:"anime_id"`
 	State   int    `json:"state,string"` // form
 	UserId  string `json:"user_id"`
 }
 
-func (result TAudienceCountJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-	tools.SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
-}
-
-func (result TUserWatchJoinResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-	tools.SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
-}
-
 // by anime
 func AnimeWatchCountView(w http.ResponseWriter, r *http.Request) error {
-	result := TAudienceCountJsonResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
@@ -64,7 +30,7 @@ func AnimeWatchCountView(w http.ResponseWriter, r *http.Request) error {
 // by userId
 // ?user=userId
 func UserWatchStatusView(w http.ResponseWriter, r *http.Request) error {
-	result := TUserWatchJoinResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := r.URL.Query().Get("user")
 
 	var watches []TAudienceJoinAnime
@@ -78,7 +44,7 @@ func UserWatchStatusView(w http.ResponseWriter, r *http.Request) error {
 // anime by ?anime=
 // user by cookie
 func WatchAnimeStateOfUserView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
@@ -88,7 +54,7 @@ func WatchAnimeStateOfUserView(w http.ResponseWriter, r *http.Request) error {
 		result.Status = 4001
 	} else {
 		watch := WatchDetail(userId, animeId)
-		result.Num = watch
+		result.Data = watch
 	}
 
 	result.ResponseWrite(w)
@@ -97,7 +63,7 @@ func WatchAnimeStateOfUserView(w http.ResponseWriter, r *http.Request) error {
 
 // watch post view
 func WatchPostView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetIdFromCookie(r)
 	if userId == "" {
 		result.Status = 4001
@@ -109,7 +75,7 @@ func WatchPostView(w http.ResponseWriter, r *http.Request) error {
 	json.NewDecoder(r.Body).Decode(&p)
 	// watch := InsertWatch(posted.AnimeId, posted.Watch, userId)
 	watch := UpsertWatch(p.AnimeId, p.State, userId)
-	result.Num = watch
+	result.Data = watch
 
 	result.ResponseWrite(w)
 	return nil

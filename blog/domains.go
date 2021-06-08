@@ -89,7 +89,7 @@ func ListBlogByUserJoinAnimeDomain(uid string) []TBlogJoinAnimes {
 		var b TBlogJoinAnimes
 		err := rows.Scan(
 			&b.ID, &b.Slug, &b.Title, &b.Abstract,
-			&b.Content, &b.IsPublic, &b.UserId,
+			&b.Content, &b.UserId, &b.IsPublic,
 			&b.CreatedAt, &b.UpdatedAt,
 		)
 		blogID := b.ID

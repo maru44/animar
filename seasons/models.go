@@ -25,7 +25,7 @@ type TSeasonInput struct {
 	Season string `json:"season"`
 }
 
-func InsertSeason(year string, season string) int {
+func insertSeason(year string, season string) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
@@ -44,7 +44,7 @@ func InsertSeason(year string, season string) int {
 	return int(insertedId)
 }
 
-func ListSeason() *sql.Rows {
+func listSeason() *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select * from seasons")
@@ -54,7 +54,7 @@ func ListSeason() *sql.Rows {
 	return rows
 }
 
-func DetailSeason(id int) TSeason {
+func detailSeason(id int) TSeason {
 	db := tools.AccessDB()
 	defer db.Close()
 
@@ -78,7 +78,7 @@ func DetailSeason(id int) TSeason {
              relation
 ************************************/
 
-func RelationSeasonByAnime(animeId int) *sql.Rows {
+func relationSeasonByAnime(animeId int) *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
 	rows, err := db.Query(
@@ -90,4 +90,23 @@ func RelationSeasonByAnime(animeId int) *sql.Rows {
 		panic(err.Error())
 	}
 	return rows
+}
+
+func insertRelation(seasonId int, animeId int) int {
+	db := tools.AccessDB()
+	defer db.Close()
+
+	stmtInsert, err := db.Prepare(
+		"INSERT INTO relation_anime_season(season_id, anime_id) VALUES(?, ?)",
+	)
+	defer stmtInsert.Close()
+
+	exe, err := stmtInsert.Exec(
+		seasonId, animeId,
+	)
+	insertedId, _ := exe.LastInsertId()
+	if err != nil {
+		fmt.Print(err)
+	}
+	return int(insertedId)
 }

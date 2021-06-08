@@ -65,7 +65,7 @@ func SeasonView(w http.ResponseWriter, r *http.Request) error {
 		var ss []TSeason
 		if id != "" {
 			i, _ := strconv.Atoi(id)
-			s := DetailSeason(i)
+			s := detailSeason(i)
 			if s.ID == 0 {
 				result.Status = 404
 			}
@@ -81,17 +81,17 @@ func SeasonView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func InsertSeasonView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetAdminIdFromCookie(r)
 	if userId == "" {
 		result.Status = 4003
 	} else {
 		var p TSeasonInput
 		json.NewDecoder(r.Body).Decode(&p)
-		insertedId := InsertSeason(
+		insertedId := insertSeason(
 			p.Year, p.Season,
 		)
-		result.Num = insertedId
+		result.Data = insertedId
 	}
 	result.ResponseWrite(w)
 	return nil
@@ -102,7 +102,7 @@ func InsertSeasonView(w http.ResponseWriter, r *http.Request) error {
 ************************************/
 
 func SeasonByAnimeIdView(w http.ResponseWriter, r *http.Request) error {
-	result := TSeasonRelationResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	strId := query.Get("id")

@@ -40,7 +40,7 @@ type TRelationPlatformInput struct {
 	LinkUrl    string `json:"link_url"`
 }
 
-func ListPlatform() *sql.Rows {
+func listPlatform() *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select * from platforms")
@@ -50,7 +50,7 @@ func ListPlatform() *sql.Rows {
 	return rows
 }
 
-func InsertPlatform(engName string, platName string, baseUrl string, image string, isValid bool) int {
+func insertPlatform(engName string, platName string, baseUrl string, image string, isValid bool) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
@@ -71,7 +71,7 @@ func InsertPlatform(engName string, platName string, baseUrl string, image strin
 	return int(insertedId)
 }
 
-func DetailPlatfrom(id int) TPlatform {
+func detailPlatfrom(id int) TPlatform {
 	db := tools.AccessDB()
 	defer db.Close()
 
@@ -93,7 +93,7 @@ func DetailPlatfrom(id int) TPlatform {
 }
 
 // validation by userId @domain or view
-func UpdatePlatform(engName string, platName string, baseUrl string, image string, isValid bool, id int) int {
+func updatePlatform(engName string, platName string, baseUrl string, image string, isValid bool, id int) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
@@ -110,7 +110,7 @@ func UpdatePlatform(engName string, platName string, baseUrl string, image strin
 	return int(updatedId)
 }
 
-func DeletePlatform(id int) int {
+func deletePlatform(id int) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
@@ -126,7 +126,7 @@ func DeletePlatform(id int) int {
 *          relation		    *
 ****************************/
 
-func RelationPlatformByAnime(animeId int) *sql.Rows {
+func relationPlatformByAnime(animeId int) *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
 	rows, err := db.Query(
@@ -139,7 +139,7 @@ func RelationPlatformByAnime(animeId int) *sql.Rows {
 	return rows
 }
 
-func InsertRelation(platformId int, animeId int, linkUrl string) int {
+func insertRelation(platformId int, animeId int, linkUrl string) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
@@ -158,7 +158,7 @@ func InsertRelation(platformId int, animeId int, linkUrl string) int {
 	return int(insertedId)
 }
 
-func DeleteRelationPlatform(animeId int, platformId int) int {
+func deleteRelationPlatform(animeId int, platformId int) int {
 	db := tools.AccessDB()
 	defer db.Close()
 	exe, err := db.Exec(

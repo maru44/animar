@@ -1,7 +1,7 @@
 package platform
 
 func ListPlatformDomain() []TPlatform {
-	rows := ListPlatform()
+	rows := listPlatform()
 	var plats []TPlatform
 	for rows.Next() {
 		var p TPlatform
@@ -25,7 +25,7 @@ func ListPlatformDomain() []TPlatform {
 ****************************/
 
 func ListRelationPlatformDomain(animeId int) []TRelationPlatform {
-	rows := RelationPlatformByAnime(animeId)
+	rows := relationPlatformByAnime(animeId)
 	var relations []TRelationPlatform
 	for rows.Next() {
 		var r TRelationPlatform

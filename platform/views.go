@@ -8,42 +8,8 @@ import (
 	"strconv"
 )
 
-type TPlatformResponse struct {
-	Status int         `json:"status"`
-	Data   []TPlatform `josn:"data"`
-}
-
-type TRelationPlatformResponse struct {
-	Status int                 `json:"status"`
-	Data   []TRelationPlatform `json:"data"`
-}
-
-func (result TPlatformResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-	tools.SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
-}
-
-func (result TRelationPlatformResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-	tools.SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
-}
-
 func PlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := TPlatformResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	var userId string
 
 	switch r.Method {
@@ -66,7 +32,7 @@ func PlatformView(w http.ResponseWriter, r *http.Request) error {
 		var plats []TPlatform
 		if id != "" {
 			i, _ := strconv.Atoi(id)
-			plat := DetailPlatfrom(i)
+			plat := detailPlatfrom(i)
 			if plat.ID == 0 {
 				result.Status = 404
 			}
@@ -82,7 +48,7 @@ func PlatformView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func InsertPlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetAdminIdFromCookie(r)
 
 	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
@@ -105,11 +71,11 @@ func InsertPlatformView(w http.ResponseWriter, r *http.Request) error {
 		}
 		validStr := r.FormValue("valid")
 		isValid, _ := strconv.ParseBool(validStr)
-		insertedId = InsertPlatform(
+		insertedId = insertPlatform(
 			r.FormValue("engName"), r.FormValue("platName"), r.FormValue("baseUrl"),
 			returnFileName, isValid,
 		)
-		result.Num = insertedId
+		result.Data = insertedId
 	}
 	result.ResponseWrite(w)
 	return nil
@@ -117,7 +83,7 @@ func InsertPlatformView(w http.ResponseWriter, r *http.Request) error {
 
 // update ?id=<id>
 func UpdatePlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetAdminIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -144,11 +110,11 @@ func UpdatePlatformView(w http.ResponseWriter, r *http.Request) error {
 		}
 		validStr := r.FormValue("valid")
 		isValid, _ := strconv.ParseBool(validStr)
-		updatedId = UpdatePlatform(
+		updatedId = updatePlatform(
 			r.FormValue("engName"), r.FormValue("platName"), r.FormValue("baseUrl"),
 			returnFileName, isValid, id,
 		)
-		result.Num = updatedId
+		result.Data = updatedId
 	}
 	result.ResponseWrite(w)
 	return nil
@@ -156,7 +122,7 @@ func UpdatePlatformView(w http.ResponseWriter, r *http.Request) error {
 
 // delete platform ?=<id>
 func DeletePlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetAdminIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -166,8 +132,8 @@ func DeletePlatformView(w http.ResponseWriter, r *http.Request) error {
 	if userId == "" {
 		result.Status = 4003
 	} else {
-		deletedRow := DeletePlatform(id)
-		result.Num = deletedRow
+		deletedRow := deletePlatform(id)
+		result.Data = deletedRow
 	}
 	result.ResponseWrite(w)
 	return nil
@@ -178,7 +144,7 @@ func DeletePlatformView(w http.ResponseWriter, r *http.Request) error {
 ****************************/
 
 func RelationPlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := TRelationPlatformResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	query := r.URL.Query()
 	id := query.Get("id") // animeId
 	i, _ := strconv.Atoi(id)
@@ -189,7 +155,7 @@ func RelationPlatformView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func InsertRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetAdminIdFromCookie(r)
 
 	if userId == "" {
@@ -197,10 +163,10 @@ func InsertRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
 	} else {
 		var p TRelationPlatformInput
 		json.NewDecoder(r.Body).Decode(&p)
-		value := InsertRelation(
+		value := insertRelation(
 			p.PlatformId, p.AnimeId, p.LinkUrl,
 		)
-		result.Num = value
+		result.Data = value
 	}
 	result.ResponseWrite(w)
 	return nil
@@ -208,7 +174,7 @@ func InsertRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
 
 // delete platform ?=<id>
 func DeleteRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetAdminIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -220,8 +186,8 @@ func DeleteRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
 	if userId == "" {
 		result.Status = 4003
 	} else {
-		deletedRow := DeleteRelationPlatform(animeId, platformId)
-		result.Num = deletedRow
+		deletedRow := deleteRelationPlatform(animeId, platformId)
+		result.Data = deletedRow
 	}
 	result.ResponseWrite(w)
 	return nil

@@ -8,16 +8,6 @@ import (
 	"strconv"
 )
 
-type TAnimesJsonResponse struct {
-	Status int      `json:"status"`
-	Data   []TAnime `json:"data"`
-}
-
-type TAnimesWithUserWatchResponse struct {
-	Status int                         `json:"status"`
-	Data   []TAnimeWithUserWatchReview `json:"data"`
-}
-
 type TAnimeInput struct {
 	Title         string `json:"title"`
 	Abbrevation   string `json:"abbrevation,omitempty"`
@@ -30,69 +20,9 @@ type TAnimeInput struct {
 	CountEpisodes int    `jsoin:"count_episodes,omitempty"`
 }
 
-type TAnimeMinimumResponse struct {
-	Status int             `json:"status"`
-	Data   []TAnimeMinimum `json:"data"`
-}
-
-type TAnimeAdminResponse struct {
-	Status int           `json:"status"`
-	Data   []TAnimeAdmin `json:"data"`
-}
-
-func (result TAnimesJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-
-	tools.SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
-}
-
-func (result TAnimesWithUserWatchResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-	tools.SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
-}
-
-func (result TAnimeMinimumResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-	tools.SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
-}
-
-func (result TAnimeAdminResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-	tools.SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
-}
-
 // list and detail
 func AnimeView(w http.ResponseWriter, r *http.Request) error {
-	result := TAnimesJsonResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	strId := query.Get("id")
@@ -125,7 +55,7 @@ func AnimeView(w http.ResponseWriter, r *http.Request) error {
 // not be used to
 // anime data + user's watch + review
 func AnimeWithUserWatchView(w http.ResponseWriter, r *http.Request) error {
-	result := TAnimesWithUserWatchResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	strId := query.Get("id")
@@ -159,7 +89,7 @@ func AnimeWithUserWatchView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func ListAnimeMinimumView(w http.ResponseWriter, r *http.Request) error {
-	result := TAnimeMinimumResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	var animes []TAnimeMinimum
 
 	animes = ListAnimeMinimumDomain()
@@ -170,7 +100,7 @@ func ListAnimeMinimumView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func SearchAnimeView(w http.ResponseWriter, r *http.Request) error {
-	result := TAnimeMinimumResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	var animes []TAnimeMinimum
 
 	query := r.URL.Query()
@@ -191,7 +121,7 @@ type TUserToken struct {
 }
 
 func AnimeListAdminView(w http.ResponseWriter, r *http.Request) error {
-	result := TAnimesJsonResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 
 	var userId string
 	switch r.Method {
@@ -218,7 +148,7 @@ func AnimeListAdminView(w http.ResponseWriter, r *http.Request) error {
 
 // anime detail ?=<id>
 func AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) error {
-	result := TAnimeAdminResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 
 	var userId string
 	switch r.Method {
@@ -257,7 +187,7 @@ func AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) error {
 
 // add anime (only admin)
 func AnimePostView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetAdminIdFromCookie(r)
 	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
 	if userId == "" {
@@ -285,7 +215,7 @@ func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 			r.FormValue("description"), r.FormValue("state"),
 			series, episodes, r.FormValue("copyright"), returnFileName,
 		)
-		result.Num = insertedId
+		result.Data = insertedId
 	}
 	result.ResponseWrite(w)
 	return nil
@@ -293,7 +223,7 @@ func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 
 // update ?=<id>
 func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetAdminIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -328,7 +258,7 @@ func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
 			r.FormValue("description"), r.FormValue("state"),
 			series, episodes, r.FormValue("copyright"), returnFileName,
 		)
-		result.Num = updatedId
+		result.Data = updatedId
 	}
 	result.ResponseWrite(w)
 	return nil
@@ -336,7 +266,7 @@ func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
 
 // delete anime ?=<id>
 func AnimeDeleteView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetAdminIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -347,7 +277,7 @@ func AnimeDeleteView(w http.ResponseWriter, r *http.Request) error {
 		result.Status = 4003
 	} else {
 		deletedRow := DeleteAnime(id)
-		result.Num = deletedRow
+		result.Data = deletedRow
 	}
 
 	result.ResponseWrite(w)

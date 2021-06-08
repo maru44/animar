@@ -3,24 +3,10 @@ package blog
 import (
 	"animar/v1/tools"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
-
-type TBlogResponse struct {
-	Status int     `json:"status"`
-	Data   []TBlog `json:"data"`
-}
-
-type TBlogJoinAnimesResponse struct {
-	Status int               `json:"dtatus"`
-	Data   []TBlogJoinAnimes `json:"data"`
-}
-
-type TBlogJoinAnimesUserResponse struct {
-	Status int                   `json:"status"`
-	Data   []TBlogJoinAnimesUser `json:"data"`
-}
 
 type TBlogInput struct {
 	Title    string `json:"title"`
@@ -39,44 +25,8 @@ type TBlogInputWith struct {
 // retrieve(list)とretrieve(detail)で型を分けて
 // select して最適化
 
-func (result TBlogResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-	tools.SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
-}
-
-func (result TBlogJoinAnimesResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-	tools.SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
-}
-
-func (result TBlogJoinAnimesUserResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-	tools.SetDefaultResponseHeader(w)
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	return true
-}
-
 func ListBlogView(w http.ResponseWriter, r *http.Request) error {
-	result := TBlogResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 
 	var blogs []TBlog
 	blogs = ListBlogDomain()
@@ -88,7 +38,7 @@ func ListBlogView(w http.ResponseWriter, r *http.Request) error {
 
 // retrieve blog + anime
 func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
-	result := TBlogJoinAnimesResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	slug := query.Get("s")
@@ -122,7 +72,7 @@ func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
 
 // retrieve blog + anime + user
 func BlogJoinAnimeUserView(w http.ResponseWriter, r *http.Request) error {
-	result := TBlogJoinAnimesUserResponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	slug := query.Get("s")
@@ -148,6 +98,7 @@ func BlogJoinAnimeUserView(w http.ResponseWriter, r *http.Request) error {
 	} else {
 		blogs = ListBlogJoinAnimeUserDomain()
 	}
+	fmt.Print(blogs)
 
 	result.Data = blogs
 	result.ResponseWrite(w)
@@ -156,7 +107,7 @@ func BlogJoinAnimeUserView(w http.ResponseWriter, r *http.Request) error {
 
 // @TODO delete
 func InsertBlogView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetIdFromCookie(r)
 
 	if userId == "" {
@@ -165,14 +116,14 @@ func InsertBlogView(w http.ResponseWriter, r *http.Request) error {
 		var posted TBlogInput
 		json.NewDecoder(r.Body).Decode(&posted)
 		value := InsertBlog(posted.Title, posted.Abstract, posted.Content, userId)
-		result.Num = value
+		result.Data = value
 	}
 	result.ResponseWrite(w)
 	return nil
 }
 
 func InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetIdFromCookie(r)
 
 	if userId == "" {
@@ -182,7 +133,7 @@ func InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
 		json.NewDecoder(r.Body).Decode(&posted)
 
 		value := InsertBlog(posted.Title, posted.Abstract, posted.Content, userId)
-		result.Num = value
+		result.Data = value
 
 		for _, animeId := range posted.AnimeIds {
 			InsertRelationAnimeBlog(animeId, value)
@@ -193,7 +144,7 @@ func InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func UpdateBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -212,14 +163,14 @@ func UpdateBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
 	json.NewDecoder(r.Body).Decode(&posted)
 	value := UpdateBlog(id, posted.Title, posted.Abstract, posted.Content)
 	UpdateRelationBlogAnimesDomain(posted.AnimeIds, id)
-	result.Num = value
+	result.Data = value
 
 	result.ResponseWrite(w)
 	return nil
 }
 
 func DeleteBlogView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TIntJsonReponse{Status: 200}
+	result := tools.TBaseJsonResponse{Status: 200}
 	userId := tools.GetIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -235,7 +186,7 @@ func DeleteBlogView(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	deletedRow := DeleteBlog(id)
-	result.Num = deletedRow
+	result.Data = deletedRow
 	result.ResponseWrite(w)
 	return nil
 }

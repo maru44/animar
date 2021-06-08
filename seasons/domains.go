@@ -3,7 +3,7 @@ package seasons
 import "fmt"
 
 func ListSeasonDomain() []TSeason {
-	rows := ListSeason()
+	rows := listSeason()
 	var seasons []TSeason
 	for rows.Next() {
 		var s TSeason
@@ -25,7 +25,7 @@ func ListSeasonDomain() []TSeason {
 ************************************/
 
 func SeasonByAnimeIdDomain(animeId int) []TSeasonRelation {
-	rows := RelationSeasonByAnime(animeId)
+	rows := relationSeasonByAnime(animeId)
 	var seasons []TSeasonRelation
 	for rows.Next() {
 		var s TSeasonRelation
