@@ -194,14 +194,14 @@ func InsertBlog(title string, abstract string, content string, userId string) in
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare(
+	stmt, err := db.Prepare(
 		"INSERT INTO blogs(slug, title, abstract, content, user_id) " +
 			"VALUES(?, ?, ?, ?, ?)",
 	)
-	defer stmtInsert.Close()
+	defer stmt.Close()
 
 	slug := tools.GenRandSlug(8)
-	exe, err := stmtInsert.Exec(
+	exe, err := stmt.Exec(
 		slug, title, abstract,
 		content, userId,
 	)
@@ -218,10 +218,11 @@ func UpdateBlog(id int, title string, abstract string, content string) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	exe, err := db.Exec(
-		"UPDATE blogs SET title = ?, abstract = ?, content = ? WHERE id = ?",
+	stmt, err := db.Prepare("UPDATE blogs SET title = ?, abstract = ?, content = ? WHERE id = ?")
+	exe, err := stmt.Exec(
 		title, abstract, content, id,
 	)
+	defer stmt.Close()
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -233,7 +234,8 @@ func DeleteBlog(id int) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	exe, err := db.Exec("DELETE FROM blogs WHERE id = ?", id)
+	stmt, err := db.Prepare("DELETE FROM blogs WHERE id = ?")
+	exe, err := stmt.Exec(id)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -277,13 +279,13 @@ func RelationBlogByAnime(animeId int) *sql.Rows {
 func InsertRelationAnimeBlog(animeId int, blogId int) bool {
 	db := tools.AccessDB()
 	defer db.Close()
-	stmtInsert, err := db.Prepare(
+	stmt, err := db.Prepare(
 		"INSERT INTO relation_blog_animes(anime_id, blog_id) " +
 			"VALUES(?, ?)",
 	)
-	defer stmtInsert.Close()
+	defer stmt.Close()
 
-	_, err = stmtInsert.Exec(
+	_, err = stmt.Exec(
 		animeId, blogId,
 	)
 	if err != nil {
@@ -296,13 +298,13 @@ func DeleteRelationAnimeBlog(animeId int, blogId int) error {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtDelete, err := db.Prepare("DELETE FROM relation_blog_animes WHERE anime_id = ? AND blog_id = ?")
+	stmt, err := db.Prepare("DELETE FROM relation_blog_animes WHERE anime_id = ? AND blog_id = ?")
 	if err != nil {
 		panic(err.Error())
 	}
-	defer stmtDelete.Close()
+	defer stmt.Close()
 
-	_, err = stmtDelete.Exec(animeId, blogId)
+	_, err = stmt.Exec(animeId, blogId)
 	if err != nil {
 		return err
 	}

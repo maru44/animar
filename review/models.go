@@ -139,10 +139,10 @@ func InsertReview(animeId int, content string, rating int, user_id string) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare("INSERT INTO reviews(anime_id, content, rating, user_id) VALUES(?, ?, ?, ?)")
-	defer stmtInsert.Close()
+	stmt, err := db.Prepare("INSERT INTO reviews(anime_id, content, rating, user_id) VALUES(?, ?, ?, ?)")
+	defer stmt.Close()
 
-	exe, err := stmtInsert.Exec(animeId, content, rating, user_id)
+	exe, err := stmt.Exec(animeId, content, rating, user_id)
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
 		panic(err.Error())
@@ -155,10 +155,10 @@ func InsertReviewContent(animeId int, userId string, content string) string {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare("INSERT INTO reviews(anime_id, content, user_id) VALUES(?, ?, ?)")
-	defer stmtInsert.Close()
+	stmt, err := db.Prepare("INSERT INTO reviews(anime_id, content, user_id) VALUES(?, ?, ?)")
+	defer stmt.Close()
 
-	exe, err := stmtInsert.Exec(animeId, content, userId)
+	exe, err := stmt.Exec(animeId, content, userId)
 	_, err = exe.LastInsertId()
 	if err != nil {
 		panic(err.Error())
@@ -183,9 +183,9 @@ func UpsertReviewContent(animeId int, content string, userId string) string {
 		panic(err.Error())
 	default:
 		// update
-		stmtUpdate, err := db.Prepare("UPDATE reviews SET content = ? WHERE id = ?")
-		defer stmtUpdate.Close()
-		exe, err := stmtUpdate.Exec(content, &rev.ID)
+		stmt, err := db.Prepare("UPDATE reviews SET content = ? WHERE id = ?")
+		defer stmt.Close()
+		exe, err := stmt.Exec(content, &rev.ID)
 		fmt.Print(exe)
 		if err != nil {
 			panic(err.Error())
@@ -199,10 +199,10 @@ func InsertReviewStar(animeId int, userId string, rating int) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare("INSERT INTO reviews(anime_id, rating, user_id) VALUES(?, ?, ?)")
-	defer stmtInsert.Close()
+	stmt, err := db.Prepare("INSERT INTO reviews(anime_id, rating, user_id) VALUES(?, ?, ?)")
+	defer stmt.Close()
 
-	exe, err := stmtInsert.Exec(animeId, rating, userId)
+	exe, err := stmt.Exec(animeId, rating, userId)
 	_, err = exe.LastInsertId()
 	if err != nil {
 		panic(err.Error())
@@ -227,9 +227,9 @@ func UpsertReviewStar(animeId int, rating int, userId string) int {
 		panic(err.Error())
 	default:
 		// update
-		stmtUpdate, err := db.Prepare("UPDATE reviews SET rating = ? WHERE id = ?")
-		defer stmtUpdate.Close()
-		exe, err := stmtUpdate.Exec(rating, &rev.ID)
+		stmt, err := db.Prepare("UPDATE reviews SET rating = ? WHERE id = ?")
+		defer stmt.Close()
+		exe, err := stmt.Exec(rating, &rev.ID)
 		if err != nil {
 			panic(err.Error())
 		}

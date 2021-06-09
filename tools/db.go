@@ -13,14 +13,14 @@ var (
 	MysqlUser     = GetenvOrDefault("MYSQL_USER", "go")
 	MysqlPassword = GetenvOrDefault("MYSQL_PASSWORD", "Go1234_test")
 	MysqlDataBase = GetenvOrDefault("MYSQL_DB", "go_test")
+	MysqlHost     = GetenvOrDefault("MYSQL_HOST", "@tcp(127.0.0.1:3306)")
 )
 
 func AccessDB() *sql.DB {
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", MysqlUser, MysqlPassword, MysqlDataBase))
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s%s/%s", MysqlUser, MysqlPassword, MysqlHost, MysqlDataBase))
 	if err != nil {
 		panic(err.Error())
 	}
-
 	return db
 }
 

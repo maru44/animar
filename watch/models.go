@@ -93,10 +93,10 @@ func InsertWatch(animeId int, state int, userId string) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare("INSERT INTO audiences(state, anime_id, user_id) VALUES(?, ?, ?)")
-	defer stmtInsert.Close()
+	stmt, err := db.Prepare("INSERT INTO audiences(state, anime_id, user_id) VALUES(?, ?, ?)")
+	defer stmt.Close()
 
-	exe, err := stmtInsert.Exec(state, animeId, userId)
+	exe, err := stmt.Exec(state, animeId, userId)
 
 	_, err = exe.LastInsertId()
 	if err != nil {
@@ -123,9 +123,9 @@ func UpsertWatch(animeId int, state int, userId string) int {
 		panic(err.Error())
 	default:
 		// update
-		stmtUpdate, err := db.Prepare("UPDATE audiences SET state = ? WHERE user_id = ? AND anime_id = ?")
-		defer stmtUpdate.Close()
-		_, err = stmtUpdate.Exec(state, userId, animeId)
+		stmt, err := db.Prepare("UPDATE audiences SET state = ? WHERE user_id = ? AND anime_id = ?")
+		defer stmt.Close()
+		_, err = stmt.Exec(state, userId, animeId)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -137,7 +137,8 @@ func DeleteWatch(animeId int, userId string) bool {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	_, err := db.Exec("DELETE FROM audiences WHERE anime_id = ? AND user_id = ?", animeId, userId)
+	stmt, err := db.Prepare("DELETE FROM audiences WHERE anime_id = ? AND user_id = ?")
+	_, err = stmt.Exec(animeId, userId)
 	if err != nil {
 		//panic(err.Error())
 		return false

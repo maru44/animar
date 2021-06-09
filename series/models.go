@@ -33,12 +33,12 @@ func InsertSeries(engName string, seriesName string) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare(
+	stmt, err := db.Prepare(
 		"INSERT INTO series(eng_name, series_name) VALUES(?, ?)",
 	)
-	defer stmtInsert.Close()
+	defer stmt.Close()
 
-	exe, err := stmtInsert.Exec(
+	exe, err := stmt.Exec(
 		engName, seriesName,
 	)
 	insertedId, err := exe.LastInsertId()
@@ -74,8 +74,9 @@ func UpdateSeries(engName string, seriesName string, id int) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	exe, err := db.Exec(
-		"UPDATE series SET eng_name = ?, series_name = ? WHERE id = ?",
+	stmt, err := db.Prepare("UPDATE series SET eng_name = ?, series_name = ? WHERE id = ?")
+	defer stmt.Close()
+	exe, err := stmt.Exec(
 		engName, seriesName, id,
 	)
 	if err != nil {
@@ -89,7 +90,9 @@ func DeleteSeries(id int) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	exe, err := db.Exec("DELETE FROM series WHERE id = ?", id)
+	stmt, err := db.Prepare("DELETE FROM series WHERE id = ?")
+	defer db.Close()
+	exe, err := stmt.Exec(id)
 	if err != nil {
 		panic(err.Error())
 	}

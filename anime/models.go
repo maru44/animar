@@ -68,7 +68,7 @@ type TAnimeMinimum struct {
 func ListAnime() *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
-	rows, err := db.Query("Select id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, created_at, updated_at from animes")
+	rows, err := db.Query("Select id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, created_at, updated_at FROM animes ORDER BY created_at ASC")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -210,14 +210,14 @@ func InsertAnime(title string, abbreviation string, kana string, eng_name string
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare(
+	stmt, err := db.Prepare(
 		"INSERT INTO animes(title, slug, abbreviation, kana, eng_name, description, thumb_url, state, series_id, count_episodes, copyright) " +
 			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 	)
-	defer stmtInsert.Close()
+	defer stmt.Close()
 
 	slug := tools.GenRandSlug(12)
-	exe, err := stmtInsert.Exec(
+	exe, err := stmt.Exec(
 		title, slug, tools.NewNullString(abbreviation),
 		tools.NewNullString(kana), tools.NewNullString(eng_name),
 		tools.NewNullString(content), tools.NewNullString(thumb_url),
@@ -237,19 +237,21 @@ func InsertAnime(title string, abbreviation string, kana string, eng_name string
 func UpdateAnime(id int, title string, abbreviation string, kana string, eng_name string, content string, state string, seriesId int, episodes int, copyright string, thumbUrl string) int {
 	db := tools.AccessDB()
 	defer db.Close()
-
-	exe, err := db.Exec(
+	stmt, err := db.Prepare(
 		"UPDATE animes SET title = ?, abbreviation = ?, kana = ?, eng_name = ?, description = ?, thumb_url = ?, state = ?, series_id = ?, count_episodes = ?, copyright = ? WHERE id = ?",
+	)
+	defer stmt.Close()
+
+	exe, err := stmt.Exec(
 		title, tools.NewNullString(abbreviation), tools.NewNullString(kana),
 		tools.NewNullString(eng_name), tools.NewNullString(content),
 		tools.NewNullString(thumbUrl), tools.NewNullString(state),
 		tools.NewNullInt(seriesId), tools.NewNullInt(episodes),
-		tools.NewNullString(copyright), id,
-	)
+		tools.NewNullString(copyright), id)
+	updatedId, err := exe.RowsAffected()
 	if err != nil {
-		panic(err.Error())
+		fmt.Print(err)
 	}
-	updatedId, _ := exe.RowsAffected()
 	return int(updatedId)
 }
 
@@ -257,7 +259,9 @@ func DeleteAnime(id int) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	exe, err := db.Exec("DELETE FROM animes WHERE id = ?", id)
+	stmt, err := db.Prepare("DELETE FROM animes WHERE id = ?")
+	defer stmt.Close()
+	exe, err := stmt.Exec(id)
 	if err != nil {
 		panic(err.Error())
 	}

@@ -55,12 +55,11 @@ func insertPlatform(engName string, platName string, baseUrl string, image strin
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare(
+	stmt, err := db.Prepare(
 		"INSERT INTO platforms(eng_name, plat_name, base_url, image, is_valid) VALUES(?, ?, ?, ?, ?)",
 	)
-	defer stmtInsert.Close()
-
-	exe, err := stmtInsert.Exec(
+	defer stmt.Close()
+	exe, err := stmt.Exec(
 		engName, tools.NewNullString(platName),
 		tools.NewNullString(baseUrl), tools.NewNullString(image),
 		isValid,
@@ -98,12 +97,14 @@ func updatePlatform(engName string, platName string, baseUrl string, image strin
 	db := tools.AccessDB()
 	defer db.Close()
 
-	exe, err := db.Exec(
-		"UPDATE platforms SET eng_name = ?, plat_name = ?, base_url = ?, image = ?, is_valid = ? WHERE id = ?",
+	stmt, err := db.Prepare("UPDATE platforms SET eng_name = ?, plat_name = ?, base_url = ?, image = ?, is_valid = ? WHERE id = ?")
+	defer stmt.Close()
+	exe, err := stmt.Exec(
 		engName, tools.NewNullString(platName),
 		tools.NewNullString(baseUrl), tools.NewNullString(image),
 		isValid, id,
 	)
+
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -115,7 +116,9 @@ func deletePlatform(id int) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	exe, err := db.Exec("DELETE FROM platforms WHERE id = ?", id)
+	stmt, err := db.Prepare("DELETE FROM platforms WHERE id = ?")
+	exe, err := stmt.Exec(id)
+	defer stmt.Close()
 	if err != nil {
 		panic(err.Error())
 	}
@@ -145,12 +148,12 @@ func insertRelation(platformId int, animeId int, linkUrl string) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare(
+	stmt, err := db.Prepare(
 		"INSERT INTO relation_anime_platform(platform_id, anime_id, link_url) VALUES(?, ?, ?)",
 	)
-	defer stmtInsert.Close()
+	defer stmt.Close()
 
-	exe, err := stmtInsert.Exec(
+	exe, err := stmt.Exec(
 		platformId, animeId, tools.NewNullString(linkUrl),
 	)
 	insertedId, err := exe.LastInsertId()
@@ -163,8 +166,9 @@ func insertRelation(platformId int, animeId int, linkUrl string) int {
 func deleteRelationPlatform(animeId int, platformId int) int {
 	db := tools.AccessDB()
 	defer db.Close()
-	exe, err := db.Exec(
-		"DELETE FROM relation_anime_platform WHERE anime_id = ? AND platform_id = ?",
+	stmt, err := db.Prepare("DELETE FROM relation_anime_platform WHERE anime_id = ? AND platform_id = ?")
+	defer stmt.Close()
+	exe, err := stmt.Exec(
 		animeId, platformId,
 	)
 	if err != nil {

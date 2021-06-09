@@ -29,12 +29,12 @@ func insertSeason(year string, season string) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare(
+	stmt, err := db.Prepare(
 		"INSERT INTO seasons(year, season) VALUES(?, ?)",
 	)
-	defer stmtInsert.Close()
+	defer stmt.Close()
 
-	exe, err := stmtInsert.Exec(
+	exe, err := stmt.Exec(
 		year, season,
 	)
 	insertedId, err := exe.LastInsertId()
@@ -96,12 +96,12 @@ func insertRelation(seasonId int, animeId int) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare(
+	stmt, err := db.Prepare(
 		"INSERT INTO relation_anime_season(season_id, anime_id) VALUES(?, ?)",
 	)
-	defer stmtInsert.Close()
+	defer stmt.Close()
 
-	exe, err := stmtInsert.Exec(
+	exe, err := stmt.Exec(
 		seasonId, animeId,
 	)
 	insertedId, _ := exe.LastInsertId()
