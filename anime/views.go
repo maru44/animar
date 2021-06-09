@@ -36,17 +36,20 @@ func AnimeView(w http.ResponseWriter, r *http.Request) error {
 			result.Status = 404
 		}
 		animes = append(animes, ani)
+		result.Data = animes
 	} else if slug != "" {
+		var animes []TAnimeWithSeries
 		ani := DetailAnimeBySlug(slug)
 		if ani.ID == 0 {
 			result.Status = 404
 		}
 		animes = append(animes, ani)
+		result.Data = animes
 	} else {
 		animes = ListAnimeDomain()
+		result.Data = animes
 	}
 
-	result.Data = animes
 	result.ResponseWrite(w)
 
 	return nil

@@ -23,6 +23,22 @@ type TAnime struct {
 	UpdatedAt     *string `json:"updated_at,omitempty"`
 }
 
+type TAnimeWithSeries struct {
+	ID            int     `json:"id"`
+	Slug          string  `json:"slug"`
+	Title         string  `json:"title"`
+	ThumbUrl      *string `json:"thumb_url,omitempty"`
+	CopyRight     *string `json:"copyright,omitempty"`
+	Abbreviation  *string `json:"abbreviation,omitempty"`
+	Description   *string `json:"description,omitempty"`
+	State         *string `json:"state,omitempty"`
+	SeriesId      *int    `json:"series_id,omitempty"`
+	CountEpisodes *int    `json:"count_episode,omitemptys"`
+	CreatedAt     string  `json:"created_at"`
+	UpdatedAt     *string `json:"updated_at,omitempty"`
+	SeriesName    *string `json:"series_name"`
+}
+
 type TAnimeWithUserWatchReview struct {
 	ID            int     `json:"id"`
 	Slug          string  `json:"slug"`
@@ -139,14 +155,19 @@ func DetailAnime(id int) TAnime {
 	return a
 }
 
-func DetailAnimeBySlug(slug string) TAnime {
+func DetailAnimeBySlug(slug string) TAnimeWithSeries {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	var a TAnime
-	err := db.QueryRow("SELECT id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, created_at, updated_at FROM animes WHERE slug = ?", slug).Scan(
+	var a TAnimeWithSeries
+	err := db.QueryRow(
+		"SELECT animes.id as id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, animes.created_at, animes.updated_at, "+
+			"series_name FROM animes "+
+			"LEFT JOIN series on animes.series_id = series.id "+
+			"WHERE slug = ?", slug,
+	).Scan(
 		&a.ID, &a.Slug, &a.Title, &a.Abbreviation, &a.ThumbUrl, &a.CopyRight, &a.Description,
-		&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
+		&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt, &a.SeriesName,
 	)
 
 	switch {
