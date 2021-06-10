@@ -82,8 +82,8 @@ func ListBlogJoinAnimeUserDomain() []TBlogJoinAnimesUser {
 }
 
 // List of users (blog + anime)
-func ListBlogByUserJoinAnimeDomain(uid string) []TBlogJoinAnimes {
-	rows := ListUsersBlog(uid)
+func ListBlogByUserJoinAnimeDomain(uid string, userId string) []TBlogJoinAnimes {
+	rows := ListUsersBlog(uid, userId)
 	var blogs []TBlogJoinAnimes
 	for rows.Next() {
 		var b TBlogJoinAnimes
@@ -105,9 +105,9 @@ func ListBlogByUserJoinAnimeDomain(uid string) []TBlogJoinAnimes {
 }
 
 // List of users (blog + anime + user)
-func ListBlogByUserJoinAnimeUserDomain(uid string) []TBlogJoinAnimesUser {
+func ListBlogByUserJoinAnimeUserDomain(uid string, userId string) []TBlogJoinAnimesUser {
 	ctx := context.Background()
-	rows := ListUsersBlog(uid)
+	rows := ListUsersBlog(uid, userId)
 	var blogs []TBlogJoinAnimesUser
 	for rows.Next() {
 		var b TBlogJoinAnimesUser

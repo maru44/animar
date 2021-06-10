@@ -65,33 +65,23 @@ type TBlogJoinAnimesUser struct {
 func ListBlog() *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
-	rows, err := db.Query("Select * from blogs")
+	rows, err := db.Query("SELECT * FROM blogs WHERE is_public = true")
 	if err != nil {
 		panic(err.Error())
 	}
 	return rows
 }
 
-func ListUsersBlog(uid string) *sql.Rows {
+func ListUsersBlog(uid string, userId string) *sql.Rows {
 	db := tools.AccessDB()
 	defer db.Close()
-	rows, err := db.Query("SELECT * from blogs where user_id = ?", uid)
-	if err != nil {
-		panic(err.Error())
+	var rows *sql.Rows
+	var err error
+	if uid == userId {
+		rows, err = db.Query("SELECT * FROM blogs WHERE user_id = ?", uid)
+	} else {
+		rows, err = db.Query("SELECT * FROM blogs WHERE user_id = ? AND is_public = true", uid)
 	}
-	return rows
-}
-
-// 使ってない Many to many のjoinに失敗
-func ListBlogJoinAnime() *sql.Rows {
-	db := tools.AccessDB()
-	defer db.Close()
-	// fail
-	rows, err := db.Query(
-		"SELECT blogs.*, animes FROM blogs " +
-			"LEFT JOIN relation_blog_animes ON blog.id = relation_blog_animes.blog_id " +
-			"LEFT JOIN animes ON anime.id = relation_blog_animes.anime_id",
-	)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -190,20 +180,20 @@ func DetailBlogWithUserBySlug(slug string) TBlogJoinAnimesUser {
 	return b
 }
 
-func InsertBlog(title string, abstract string, content string, userId string) int {
+func InsertBlog(title string, abstract string, content string, userId string, isPublic bool) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare(
-		"INSERT INTO blogs(slug, title, abstract, content, user_id) " +
-			"VALUES(?, ?, ?, ?, ?)",
+		"INSERT INTO blogs(slug, title, abstract, content, user_id, is_public) " +
+			"VALUES(?, ?, ?, ?, ?, ?)",
 	)
 	defer stmt.Close()
 
 	slug := tools.GenRandSlug(8)
 	exe, err := stmt.Exec(
 		slug, title, abstract,
-		content, userId,
+		content, userId, isPublic,
 	)
 
 	insertedId, err := exe.LastInsertId()
@@ -214,13 +204,13 @@ func InsertBlog(title string, abstract string, content string, userId string) in
 }
 
 // validation by userId @domain or view
-func UpdateBlog(id int, title string, abstract string, content string) int {
+func UpdateBlog(id int, title string, abstract string, content string, isPublic bool) int {
 	db := tools.AccessDB()
 	defer db.Close()
 
-	stmt, err := db.Prepare("UPDATE blogs SET title = ?, abstract = ?, content = ? WHERE id = ?")
+	stmt, err := db.Prepare("UPDATE blogs SET title = ?, abstract = ?, content = ?, is_public = ? WHERE id = ?")
 	exe, err := stmt.Exec(
-		title, abstract, content, id,
+		title, abstract, content, id, isPublic,
 	)
 	defer stmt.Close()
 	if err != nil {

@@ -3,7 +3,6 @@ package blog
 import (
 	"animar/v1/tools"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -18,6 +17,7 @@ type TBlogInputWith struct {
 	Title    string `json:"title"`
 	Abstract string `json:"abstract,omitempty"`
 	Content  string `json:"content"`
+	IsPublic bool   `json:"is_public,omitempty"`
 	AnimeIds []int  `json:"anime_ids"`
 }
 
@@ -40,6 +40,19 @@ func ListBlogView(w http.ResponseWriter, r *http.Request) error {
 func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
 
+	// access user
+	var userId string
+	switch r.Method {
+	case "GET":
+		userId = tools.GetIdFromCookie(r)
+	case "POST":
+		var posted tools.TUserIdCookieInput
+		json.NewDecoder(r.Body).Decode(&posted)
+		userId = tools.GetUserIdFromToken(posted.Token)
+	default:
+		userId = ""
+	}
+
 	query := r.URL.Query()
 	slug := query.Get("s")
 	id := query.Get("id")
@@ -60,7 +73,7 @@ func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
 		}
 		blogs = append(blogs, blog)
 	} else if uid != "" {
-		blogs = ListBlogByUserJoinAnimeDomain(uid)
+		blogs = ListBlogByUserJoinAnimeDomain(uid, userId)
 	} else {
 		blogs = ListBlogJoinAnimeDomain()
 	}
@@ -73,6 +86,19 @@ func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
 // retrieve blog + anime + user
 func BlogJoinAnimeUserView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
+	// access user
+	var userId string
+	switch r.Method {
+	case "GET":
+		userId = tools.GetIdFromCookie(r)
+	case "POST":
+		var posted tools.TUserIdCookieInput
+		json.NewDecoder(r.Body).Decode(&posted)
+		userId = tools.GetUserIdFromToken(posted.Token)
+	default:
+		userId = ""
+	}
 
 	query := r.URL.Query()
 	slug := query.Get("s")
@@ -94,30 +120,12 @@ func BlogJoinAnimeUserView(w http.ResponseWriter, r *http.Request) error {
 		}
 		blogs = append(blogs, blog)
 	} else if uid != "" {
-		blogs = ListBlogByUserJoinAnimeUserDomain(uid)
+		blogs = ListBlogByUserJoinAnimeUserDomain(uid, userId)
 	} else {
 		blogs = ListBlogJoinAnimeUserDomain()
 	}
-	fmt.Print(blogs)
 
 	result.Data = blogs
-	result.ResponseWrite(w)
-	return nil
-}
-
-// @TODO delete
-func InsertBlogView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
-	userId := tools.GetIdFromCookie(r)
-
-	if userId == "" {
-		result.Status = 4001
-	} else {
-		var posted TBlogInput
-		json.NewDecoder(r.Body).Decode(&posted)
-		value := InsertBlog(posted.Title, posted.Abstract, posted.Content, userId)
-		result.Data = value
-	}
 	result.ResponseWrite(w)
 	return nil
 }
@@ -129,13 +137,13 @@ func InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
 	if userId == "" {
 		result.Status = 4001
 	} else {
-		var posted TBlogInputWith
-		json.NewDecoder(r.Body).Decode(&posted)
+		var p TBlogInputWith
+		json.NewDecoder(r.Body).Decode(&p)
 
-		value := InsertBlog(posted.Title, posted.Abstract, posted.Content, userId)
+		value := InsertBlog(p.Title, p.Abstract, p.Content, userId, p.IsPublic)
 		result.Data = value
 
-		for _, animeId := range posted.AnimeIds {
+		for _, animeId := range p.AnimeIds {
 			InsertRelationAnimeBlog(animeId, value)
 		}
 	}
@@ -159,10 +167,10 @@ func UpdateBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 
-	var posted TBlogInputWith
-	json.NewDecoder(r.Body).Decode(&posted)
-	value := UpdateBlog(id, posted.Title, posted.Abstract, posted.Content)
-	UpdateRelationBlogAnimesDomain(posted.AnimeIds, id)
+	var p TBlogInputWith
+	json.NewDecoder(r.Body).Decode(&p)
+	value := UpdateBlog(id, p.Title, p.Abstract, p.Content, p.IsPublic)
+	UpdateRelationBlogAnimesDomain(p.AnimeIds, id)
 	result.Data = value
 
 	result.ResponseWrite(w)
