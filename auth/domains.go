@@ -28,7 +28,7 @@ func GetJWTFromGoogle(posted TLoginForm) TTokensForm {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Print(err.Error())
+		tools.ErrorLog(err)
 		return tokens
 	}
 
@@ -37,7 +37,7 @@ func GetJWTFromGoogle(posted TLoginForm) TTokensForm {
 	err = json.Unmarshal(body, &tokens)
 
 	if err != nil {
-		fmt.Print(err.Error())
+		tools.ErrorLog(err)
 		return tokens
 	}
 

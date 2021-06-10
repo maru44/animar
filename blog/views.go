@@ -21,10 +21,6 @@ type TBlogInputWith struct {
 	AnimeIds []int  `json:"anime_ids"`
 }
 
-// @TODO
-// retrieve(list)とretrieve(detail)で型を分けて
-// select して最適化
-
 func ListBlogView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
 

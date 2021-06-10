@@ -1,6 +1,6 @@
 package seasons
 
-import "fmt"
+import "animar/v1/tools"
 
 func ListSeasonDomain() []TSeason {
 	rows := listSeason()
@@ -11,7 +11,7 @@ func ListSeasonDomain() []TSeason {
 			&s.ID, &s.Year, &s.Season, &s.CreatedAt, &s.UpdatedAt,
 		)
 		if err != nil {
-			panic(err.Error())
+			tools.ErrorLog(err)
 		}
 		seasons = append(seasons, s)
 	}
@@ -33,7 +33,7 @@ func SeasonByAnimeIdDomain(animeId int) []TSeasonRelation {
 			&s.ID, &s.Year, &s.Season,
 		)
 		if err != nil {
-			fmt.Print(err)
+			tools.ErrorLog(err)
 		}
 		seasons = append(seasons, s)
 	}

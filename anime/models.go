@@ -3,7 +3,6 @@ package anime
 import (
 	"animar/v1/tools"
 	"database/sql"
-	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -86,7 +85,7 @@ func ListAnime() *sql.Rows {
 	defer db.Close()
 	rows, err := db.Query("Select id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, created_at, updated_at FROM animes ORDER BY created_at ASC")
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }
@@ -96,7 +95,7 @@ func ListAnimeMinimum() *sql.Rows {
 	defer db.Close()
 	rows, err := db.Query("SELECT id, slug, title from animes")
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }
@@ -129,7 +128,7 @@ func SearchAnime(title string) *sql.Rows {
 	// 		"AGAINST ('+" + title + "')",
 	// )
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }
@@ -150,7 +149,7 @@ func DetailAnime(id int) TAnime {
 	case err == sql.ErrNoRows:
 		a.ID = 0
 	case err != nil:
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return a
 }
@@ -174,7 +173,7 @@ func DetailAnimeBySlug(slug string) TAnimeWithSeries {
 	case err == sql.ErrNoRows:
 		a.ID = 0
 	case err != nil:
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return a
 }
@@ -197,7 +196,7 @@ func DetailAnimeBySlugWithUserWatchReview(slug string, userId string) TAnimeWith
 	case err == sql.ErrNoRows:
 		a.ID = 0
 	case err != nil:
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return a
 }
@@ -222,7 +221,7 @@ func DetailAnimeAdmin(id int) TAnimeAdmin {
 	case err == sql.ErrNoRows:
 		a.ID = 0
 	case err != nil:
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return a
 }
@@ -248,8 +247,7 @@ func InsertAnime(title string, abbreviation string, kana string, eng_name string
 
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
-		//panic(err.Error())
-		fmt.Print(err)
+		tools.ErrorLog(err)
 	}
 	return int(insertedId)
 }
@@ -271,7 +269,7 @@ func UpdateAnime(id int, title string, abbreviation string, kana string, eng_nam
 		tools.NewNullString(copyright), id)
 	updatedId, err := exe.RowsAffected()
 	if err != nil {
-		fmt.Print(err)
+		tools.ErrorLog(err)
 	}
 	return int(updatedId)
 }
@@ -284,7 +282,7 @@ func DeleteAnime(id int) int {
 	defer stmt.Close()
 	exe, err := stmt.Exec(id)
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	rowsAffect, _ := exe.RowsAffected()
 	return int(rowsAffect)
@@ -295,7 +293,7 @@ func ListAnimeAdmin() *sql.Rows {
 	defer db.Close()
 	rows, err := db.Query("Select * from animes")
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }

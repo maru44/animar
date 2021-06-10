@@ -3,7 +3,6 @@ package series
 import (
 	"animar/v1/tools"
 	"database/sql"
-	"fmt"
 )
 
 type TSeries struct {
@@ -24,7 +23,7 @@ func ListSeries() *sql.Rows {
 	defer db.Close()
 	rows, err := db.Query("Select * from series")
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }
@@ -43,7 +42,7 @@ func InsertSeries(engName string, seriesName string) int {
 	)
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
-		fmt.Print(err)
+		tools.ErrorLog(err)
 	}
 
 	return int(insertedId)
@@ -64,7 +63,7 @@ func DetailSeries(id int) TSeries {
 	case err == sql.ErrNoRows:
 		ser.ID = 0
 	case err != nil:
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return ser
 }
@@ -80,7 +79,7 @@ func UpdateSeries(engName string, seriesName string, id int) int {
 		engName, seriesName, id,
 	)
 	if err != nil {
-		fmt.Print(err)
+		tools.ErrorLog(err)
 	}
 	updatedId, _ := exe.RowsAffected()
 	return int(updatedId)
@@ -94,7 +93,7 @@ func DeleteSeries(id int) int {
 	defer db.Close()
 	exe, err := stmt.Exec(id)
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	rowsAffect, _ := exe.RowsAffected()
 	return int(rowsAffect)

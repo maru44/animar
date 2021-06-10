@@ -1,5 +1,7 @@
 package series
 
+import "animar/v1/tools"
+
 func ListSeriesDomain() []TSeries {
 	rows := ListSeries()
 	var sers []TSeries
@@ -10,7 +12,7 @@ func ListSeriesDomain() []TSeries {
 			&s.CreatedAt, &s.UpdatedAt,
 		)
 		if err != nil {
-			panic(err.Error())
+			tools.ErrorLog(err)
 		}
 		sers = append(sers, s)
 	}

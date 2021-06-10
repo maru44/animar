@@ -4,7 +4,6 @@ import (
 	"animar/v1/auth"
 	"animar/v1/tools"
 	"context"
-	"fmt"
 )
 
 func ListBlogDomain() []TBlog {
@@ -18,7 +17,7 @@ func ListBlogDomain() []TBlog {
 			&b.CreatedAt, &b.UpdatedAt,
 		)
 		if err != nil {
-			panic(err.Error())
+			tools.ErrorLog(err)
 		}
 		blogs = append(blogs, b)
 	}
@@ -43,7 +42,7 @@ func ListBlogJoinAnimeDomain() []TBlogJoinAnimes {
 		b.Animes = RelationBlogAnimesDomain(blogID)
 
 		if err != nil {
-			fmt.Print(err)
+			tools.ErrorLog(err)
 		}
 		blogs = append(blogs, b)
 	}
@@ -73,7 +72,7 @@ func ListBlogJoinAnimeUserDomain() []TBlogJoinAnimesUser {
 		b.User = user
 
 		if err != nil {
-			fmt.Print(err)
+			tools.ErrorLog(err)
 		}
 		blogs = append(blogs, b)
 	}
@@ -96,7 +95,7 @@ func ListBlogByUserJoinAnimeDomain(uid string, userId string) []TBlogJoinAnimes 
 		b.Animes = RelationBlogAnimesDomain(blogID)
 
 		if err != nil {
-			fmt.Print(err)
+			tools.ErrorLog(err)
 		}
 		blogs = append(blogs, b)
 	}
@@ -124,7 +123,7 @@ func ListBlogByUserJoinAnimeUserDomain(uid string, userId string) []TBlogJoinAni
 		b.User = user
 
 		if err != nil {
-			fmt.Print(err)
+			tools.ErrorLog(err)
 		}
 		blogs = append(blogs, b)
 	}
@@ -174,7 +173,7 @@ func RelationBlogAnimesDomain(blogId int) []TJoinedAnime {
 			&a.AnimeId, &a.Slug, &a.Title,
 		)
 		if err != nil {
-			fmt.Print(err)
+			tools.ErrorLog(err)
 		}
 		ret = append(ret, a)
 	}
@@ -191,7 +190,7 @@ func UpdateRelationBlogAnimesDomain(animeIds []int, blogId int) {
 			&a.AnimeId, &a.Slug, &a.Title,
 		)
 		if err != nil {
-			fmt.Print(err)
+			tools.ErrorLog(err)
 		}
 		originAnimeIds = append(originAnimeIds, a.AnimeId)
 	}

@@ -1,5 +1,7 @@
 package watch
 
+import "animar/v1/tools"
+
 func AnimeWatchCountDomain(animeId int) []TAudienceCount {
 	rows := AnimeWatchCounts(animeId)
 	var watches []TAudienceCount
@@ -7,7 +9,7 @@ func AnimeWatchCountDomain(animeId int) []TAudienceCount {
 		var w TAudienceCount
 		err := rows.Scan(&w.State, &w.Count)
 		if err != nil {
-			panic(err.Error())
+			tools.ErrorLog(err)
 		}
 		watches = append(watches, w)
 	}
@@ -25,7 +27,7 @@ func OnesWatchStatusDomain(userId string) []TAudienceJoinAnime {
 			&w.UpdatedAt, &w.Title, &w.Slug, &w.Content, &w.AState,
 		)
 		if err != nil {
-			panic(err.Error())
+			tools.ErrorLog(err)
 		}
 		watches = append(watches, w)
 	}

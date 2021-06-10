@@ -3,7 +3,6 @@ package blog
 import (
 	"animar/v1/tools"
 	"database/sql"
-	"fmt"
 	"strconv"
 
 	"firebase.google.com/go/v4/auth"
@@ -67,7 +66,7 @@ func ListBlog() *sql.Rows {
 	defer db.Close()
 	rows, err := db.Query("SELECT * FROM blogs WHERE is_public = true")
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }
@@ -83,7 +82,7 @@ func ListUsersBlog(uid string, userId string) *sql.Rows {
 		rows, err = db.Query("SELECT * FROM blogs WHERE user_id = ? AND is_public = true", uid)
 	}
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }
@@ -94,7 +93,7 @@ func BlogUserId(id int) string {
 	var userId string
 	err := db.QueryRow("SELECT user_id FROM blogs WHERE id = ?", id).Scan(&userId)
 	if err != nil {
-		fmt.Print(err)
+		tools.ErrorLog(err)
 	}
 	return userId
 }
@@ -115,7 +114,7 @@ func DetailBlog(id int) TBlogJoinAnimes {
 	case err == sql.ErrNoRows:
 		b.ID = 0
 	case err != nil:
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return b
 }
@@ -136,7 +135,7 @@ func DetailBlogWithUser(id int) TBlogJoinAnimesUser {
 	case err == sql.ErrNoRows:
 		b.ID = 0
 	case err != nil:
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return b
 }
@@ -156,7 +155,7 @@ func DetailBlogBySlug(slug string) TBlogJoinAnimes {
 	case err == sql.ErrNoRows:
 		b.ID = 0
 	case err != nil:
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return b
 }
@@ -175,7 +174,7 @@ func DetailBlogWithUserBySlug(slug string) TBlogJoinAnimesUser {
 	case err == sql.ErrNoRows:
 		b.ID = 0
 	case err != nil:
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return b
 }
@@ -198,7 +197,7 @@ func InsertBlog(title string, abstract string, content string, userId string, is
 
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
-		fmt.Print(err)
+		tools.ErrorLog(err)
 	}
 	return int(insertedId)
 }
@@ -214,7 +213,7 @@ func UpdateBlog(id int, title string, abstract string, content string, isPublic 
 	)
 	defer stmt.Close()
 	if err != nil {
-		fmt.Print(err)
+		tools.ErrorLog(err)
 	}
 	updatedId, _ := exe.RowsAffected()
 	return int(updatedId)
@@ -227,7 +226,7 @@ func DeleteBlog(id int) int {
 	stmt, err := db.Prepare("DELETE FROM blogs WHERE id = ?")
 	exe, err := stmt.Exec(id)
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	rowsAffect, _ := exe.RowsAffected()
 	return int(rowsAffect)
@@ -244,7 +243,7 @@ func RelationAnimeByBlog(blogId int) *sql.Rows {
 			"WHERE blog_id = " + strconv.Itoa(blogId),
 	)
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }
@@ -261,7 +260,7 @@ func RelationBlogByAnime(animeId int) *sql.Rows {
 			"WHERE anime_id = " + strconv.Itoa(animeId),
 	)
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }
@@ -290,7 +289,7 @@ func DeleteRelationAnimeBlog(animeId int, blogId int) error {
 
 	stmt, err := db.Prepare("DELETE FROM relation_blog_animes WHERE anime_id = ? AND blog_id = ?")
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	defer stmt.Close()
 

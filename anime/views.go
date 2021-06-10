@@ -3,7 +3,6 @@ package anime
 import (
 	"animar/v1/tools"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -205,7 +204,7 @@ func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 			returnFileName, err = tools.UploadS3(file, fileHeader.Filename, []string{"anime"})
 
 			if err != nil {
-				fmt.Print(err)
+				tools.ErrorLog(err)
 			}
 		} else {
 			returnFileName = ""
@@ -247,7 +246,7 @@ func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
 			defer file.Close()
 			returnFileName, err = tools.UploadS3(file, fileHeader.Filename, []string{"anime"})
 			if err != nil {
-				fmt.Print(err)
+				tools.ErrorLog(err)
 			}
 		} else {
 			returnFileName = ""

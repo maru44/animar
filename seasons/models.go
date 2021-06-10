@@ -3,7 +3,6 @@ package seasons
 import (
 	"animar/v1/tools"
 	"database/sql"
-	"fmt"
 )
 
 type TSeasonRelation struct {
@@ -39,7 +38,7 @@ func insertSeason(year string, season string) int {
 	)
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
-		fmt.Print(err)
+		tools.ErrorLog(err)
 	}
 	return int(insertedId)
 }
@@ -49,7 +48,7 @@ func listSeason() *sql.Rows {
 	defer db.Close()
 	rows, err := db.Query("Select * from seasons")
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }
@@ -69,7 +68,7 @@ func detailSeason(id int) TSeason {
 	case err == sql.ErrNoRows:
 		s.ID = 0
 	case err != nil:
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return s
 }
@@ -87,7 +86,7 @@ func relationSeasonByAnime(animeId int) *sql.Rows {
 			"WHERE anime_id = ?", animeId,
 	)
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }
@@ -106,7 +105,7 @@ func insertRelation(seasonId int, animeId int) int {
 	)
 	insertedId, _ := exe.LastInsertId()
 	if err != nil {
-		fmt.Print(err)
+		tools.ErrorLog(err)
 	}
 	return int(insertedId)
 }

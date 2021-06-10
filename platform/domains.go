@@ -1,5 +1,7 @@
 package platform
 
+import "animar/v1/tools"
+
 func ListPlatformDomain() []TPlatform {
 	rows := listPlatform()
 	var plats []TPlatform
@@ -11,7 +13,7 @@ func ListPlatformDomain() []TPlatform {
 			&p.CreatedAt, &p.UpdatedAt,
 		)
 		if err != nil {
-			panic(err.Error())
+			tools.ErrorLog(err)
 		}
 		plats = append(plats, p)
 	}
@@ -34,7 +36,7 @@ func ListRelationPlatformDomain(animeId int) []TRelationPlatform {
 			&r.CreatedAt, &r.UpdatedAt, &r.PlatName,
 		)
 		if err != nil {
-			panic(err.Error())
+			tools.ErrorLog(err)
 		}
 		relations = append(relations, r)
 	}

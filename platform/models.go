@@ -3,7 +3,6 @@ package platform
 import (
 	"animar/v1/tools"
 	"database/sql"
-	"fmt"
 )
 
 type TPlatform struct {
@@ -46,7 +45,7 @@ func listPlatform() *sql.Rows {
 	defer db.Close()
 	rows, err := db.Query("Select * from platforms")
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }
@@ -66,7 +65,7 @@ func insertPlatform(engName string, platName string, baseUrl string, image strin
 	)
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
-		fmt.Print(err)
+		tools.ErrorLog(err)
 	}
 	return int(insertedId)
 }
@@ -87,7 +86,7 @@ func detailPlatfrom(id int) TPlatform {
 	case err == sql.ErrNoRows:
 		p.ID = 0
 	case err != nil:
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return p
 }
@@ -106,7 +105,7 @@ func updatePlatform(engName string, platName string, baseUrl string, image strin
 	)
 
 	if err != nil {
-		fmt.Print(err)
+		tools.ErrorLog(err)
 	}
 	updatedId, _ := exe.RowsAffected()
 	return int(updatedId)
@@ -120,7 +119,7 @@ func deletePlatform(id int) int {
 	exe, err := stmt.Exec(id)
 	defer stmt.Close()
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	rowsAffect, _ := exe.RowsAffected()
 	return int(rowsAffect)
@@ -139,7 +138,7 @@ func relationPlatformByAnime(animeId int) *sql.Rows {
 			"WHERE anime_id = ?", animeId,
 	)
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }
@@ -158,7 +157,7 @@ func insertRelation(platformId int, animeId int, linkUrl string) int {
 	)
 	insertedId, err := exe.LastInsertId()
 	if err != nil {
-		fmt.Print(err)
+		tools.ErrorLog(err)
 	}
 	return int(insertedId)
 }
@@ -172,7 +171,7 @@ func deleteRelationPlatform(animeId int, platformId int) int {
 		animeId, platformId,
 	)
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	rowsAffect, _ := exe.RowsAffected()
 	return int(rowsAffect)

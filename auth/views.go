@@ -62,7 +62,7 @@ func UserListView(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	defer resp.Body.Close()
 
@@ -237,7 +237,7 @@ func RenewTokenFCView(w http.ResponseWriter, r *http.Request) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Print(err.Error())
+		tools.ErrorLog(err)
 	}
 	defer resp.Body.Close()
 
@@ -289,7 +289,7 @@ func UserUpdateView(w http.ResponseWriter, r *http.Request) error {
 
 	u, err := clientAuth.UpdateUser(ctx, userId, params)
 	if err != nil {
-		fmt.Print(err)
+		tools.ErrorLog(err)
 	}
 	result.User = *u.UserInfo
 

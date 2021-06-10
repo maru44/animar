@@ -39,7 +39,7 @@ func AnimeWatchCounts(animeId int) *sql.Rows {
 	defer db.Close()
 	rows, err := db.Query("Select state, count(state) from audiences WHERE anime_id = ? GROUP BY state", animeId)
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }
@@ -51,7 +51,7 @@ func OnesAnimeWatchList(userId string) *sql.Rows {
 	defer db.Close()
 	rows, err := db.Query("Select * from audiences WHERE user_id = ?", userId)
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }
@@ -64,7 +64,7 @@ func OnesAnimeWatchJoinList(userId string) *sql.Rows {
 			"FROM audiences LEFT JOIN animes ON audiences.anime_id = animes.id WHERE user_id = ?", userId,
 	)
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 	return rows
 }
@@ -82,7 +82,8 @@ func WatchDetail(userId string, animeId int) int {
 	case err == sql.ErrNoRows:
 		return -1
 	case err != nil:
-		panic(err.Error())
+		tools.ErrorLog(err)
+		return 0
 	default:
 		return w.State
 	}
@@ -100,7 +101,7 @@ func InsertWatch(animeId int, state int, userId string) int {
 
 	_, err = exe.LastInsertId()
 	if err != nil {
-		panic(err.Error())
+		tools.ErrorLog(err)
 	}
 
 	return state
@@ -120,14 +121,15 @@ func UpsertWatch(animeId int, state int, userId string) int {
 		// create
 		return InsertWatch(animeId, state, userId)
 	case err != nil:
-		panic(err.Error())
+		tools.ErrorLog(err)
+		return -1
 	default:
 		// update
 		stmt, err := db.Prepare("UPDATE audiences SET state = ? WHERE user_id = ? AND anime_id = ?")
 		defer stmt.Close()
 		_, err = stmt.Exec(state, userId, animeId)
 		if err != nil {
-			panic(err.Error())
+			tools.ErrorLog(err)
 		}
 		return state
 	}

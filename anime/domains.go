@@ -1,5 +1,7 @@
 package anime
 
+import "animar/v1/tools"
+
 func ListAnimeDomain() []TAnime {
 	rows := ListAnime()
 	var animes []TAnime
@@ -10,7 +12,7 @@ func ListAnimeDomain() []TAnime {
 			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			panic(err.Error())
+			tools.ErrorLog(err)
 		}
 		animes = append(animes, a)
 	}
@@ -28,7 +30,7 @@ func ListAnimeMinimumDomain() []TAnimeMinimum {
 			&a.ID, &a.Slug, &a.Title,
 		)
 		if err != nil {
-			panic(err.Error())
+			tools.ErrorLog(err)
 		}
 		animes = append(animes, a)
 	}
@@ -46,7 +48,7 @@ func ListAnimeMinimumDomainByTitle(title string) []TAnimeMinimum {
 			&a.ID, &a.Slug, &a.Title,
 		)
 		if err != nil {
-			panic(err.Error())
+			tools.ErrorLog(err)
 		}
 		animes = append(animes, a)
 	}
@@ -71,7 +73,7 @@ func ListAnimeAdminDomain() []TAnimeAdmin {
 			&ani.CountEpisodes, &ani.CreatedAt, &ani.UpdatedAt,
 		)
 		if err != nil {
-			panic(err.Error())
+			tools.ErrorLog(err)
 		}
 		animes = append(animes, ani)
 	}

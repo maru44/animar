@@ -1,6 +1,8 @@
 package tools
 
 import (
+	"fmt"
+	"log"
 	"os"
 )
 
@@ -18,4 +20,12 @@ func ConvertUintsToInts(lst []uint8) []int {
 		ret = append(ret, i)
 	}
 	return ret
+}
+
+func ErrorLog(err error) {
+	if IsProductionEnv() {
+		log.Println(err)
+	} else {
+		fmt.Println(err)
+	}
 }
