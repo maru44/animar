@@ -4,28 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-	"runtime"
+	"strings"
 
 	"firebase.google.com/go/v4/auth"
 )
-
-func IsProductionEnv() bool {
-	// 本番環境IPリスト
-	hosts := []string{
-		"aaa",
-	}
-	host, _ := os.Hostname()
-
-	if runtime.GOOS != "linux" {
-		return false
-	}
-	for _, v := range hosts {
-		if v == host {
-			return true
-		}
-	}
-	return true
-}
 
 type TUserJsonResponse struct {
 	Status     int           `json:"status"`
@@ -42,33 +24,75 @@ type TBaseJsonResponse struct {
 	Data   interface{} `json:"data"`
 }
 
-// @TODO env使う
+func IsProductionEnv() bool {
+	// 本番環境IPリスト
+	hosts := strings.Split(os.Getenv("PRODUCTION_IP_LIST"), ", ")
+	host, _ := os.Hostname()
+
+	// if runtime.GOOS != "linux" {
+	// 	return false
+	// }
+	for _, v := range hosts {
+		if v == host {
+			return true
+		}
+	}
+	return false
+}
+
 func SetCookiePackage(w http.ResponseWriter, key string, value string) bool {
-	cookie := &http.Cookie{
-		Name:     key,
-		Value:    value,
-		Path:     "/",
-		Domain:   "localhost",
-		MaxAge:   60 * 60 * 24 * 30,
-		SameSite: http.SameSiteLaxMode,
-		Secure:   false,
-		HttpOnly: true,
+	var cookie *http.Cookie
+	if IsProductionEnv() {
+		cookie = &http.Cookie{
+			Name:     key,
+			Value:    value,
+			Path:     "/",
+			Domain:   os.Getenv("FRONT_HOST"),
+			MaxAge:   60 * 60 * 24 * 30,
+			SameSite: http.SameSiteNoneMode,
+			Secure:   true,
+			HttpOnly: true,
+		}
+	} else {
+		cookie = &http.Cookie{
+			Name:     key,
+			Value:    value,
+			Path:     "/",
+			Domain:   os.Getenv("FRONT_HOST"),
+			MaxAge:   60 * 60 * 24 * 30,
+			SameSite: http.SameSiteLaxMode,
+			Secure:   false,
+			HttpOnly: true,
+		}
 	}
 	http.SetCookie(w, cookie)
 	return true
 }
 
-// @TODO env使う
 func DestroyCookie(w http.ResponseWriter, key string) bool {
-	cookie := &http.Cookie{
-		Name:     key,
-		Value:    "",
-		Path:     "",
-		Domain:   "localhost",
-		MaxAge:   -1,
-		SameSite: http.SameSiteLaxMode,
-		Secure:   false,
-		HttpOnly: true,
+	var cookie *http.Cookie
+	if IsProductionEnv() {
+		cookie = &http.Cookie{
+			Name:     key,
+			Value:    "",
+			Path:     "",
+			Domain:   os.Getenv("FRONT_HOST"),
+			MaxAge:   -1,
+			SameSite: http.SameSiteNoneMode,
+			Secure:   true,
+			HttpOnly: true,
+		}
+	} else {
+		cookie = &http.Cookie{
+			Name:     key,
+			Value:    "",
+			Path:     "",
+			Domain:   os.Getenv("FRONT_HOST"),
+			MaxAge:   -1,
+			SameSite: http.SameSiteLaxMode,
+			Secure:   false,
+			HttpOnly: true,
+		}
 	}
 	http.SetCookie(w, cookie)
 	return true
@@ -82,8 +106,8 @@ func SetDefaultResponseHeader(w http.ResponseWriter) bool {
 	protocol := "http://"
 	host := "localhost:3000"
 	if IsProductionEnv() {
-		protocol = "http://"
-		host = "localhost:3000"
+		protocol = "https://"
+		host = os.Getenv("FRONT_HOST")
 	}
 	w.Header().Set("Access-Control-Allow-Origin", protocol+host)
 	w.Header().Set("Access-Control-Allow-Credentials", "true")

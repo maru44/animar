@@ -25,9 +25,7 @@ func main() {
 	http.HandleFunc("/db/anime/wc/", tools.Handle(anime.AnimeWithUserWatchView)) // 動かず
 
 	/*   blogs   */
-	//http.HandleFunc("/blog/", tools.Handle(blog.ListBlogView))
 	http.HandleFunc("/blog/", tools.Handle(blog.BlogJoinAnimeView))
-	//http.HandleFunc("/blog/post/", tools.Handle(blog.InsertBlogView))
 	http.HandleFunc("/blog/post/", tools.Handle(blog.InsertBlogWithRelationView))
 	http.HandleFunc("/blog/delete/", tools.Handle(blog.DeleteBlogView))             // ?id=
 	http.HandleFunc("/blog/update/", tools.Handle(blog.UpdateBlogWithRelationView)) // ?id=
