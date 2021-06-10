@@ -11,12 +11,18 @@ import (
 	"animar/v1/series"
 	"animar/v1/tools"
 	"animar/v1/watch"
+	"fmt"
 	"net/http"
 )
 
 func main() {
 
 	configs.SetEnviron()
+
+	// connection
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Print("OK")
+	})
 
 	/*   Anime database   */
 	http.HandleFunc("/db/anime/", tools.Handle(anime.AnimeView))
@@ -85,5 +91,11 @@ func main() {
 	http.HandleFunc("/admin/relation/plat/post/", tools.Handle(platform.InsertRelationPlatformView))
 	http.HandleFunc("/admin/relation/plat/delete/", tools.Handle(platform.DeleteRelationPlatformView)) // ?anime=<anime_id>&platform=<platform_id>
 
-	http.ListenAndServe(":8000", nil)
+	if tools.IsProductionEnv() {
+		//http.ListenAndServeTLS(":443", os.Getenv("SSL_CHAIN_PATH"), os.Getenv("SSL_KEY_PATH"), nil)
+		http.ListenAndServe(":8000", nil) // reverse proxy
+	} else {
+		http.ListenAndServe(":8000", nil)
+	}
+
 }
