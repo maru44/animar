@@ -164,3 +164,14 @@ func (result TBaseJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 	w.Write(res)
 	return true
 }
+
+func (result TBaseJsonResponse) LimitMethod(validMethods []string, r *http.Request) (TBaseJsonResponse, bool) {
+	method := r.Method
+	for _, m := range validMethods {
+		if method == m {
+			return result, true
+		}
+	}
+	result.Status = 4005
+	return result, false
+}

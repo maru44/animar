@@ -53,6 +53,13 @@ func SeasonView(w http.ResponseWriter, r *http.Request) error {
 
 func InsertSeasonView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
+	result, is_valid := result.LimitMethod([]string{"POST"}, r)
+	if !is_valid {
+		result.ResponseWrite(w)
+		return nil
+	}
+
 	userId := tools.GetAdminIdFromCookie(r)
 	if userId == "" {
 		result.Status = 4003
@@ -87,6 +94,13 @@ func SeasonByAnimeIdView(w http.ResponseWriter, r *http.Request) error {
 
 func InsertRelationSeasonView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
+	result, is_valid := result.LimitMethod([]string{"POST"}, r)
+	if !is_valid {
+		result.ResponseWrite(w)
+		return nil
+	}
+
 	userId := tools.GetAdminIdFromCookie(r)
 
 	if userId == "" {

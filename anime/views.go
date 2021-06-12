@@ -190,8 +190,16 @@ func AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) error {
 // add anime (only admin)
 func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
+	result, is_valid := result.LimitMethod([]string{"POST"}, r)
+	if !is_valid {
+		result.ResponseWrite(w)
+		return nil
+	}
+
 	userId := tools.GetAdminIdFromCookie(r)
 	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
+
 	if userId == "" {
 		result.Status = 4003
 	} else {
@@ -226,6 +234,13 @@ func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 // update ?=<id>
 func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
+	result, is_valid := result.LimitMethod([]string{"PUT"}, r)
+	if !is_valid {
+		result.ResponseWrite(w)
+		return nil
+	}
+
 	userId := tools.GetAdminIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -269,6 +284,13 @@ func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
 // delete anime ?=<id>
 func AnimeDeleteView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
+	result, is_valid := result.LimitMethod([]string{"DELETE"}, r)
+	if !is_valid {
+		result.ResponseWrite(w)
+		return nil
+	}
+
 	userId := tools.GetAdminIdFromCookie(r)
 
 	query := r.URL.Query()

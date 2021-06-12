@@ -31,6 +31,7 @@ func AnimeWatchCountView(w http.ResponseWriter, r *http.Request) error {
 // ?user=userId
 func UserWatchStatusView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
 	userId := r.URL.Query().Get("user")
 
 	var watches []TAudienceJoinAnime
@@ -64,6 +65,13 @@ func WatchAnimeStateOfUserView(w http.ResponseWriter, r *http.Request) error {
 // watch post view
 func WatchPostView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
+	result, is_valid := result.LimitMethod([]string{"POST"}, r)
+	if !is_valid {
+		result.ResponseWrite(w)
+		return nil
+	}
+
 	userId := tools.GetIdFromCookie(r)
 	if userId == "" {
 		result.Status = 4001
@@ -85,6 +93,7 @@ func WatchPostView(w http.ResponseWriter, r *http.Request) error {
 // ?anime=
 func WatchDeleteView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TVoidJsonResponse{Status: 200}
+
 	userId := tools.GetIdFromCookie(r)
 	if userId == "" {
 		result.Status = 5000

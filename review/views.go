@@ -96,6 +96,13 @@ func GetAnimeUserReviewView(w http.ResponseWriter, r *http.Request) error {
 // upsert star
 func UpsertReviewStarView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
+	result, is_valid := result.LimitMethod([]string{"POST, PUT"}, r)
+	if !is_valid {
+		result.ResponseWrite(w)
+		return nil
+	}
+
 	userId := tools.GetIdFromCookie(r)
 
 	if userId == "" {
@@ -113,6 +120,13 @@ func UpsertReviewStarView(w http.ResponseWriter, r *http.Request) error {
 //upsert content
 func UpsertReviewContentView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
+	result, is_valid := result.LimitMethod([]string{"POST", "PUT"}, r)
+	if !is_valid {
+		result.ResponseWrite(w)
+		return nil
+	}
+
 	userId := tools.GetIdFromCookie(r)
 
 	if userId == "" {

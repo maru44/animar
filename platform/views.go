@@ -49,6 +49,13 @@ func PlatformView(w http.ResponseWriter, r *http.Request) error {
 
 func InsertPlatformView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
+	result, is_valid := result.LimitMethod([]string{"POST"}, r)
+	if !is_valid {
+		result.ResponseWrite(w)
+		return nil
+	}
+
 	userId := tools.GetAdminIdFromCookie(r)
 
 	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
@@ -84,6 +91,13 @@ func InsertPlatformView(w http.ResponseWriter, r *http.Request) error {
 // update ?id=<id>
 func UpdatePlatformView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
+	result, is_valid := result.LimitMethod([]string{"PUT"}, r)
+	if !is_valid {
+		result.ResponseWrite(w)
+		return nil
+	}
+
 	userId := tools.GetAdminIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -123,6 +137,13 @@ func UpdatePlatformView(w http.ResponseWriter, r *http.Request) error {
 // delete platform ?=<id>
 func DeletePlatformView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
+	result, is_valid := result.LimitMethod([]string{"DELETE"}, r)
+	if !is_valid {
+		result.ResponseWrite(w)
+		return nil
+	}
+
 	userId := tools.GetAdminIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -156,6 +177,13 @@ func RelationPlatformView(w http.ResponseWriter, r *http.Request) error {
 
 func InsertRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
+	result, is_valid := result.LimitMethod([]string{"POST"}, r)
+	if !is_valid {
+		result.ResponseWrite(w)
+		return nil
+	}
+
 	userId := tools.GetAdminIdFromCookie(r)
 
 	if userId == "" {
@@ -175,6 +203,13 @@ func InsertRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
 // delete platform ?=<id>
 func DeleteRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
+	result, is_valid := result.LimitMethod([]string{"DELETE"}, r)
+	if !is_valid {
+		result.ResponseWrite(w)
+		return nil
+	}
+
 	userId := tools.GetAdminIdFromCookie(r)
 
 	query := r.URL.Query()

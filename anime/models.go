@@ -17,7 +17,7 @@ type TAnime struct {
 	Description   *string `json:"description,omitempty"`
 	State         *string `json:"state,omitempty"`
 	SeriesId      *int    `json:"series_id,omitempty"`
-	CountEpisodes *int    `json:"count_episode,omitemptys"`
+	CountEpisodes *int    `json:"count_episodes,omitemptys"`
 	CreatedAt     string  `json:"created_at"`
 	UpdatedAt     *string `json:"updated_at,omitempty"`
 }
@@ -32,7 +32,7 @@ type TAnimeWithSeries struct {
 	Description   *string `json:"description,omitempty"`
 	State         *string `json:"state,omitempty"`
 	SeriesId      *int    `json:"series_id,omitempty"`
-	CountEpisodes *int    `json:"count_episode,omitemptys"`
+	CountEpisodes *int    `json:"count_episodes,omitemptys"`
 	CreatedAt     string  `json:"created_at"`
 	UpdatedAt     *string `json:"updated_at,omitempty"`
 	SeriesName    *string `json:"series_name"`
