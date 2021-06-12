@@ -4,16 +4,17 @@ import (
 	"database/sql"
 	"fmt"
 	"math/rand"
+	"os"
 	"time"
 )
 
 const slugLetters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 
 var (
-	MysqlUser     = GetenvOrDefault("MYSQL_USER", "go")
-	MysqlPassword = GetenvOrDefault("MYSQL_PASSWORD", "Go1234_test")
-	MysqlDataBase = GetenvOrDefault("MYSQL_DB", "go_test")
-	MysqlHost     = GetenvOrDefault("MYSQL_HOST", "@tcp(127.0.0.1:3306)")
+	MysqlUser     = os.Getenv("MYSQL_USER")
+	MysqlPassword = os.Getenv("MYSQL_PASSWORD")
+	MysqlDataBase = os.Getenv("MYSQL_DB")
+	MysqlHost     = os.Getenv("MYSQL_HOST")
 )
 
 func AccessDB() *sql.DB {
