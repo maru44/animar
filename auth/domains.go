@@ -59,9 +59,12 @@ func GetJWTPayload(token string) {
 
 // send email link
 func SendVerifyEmailAtRegister(ctx context.Context, client *auth.Client, email string) error {
-	// @TODO Use env!!
+	protocol := "http://"
+	if tools.IsProductionEnv() {
+		protocol = "https://"
+	}
 	actionCodeSettings := &auth.ActionCodeSettings{
-		URL:             "http://localhost:3000/",
+		URL:             protocol + configs.FrontHost + configs.FrontPort,
 		HandleCodeInApp: false,
 	}
 
