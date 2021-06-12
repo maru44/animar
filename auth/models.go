@@ -24,8 +24,7 @@ func VerifyFirebase(ctx context.Context, idToken string) map[string]interface{} 
 	client := tools.FirebaseClient(ctx)
 	token, err := client.VerifyIDToken(ctx, idToken)
 	if err != nil {
-		//log.Fatalf("%s", err)
-		fmt.Print(err)
+		tools.ErrorLog(err)
 		return nil
 	}
 	claims := token.Claims

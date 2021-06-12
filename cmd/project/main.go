@@ -21,6 +21,7 @@ func main() {
 
 	// connection
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello"))
 		fmt.Print("OK")
 	})
 
