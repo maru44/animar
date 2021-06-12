@@ -64,7 +64,7 @@ func SendVerifyEmailAtRegister(ctx context.Context, client *auth.Client, email s
 		protocol = "https://"
 	}
 	actionCodeSettings := &auth.ActionCodeSettings{
-		URL:             protocol + configs.FrontHost + configs.FrontPort,
+		URL:             protocol + configs.FrontHost + configs.FrontPort + "/anime",
 		HandleCodeInApp: false,
 	}
 
