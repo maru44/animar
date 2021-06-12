@@ -18,6 +18,7 @@ go.sum
 
 tmp/*
 **/env.go
+**/execenv.go
 **/secret_key.json
 
 storage/production/*

@@ -17,8 +17,9 @@ import (
 
 func main() {
 
-	configs.SetEnviron()
-	defer configs.SetEnviron()
+	if !tools.IsProductionEnv() {
+		configs.SetEnviron()
+	}
 
 	// connection
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
