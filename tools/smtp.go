@@ -14,8 +14,6 @@ func BaseSendMail(subject string, message string, to string) error {
 		configs.EmailHost,
 	)
 
-	fmt.Println(configs.EmailHostUser, message, subject, to)
-
 	return smtp.SendMail(
 		configs.EmailHost+":"+configs.EmailPort,
 		smtpAuth,
@@ -41,7 +39,7 @@ func SendVerifyEmail(to string, link string) error {
 以下のリンクをクリックすることで本登録が完了します。
 
 %s
-*** Google社の提供するfirebaseへのリンクとなっております。
+Google社の提供するfirebaseへのリンクとなっております。
 
 loveAni.me
 		`, link,
