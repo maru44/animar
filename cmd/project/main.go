@@ -18,6 +18,7 @@ import (
 func main() {
 
 	configs.SetEnviron()
+	defer configs.SetEnviron()
 
 	// connection
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
