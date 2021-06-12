@@ -14,6 +14,8 @@ func BaseSendMail(subject string, message string, to string) error {
 		configs.EmailHost,
 	)
 
+	fmt.Println(configs.EmailHostUser, message, subject, to)
+
 	return smtp.SendMail(
 		configs.EmailHost+":"+configs.EmailPort,
 		smtpAuth,
