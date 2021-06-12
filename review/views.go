@@ -97,7 +97,7 @@ func GetAnimeUserReviewView(w http.ResponseWriter, r *http.Request) error {
 func UpsertReviewStarView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
 
-	result, is_valid := result.LimitMethod([]string{"POST, PUT"}, r)
+	result, is_valid := result.LimitMethod([]string{"POST", "PUT"}, r)
 	if !is_valid {
 		result.ResponseWrite(w)
 		return nil
