@@ -19,6 +19,7 @@ func main() {
 	// connection
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		host, _ := os.Hostname()
+
 		w.Write([]byte(host))
 	})
 
