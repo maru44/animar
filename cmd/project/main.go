@@ -10,6 +10,7 @@ import (
 	"animar/v1/series"
 	"animar/v1/tools"
 	"animar/v1/watch"
+	"fmt"
 	"net/http"
 	"os"
 )
@@ -20,6 +21,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		host, _ := os.Hostname()
 
+		fmt.Print(host)
 		w.Write([]byte(host))
 	})
 
