@@ -17,8 +17,8 @@ func BaseSendMail(subject string, message string, to string) error {
 	return smtp.SendMail(
 		configs.EmailHost+":"+configs.EmailPort,
 		smtpAuth,
-		configs.EmailHostUser,
-		[]string{to},
+		"<"+configs.EmailHostUser+">",
+		[]string{"<" + to + ">"},
 		[]byte(
 			"To: "+to+"\r\n"+
 				"Subject: "+subject+"\r\n"+
@@ -33,7 +33,7 @@ func SendVerifyEmail(to string, link string) error {
 	const subject = "loveAni.me 登録メール"
 	var message string
 	message = fmt.Sprintf(
-		`loveAni.meへのご登録ありがとうございます
+		`loveAnimeへのご登録ありがとうございます
 		
 仮登録が完了しました。
 以下のリンクをクリックすることで本登録が完了します。
@@ -41,7 +41,7 @@ func SendVerifyEmail(to string, link string) error {
 %s
 Google社の提供するfirebaseへのリンクとなっております。
 
-loveAni.me
+loveAnime
 		`, link,
 	)
 
