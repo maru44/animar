@@ -1,12 +1,12 @@
 package tools
 
 import (
+	"animar/v1/configs"
 	"bytes"
 	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -18,8 +18,8 @@ import (
 
 func S3Session() *session.Session {
 	creds := credentials.NewStaticCredentials(
-		os.Getenv("S3_ACCESS_KEY_ID"),
-		os.Getenv("S3_SECRET_KEY"),
+		configs.S3AccessKeyId,
+		configs.S3SecretKey,
 		"",
 	)
 	sess := session.Must(session.NewSession(
@@ -52,7 +52,7 @@ func UploadS3(file multipart.File, fileName string, pathList []string) (string, 
 
 	_, err := u.Upload(&s3manager.UploadInput{
 		Body:        buf,
-		Bucket:      aws.String(os.Getenv("BUCKET")),
+		Bucket:      aws.String(configs.Bucket),
 		ContentType: aws.String(contentType),
 		Key:         aws.String(key),
 	})
@@ -60,7 +60,7 @@ func UploadS3(file multipart.File, fileName string, pathList []string) (string, 
 		return "", err
 	}
 
-	fileUrl := fmt.Sprintf("https://%s.s3-%s.amazonaws.com/%s", os.Getenv("BUCKET"), "ap-northeast-1", key)
+	fileUrl := fmt.Sprintf("https://%s.s3-%s.amazonaws.com/%s", configs.Bucket, "ap-northeast-1", key)
 	return fileUrl, nil
 }
 

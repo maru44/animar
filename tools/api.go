@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"animar/v1/configs"
 	"encoding/json"
 	"net/http"
 	"os"
@@ -26,7 +27,7 @@ type TBaseJsonResponse struct {
 
 func IsProductionEnv() bool {
 	// 本番環境IPリスト
-	hosts := strings.Split(os.Getenv("PRODUCTION_IP_LIST"), ", ")
+	hosts := strings.Split(configs.ProductionIpList, ", ")
 	host, _ := os.Hostname()
 
 	// if runtime.GOOS != "linux" {
@@ -47,7 +48,7 @@ func SetCookiePackage(w http.ResponseWriter, key string, value string) bool {
 			Name:     key,
 			Value:    value,
 			Path:     "/",
-			Domain:   os.Getenv("FRONT_HOST"),
+			Domain:   configs.FrontHost,
 			MaxAge:   60 * 60 * 24 * 30,
 			SameSite: http.SameSiteNoneMode,
 			Secure:   true,
@@ -58,7 +59,7 @@ func SetCookiePackage(w http.ResponseWriter, key string, value string) bool {
 			Name:     key,
 			Value:    value,
 			Path:     "/",
-			Domain:   os.Getenv("FRONT_HOST"),
+			Domain:   configs.FrontHost,
 			MaxAge:   60 * 60 * 24 * 30,
 			SameSite: http.SameSiteLaxMode,
 			Secure:   false,
@@ -76,7 +77,7 @@ func DestroyCookie(w http.ResponseWriter, key string) bool {
 			Name:     key,
 			Value:    "",
 			Path:     "",
-			Domain:   os.Getenv("FRONT_HOST"),
+			Domain:   configs.FrontHost,
 			MaxAge:   -1,
 			SameSite: http.SameSiteNoneMode,
 			Secure:   true,
@@ -87,7 +88,7 @@ func DestroyCookie(w http.ResponseWriter, key string) bool {
 			Name:     key,
 			Value:    "",
 			Path:     "",
-			Domain:   os.Getenv("FRONT_HOST"),
+			Domain:   configs.FrontHost,
 			MaxAge:   -1,
 			SameSite: http.SameSiteLaxMode,
 			Secure:   false,
@@ -107,7 +108,7 @@ func SetDefaultResponseHeader(w http.ResponseWriter) bool {
 	host := "localhost:3000"
 	if IsProductionEnv() {
 		protocol = "https://"
-		host = os.Getenv("FRONT_HOST")
+		host = configs.FrontHost
 	}
 	w.Header().Set("Access-Control-Allow-Origin", protocol+host)
 	w.Header().Set("Access-Control-Allow-Credentials", "true")

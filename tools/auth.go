@@ -1,10 +1,10 @@
 package tools
 
 import (
+	"animar/v1/configs"
 	"context"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	firebase "firebase.google.com/go/v4"
@@ -83,7 +83,7 @@ func GetIdFromCookie(r *http.Request) string {
 }
 
 func IsAdmin(userId string) bool {
-	strAdmins := os.Getenv("ADMIN_USERS")
+	strAdmins := configs.AdminUsers
 	admins := strings.Split(strAdmins, ", ")
 
 	return IsContainString(admins, userId)

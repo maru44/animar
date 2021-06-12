@@ -1,23 +1,23 @@
 package tools
 
 import (
+	"animar/v1/configs"
 	"fmt"
 	"net/smtp"
-	"os"
 )
 
 func BaseSendMail(subject string, message string, to string) error {
 	smtpAuth := smtp.PlainAuth(
 		"",
-		os.Getenv("EMAIL_HOST_USER"),
-		os.Getenv("EMAIL_HOST_PASS"),
-		os.Getenv("EMAIL_HOST"),
+		configs.EmailHostUser,
+		configs.EmailHostPass,
+		configs.EmailHost,
 	)
 
 	return smtp.SendMail(
-		os.Getenv("EMAIL_HOST")+":"+os.Getenv("EMAIL_PORT"),
+		configs.EmailHost+":"+configs.EmailPort,
 		smtpAuth,
-		os.Getenv("EMAIL_HOST_USER"),
+		configs.EmailHostUser,
 		[]string{to},
 		[]byte(
 			"To: "+to+"\r\n"+

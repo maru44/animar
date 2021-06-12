@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"animar/v1/configs"
 	"animar/v1/tools"
 	"bytes"
 	"context"
@@ -8,7 +9,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 
 	"firebase.google.com/go/v4/auth"
@@ -46,27 +46,6 @@ type TCreateReturn struct {
 type TProfileForm struct {
 	DisplayName string `json:"displayName"`
 	PhotoUrl    string `json:"photoUrl"`
-}
-
-func UserListView(w http.ResponseWriter, r *http.Request) {
-	jsonStr := `{"grant_type": "client_credentials", "client_id": "` + os.Getenv("AUTH0_CLIENT_ID") + `", "client_secret": "` + os.Getenv("AUTH0_SECRET") + `", "audience": "https://` + os.Getenv("AUTH0_DOMAIN") + `/api/v2/"}`
-	url := `https://` + os.Getenv("AUTH0_DOMAIN") + `/oauth/token`
-	req, err := http.NewRequest(
-		"POST",
-		url,
-		bytes.NewBuffer([]byte(jsonStr)),
-	)
-
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		tools.ErrorLog(err)
-	}
-	defer resp.Body.Close()
-
-	fmt.Fprintln(w, resp)
 }
 
 // user info from userId
@@ -132,7 +111,7 @@ func SetJWTCookieView(w http.ResponseWriter, r *http.Request) error {
 	posted.ReturnSecureToken = true
 
 	posted_json, _ := json.Marshal(posted)
-	url := `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=` + os.Getenv("FIREBASE_API_KEY")
+	url := `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=` + configs.FirebaseApiKey
 	req, err := http.NewRequest(
 		"POST",
 		url,
@@ -175,10 +154,10 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 		posted.DisplayName = strings.Split(posted.Email, "@")[0]
 	}
 	// @TODO 後でちゃんとした画像にする
-	// posted.PhotoUrl = fmt.Sprintf("https://%s.s3-%s.amazonaws.com/%s", os.Getenv("BUCKET"), "ap-northeast-1", "auth/ogp.png")
+	// posted.PhotoUrl = fmt.Sprintf("https://%s.s3-%s.amazonaws.com/%s", configs.Bucket, "ap-northeast-1", "auth/ogp.png")
 
 	posted_json, _ := json.Marshal(posted)
-	url := `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=` + os.Getenv("FIREBASE_API_KEY")
+	url := `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=` + configs.FirebaseApiKey
 	req, err := http.NewRequest(
 		"POST",
 		url,
@@ -227,7 +206,7 @@ func RenewTokenFCView(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	jsonStr := `{"grant_type": "refresh_token", "refresh_token": "` + refreshToken.Value + `"}`
-	url := `https://securetoken.googleapis.com/v1/token?key=` + os.Getenv("FIREBASE_API_KEY")
+	url := `https://securetoken.googleapis.com/v1/token?key=` + configs.FirebaseApiKey
 	req, err := http.NewRequest(
 		"POST",
 		url,

@@ -1,24 +1,17 @@
 package tools
 
 import (
+	"animar/v1/configs"
 	"database/sql"
 	"fmt"
 	"math/rand"
-	"os"
 	"time"
 )
 
 const slugLetters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 
-var (
-	MysqlUser     = os.Getenv("MYSQL_USER")
-	MysqlPassword = os.Getenv("MYSQL_PASSWORD")
-	MysqlDataBase = os.Getenv("MYSQL_DB")
-	MysqlHost     = os.Getenv("MYSQL_HOST")
-)
-
 func AccessDB() *sql.DB {
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s%s/%s", MysqlUser, MysqlPassword, MysqlHost, MysqlDataBase))
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s%s/%s", configs.MysqlUser, configs.MysqlPassword, configs.MysqlHost, configs.MysqlDataBase))
 	if err != nil {
 		panic(err.Error())
 	}

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"animar/v1/configs"
 	"animar/v1/tools"
 	"bytes"
 	"context"
@@ -8,7 +9,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 
 	"firebase.google.com/go/v4/auth"
 )
@@ -17,7 +17,7 @@ func GetJWTFromGoogle(posted TLoginForm) TTokensForm {
 	var tokens TTokensForm
 
 	posted_json, _ := json.Marshal(posted)
-	url := `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=` + os.Getenv("FIREBASE_API_KEY")
+	url := `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=` + configs.FirebaseApiKey
 	req, err := http.NewRequest(
 		"POST",
 		url,
