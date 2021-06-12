@@ -13,6 +13,7 @@ type TAnimeInput struct {
 	Kana          string `json:"kana,omitempty"`
 	EngName       string `json:"eng_name:omitempty"`
 	ThumbUrl      string `json:"thumb_url,omitempty"`
+	PreThumbUrl   string `json:"pre_thumb,omitempty"`
 	Description   string `json:"description,omitempty"`
 	State         int    `json:"state,omitempty"`
 	SeriesId      int    `json:"series_id,omitempty"`
@@ -264,7 +265,7 @@ func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
 				tools.ErrorLog(err)
 			}
 		} else {
-			returnFileName = ""
+			returnFileName = r.FormValue("pre_thumb")
 		}
 
 		series, _ := strconv.Atoi(r.FormValue("series_id"))
