@@ -17,11 +17,12 @@ func BaseSendMail(subject string, message string, to string) error {
 	return smtp.SendMail(
 		configs.EmailHost+":"+configs.EmailPort,
 		smtpAuth,
-		"<"+configs.EmailHostUser+">",
-		[]string{"<" + to + ">"},
+		configs.EmailHostUser,
+		[]string{to},
 		[]byte(
 			"To: "+to+"\r\n"+
 				"Subject: "+subject+"\r\n"+
+				"From: "+configs.EmailHostUser+"\r\n"+
 				"Content-Type: text/plain; charset=\"utf-8\""+"\r\n"+ // anti 文字化け
 				"\r\n"+
 				message,
