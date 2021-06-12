@@ -4,27 +4,22 @@ import (
 	"animar/v1/anime"
 	"animar/v1/auth"
 	"animar/v1/blog"
-	"animar/v1/configs"
 	"animar/v1/platform"
 	"animar/v1/review"
 	"animar/v1/seasons"
 	"animar/v1/series"
 	"animar/v1/tools"
 	"animar/v1/watch"
-	"fmt"
 	"net/http"
+	"os"
 )
 
 func main() {
 
-	if !tools.IsProductionEnv() {
-		configs.SetEnviron()
-	}
-
 	// connection
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello"))
-		fmt.Print("OK")
+		host, _ := os.Hostname()
+		w.Write([]byte(host))
 	})
 
 	/*   Anime database   */
