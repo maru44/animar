@@ -3,6 +3,7 @@ package anime
 import (
 	"animar/v1/tools"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -191,6 +192,9 @@ func AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) error {
 // add anime (only admin)
 func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
+
+	// @TODO delete
+	fmt.Print("KOKO")
 
 	result, is_valid := result.LimitMethod([]string{"POST"}, r)
 	if !is_valid {
