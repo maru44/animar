@@ -54,23 +54,13 @@ func SeasonView(w http.ResponseWriter, r *http.Request) error {
 func InsertSeasonView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
 
-	result, is_valid := result.LimitMethod([]string{"POST"}, r)
-	if !is_valid {
-		result.ResponseWrite(w)
-		return nil
-	}
+	var p TSeasonInput
+	json.NewDecoder(r.Body).Decode(&p)
+	insertedId := insertSeason(
+		p.Year, p.Season,
+	)
+	result.Data = insertedId
 
-	userId := tools.GetAdminIdFromCookie(r)
-	if userId == "" {
-		result.Status = 4003
-	} else {
-		var p TSeasonInput
-		json.NewDecoder(r.Body).Decode(&p)
-		insertedId := insertSeason(
-			p.Year, p.Season,
-		)
-		result.Data = insertedId
-	}
 	result.ResponseWrite(w)
 	return nil
 }

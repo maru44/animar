@@ -66,12 +66,6 @@ func WatchAnimeStateOfUserView(w http.ResponseWriter, r *http.Request) error {
 func WatchPostView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
 
-	result, is_valid := result.LimitMethod([]string{"POST"}, r)
-	if !is_valid {
-		result.ResponseWrite(w)
-		return nil
-	}
-
 	userId := tools.GetIdFromCookie(r)
 	if userId == "" {
 		result.Status = 4001

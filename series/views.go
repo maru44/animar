@@ -49,23 +49,13 @@ func SeriesView(w http.ResponseWriter, r *http.Request) error {
 func InsertSeriesView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
 
-	result, is_valid := result.LimitMethod([]string{"POST"}, r)
-	if !is_valid {
-		result.ResponseWrite(w)
-		return nil
-	}
+	var p TSeriesInput
+	json.NewDecoder(r.Body).Decode(&p)
+	insertedId := InsertSeries(
+		p.EngName, p.SeriesName,
+	)
+	result.Data = insertedId
 
-	userId := tools.GetAdminIdFromCookie(r)
-	if userId == "" {
-		result.Status = 4003
-	} else {
-		var p TSeriesInput
-		json.NewDecoder(r.Body).Decode(&p)
-		insertedId := InsertSeries(
-			p.EngName, p.SeriesName,
-		)
-		result.Data = insertedId
-	}
 	result.ResponseWrite(w)
 	return nil
 }

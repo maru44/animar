@@ -3,7 +3,6 @@ package anime
 import (
 	"animar/v1/tools"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -127,24 +126,8 @@ type TUserToken struct {
 func AnimeListAdminView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
 
-	var userId string
-	switch r.Method {
-	case "GET":
-		userId = tools.GetAdminIdFromCookie(r)
-	case "POST":
-		var posted TUserToken
-		json.NewDecoder(r.Body).Decode(&posted)
-		userId = tools.GetAdminIdFromIdToken(posted.Token)
-	default:
-		userId = ""
-	}
-
 	var animes []TAnime
-	if userId == "" {
-		result.Status = 4003
-	} else {
-		animes = ListAnimeDomain()
-	}
+	animes = ListAnimeDomain()
 	result.Data = animes
 	result.ResponseWrite(w)
 	return nil
@@ -154,18 +137,6 @@ func AnimeListAdminView(w http.ResponseWriter, r *http.Request) error {
 func AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
 
-	var userId string
-	switch r.Method {
-	case "GET":
-		userId = tools.GetAdminIdFromCookie(r)
-	case "POST":
-		var posted TUserToken
-		json.NewDecoder(r.Body).Decode(&posted)
-		userId = tools.GetAdminIdFromIdToken(posted.Token)
-	default:
-		userId = ""
-	}
-
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
@@ -174,15 +145,11 @@ func AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) error {
 	json.NewDecoder(r.Body).Decode(&posted)
 
 	var animes []TAnimeAdmin
-	if userId == "" {
-		result.Status = 4003
+	ani := DetailAnimeAdmin(id)
+	if ani.ID == 0 {
+		result.Status = 404
 	} else {
-		ani := DetailAnimeAdmin(id)
-		if ani.ID == 0 {
-			result.Status = 404
-		} else {
-			animes = append(animes, ani)
-		}
+		animes = append(animes, ani)
 	}
 	result.Data = animes
 	result.ResponseWrite(w)
@@ -193,45 +160,31 @@ func AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) error {
 func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
 
-	// @TODO delete
-	fmt.Print("KOKO")
-
-	result, is_valid := result.LimitMethod([]string{"POST"}, r)
-	if !is_valid {
-		result.ResponseWrite(w)
-		return nil
-	}
-
-	userId := tools.GetAdminIdFromCookie(r)
 	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
 
-	if userId == "" {
-		result.Status = 4003
-	} else {
-		file, fileHeader, err := r.FormFile("thumb")
-		var returnFileName string
-		var insertedId int
-		if err == nil {
-			// w/ thumb picture
-			defer file.Close()
-			returnFileName, err = tools.UploadS3(file, fileHeader.Filename, []string{"anime"})
+	file, fileHeader, err := r.FormFile("thumb")
+	var returnFileName string
+	var insertedId int
+	if err == nil {
+		// w/ thumb picture
+		defer file.Close()
+		returnFileName, err = tools.UploadS3(file, fileHeader.Filename, []string{"anime"})
 
-			if err != nil {
-				tools.ErrorLog(err)
-			}
-		} else {
-			returnFileName = ""
+		if err != nil {
+			tools.ErrorLog(err)
 		}
-		series, _ := strconv.Atoi(r.FormValue("series_id"))
-		episodes, _ := strconv.Atoi(r.FormValue("count_episodes"))
-		insertedId = InsertAnime(
-			r.FormValue("title"), r.FormValue("abbreviation"),
-			r.FormValue("kana"), r.FormValue("engName"),
-			r.FormValue("description"), r.FormValue("state"),
-			series, episodes, r.FormValue("copyright"), returnFileName,
-		)
-		result.Data = insertedId
+	} else {
+		returnFileName = r.FormValue("pre_thumb")
 	}
+	series, _ := strconv.Atoi(r.FormValue("series_id"))
+	episodes, _ := strconv.Atoi(r.FormValue("count_episodes"))
+	insertedId = InsertAnime(
+		r.FormValue("title"), r.FormValue("abbreviation"),
+		r.FormValue("kana"), r.FormValue("engName"),
+		r.FormValue("description"), r.FormValue("state"),
+		series, episodes, r.FormValue("copyright"), returnFileName,
+	)
+	result.Data = insertedId
 	result.ResponseWrite(w)
 	return nil
 }
@@ -240,48 +193,37 @@ func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
 
-	result, is_valid := result.LimitMethod([]string{"PUT"}, r)
-	if !is_valid {
-		result.ResponseWrite(w)
-		return nil
-	}
-
-	userId := tools.GetAdminIdFromCookie(r)
-
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
 
 	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
 
-	if userId == "" {
-		result.Status = 4003
-	} else {
-		file, fileHeader, err := r.FormFile("thumb")
-		var returnFileName string
-		var updatedId int
+	file, fileHeader, err := r.FormFile("thumb")
+	var returnFileName string
+	var updatedId int
 
-		if err == nil {
-			// w/ thumb picture
-			defer file.Close()
-			returnFileName, err = tools.UploadS3(file, fileHeader.Filename, []string{"anime"})
-			if err != nil {
-				tools.ErrorLog(err)
-			}
-		} else {
-			returnFileName = r.FormValue("pre_thumb")
+	if err == nil {
+		// w/ thumb picture
+		defer file.Close()
+		returnFileName, err = tools.UploadS3(file, fileHeader.Filename, []string{"anime"})
+		if err != nil {
+			tools.ErrorLog(err)
 		}
-
-		series, _ := strconv.Atoi(r.FormValue("series_id"))
-		episodes, _ := strconv.Atoi(r.FormValue("count_episodes"))
-		updatedId = UpdateAnime(
-			id, r.FormValue("title"), r.FormValue("abbreviation"),
-			r.FormValue("kana"), r.FormValue("engName"),
-			r.FormValue("description"), r.FormValue("state"),
-			series, episodes, r.FormValue("copyright"), returnFileName,
-		)
-		result.Data = updatedId
+	} else {
+		returnFileName = r.FormValue("pre_thumb")
 	}
+
+	series, _ := strconv.Atoi(r.FormValue("series_id"))
+	episodes, _ := strconv.Atoi(r.FormValue("count_episodes"))
+	updatedId = UpdateAnime(
+		id, r.FormValue("title"), r.FormValue("abbreviation"),
+		r.FormValue("kana"), r.FormValue("engName"),
+		r.FormValue("description"), r.FormValue("state"),
+		series, episodes, r.FormValue("copyright"), returnFileName,
+	)
+	result.Data = updatedId
+
 	result.ResponseWrite(w)
 	return nil
 }
@@ -290,24 +232,12 @@ func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
 func AnimeDeleteView(w http.ResponseWriter, r *http.Request) error {
 	result := tools.TBaseJsonResponse{Status: 200}
 
-	result, is_valid := result.LimitMethod([]string{"DELETE"}, r)
-	if !is_valid {
-		result.ResponseWrite(w)
-		return nil
-	}
-
-	userId := tools.GetAdminIdFromCookie(r)
-
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
 
-	if userId == "" {
-		result.Status = 4003
-	} else {
-		deletedRow := DeleteAnime(id)
-		result.Data = deletedRow
-	}
+	deletedRow := DeleteAnime(id)
+	result.Data = deletedRow
 
 	result.ResponseWrite(w)
 	return nil

@@ -41,7 +41,7 @@ func IsProductionEnv() bool {
 	return false
 }
 
-func SetCookiePackage(w http.ResponseWriter, key string, value string) bool {
+func SetCookiePackage(w http.ResponseWriter, key string, value string, age int) bool {
 	var cookie *http.Cookie
 	if IsProductionEnv() {
 		cookie = &http.Cookie{
@@ -49,7 +49,7 @@ func SetCookiePackage(w http.ResponseWriter, key string, value string) bool {
 			Value:    value,
 			Path:     "/",
 			Domain:   configs.FrontHost,
-			MaxAge:   60 * 60 * 24 * 30,
+			MaxAge:   age,
 			SameSite: http.SameSiteNoneMode,
 			Secure:   true,
 			HttpOnly: true,
@@ -60,7 +60,7 @@ func SetCookiePackage(w http.ResponseWriter, key string, value string) bool {
 			Value:    value,
 			Path:     "/",
 			Domain:   configs.FrontHost,
-			MaxAge:   60 * 60 * 24 * 30,
+			MaxAge:   age,
 			SameSite: http.SameSiteLaxMode,
 			Secure:   false,
 			HttpOnly: true,
@@ -131,7 +131,6 @@ func (result TUserJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 		return false
 	}
 
-	SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 	return true
@@ -145,7 +144,6 @@ func (result TVoidJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 		return false
 	}
 
-	SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 	return true
@@ -159,7 +157,6 @@ func (result TBaseJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 		return false
 	}
 
-	SetDefaultResponseHeader(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 	return true

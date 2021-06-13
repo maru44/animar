@@ -39,8 +39,9 @@ type TRefreshReturn struct {
 }
 
 type TCreateReturn struct {
-	IdToken string `json:"idToken"`
-	Email   string `json:"email"`
+	IdToken      string `json:"idToken"`
+	Email        string `json:"email"`
+	RefreshToken string `json:"refreshToken"`
 }
 
 type TProfileForm struct {
@@ -133,8 +134,8 @@ func SetJWTCookieView(w http.ResponseWriter, r *http.Request) error {
 
 	// email か password が間違っていれば blankが帰ってくる
 	if tokens.IdToken != "" {
-		tools.SetCookiePackage(w, "idToken", tokens.IdToken)
-		tools.SetCookiePackage(w, "refreshToken", tokens.RefreshToken)
+		tools.SetCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
+		tools.SetCookiePackage(w, "refreshToken", tokens.RefreshToken, 60*60*24*30)
 	} else {
 		result.Status = 401
 	}
@@ -180,7 +181,8 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 		result.Status = 400
 		return nil
 	}
-	tools.SetCookiePackage(w, "idToken", d.IdToken)
+	tools.SetCookiePackage(w, "idToken", d.IdToken, 60*60*24)
+	tools.SetCookiePackage(w, "refreshToken", d.RefreshToken, 60*60*24*30)
 
 	ctx := context.Background()
 	clientAuth := tools.FirebaseClient(ctx)
@@ -226,7 +228,7 @@ func RenewTokenFCView(w http.ResponseWriter, r *http.Request) error {
 
 	if tokens.IdToken != "" {
 		tools.DestroyCookie(w, "idToken") // destroy cookie
-		tools.SetCookiePackage(w, "idToken", tokens.IdToken)
+		tools.SetCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
 	} else {
 		result.Status = 401
 	}
