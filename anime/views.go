@@ -162,9 +162,9 @@ func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 
 	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
 
-	file, fileHeader, err := r.FormFile("thumb")
 	var returnFileName string
 	var insertedId int
+	file, fileHeader, err := r.FormFile("thumb")
 	if err == nil {
 		// w/ thumb picture
 		defer file.Close()

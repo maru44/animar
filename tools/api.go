@@ -114,13 +114,9 @@ func SetDefaultResponseHeader(w http.ResponseWriter) bool {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	//w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, Origin, X-Csrftoken, Accept, Cookie")
-	//w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json, multipart/formdata, text/plain")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT")
 	return true
-}
-
-func ApiWrapper(fn func()) {
-	fn()
 }
 
 func (result TUserJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
@@ -131,8 +127,8 @@ func (result TUserJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 		return false
 	}
 
-	w.WriteHeader(http.StatusOK)
 	w.Write(res)
+	w.WriteHeader(http.StatusOK)
 	return true
 }
 
@@ -144,8 +140,8 @@ func (result TVoidJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 		return false
 	}
 
-	w.WriteHeader(http.StatusOK)
 	w.Write(res)
+	w.WriteHeader(http.StatusOK)
 	return true
 }
 
@@ -157,8 +153,8 @@ func (result TBaseJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 		return false
 	}
 
-	w.WriteHeader(http.StatusOK)
 	w.Write(res)
+	w.WriteHeader(http.StatusOK)
 	return true
 }
 
