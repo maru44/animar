@@ -2,7 +2,7 @@ package blog
 
 import (
 	"animar/v1/auth"
-	"animar/v1/tools"
+	"animar/v1/tools/tools"
 	"context"
 )
 

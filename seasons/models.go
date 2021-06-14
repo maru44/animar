@@ -1,7 +1,8 @@
 package seasons
 
 import (
-	"animar/v1/tools"
+	"animar/v1/tools/connector"
+	"animar/v1/tools/tools"
 	"database/sql"
 )
 
@@ -25,7 +26,7 @@ type TSeasonInput struct {
 }
 
 func insertSeason(year string, season string) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare(
@@ -44,7 +45,7 @@ func insertSeason(year string, season string) int {
 }
 
 func listSeason() *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select * from seasons")
 	if err != nil {
@@ -54,7 +55,7 @@ func listSeason() *sql.Rows {
 }
 
 func detailSeason(id int) TSeason {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var s TSeason
@@ -78,7 +79,7 @@ func detailSeason(id int) TSeason {
 ************************************/
 
 func relationSeasonByAnime(animeId int) *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query(
 		"SELECT seasons.id, seasons.year, seasons.season FROM relation_anime_season "+
@@ -92,7 +93,7 @@ func relationSeasonByAnime(animeId int) *sql.Rows {
 }
 
 func insertRelation(seasonId int, animeId int) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare(

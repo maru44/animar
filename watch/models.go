@@ -1,7 +1,8 @@
 package watch
 
 import (
-	"animar/v1/tools"
+	"animar/v1/tools/connector"
+	"animar/v1/tools/tools"
 	"database/sql"
 )
 
@@ -35,7 +36,7 @@ type TAudienceJoinAnime struct {
 // Count group by animeId
 // fiter by animeId
 func AnimeWatchCounts(animeId int) *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select state, count(state) from audiences WHERE anime_id = ? GROUP BY state", animeId)
 	if err != nil {
@@ -47,7 +48,7 @@ func AnimeWatchCounts(animeId int) *sql.Rows {
 // List
 // filter by user
 func OnesAnimeWatchList(userId string) *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select * from audiences WHERE user_id = ?", userId)
 	if err != nil {
@@ -57,7 +58,7 @@ func OnesAnimeWatchList(userId string) *sql.Rows {
 }
 
 func OnesAnimeWatchJoinList(userId string) *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query(
 		"SELECT audiences.*, animes.title, animes.slug, animes.description, animes.state "+
@@ -70,7 +71,7 @@ func OnesAnimeWatchJoinList(userId string) *sql.Rows {
 }
 
 func WatchDetail(userId string, animeId int) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var w TAudience
@@ -91,7 +92,7 @@ func WatchDetail(userId string, animeId int) int {
 
 // Post
 func InsertWatch(animeId int, state int, userId string) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare("INSERT INTO audiences(state, anime_id, user_id) VALUES(?, ?, ?)")
@@ -109,7 +110,7 @@ func InsertWatch(animeId int, state int, userId string) int {
 
 // create or update
 func UpsertWatch(animeId int, state int, userId string) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var w TAudience
@@ -136,7 +137,7 @@ func UpsertWatch(animeId int, state int, userId string) int {
 }
 
 func DeleteWatch(animeId int, userId string) bool {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare("DELETE FROM audiences WHERE anime_id = ? AND user_id = ?")

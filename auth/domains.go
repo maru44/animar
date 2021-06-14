@@ -2,7 +2,9 @@ package auth
 
 import (
 	"animar/v1/configs"
-	"animar/v1/tools"
+	"animar/v1/tools/fire"
+	"animar/v1/tools/mysmtp"
+	"animar/v1/tools/tools"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -73,11 +75,11 @@ func SendVerifyEmailAtRegister(ctx context.Context, client *auth.Client, email s
 		fmt.Print(err.Error())
 	}
 
-	sended := tools.SendVerifyEmail(email, link)
+	sended := mysmtp.SendVerifyEmail(email, link)
 	return sended
 }
 
 func SetAdminClaimExe(ctx context.Context, client *auth.Client, idToken *string) {
-	userId := tools.GetUserIdFromToken(*idToken)
+	userId := fire.GetUserIdFromToken(*idToken)
 	SetAdminClaim(ctx, client, userId)
 }

@@ -1,7 +1,7 @@
 package review
 
 import (
-	"animar/v1/tools"
+	"animar/v1/tools/connector"
 	"database/sql"
 	"fmt"
 
@@ -46,7 +46,7 @@ type TReviewJoinUser struct {
 
 // all
 func ListReviews() *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select * from reviews")
 	if err != nil {
@@ -58,7 +58,7 @@ func ListReviews() *sql.Rows {
 // retrieve
 // by id
 func DetailReview(id int) TReview {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var rev TReview
@@ -75,7 +75,7 @@ func DetailReview(id int) TReview {
 
 // ones detail review
 func DetailReviewAnimeUser(animeId int, userId string) TReview {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var r TReview
@@ -97,7 +97,7 @@ func DetailReviewAnimeUser(animeId int, userId string) TReview {
 // List
 // fiter by userId
 func OnesReviewsList(userId string) *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select * from reviews WHERE user_id = ?", userId)
 	if err != nil {
@@ -109,7 +109,7 @@ func OnesReviewsList(userId string) *sql.Rows {
 // filter by userId
 // joined anime detail
 func OnesReviewsJoinAnime(userId string) *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query(
 		"SELECT reviews.*, animes.title, animes.slug, animes.description, animes.state "+
@@ -125,7 +125,7 @@ func OnesReviewsJoinAnime(userId string) *sql.Rows {
 // List
 // filter by animeId
 func AnimeReviewsList(animeId int, userId string) *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select * from reviews WHERE anime_id = ? AND (user_id != ? OR user_id IS NULL)", animeId, userId)
 	if err != nil {
@@ -136,7 +136,7 @@ func AnimeReviewsList(animeId int, userId string) *sql.Rows {
 
 // Post
 func InsertReview(animeId int, content string, rating int, user_id string) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare("INSERT INTO reviews(anime_id, content, rating, user_id) VALUES(?, ?, ?, ?)")
@@ -152,7 +152,7 @@ func InsertReview(animeId int, content string, rating int, user_id string) int {
 
 // insert content of review
 func InsertReviewContent(animeId int, userId string, content string) string {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare("INSERT INTO reviews(anime_id, content, user_id) VALUES(?, ?, ?)")
@@ -169,7 +169,7 @@ func InsertReviewContent(animeId int, userId string, content string) string {
 
 // upsert content of review
 func UpsertReviewContent(animeId int, content string, userId string) string {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var rev TReview
@@ -196,7 +196,7 @@ func UpsertReviewContent(animeId int, content string, userId string) string {
 
 // insert star of review
 func InsertReviewStar(animeId int, userId string, rating int) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare("INSERT INTO reviews(anime_id, rating, user_id) VALUES(?, ?, ?)")
@@ -213,7 +213,7 @@ func InsertReviewStar(animeId int, userId string, rating int) int {
 
 // upsert star of content
 func UpsertReviewStar(animeId int, rating int, userId string) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var rev TReview
@@ -240,7 +240,7 @@ func UpsertReviewStar(animeId int, rating int, userId string) int {
 }
 
 func AnimeStarAvg(animeId int) string {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var avg float32

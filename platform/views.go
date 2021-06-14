@@ -1,7 +1,8 @@
 package platform
 
 import (
-	"animar/v1/tools"
+	"animar/v1/tools/api"
+	"animar/v1/tools/s3"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,7 +10,7 @@ import (
 )
 
 func PlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	id := query.Get("id")
@@ -32,7 +33,7 @@ func PlatformView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func InsertPlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
 
@@ -42,7 +43,7 @@ func InsertPlatformView(w http.ResponseWriter, r *http.Request) error {
 	if err == nil {
 		// w/ thumb picture
 		defer file.Close()
-		returnFileName, err = tools.UploadS3(file, fileHeader.Filename, []string{"platform"})
+		returnFileName, err = s3.UploadS3(file, fileHeader.Filename, []string{"platform"})
 
 		if err != nil {
 			fmt.Print(err)
@@ -64,7 +65,7 @@ func InsertPlatformView(w http.ResponseWriter, r *http.Request) error {
 
 // update ?id=<id>
 func UpdatePlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	strId := query.Get("id")
@@ -78,7 +79,7 @@ func UpdatePlatformView(w http.ResponseWriter, r *http.Request) error {
 	if err == nil {
 		// w/ thumb picture
 		defer file.Close()
-		returnFileName, err = tools.UploadS3(file, fileHeader.Filename, []string{"platform"})
+		returnFileName, err = s3.UploadS3(file, fileHeader.Filename, []string{"platform"})
 
 		if err != nil {
 			fmt.Print(err)
@@ -100,7 +101,7 @@ func UpdatePlatformView(w http.ResponseWriter, r *http.Request) error {
 
 // delete platform ?=<id>
 func DeletePlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	strId := query.Get("id")
@@ -118,7 +119,7 @@ func DeletePlatformView(w http.ResponseWriter, r *http.Request) error {
 ****************************/
 
 func RelationPlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 	query := r.URL.Query()
 	id := query.Get("id") // animeId
 	i, _ := strconv.Atoi(id)
@@ -129,7 +130,7 @@ func RelationPlatformView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func InsertRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	var p TRelationPlatformInput
 	json.NewDecoder(r.Body).Decode(&p)
@@ -144,7 +145,7 @@ func InsertRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
 
 // delete platform ?=<id>
 func DeleteRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	strAnimeId := query.Get("anime")

@@ -1,26 +1,16 @@
 package series
 
 import (
-	"animar/v1/tools"
+	"animar/v1/tools/api"
+	"animar/v1/tools/fire"
 	"encoding/json"
 	"net/http"
 	"strconv"
 )
 
 func SeriesView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 	var userId string
-
-	switch r.Method {
-	case "GET":
-		userId = tools.GetAdminIdFromCookie(r)
-	case "POST":
-		var posted tools.TUserIdCookieInput
-		json.NewDecoder(r.Body).Decode(&posted)
-		userId = tools.GetAdminIdFromIdToken(posted.Token)
-	default:
-		userId = ""
-	}
 
 	query := r.URL.Query()
 	id := query.Get("id")
@@ -47,7 +37,7 @@ func SeriesView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func InsertSeriesView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	var p TSeriesInput
 	json.NewDecoder(r.Body).Decode(&p)
@@ -61,7 +51,7 @@ func InsertSeriesView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func UpdateSeriesView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	result, is_valid := result.LimitMethod([]string{"PUT"}, r)
 	if !is_valid {
@@ -69,7 +59,7 @@ func UpdateSeriesView(w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 
-	userId := tools.GetAdminIdFromCookie(r)
+	userId := fire.GetAdminIdFromCookie(r)
 
 	query := r.URL.Query()
 	strId := query.Get("id")

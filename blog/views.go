@@ -1,7 +1,8 @@
 package blog
 
 import (
-	"animar/v1/tools"
+	"animar/v1/tools/api"
+	"animar/v1/tools/fire"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -22,7 +23,7 @@ type TBlogInputWith struct {
 }
 
 func ListBlogView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	var blogs []TBlog
 	blogs = ListBlogDomain()
@@ -34,17 +35,17 @@ func ListBlogView(w http.ResponseWriter, r *http.Request) error {
 
 // retrieve blog + anime
 func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	// access user
 	var userId string
 	switch r.Method {
 	case "GET":
-		userId = tools.GetIdFromCookie(r)
+		userId = fire.GetIdFromCookie(r)
 	case "POST":
-		var posted tools.TUserIdCookieInput
+		var posted fire.TUserIdCookieInput
 		json.NewDecoder(r.Body).Decode(&posted)
-		userId = tools.GetUserIdFromToken(posted.Token)
+		userId = fire.GetUserIdFromToken(posted.Token)
 	default:
 		userId = ""
 	}
@@ -81,17 +82,17 @@ func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
 
 // retrieve blog + anime + user
 func BlogJoinAnimeUserView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	// access user
 	var userId string
 	switch r.Method {
 	case "GET":
-		userId = tools.GetIdFromCookie(r)
+		userId = fire.GetIdFromCookie(r)
 	case "POST":
-		var posted tools.TUserIdCookieInput
+		var posted fire.TUserIdCookieInput
 		json.NewDecoder(r.Body).Decode(&posted)
-		userId = tools.GetUserIdFromToken(posted.Token)
+		userId = fire.GetUserIdFromToken(posted.Token)
 	default:
 		userId = ""
 	}
@@ -127,8 +128,8 @@ func BlogJoinAnimeUserView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
-	userId := tools.GetIdFromCookie(r)
+	result := api.TBaseJsonResponse{Status: 200}
+	userId := fire.GetIdFromCookie(r)
 
 	if userId == "" {
 		result.Status = 4001
@@ -148,8 +149,8 @@ func InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func UpdateBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
-	userId := tools.GetIdFromCookie(r)
+	result := api.TBaseJsonResponse{Status: 200}
+	userId := fire.GetIdFromCookie(r)
 
 	query := r.URL.Query()
 	strId := query.Get("id")
@@ -174,8 +175,8 @@ func UpdateBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func DeleteBlogView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
-	userId := tools.GetIdFromCookie(r)
+	result := api.TBaseJsonResponse{Status: 200}
+	userId := fire.GetIdFromCookie(r)
 
 	query := r.URL.Query()
 	strId := query.Get("id")

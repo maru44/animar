@@ -1,7 +1,10 @@
 package anime
 
 import (
-	"animar/v1/tools"
+	"animar/v1/tools/api"
+	"animar/v1/tools/fire"
+	"animar/v1/tools/s3"
+	"animar/v1/tools/tools"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -22,7 +25,7 @@ type TAnimeInput struct {
 
 // list and detail
 func AnimeView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	strId := query.Get("id")
@@ -58,12 +61,12 @@ func AnimeView(w http.ResponseWriter, r *http.Request) error {
 // not be used to
 // anime data + user's watch + review
 func AnimeWithUserWatchView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	strId := query.Get("id")
 	slug := query.Get("slug")
-	userId := tools.GetIdFromCookie(r)
+	userId := fire.GetIdFromCookie(r)
 
 	var animes []TAnimeWithUserWatchReview
 	if strId != "" {
@@ -92,7 +95,7 @@ func AnimeWithUserWatchView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func ListAnimeMinimumView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 	var animes []TAnimeMinimum
 
 	animes = ListAnimeMinimumDomain()
@@ -103,7 +106,7 @@ func ListAnimeMinimumView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func SearchAnimeView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 	var animes []TAnimeMinimum
 
 	query := r.URL.Query()
@@ -124,7 +127,7 @@ type TUserToken struct {
 }
 
 func AnimeListAdminView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	var animes []TAnime
 	animes = ListAnimeDomain()
@@ -135,7 +138,7 @@ func AnimeListAdminView(w http.ResponseWriter, r *http.Request) error {
 
 // anime detail ?=<id>
 func AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	strId := query.Get("id")
@@ -158,7 +161,7 @@ func AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) error {
 
 // add anime (only admin)
 func AnimePostView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
 
@@ -168,7 +171,7 @@ func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 	if err == nil {
 		// w/ thumb picture
 		defer file.Close()
-		returnFileName, err = tools.UploadS3(file, fileHeader.Filename, []string{"anime"})
+		returnFileName, err = s3.UploadS3(file, fileHeader.Filename, []string{"anime"})
 
 		if err != nil {
 			tools.ErrorLog(err)
@@ -191,7 +194,7 @@ func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 
 // update ?=<id>
 func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	strId := query.Get("id")
@@ -206,7 +209,7 @@ func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
 	if err == nil {
 		// w/ thumb picture
 		defer file.Close()
-		returnFileName, err = tools.UploadS3(file, fileHeader.Filename, []string{"anime"})
+		returnFileName, err = s3.UploadS3(file, fileHeader.Filename, []string{"anime"})
 		if err != nil {
 			tools.ErrorLog(err)
 		}
@@ -230,7 +233,7 @@ func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
 
 // delete anime ?=<id>
 func AnimeDeleteView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	strId := query.Get("id")

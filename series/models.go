@@ -1,7 +1,8 @@
 package series
 
 import (
-	"animar/v1/tools"
+	"animar/v1/tools/connector"
+	"animar/v1/tools/tools"
 	"database/sql"
 )
 
@@ -19,7 +20,7 @@ type TSeriesInput struct {
 }
 
 func ListSeries() *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select * from series")
 	if err != nil {
@@ -29,7 +30,7 @@ func ListSeries() *sql.Rows {
 }
 
 func InsertSeries(engName string, seriesName string) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare(
@@ -49,7 +50,7 @@ func InsertSeries(engName string, seriesName string) int {
 }
 
 func DetailSeries(id int) TSeries {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var ser TSeries
@@ -70,7 +71,7 @@ func DetailSeries(id int) TSeries {
 
 // validation by userId @domain or view
 func UpdateSeries(engName string, seriesName string, id int) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare("UPDATE series SET eng_name = ?, series_name = ? WHERE id = ?")
@@ -86,7 +87,7 @@ func UpdateSeries(engName string, seriesName string, id int) int {
 }
 
 func DeleteSeries(id int) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare("DELETE FROM series WHERE id = ?")

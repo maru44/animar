@@ -1,7 +1,8 @@
-package tools
+package fire
 
 import (
 	"animar/v1/configs"
+	"animar/v1/tools/tools"
 	"context"
 	"log"
 	"net/http"
@@ -86,7 +87,7 @@ func IsAdmin(userId string) bool {
 	strAdmins := configs.AdminUsers
 	admins := strings.Split(strAdmins, ", ")
 
-	return IsContainString(admins, userId)
+	return tools.IsContainString(admins, userId)
 }
 
 // isAdmin required

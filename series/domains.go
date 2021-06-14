@@ -1,6 +1,6 @@
 package series
 
-import "animar/v1/tools"
+import "animar/v1/tools/tools"
 
 func ListSeriesDomain() []TSeries {
 	rows := ListSeries()

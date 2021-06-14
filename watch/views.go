@@ -1,7 +1,8 @@
 package watch
 
 import (
-	"animar/v1/tools"
+	"animar/v1/tools/api"
+	"animar/v1/tools/fire"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -15,7 +16,7 @@ type TAudienceInput struct {
 
 // by anime
 func AnimeWatchCountView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
@@ -30,7 +31,7 @@ func AnimeWatchCountView(w http.ResponseWriter, r *http.Request) error {
 // by userId
 // ?user=userId
 func UserWatchStatusView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	userId := r.URL.Query().Get("user")
 
@@ -45,12 +46,12 @@ func UserWatchStatusView(w http.ResponseWriter, r *http.Request) error {
 // anime by ?anime=
 // user by cookie
 func WatchAnimeStateOfUserView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
-	userId := tools.GetIdFromCookie(r)
+	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
 		result.Status = 4001
 	} else {
@@ -64,9 +65,9 @@ func WatchAnimeStateOfUserView(w http.ResponseWriter, r *http.Request) error {
 
 // watch post view
 func WatchPostView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
-	userId := tools.GetIdFromCookie(r)
+	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
 		result.Status = 4001
 		result.ResponseWrite(w)
@@ -86,9 +87,9 @@ func WatchPostView(w http.ResponseWriter, r *http.Request) error {
 // watch delete view
 // ?anime=
 func WatchDeleteView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TVoidJsonResponse{Status: 200}
+	result := api.TVoidJsonResponse{Status: 200}
 
-	userId := tools.GetIdFromCookie(r)
+	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
 		result.Status = 5000
 		result.ResponseWrite(w)

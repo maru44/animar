@@ -1,4 +1,4 @@
-package tools
+package mysmtp
 
 import (
 	"animar/v1/configs"

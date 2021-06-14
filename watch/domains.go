@@ -1,6 +1,6 @@
 package watch
 
-import "animar/v1/tools"
+import "animar/v1/tools/tools"
 
 func AnimeWatchCountDomain(animeId int) []TAudienceCount {
 	rows := AnimeWatchCounts(animeId)

@@ -1,7 +1,9 @@
-package tools
+package middleware
 
 import (
 	"animar/v1/configs"
+	"animar/v1/tools/fire"
+	"animar/v1/tools/tools"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -11,9 +13,9 @@ type TUserToken struct {
 	Token string `json:"token,omitempty"`
 }
 
-func allowOptionsMiddleware(w http.ResponseWriter, r *http.Request) error {
+func AllowOptionsMiddleware(w http.ResponseWriter, r *http.Request) error {
 	if r.Method == "OPTIONS" {
-		//w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusOK)
 		return nil
 	}
 	return nil
@@ -53,8 +55,8 @@ func DeleteOnlyMiddleware(w http.ResponseWriter, r *http.Request) error {
 
 // for CSR
 func AdminRequiredMiddleware(w http.ResponseWriter, r *http.Request) error {
-	userId := GetAdminIdFromCookie(r)
-	isAdmin := IsAdmin(userId)
+	userId := fire.GetAdminIdFromCookie(r)
+	isAdmin := fire.IsAdmin(userId)
 	if !isAdmin {
 		http.Error(w, "FORBIDDEN", http.StatusForbidden)
 		return errors.New("FORBIDDEN")
@@ -68,11 +70,11 @@ func AdminRequiredMiddlewareGet(w http.ResponseWriter, r *http.Request) error {
 	var userId string
 	switch r.Method {
 	case "GET":
-		userId = GetAdminIdFromCookie(r)
+		userId = fire.GetAdminIdFromCookie(r)
 	case "POST":
 		var p TUserToken
 		json.NewDecoder(r.Body).Decode(&p)
-		userId = GetAdminIdFromIdToken(p.Token)
+		userId = fire.GetAdminIdFromIdToken(p.Token)
 	default:
 		userId = ""
 	}
@@ -84,10 +86,10 @@ func AdminRequiredMiddlewareGet(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func corsMiddleware(w http.ResponseWriter, r *http.Request) error {
+func CorsMiddleware(w http.ResponseWriter, r *http.Request) error {
 	protocol := "http://"
 	host := "localhost:3000"
-	if IsProductionEnv() {
+	if tools.IsProductionEnv() {
 		protocol = "https://"
 		host = configs.FrontHost
 	}

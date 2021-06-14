@@ -1,7 +1,8 @@
 package blog
 
 import (
-	"animar/v1/tools"
+	"animar/v1/tools/connector"
+	"animar/v1/tools/tools"
 	"database/sql"
 	"strconv"
 
@@ -62,7 +63,7 @@ type TBlogJoinAnimesUser struct {
 }
 
 func ListBlog() *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("SELECT * FROM blogs WHERE is_public = true")
 	if err != nil {
@@ -72,7 +73,7 @@ func ListBlog() *sql.Rows {
 }
 
 func ListUsersBlog(uid string, userId string) *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	var rows *sql.Rows
 	var err error
@@ -88,7 +89,7 @@ func ListUsersBlog(uid string, userId string) *sql.Rows {
 }
 
 func BlogUserId(id int) string {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	var userId string
 	err := db.QueryRow("SELECT user_id FROM blogs WHERE id = ?", id).Scan(&userId)
@@ -99,7 +100,7 @@ func BlogUserId(id int) string {
 }
 
 func DetailBlog(id int) TBlogJoinAnimes {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var b TBlogJoinAnimes
@@ -120,7 +121,7 @@ func DetailBlog(id int) TBlogJoinAnimes {
 }
 
 func DetailBlogWithUser(id int) TBlogJoinAnimesUser {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var b TBlogJoinAnimesUser
@@ -141,7 +142,7 @@ func DetailBlogWithUser(id int) TBlogJoinAnimesUser {
 }
 
 func DetailBlogBySlug(slug string) TBlogJoinAnimes {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var b TBlogJoinAnimes
@@ -161,7 +162,7 @@ func DetailBlogBySlug(slug string) TBlogJoinAnimes {
 }
 
 func DetailBlogWithUserBySlug(slug string) TBlogJoinAnimesUser {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var b TBlogJoinAnimesUser
@@ -180,7 +181,7 @@ func DetailBlogWithUserBySlug(slug string) TBlogJoinAnimesUser {
 }
 
 func InsertBlog(title string, abstract string, content string, userId string, isPublic bool) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare(
@@ -204,7 +205,7 @@ func InsertBlog(title string, abstract string, content string, userId string, is
 
 // validation by userId @domain or view
 func UpdateBlog(id int, title string, abstract string, content string, isPublic bool) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare("UPDATE blogs SET title = ?, abstract = ?, content = ?, is_public = ? WHERE id = ?")
@@ -220,7 +221,7 @@ func UpdateBlog(id int, title string, abstract string, content string, isPublic 
 }
 
 func DeleteBlog(id int) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare("DELETE FROM blogs WHERE id = ?")
@@ -234,7 +235,7 @@ func DeleteBlog(id int) int {
 
 // animes of blog
 func RelationAnimeByBlog(blogId int) *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	rows, err := db.Query(
@@ -250,7 +251,7 @@ func RelationAnimeByBlog(blogId int) *sql.Rows {
 
 // blogs by anime
 func RelationBlogByAnime(animeId int) *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	rows, err := db.Query(
@@ -266,7 +267,7 @@ func RelationBlogByAnime(animeId int) *sql.Rows {
 }
 
 func InsertRelationAnimeBlog(animeId int, blogId int) bool {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	stmt, err := db.Prepare(
 		"INSERT INTO relation_blog_animes(anime_id, blog_id) " +
@@ -284,7 +285,7 @@ func InsertRelationAnimeBlog(animeId int, blogId int) bool {
 }
 
 func DeleteRelationAnimeBlog(animeId int, blogId int) error {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare("DELETE FROM relation_blog_animes WHERE anime_id = ? AND blog_id = ?")

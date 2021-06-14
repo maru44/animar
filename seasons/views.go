@@ -1,7 +1,8 @@
 package seasons
 
 import (
-	"animar/v1/tools"
+	"animar/v1/tools/api"
+	"animar/v1/tools/fire"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -13,19 +14,8 @@ type TSeasonRelationInput struct {
 }
 
 func SeasonView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 	var userId string
-
-	switch r.Method {
-	case "GET":
-		userId = tools.GetAdminIdFromCookie(r)
-	case "POST":
-		var posted tools.TUserIdCookieInput
-		json.NewDecoder(r.Body).Decode(&posted)
-		userId = tools.GetAdminIdFromIdToken(posted.Token)
-	default:
-		userId = ""
-	}
 
 	query := r.URL.Query()
 	id := query.Get("id")
@@ -52,7 +42,7 @@ func SeasonView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func InsertSeasonView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	var p TSeasonInput
 	json.NewDecoder(r.Body).Decode(&p)
@@ -70,7 +60,7 @@ func InsertSeasonView(w http.ResponseWriter, r *http.Request) error {
 ************************************/
 
 func SeasonByAnimeIdView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	strId := query.Get("id")
@@ -83,7 +73,7 @@ func SeasonByAnimeIdView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func InsertRelationSeasonView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	result, is_valid := result.LimitMethod([]string{"POST"}, r)
 	if !is_valid {
@@ -91,7 +81,7 @@ func InsertRelationSeasonView(w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 
-	userId := tools.GetAdminIdFromCookie(r)
+	userId := fire.GetAdminIdFromCookie(r)
 
 	if userId == "" {
 		result.Status = 4003

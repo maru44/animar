@@ -1,7 +1,8 @@
 package platform
 
 import (
-	"animar/v1/tools"
+	"animar/v1/tools/connector"
+	"animar/v1/tools/tools"
 	"database/sql"
 )
 
@@ -41,7 +42,7 @@ type TRelationPlatformInput struct {
 }
 
 func listPlatform() *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select * from platforms")
 	if err != nil {
@@ -51,7 +52,7 @@ func listPlatform() *sql.Rows {
 }
 
 func insertPlatform(engName string, platName string, baseUrl string, image string, isValid bool) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare(
@@ -71,7 +72,7 @@ func insertPlatform(engName string, platName string, baseUrl string, image strin
 }
 
 func detailPlatfrom(id int) TPlatform {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var p TPlatform
@@ -93,7 +94,7 @@ func detailPlatfrom(id int) TPlatform {
 
 // validation by userId @domain or view
 func updatePlatform(engName string, platName string, baseUrl string, image string, isValid bool, id int) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare("UPDATE platforms SET eng_name = ?, plat_name = ?, base_url = ?, image = ?, is_valid = ? WHERE id = ?")
@@ -112,7 +113,7 @@ func updatePlatform(engName string, platName string, baseUrl string, image strin
 }
 
 func deletePlatform(id int) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare("DELETE FROM platforms WHERE id = ?")
@@ -130,7 +131,7 @@ func deletePlatform(id int) int {
 ****************************/
 
 func relationPlatformByAnime(animeId int) *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query(
 		"Select relation_anime_platform.*, platforms.plat_name FROM relation_anime_platform "+
@@ -144,7 +145,7 @@ func relationPlatformByAnime(animeId int) *sql.Rows {
 }
 
 func insertRelation(platformId int, animeId int, linkUrl string) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare(
@@ -163,7 +164,7 @@ func insertRelation(platformId int, animeId int, linkUrl string) int {
 }
 
 func deleteRelationPlatform(animeId int, platformId int) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	stmt, err := db.Prepare("DELETE FROM relation_anime_platform WHERE anime_id = ? AND platform_id = ?")
 	defer stmt.Close()

@@ -1,6 +1,6 @@
 package platform
 
-import "animar/v1/tools"
+import "animar/v1/tools/tools"
 
 func ListPlatformDomain() []TPlatform {
 	rows := listPlatform()

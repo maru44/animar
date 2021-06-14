@@ -1,7 +1,8 @@
-package tools
+package s3
 
 import (
 	"animar/v1/configs"
+	"animar/v1/tools/tools"
 	"bytes"
 	"errors"
 	"fmt"
@@ -40,7 +41,7 @@ func UploadS3(file multipart.File, fileName string, pathList []string) (string, 
 
 	sess := S3Session()
 	u := s3manager.NewUploader(sess)
-	slug := GenRandSlug(6)
+	slug := tools.GenRandSlug(6)
 
 	buf := bytes.NewBuffer(nil)
 	if _, err := io.Copy(buf, file); err != nil {

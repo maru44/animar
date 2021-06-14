@@ -1,7 +1,8 @@
 package review
 
 import (
-	"animar/v1/tools"
+	"animar/v1/tools/api"
+	"animar/v1/tools/fire"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -16,9 +17,9 @@ type TReviewInput struct {
 
 // cookie
 func GetYourReviews(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
-	userId := tools.GetIdFromCookie(r)
+	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
 		result.Status = 5000
 		result.ResponseWrite(w)
@@ -34,7 +35,7 @@ func GetYourReviews(w http.ResponseWriter, r *http.Request) error {
 }
 
 func GetOnesReviewsView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	userId := r.URL.Query().Get("user")
 	var revs []TReviewJoinAnime
@@ -46,10 +47,10 @@ func GetOnesReviewsView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func GetAnimeReviewsView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
-	userId := tools.GetIdFromCookie(r)
+	userId := fire.GetIdFromCookie(r)
 
 	var revs []TReview
 	revs = AnimeReviewsDomain(animeId, userId)
@@ -60,10 +61,10 @@ func GetAnimeReviewsView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func GetAnimeReviewsWithUserInfoView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
-	userId := tools.GetIdFromCookie(r)
+	userId := fire.GetIdFromCookie(r)
 
 	var revs []TReviewJoinUser
 	revs = AnimeReviewsWithUserInfoDomain(animeId, userId)
@@ -75,12 +76,12 @@ func GetAnimeReviewsWithUserInfoView(w http.ResponseWriter, r *http.Request) err
 
 // user's anime's review
 func GetAnimeUserReviewView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
-	userId := tools.GetIdFromCookie(r)
+	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
 		result.Status = 4001
 	} else {
@@ -95,9 +96,9 @@ func GetAnimeUserReviewView(w http.ResponseWriter, r *http.Request) error {
 
 // upsert star
 func UpsertReviewStarView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
-	userId := tools.GetIdFromCookie(r)
+	userId := fire.GetIdFromCookie(r)
 
 	if userId == "" {
 		result.Status = 4001
@@ -113,9 +114,9 @@ func UpsertReviewStarView(w http.ResponseWriter, r *http.Request) error {
 
 //upsert content
 func UpsertReviewContentView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 
-	userId := tools.GetIdFromCookie(r)
+	userId := fire.GetIdFromCookie(r)
 
 	if userId == "" {
 		result.Status = 4001
@@ -131,7 +132,7 @@ func UpsertReviewContentView(w http.ResponseWriter, r *http.Request) error {
 
 // anime star avarage view
 func AnimeStarAvgView(w http.ResponseWriter, r *http.Request) error {
-	result := tools.TBaseJsonResponse{Status: 200}
+	result := api.TBaseJsonResponse{Status: 200}
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 

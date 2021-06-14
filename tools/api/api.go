@@ -1,11 +1,10 @@
-package tools
+package api
 
 import (
 	"animar/v1/configs"
+	"animar/v1/tools/tools"
 	"encoding/json"
 	"net/http"
-	"os"
-	"strings"
 
 	"firebase.google.com/go/v4/auth"
 )
@@ -25,25 +24,9 @@ type TBaseJsonResponse struct {
 	Data   interface{} `json:"data"`
 }
 
-func IsProductionEnv() bool {
-	// 本番環境IPリスト
-	hosts := strings.Split(configs.ProductionIpList, ", ")
-	host, _ := os.Hostname()
-
-	// if runtime.GOOS != "linux" {
-	// 	return false
-	// }
-	for _, v := range hosts {
-		if v == host {
-			return true
-		}
-	}
-	return false
-}
-
 func SetCookiePackage(w http.ResponseWriter, key string, value string, age int) bool {
 	var cookie *http.Cookie
-	if IsProductionEnv() {
+	if tools.IsProductionEnv() {
 		cookie = &http.Cookie{
 			Name:     key,
 			Value:    value,
@@ -72,7 +55,7 @@ func SetCookiePackage(w http.ResponseWriter, key string, value string, age int) 
 
 func DestroyCookie(w http.ResponseWriter, key string) bool {
 	var cookie *http.Cookie
-	if IsProductionEnv() {
+	if tools.IsProductionEnv() {
 		cookie = &http.Cookie{
 			Name:     key,
 			Value:    "",
@@ -101,22 +84,6 @@ func DestroyCookie(w http.ResponseWriter, key string) bool {
 
 type Api interface {
 	ResponseWrite(w http.ResponseWriter) bool
-}
-
-func SetDefaultResponseHeader(w http.ResponseWriter) bool {
-	protocol := "http://"
-	host := "localhost:3000"
-	if IsProductionEnv() {
-		protocol = "https://"
-		host = configs.FrontHost
-	}
-	w.Header().Set("Access-Control-Allow-Origin", protocol+host)
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	//w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, Origin, X-Csrftoken, Accept, Cookie")
-	w.Header().Set("Content-Type", "application/json, multipart/formdata, text/plain")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT")
-	return true
 }
 
 func (result TUserJsonResponse) ResponseWrite(w http.ResponseWriter) bool {

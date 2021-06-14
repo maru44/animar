@@ -1,7 +1,8 @@
 package anime
 
 import (
-	"animar/v1/tools"
+	"animar/v1/tools/connector"
+	"animar/v1/tools/tools"
 	"database/sql"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -81,7 +82,7 @@ type TAnimeMinimum struct {
 }
 
 func ListAnime() *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, created_at, updated_at FROM animes ORDER BY created_at ASC")
 	if err != nil {
@@ -91,7 +92,7 @@ func ListAnime() *sql.Rows {
 }
 
 func ListAnimeMinimum() *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("SELECT id, slug, title from animes")
 	if err != nil {
@@ -102,7 +103,7 @@ func ListAnimeMinimum() *sql.Rows {
 
 // タイトル検索
 func SearchAnime(title string) *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query(
 		"SELECT DISTINCT id, slug, title from animes where title like " +
@@ -134,7 +135,7 @@ func SearchAnime(title string) *sql.Rows {
 }
 
 func DetailAnime(id int) TAnime {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var a TAnime
@@ -155,7 +156,7 @@ func DetailAnime(id int) TAnime {
 }
 
 func DetailAnimeBySlug(slug string) TAnimeWithSeries {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var a TAnimeWithSeries
@@ -180,7 +181,7 @@ func DetailAnimeBySlug(slug string) TAnimeWithSeries {
 
 // not be used to
 func DetailAnimeBySlugWithUserWatchReview(slug string, userId string) TAnimeWithUserWatchReview {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var a TAnimeWithUserWatchReview
@@ -206,7 +207,7 @@ func DetailAnimeBySlugWithUserWatchReview(slug string, userId string) TAnimeWith
 ************************************/
 
 func DetailAnimeAdmin(id int) TAnimeAdmin {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	var a TAnimeAdmin
@@ -227,7 +228,7 @@ func DetailAnimeAdmin(id int) TAnimeAdmin {
 }
 
 func InsertAnime(title string, abbreviation string, kana string, eng_name string, content string, State string, seriesId int, episodes int, copyright string, thumb_url string) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare(
@@ -254,7 +255,7 @@ func InsertAnime(title string, abbreviation string, kana string, eng_name string
 
 // @TODO insertにしたがってcolumn追加
 func UpdateAnime(id int, title string, abbreviation string, kana string, eng_name string, content string, state string, seriesId int, episodes int, copyright string, thumbUrl string) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	stmt, err := db.Prepare(
 		"UPDATE animes SET title = ?, abbreviation = ?, kana = ?, eng_name = ?, description = ?, thumb_url = ?, state = ?, series_id = ?, count_episodes = ?, copyright = ? WHERE id = ?",
@@ -275,7 +276,7 @@ func UpdateAnime(id int, title string, abbreviation string, kana string, eng_nam
 }
 
 func DeleteAnime(id int) int {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 
 	stmt, err := db.Prepare("DELETE FROM animes WHERE id = ?")
@@ -289,7 +290,7 @@ func DeleteAnime(id int) int {
 }
 
 func ListAnimeAdmin() *sql.Rows {
-	db := tools.AccessDB()
+	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("Select * from animes")
 	if err != nil {

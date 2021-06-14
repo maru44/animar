@@ -1,7 +1,8 @@
 package auth
 
 import (
-	"animar/v1/tools"
+	"animar/v1/tools/fire"
+	"animar/v1/tools/tools"
 	"context"
 	"fmt"
 
@@ -10,7 +11,7 @@ import (
 
 // *auth.UserRecord
 func GetUserFirebase(ctx context.Context, uid string) *auth.UserInfo {
-	client := tools.FirebaseClient(ctx)
+	client := fire.FirebaseClient(ctx)
 	u, err := client.GetUser(ctx, uid)
 	if err != nil {
 		//fmt.Println(err.Error(), err)
@@ -21,7 +22,7 @@ func GetUserFirebase(ctx context.Context, uid string) *auth.UserInfo {
 
 // user info from token
 func VerifyFirebase(ctx context.Context, idToken string) map[string]interface{} {
-	client := tools.FirebaseClient(ctx)
+	client := fire.FirebaseClient(ctx)
 	token, err := client.VerifyIDToken(ctx, idToken)
 	if err != nil {
 		tools.ErrorLog(err)
