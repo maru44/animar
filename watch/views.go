@@ -4,6 +4,7 @@ import (
 	"animar/v1/tools/api"
 	"animar/v1/tools/fire"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 )
@@ -16,84 +17,68 @@ type TAudienceInput struct {
 
 // by anime
 func AnimeWatchCountView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
 	var watches []TAudienceCount
 	watches = AnimeWatchCountDomain(animeId)
 
-	result.Data = watches
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": watches})
 	return nil
 }
 
 // by userId
 // ?user=userId
 func UserWatchStatusView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	userId := r.URL.Query().Get("user")
 
 	var watches []TAudienceJoinAnime
 	watches = OnesWatchStatusDomain(userId)
 
-	result.Data = watches
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": watches})
 	return nil
 }
 
 // anime by ?anime=
 // user by cookie
 func WatchAnimeStateOfUserView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		result.Status = 4001
+		w.WriteHeader(http.StatusUnauthorized)
+		return errors.New("Unauthorize")
 	} else {
 		watch := WatchDetail(userId, animeId)
-		result.Data = watch
+		api.JsonResponse(w, map[string]interface{}{"data": watch})
 	}
-
-	result.ResponseWrite(w)
 	return nil
 }
 
 // watch post view
 func WatchPostView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		result.Status = 4001
-		result.ResponseWrite(w)
-		return nil
+		w.WriteHeader(http.StatusUnauthorized)
+		return errors.New("Unauthorize")
 	}
 
 	var p TAudienceInput
 	json.NewDecoder(r.Body).Decode(&p)
 	// watch := InsertWatch(posted.AnimeId, posted.Watch, userId)
 	watch := UpsertWatch(p.AnimeId, p.State, userId)
-	result.Data = watch
-
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": watch})
 	return nil
 }
 
 // watch delete view
 // ?anime=
 func WatchDeleteView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TVoidJsonResponse{Status: 200}
-
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		result.Status = 5000
-		result.ResponseWrite(w)
-		return nil
+		w.WriteHeader(http.StatusUnauthorized)
+		return errors.New("Unauthorize")
 	}
 
 	animeIdStr := r.URL.Query().Get("anime")
@@ -101,9 +86,10 @@ func WatchDeleteView(w http.ResponseWriter, r *http.Request) error {
 
 	exe := DeleteWatch(animeId, userId)
 	if !exe {
-		result.Status = 4000
+		w.WriteHeader(http.StatusBadRequest)
+		return errors.New("Bad Request")
 	}
 
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{})
 	return nil
 }

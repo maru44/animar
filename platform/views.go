@@ -4,42 +4,36 @@ import (
 	"animar/v1/tools/api"
 	"animar/v1/tools/s3"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 )
 
 func PlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	query := r.URL.Query()
 	id := query.Get("id")
 
-	var plats []TPlatform
 	if id != "" {
 		i, _ := strconv.Atoi(id)
 		plat := detailPlatfrom(i)
 		if plat.ID == 0 {
-			result.Status = 404
+			w.WriteHeader(http.StatusNotFound)
+			return errors.New("Not Found")
 		}
-		plats = append(plats, plat)
+		api.JsonResponse(w, map[string]interface{}{"data": plat})
 	} else {
-		plats = ListPlatformDomain()
+		plats := ListPlatformDomain()
+		api.JsonResponse(w, map[string]interface{}{"data": plats})
 	}
-	result.Data = plats
-
-	result.ResponseWrite(w)
 	return nil
 }
 
 func InsertPlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
 
 	file, fileHeader, err := r.FormFile("image")
 	var returnFileName string
-	var insertedId int
 	if err == nil {
 		// w/ thumb picture
 		defer file.Close()
@@ -53,20 +47,16 @@ func InsertPlatformView(w http.ResponseWriter, r *http.Request) error {
 	}
 	validStr := r.FormValue("valid")
 	isValid, _ := strconv.ParseBool(validStr)
-	insertedId = insertPlatform(
+	insertedId := insertPlatform(
 		r.FormValue("engName"), r.FormValue("platName"), r.FormValue("baseUrl"),
 		returnFileName, isValid,
 	)
-	result.Data = insertedId
-
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": insertedId})
 	return nil
 }
 
 // update ?id=<id>
 func UpdatePlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
@@ -93,24 +83,18 @@ func UpdatePlatformView(w http.ResponseWriter, r *http.Request) error {
 		r.FormValue("engName"), r.FormValue("platName"), r.FormValue("baseUrl"),
 		returnFileName, isValid, id,
 	)
-	result.Data = updatedId
-
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": updatedId})
 	return nil
 }
 
 // delete platform ?=<id>
 func DeletePlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
 
 	deletedRow := deletePlatform(id)
-	result.Data = deletedRow
-
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": deletedRow})
 	return nil
 }
 
@@ -119,34 +103,26 @@ func DeletePlatformView(w http.ResponseWriter, r *http.Request) error {
 ****************************/
 
 func RelationPlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
 	query := r.URL.Query()
 	id := query.Get("id") // animeId
 	i, _ := strconv.Atoi(id)
 	relations := ListRelationPlatformDomain(i)
-	result.Data = relations
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": relations})
 	return nil
 }
 
 func InsertRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	var p TRelationPlatformInput
 	json.NewDecoder(r.Body).Decode(&p)
 	value := insertRelation(
 		p.PlatformId, p.AnimeId, p.LinkUrl,
 	)
-	result.Data = value
-
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": value})
 	return nil
 }
 
 // delete platform ?=<id>
 func DeleteRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	query := r.URL.Query()
 	strAnimeId := query.Get("anime")
 	strPlatformId := query.Get("platform")
@@ -154,8 +130,6 @@ func DeleteRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
 	platformId, _ := strconv.Atoi(strPlatformId)
 
 	deletedRow := deleteRelationPlatform(animeId, platformId)
-	result.Data = deletedRow
-
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": deletedRow})
 	return nil
 }

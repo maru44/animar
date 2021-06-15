@@ -29,7 +29,6 @@ func main() {
 	http.HandleFunc("/db/anime/", handler.Handle(anime.AnimeView))
 	http.HandleFunc("/db/anime/search/", handler.Handle(anime.SearchAnimeView))
 	http.HandleFunc("/db/anime/minimum/", handler.Handle(anime.ListAnimeMinimumView))
-	http.HandleFunc("/db/anime/wc/", handler.Handle(anime.AnimeWithUserWatchView)) // 動かず
 
 	/*   blogs   */
 	http.HandleFunc("/blog/", handler.Handle(blog.BlogJoinAnimeView))

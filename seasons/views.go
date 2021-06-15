@@ -4,6 +4,7 @@ import (
 	"animar/v1/tools/api"
 	"animar/v1/tools/fire"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 )
@@ -14,44 +15,38 @@ type TSeasonRelationInput struct {
 }
 
 func SeasonView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
 	var userId string
 
 	query := r.URL.Query()
 	id := query.Get("id")
 
 	if userId == "" {
-		result.Status = 4003
+		w.WriteHeader(http.StatusForbidden)
+		return errors.New("Forbidden")
 	} else {
-		var ss []TSeason
 		if id != "" {
 			i, _ := strconv.Atoi(id)
 			s := detailSeason(i)
 			if s.ID == 0 {
-				result.Status = 404
+				w.WriteHeader(http.StatusNotFound)
+				return errors.New("Not Found")
 			}
-			ss = append(ss, s)
+			api.JsonResponse(w, map[string]interface{}{"data": s})
 		} else {
-			ss = ListSeasonDomain()
+			ss := ListSeasonDomain()
+			api.JsonResponse(w, map[string]interface{}{"data": ss})
 		}
-		result.Data = ss
 	}
-
-	result.ResponseWrite(w)
 	return nil
 }
 
 func InsertSeasonView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	var p TSeasonInput
 	json.NewDecoder(r.Body).Decode(&p)
 	insertedId := insertSeason(
 		p.Year, p.Season,
 	)
-	result.Data = insertedId
-
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": insertedId})
 	return nil
 }
 
@@ -60,39 +55,28 @@ func InsertSeasonView(w http.ResponseWriter, r *http.Request) error {
 ************************************/
 
 func SeasonByAnimeIdView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
 
 	seasons := SeasonByAnimeIdDomain(id)
-	result.Data = seasons
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": seasons})
 	return nil
 }
 
 func InsertRelationSeasonView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
-	result, is_valid := result.LimitMethod([]string{"POST"}, r)
-	if !is_valid {
-		result.ResponseWrite(w)
-		return nil
-	}
-
 	userId := fire.GetAdminIdFromCookie(r)
 
 	if userId == "" {
-		result.Status = 4003
+		w.WriteHeader(http.StatusForbidden)
+		return errors.New("Forbidden")
 	} else {
 		var s TSeasonRelationInput
 		json.NewDecoder(r.Body).Decode(&s)
 		value := insertRelation(
 			s.SeasonId, s.AnimeId,
 		)
-		result.Data = value
+		api.JsonResponse(w, map[string]interface{}{"data": value})
 	}
-	result.ResponseWrite(w)
 	return nil
 }

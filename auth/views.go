@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -55,61 +56,44 @@ type TProfileForm struct {
 // user info from userId
 // url query params(?uid=)
 func GetUserModelView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TUserJsonResponse{Status: 200}
 	query := r.URL.Query()
 	uid := query.Get("uid")
 	ctx := context.Background()
 
 	user := GetUserFirebase(ctx, uid)
-	if user != nil {
-		result.User = *user
-	}
-
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"user": user})
 	return nil
 }
 
 // user info from userId
 // from cookie
 func GetUserModelFCView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TUserJsonResponse{Status: 200}
 	userId := fire.GetIdFromCookie(r)
 	claims := fire.GetClaimsFromCookie(r)
 	// tokenがキレてたらblankが帰ってくる
 
 	switch {
 	case userId == "":
-		result.Status = 4001
-		/*
-			// メール未承認入れない場合
-			case claims["email_verified"]:
-				ctx := context.Background()
-				user := GetUserFirebase(ctx, userId)
-				result.User = *user
-		*/
+		w.WriteHeader(http.StatusBadRequest)
+		return errors.New("Bad Request")
 	case userId != "":
 		ctx := context.Background()
 		user := GetUserFirebase(ctx, userId)
-		result.User = *user
-		if claims["email_verified"] == true {
-			result.IsVerified = true
-		} else {
-			result.IsVerified = false
-		}
+		api.JsonResponse(w, map[string]interface{}{
+			"user":      user,
+			"is_verify": claims["email_verified"],
+		})
+		return nil
 	default:
 		// if emai is not verified
-		result.Status = 4002
+		w.WriteHeader(http.StatusBadRequest)
+		return errors.New("Bad Request")
 	}
-
-	result.ResponseWrite(w)
-	return nil
 }
 
 // login処理
 // cookie
 func SetJWTCookieView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TVoidJsonResponse{Status: 200}
-
 	var posted TLoginForm
 	json.NewDecoder(r.Body).Decode(&posted)
 	posted.ReturnSecureToken = true
@@ -126,8 +110,8 @@ func SetJWTCookieView(w http.ResponseWriter, r *http.Request) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		result.Status = 400
-		return nil
+		w.WriteHeader(http.StatusBadRequest)
+		return errors.New("Bad Request")
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
@@ -140,16 +124,14 @@ func SetJWTCookieView(w http.ResponseWriter, r *http.Request) error {
 		api.SetCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
 		api.SetCookiePackage(w, "refreshToken", tokens.RefreshToken, 60*60*24*30)
 	} else {
-		result.Status = 401
+		w.WriteHeader(http.StatusUnauthorized)
+		return errors.New("Unauthorized")
 	}
-	result.ResponseWrite(w)
-
+	api.JsonResponse(w, map[string]interface{}{})
 	return nil
 }
 
 func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TVoidJsonResponse{Status: 200}
-
 	var posted TLoginForm
 	json.NewDecoder(r.Body).Decode(&posted)
 	posted.ReturnSecureToken = true
@@ -172,8 +154,8 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		result.Status = 400
-		return nil
+		w.WriteHeader(http.StatusBadRequest)
+		return errors.New("Bad Request")
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
@@ -181,8 +163,8 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 	var d TCreateReturn
 	err = json.Unmarshal(body, &d)
 	if err != nil {
-		result.Status = 400
-		return nil
+		w.WriteHeader(http.StatusUnauthorized)
+		return errors.New("Unauthorized")
 	}
 	api.SetCookiePackage(w, "idToken", d.IdToken, 60*60*24)
 	api.SetCookiePackage(w, "refreshToken", d.RefreshToken, 60*60*24*30)
@@ -194,20 +176,18 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 	// defer SetAdminClaim(ctx, clientAuth, *idToken) // set is_admin false
 	SendVerifyEmailAtRegister(ctx, clientAuth, posted.Email)
 
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{})
 	return nil
 }
 
 // refresh idToken
 // cookie
 func RenewTokenFCView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TVoidJsonResponse{Status: 200}
-
 	// get refresh token from cookie
 	refreshToken, _ := r.Cookie("refreshToken")
 	if refreshToken.Value == "" {
-		result.Status = 4002
-		return nil
+		w.WriteHeader(http.StatusBadRequest)
+		return errors.New("Bad Request")
 	}
 
 	jsonStr := `{"grant_type": "refresh_token", "refresh_token": "` + refreshToken.Value + `"}`
@@ -233,17 +213,16 @@ func RenewTokenFCView(w http.ResponseWriter, r *http.Request) error {
 		api.DestroyCookie(w, "idToken") // destroy cookie
 		api.SetCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
 	} else {
-		result.Status = 401
+		w.WriteHeader(http.StatusUnauthorized)
+		return errors.New("Unauthorize")
 	}
 
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{})
 	return nil
 }
 
 // profile 変更
 func UserUpdateView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TUserJsonResponse{Status: 200}
-
 	userId := fire.GetIdFromCookie(r)
 	var posted TProfileForm
 
@@ -275,19 +254,15 @@ func UserUpdateView(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		tools.ErrorLog(err)
 	}
-	result.User = *u.UserInfo
-
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"user": *u.UserInfo})
 	return nil
 }
 
 // この流れでclaim取得
 // cookie
 func TestGetCookie(w http.ResponseWriter, r *http.Request) error {
-	result := api.TVoidJsonResponse{Status: 200}
-
 	claims := fire.GetClaimsFromCookie(r)
 	fmt.Print(claims)
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{})
 	return nil
 }

@@ -25,7 +25,8 @@ func UpsertOnlyMiddleware(w http.ResponseWriter, r *http.Request) error {
 	if r.Method == "POST" || r.Method == "PUT" {
 		return nil
 	}
-	http.Error(w, "METHOD NOT ALLOWED", http.StatusMethodNotAllowed)
+	// http.Error(w, "METHOD NOT ALLOWED", http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusMethodNotAllowed)
 	return errors.New("METHOD NOT ALLOWED")
 }
 
@@ -33,7 +34,8 @@ func PostOnlyMiddleware(w http.ResponseWriter, r *http.Request) error {
 	if r.Method == "POST" {
 		return nil
 	}
-	http.Error(w, "METHOD NOT ALLOWED", http.StatusMethodNotAllowed)
+	//http.Error(w, "METHOD NOT ALLOWED", http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusMethodNotAllowed)
 	return errors.New("METHOD NOT ALLOWED")
 }
 
@@ -41,7 +43,8 @@ func PutOnlyMiddleware(w http.ResponseWriter, r *http.Request) error {
 	if r.Method == "PUT" {
 		return nil
 	}
-	http.Error(w, "METHOD NOT ALLOWED", http.StatusMethodNotAllowed)
+	//http.Error(w, "METHOD NOT ALLOWED", http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusMethodNotAllowed)
 	return errors.New("METHOD NOT ALLOWED")
 }
 
@@ -49,7 +52,8 @@ func DeleteOnlyMiddleware(w http.ResponseWriter, r *http.Request) error {
 	if r.Method == "DELETE" {
 		return nil
 	}
-	http.Error(w, "METHOD NOT ALLOWED", http.StatusMethodNotAllowed)
+	// http.Error(w, "METHOD NOT ALLOWED", http.StatusMethodNotAllowed)
+	w.WriteHeader(http.StatusMethodNotAllowed)
 	return errors.New("METHOD NOT ALLOWED")
 }
 
@@ -58,10 +62,10 @@ func AdminRequiredMiddleware(w http.ResponseWriter, r *http.Request) error {
 	userId := fire.GetAdminIdFromCookie(r)
 	isAdmin := fire.IsAdmin(userId)
 	if !isAdmin {
-		http.Error(w, "FORBIDDEN", http.StatusForbidden)
+		//http.Error(w, "FORBIDDEN", http.StatusForbidden)
+		w.WriteHeader(http.StatusForbidden)
 		return errors.New("FORBIDDEN")
 	}
-	w.WriteHeader(http.StatusOK)
 	return nil
 }
 
@@ -79,10 +83,10 @@ func AdminRequiredMiddlewareGet(w http.ResponseWriter, r *http.Request) error {
 		userId = ""
 	}
 	if userId == "" {
-		http.Error(w, "FORBIDDEN", http.StatusForbidden)
+		// http.Error(w, "FORBIDDEN", http.StatusForbidden)
+		w.WriteHeader(http.StatusForbidden)
 		return errors.New("FORBIDDEN")
 	}
-	w.WriteHeader(http.StatusOK)
 	return nil
 }
 

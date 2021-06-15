@@ -4,6 +4,7 @@ import (
 	"animar/v1/tools/api"
 	"animar/v1/tools/fire"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 )
@@ -23,20 +24,14 @@ type TBlogInputWith struct {
 }
 
 func ListBlogView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	var blogs []TBlog
 	blogs = ListBlogDomain()
-
-	result.Data = blogs
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": blogs})
 	return nil
 }
 
 // retrieve blog + anime
 func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	// access user
 	var userId string
 	switch r.Method {
@@ -55,35 +50,33 @@ func BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
 	id := query.Get("id")
 	uid := query.Get("u")
 
-	var blogs []TBlogJoinAnimes
 	if slug != "" {
 		blog := DetailBlogJoinAnimeDomain(slug)
 		if blog.ID == 0 {
-			result.Status = 404
+			w.WriteHeader(http.StatusNotFound)
+			return errors.New("Not Found")
 		}
-		blogs = append(blogs, blog)
+		api.JsonResponse(w, map[string]interface{}{"data": blog})
 	} else if id != "" {
 		i, _ := strconv.Atoi(id)
 		blog := DetailBlogJoinAnimeFromIdDomain(i)
 		if blog.ID == 0 {
-			result.Status = 404
+			w.WriteHeader(http.StatusNotFound)
+			return errors.New("Not Found")
 		}
-		blogs = append(blogs, blog)
+		api.JsonResponse(w, map[string]interface{}{"data": blog})
 	} else if uid != "" {
-		blogs = ListBlogByUserJoinAnimeDomain(uid, userId)
+		blogs := ListBlogByUserJoinAnimeDomain(uid, userId)
+		api.JsonResponse(w, map[string]interface{}{"data": blogs})
 	} else {
-		blogs = ListBlogJoinAnimeDomain()
+		blogs := ListBlogJoinAnimeDomain()
+		api.JsonResponse(w, map[string]interface{}{"data": blogs})
 	}
-
-	result.Data = blogs
-	result.ResponseWrite(w)
 	return nil
 }
 
 // retrieve blog + anime + user
 func BlogJoinAnimeUserView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	// access user
 	var userId string
 	switch r.Method {
@@ -102,54 +95,49 @@ func BlogJoinAnimeUserView(w http.ResponseWriter, r *http.Request) error {
 	id := query.Get("id")
 	uid := query.Get("u")
 
-	var blogs []TBlogJoinAnimesUser
 	if slug != "" {
 		blog := DetailBlogJoinAnimeUserDomain(slug)
 		if blog.ID == 0 {
-			result.Status = 404
+			w.WriteHeader(http.StatusNotFound)
+			return errors.New("Not Found")
 		}
-		blogs = append(blogs, blog)
+		api.JsonResponse(w, map[string]interface{}{"data": blog})
 	} else if id != "" {
 		i, _ := strconv.Atoi(id)
 		blog := DetailBlogJoinAnimeUserFromIdDomain(i)
 		if blog.ID == 0 {
-			result.Status = 404
+			w.WriteHeader(http.StatusNotFound)
+			return errors.New("Not Found")
 		}
-		blogs = append(blogs, blog)
+		api.JsonResponse(w, map[string]interface{}{"data": blog})
 	} else if uid != "" {
-		blogs = ListBlogByUserJoinAnimeUserDomain(uid, userId)
+		blogs := ListBlogByUserJoinAnimeUserDomain(uid, userId)
+		api.JsonResponse(w, map[string]interface{}{"data": blogs})
 	} else {
-		blogs = ListBlogJoinAnimeUserDomain()
+		blogs := ListBlogJoinAnimeUserDomain()
+		api.JsonResponse(w, map[string]interface{}{"data": blogs})
 	}
-
-	result.Data = blogs
-	result.ResponseWrite(w)
 	return nil
 }
 
 func InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
 	userId := fire.GetIdFromCookie(r)
-
 	if userId == "" {
-		result.Status = 4001
+		w.WriteHeader(http.StatusUnauthorized)
+		return errors.New("Unauthorized")
 	} else {
 		var p TBlogInputWith
 		json.NewDecoder(r.Body).Decode(&p)
-
 		value := InsertBlog(p.Title, p.Abstract, p.Content, userId, p.IsPublic)
-		result.Data = value
-
 		for _, animeId := range p.AnimeIds {
 			InsertRelationAnimeBlog(animeId, value)
 		}
+		api.JsonResponse(w, map[string]interface{}{"data": value})
 	}
-	result.ResponseWrite(w)
 	return nil
 }
 
 func UpdateBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
 	userId := fire.GetIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -159,23 +147,20 @@ func UpdateBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
 	// user 不一致
 	blogUserId := BlogUserId(id)
 	if blogUserId != userId {
-		result.Status = 4003
-		result.ResponseWrite(w)
-		return nil
+		w.WriteHeader(http.StatusForbidden)
+		return errors.New("Forbidden")
 	}
 
 	var p TBlogInputWith
 	json.NewDecoder(r.Body).Decode(&p)
 	value := UpdateBlog(id, p.Title, p.Abstract, p.Content, p.IsPublic)
 	UpdateRelationBlogAnimesDomain(p.AnimeIds, id)
-	result.Data = value
 
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": value})
 	return nil
 }
 
 func DeleteBlogView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
 	userId := fire.GetIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -185,13 +170,11 @@ func DeleteBlogView(w http.ResponseWriter, r *http.Request) error {
 	// user 不一致
 	blogUserId := BlogUserId(id)
 	if blogUserId != userId {
-		result.Status = 4003
-		result.ResponseWrite(w)
-		return nil
+		w.WriteHeader(http.StatusForbidden)
+		return errors.New("Forbidden")
 	}
 
 	deletedRow := DeleteBlog(id)
-	result.Data = deletedRow
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": deletedRow})
 	return nil
 }

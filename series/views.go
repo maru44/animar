@@ -4,61 +4,48 @@ import (
 	"animar/v1/tools/api"
 	"animar/v1/tools/fire"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 )
 
 func SeriesView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
 	var userId string
 
 	query := r.URL.Query()
 	id := query.Get("id")
 
 	if userId == "" {
-		result.Status = 4003
+		w.WriteHeader(http.StatusForbidden)
+		return errors.New("Forbidden")
 	} else {
-		var sers []TSeries
 		if id != "" {
 			i, _ := strconv.Atoi(id)
 			ser := DetailSeries(i)
 			if ser.ID == 0 {
-				result.Status = 404
+				w.WriteHeader(http.StatusNotFound)
+				return errors.New("Not Found")
 			}
-			sers = append(sers, ser)
+			api.JsonResponse(w, map[string]interface{}{"data": ser})
 		} else {
-			sers = ListSeriesDomain()
+			sers := ListSeriesDomain()
+			api.JsonResponse(w, map[string]interface{}{"data": sers})
 		}
-		result.Data = sers
 	}
-
-	result.ResponseWrite(w)
 	return nil
 }
 
 func InsertSeriesView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	var p TSeriesInput
 	json.NewDecoder(r.Body).Decode(&p)
 	insertedId := InsertSeries(
 		p.EngName, p.SeriesName,
 	)
-	result.Data = insertedId
-
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": insertedId})
 	return nil
 }
 
 func UpdateSeriesView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
-	result, is_valid := result.LimitMethod([]string{"PUT"}, r)
-	if !is_valid {
-		result.ResponseWrite(w)
-		return nil
-	}
-
 	userId := fire.GetAdminIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -66,14 +53,13 @@ func UpdateSeriesView(w http.ResponseWriter, r *http.Request) error {
 	id, _ := strconv.Atoi(strId)
 
 	if userId == "" {
-		result.Status = 4003
+		w.WriteHeader(http.StatusForbidden)
+		return errors.New("Forbidden")
 	} else {
 		var posted TSeriesInput
 		json.NewDecoder(r.Body).Decode(&posted)
 		value := UpdateSeries(posted.EngName, posted.SeriesName, id)
-		result.Data = value
+		api.JsonResponse(w, map[string]interface{}{"data": value})
 	}
-
-	result.ResponseWrite(w)
 	return nil
 }

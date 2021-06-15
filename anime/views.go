@@ -2,10 +2,10 @@ package anime
 
 import (
 	"animar/v1/tools/api"
-	"animar/v1/tools/fire"
 	"animar/v1/tools/s3"
 	"animar/v1/tools/tools"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 )
@@ -25,96 +25,86 @@ type TAnimeInput struct {
 
 // list and detail
 func AnimeView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
 
 	query := r.URL.Query()
 	strId := query.Get("id")
 	slug := query.Get("slug")
 
-	var animes []TAnime
 	if strId != "" {
 		id, _ := strconv.Atoi(strId)
 		ani := DetailAnime(id)
 		if ani.ID == 0 {
-			result.Status = 404
+			w.WriteHeader(http.StatusNotFound)
+			return errors.New("Not Found")
 		}
-		animes = append(animes, ani)
-		result.Data = animes
+		api.JsonResponse(w, map[string]interface{}{"data": ani})
 	} else if slug != "" {
-		var animes []TAnimeWithSeries
 		ani := DetailAnimeBySlug(slug)
 		if ani.ID == 0 {
-			result.Status = 404
+			w.WriteHeader(http.StatusNotFound)
+			return errors.New("Not Found")
 		}
-		animes = append(animes, ani)
-		result.Data = animes
+		api.JsonResponse(w, map[string]interface{}{"data": ani})
 	} else {
-		animes = ListAnimeDomain()
-		result.Data = animes
+		animes := ListAnimeDomain()
+		api.JsonResponse(w, map[string]interface{}{"data": animes})
 	}
-
-	result.ResponseWrite(w)
-
 	return nil
 }
 
 // not be used to
 // anime data + user's watch + review
-func AnimeWithUserWatchView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
+// func AnimeWithUserWatchView(w http.ResponseWriter, r *http.Request) error {
+// 	result := api.TBaseJsonResponse{Status: 200}
 
-	query := r.URL.Query()
-	strId := query.Get("id")
-	slug := query.Get("slug")
-	userId := fire.GetIdFromCookie(r)
+// 	query := r.URL.Query()
+// 	strId := query.Get("id")
+// 	slug := query.Get("slug")
+// 	userId := fire.GetIdFromCookie(r)
 
-	var animes []TAnimeWithUserWatchReview
-	if strId != "" {
-		/*
-			id, _ := strconv.Atoi(strId)
-			ani := DetailAnime(id)
-			if ani.ID == 0 {
-				result.Status = 404
-			}
-			animes = append(animes, ani)
-		*/
-	} else if slug != "" {
-		ani := DetailAnimeBySlugWithUserWatchReview(slug, userId)
-		if ani.ID == 0 {
-			result.Status = 404
-		} else {
-			animes = append(animes, ani)
-			result.Data = animes
-		}
-	} else {
-		// animes = ListAnimeDomain()
-	}
+// 	var animes []TAnimeWithUserWatchReview
+// 	if strId != "" {
+// 		/*
+// 			id, _ := strconv.Atoi(strId)
+// 			ani := DetailAnime(id)
+// 			if ani.ID == 0 {
+// 				result.Status = 404
+// 			}
+// 			animes = append(animes, ani)
+// 		*/
+// 	} else if slug != "" {
+// 		ani := DetailAnimeBySlugWithUserWatchReview(slug, userId)
+// 		if ani.ID == 0 {
+// 			w.WriteHeader(http.StatusNotFound)
+// 			return errors.New("Not Found")
+// 		} else {
+// 			animes = append(animes, ani)
+// 			result.Data = animes
+// 		}
+// 	} else {
+// 		// animes = ListAnimeDomain()
+// 	}
 
-	result.ResponseWrite(w)
-	return nil
-}
+// 	result.ResponseWrite(w)
+// 	return nil
+// }
 
 func ListAnimeMinimumView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
 	var animes []TAnimeMinimum
-
 	animes = ListAnimeMinimumDomain()
 
-	result.Data = animes
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": animes})
 	return nil
 }
 
 func SearchAnimeView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
 	var animes []TAnimeMinimum
 
 	query := r.URL.Query()
 	title := query.Get("t")
 
 	animes = ListAnimeMinimumDomainByTitle(title)
-	result.Data = animes
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": animes})
 	return nil
 }
 
@@ -127,19 +117,14 @@ type TUserToken struct {
 }
 
 func AnimeListAdminView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	var animes []TAnime
 	animes = ListAnimeDomain()
-	result.Data = animes
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": animes})
 	return nil
 }
 
 // anime detail ?=<id>
 func AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
@@ -147,22 +132,17 @@ func AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) error {
 	var posted TUserToken
 	json.NewDecoder(r.Body).Decode(&posted)
 
-	var animes []TAnimeAdmin
 	ani := DetailAnimeAdmin(id)
 	if ani.ID == 0 {
-		result.Status = 404
-	} else {
-		animes = append(animes, ani)
+		w.WriteHeader(http.StatusNotFound)
+		return errors.New("Not Found")
 	}
-	result.Data = animes
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": ani})
 	return nil
 }
 
 // add anime (only admin)
 func AnimePostView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
 
 	var returnFileName string
@@ -187,15 +167,12 @@ func AnimePostView(w http.ResponseWriter, r *http.Request) error {
 		r.FormValue("description"), r.FormValue("state"),
 		series, episodes, r.FormValue("copyright"), returnFileName,
 	)
-	result.Data = insertedId
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": insertedId})
 	return nil
 }
 
 // update ?=<id>
 func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
@@ -225,23 +202,17 @@ func AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
 		r.FormValue("description"), r.FormValue("state"),
 		series, episodes, r.FormValue("copyright"), returnFileName,
 	)
-	result.Data = updatedId
-
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": updatedId})
 	return nil
 }
 
 // delete anime ?=<id>
 func AnimeDeleteView(w http.ResponseWriter, r *http.Request) error {
-	result := api.TBaseJsonResponse{Status: 200}
-
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
 
 	deletedRow := DeleteAnime(id)
-	result.Data = deletedRow
-
-	result.ResponseWrite(w)
+	api.JsonResponse(w, map[string]interface{}{"data": deletedRow})
 	return nil
 }
