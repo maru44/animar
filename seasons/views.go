@@ -15,28 +15,22 @@ type TSeasonRelationInput struct {
 }
 
 func SeasonView(w http.ResponseWriter, r *http.Request) error {
-	var userId string
-
 	query := r.URL.Query()
 	id := query.Get("id")
 
-	if userId == "" {
-		w.WriteHeader(http.StatusForbidden)
-		return errors.New("Forbidden")
-	} else {
-		if id != "" {
-			i, _ := strconv.Atoi(id)
-			s := detailSeason(i)
-			if s.ID == 0 {
-				w.WriteHeader(http.StatusNotFound)
-				return errors.New("Not Found")
-			}
-			api.JsonResponse(w, map[string]interface{}{"data": s})
-		} else {
-			ss := ListSeasonDomain()
-			api.JsonResponse(w, map[string]interface{}{"data": ss})
+	if id != "" {
+		i, _ := strconv.Atoi(id)
+		s := detailSeason(i)
+		if s.ID == 0 {
+			w.WriteHeader(http.StatusNotFound)
+			return errors.New("Not Found")
 		}
+		api.JsonResponse(w, map[string]interface{}{"data": s})
+	} else {
+		ss := ListSeasonDomain()
+		api.JsonResponse(w, map[string]interface{}{"data": ss})
 	}
+
 	return nil
 }
 
