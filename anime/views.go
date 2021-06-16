@@ -25,35 +25,12 @@ type TAnimeInput struct {
 
 // list and detail
 func AnimeView(w http.ResponseWriter, r *http.Request) error {
-
 	query := r.URL.Query()
 	strId := query.Get("id")
 	slug := query.Get("slug")
 	season := query.Get("season")
+	keyword := query.Get("keyword")
 
-	if strId != "" {
-		id, _ := strconv.Atoi(strId)
-		ani := DetailAnime(id)
-		if ani.ID == 0 {
-			w.WriteHeader(http.StatusNotFound)
-			return errors.New("Not Found")
-		}
-		api.JsonResponse(w, map[string]interface{}{"data": ani})
-	} else if slug != "" {
-		ani := DetailAnimeBySlug(slug)
-		if ani.ID == 0 {
-			w.WriteHeader(http.StatusNotFound)
-			return errors.New("Not Found")
-		}
-		api.JsonResponse(w, map[string]interface{}{"data": ani})
-	} else if season != "" {
-		seasonId, _ := strconv.Atoi(season)
-		animes := AnimesBySeasonIdDomain(seasonId)
-		api.JsonResponse(w, map[string]interface{}{"data": animes})
-	} else {
-		animes := ListAnimeDomain()
-		api.JsonResponse(w, map[string]interface{}{"data": animes})
-	}
 	switch {
 	case strId != "":
 		id, _ := strconv.Atoi(strId)
@@ -70,6 +47,16 @@ func AnimeView(w http.ResponseWriter, r *http.Request) error {
 			return errors.New("Not Found")
 		}
 		api.JsonResponse(w, map[string]interface{}{"data": ani})
+	case season != "":
+		seasonId, _ := strconv.Atoi(season)
+		animes := AnimesBySeasonIdDomain(seasonId)
+		api.JsonResponse(w, map[string]interface{}{"data": animes})
+	case keyword != "":
+		animes := AnimeSearchDomain(keyword)
+		api.JsonResponse(w, map[string]interface{}{"data": animes})
+	default:
+		animes := ListAnimeDomain()
+		api.JsonResponse(w, map[string]interface{}{"data": animes})
 	}
 	return nil
 }
