@@ -27,7 +27,7 @@ func main() {
 
 	/*   Anime database   */
 	http.HandleFunc("/db/anime/", handler.Handle(anime.AnimeView))
-	http.HandleFunc("/db/anime/search/", handler.Handle(anime.SearchAnimeView))
+	http.HandleFunc("/db/anime/search/", handler.Handle(anime.SearchAnimeMinView))
 	http.HandleFunc("/db/anime/minimum/", handler.Handle(anime.ListAnimeMinimumView))
 
 	/*   blogs   */

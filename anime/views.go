@@ -29,6 +29,7 @@ func AnimeView(w http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query()
 	strId := query.Get("id")
 	slug := query.Get("slug")
+	season := query.Get("season")
 
 	if strId != "" {
 		id, _ := strconv.Atoi(strId)
@@ -45,9 +46,30 @@ func AnimeView(w http.ResponseWriter, r *http.Request) error {
 			return errors.New("Not Found")
 		}
 		api.JsonResponse(w, map[string]interface{}{"data": ani})
+	} else if season != "" {
+		seasonId, _ := strconv.Atoi(season)
+		animes := AnimesBySeasonIdDomain(seasonId)
+		api.JsonResponse(w, map[string]interface{}{"data": animes})
 	} else {
 		animes := ListAnimeDomain()
 		api.JsonResponse(w, map[string]interface{}{"data": animes})
+	}
+	switch {
+	case strId != "":
+		id, _ := strconv.Atoi(strId)
+		ani := DetailAnime(id)
+		if ani.ID == 0 {
+			w.WriteHeader(http.StatusNotFound)
+			return errors.New("Not Found")
+		}
+		api.JsonResponse(w, map[string]interface{}{"data": ani})
+	case slug != "":
+		ani := DetailAnimeBySlug(slug)
+		if ani.ID == 0 {
+			w.WriteHeader(http.StatusNotFound)
+			return errors.New("Not Found")
+		}
+		api.JsonResponse(w, map[string]interface{}{"data": ani})
 	}
 	return nil
 }
@@ -97,7 +119,7 @@ func ListAnimeMinimumView(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func SearchAnimeView(w http.ResponseWriter, r *http.Request) error {
+func SearchAnimeMinView(w http.ResponseWriter, r *http.Request) error {
 	var animes []TAnimeMinimum
 
 	query := r.URL.Query()

@@ -102,7 +102,7 @@ func ListAnimeMinimum() *sql.Rows {
 }
 
 // タイトル検索
-func SearchAnime(title string) *sql.Rows {
+func SearchAnimeMin(title string) *sql.Rows {
 	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query(
@@ -128,6 +128,26 @@ func SearchAnime(title string) *sql.Rows {
 	// 		"WHERE MATCH (title,kana,eng_name,abbreviation) " +
 	// 		"AGAINST ('+" + title + "')",
 	// )
+	if err != nil {
+		tools.ErrorLog(err)
+	}
+	return rows
+}
+
+// タイトル検索
+func SearchAnime(title string) *sql.Rows {
+	db := connector.AccessDB()
+	defer db.Close()
+	rows, err := db.Query(
+		"SELECT DISTINCT id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, created_at, updated_at from animes where title like " +
+			"'%" + title + "%' " +
+			"OR kana like " +
+			"'%" + title + "%' " +
+			"OR eng_name like " +
+			"'%" + title + "%' " +
+			"limit 24",
+	)
+
 	if err != nil {
 		tools.ErrorLog(err)
 	}
@@ -177,6 +197,21 @@ func DetailAnimeBySlug(slug string) TAnimeWithSeries {
 		tools.ErrorLog(err)
 	}
 	return a
+}
+
+func AnimesBySeasonId(seasonId int) *sql.Rows {
+	db := connector.AccessDB()
+	defer db.Close()
+	rows, err := db.Query(
+		"SELECT animes.id as id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, "+
+			"created_at, updated_at FROM relation_anime_season "+
+			"LEFT JOIN animes ON relation_anime_season.anime_id = animes.id "+
+			"WHERE season_id = ?", seasonId,
+	)
+	if err != nil {
+		tools.ErrorLog(err)
+	}
+	return rows
 }
 
 // not be used to
