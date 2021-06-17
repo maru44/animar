@@ -51,7 +51,6 @@ func AnimeView(w http.ResponseWriter, r *http.Request) error {
 		revs := review.AnimeReviewsDomain(ani.ID, "")
 		api.JsonResponse(w, map[string]interface{}{"anime": ani, "reviews": revs})
 	case year != "":
-		// @TODO fix
 		animes := AnimesBySeasonDomain(year, season)
 		api.JsonResponse(w, map[string]interface{}{"data": animes})
 	case keyword != "":
