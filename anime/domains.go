@@ -21,8 +21,27 @@ func ListAnimeDomain() []TAnime {
 	return animes
 }
 
-func AnimesBySeasonIdDomain(seasonId int) []TAnime {
-	rows := AnimesBySeasonId(seasonId)
+func ListAnimeOnAirDomain() []TAnime {
+	rows := ListAnimeOnAir()
+	var animes []TAnime
+	for rows.Next() {
+		var a TAnime
+		err := rows.Scan(
+			&a.ID, &a.Slug, &a.Title, &a.Abbreviation, &a.ThumbUrl, &a.CopyRight, &a.Description,
+			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
+		)
+		if err != nil {
+			tools.ErrorLog(err)
+		}
+		animes = append(animes, a)
+	}
+
+	defer rows.Close()
+	return animes
+}
+
+func AnimesBySeasonDomain(year string, season string) []TAnime {
+	rows := AnimesBySeason(year, season)
 	var animes []TAnime
 	for rows.Next() {
 		var a TAnime

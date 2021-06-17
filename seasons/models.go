@@ -25,6 +25,13 @@ type TSeasonInput struct {
 	Season string `json:"season"`
 }
 
+var SeasonDict = map[string]string{
+	"spring": "春",
+	"summer": "夏",
+	"fall":   "秋",
+	"winter": "冬",
+}
+
 func insertSeason(year string, season string) int {
 	db := connector.AccessDB()
 	defer db.Close()

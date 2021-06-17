@@ -1,6 +1,7 @@
 package anime
 
 import (
+	"animar/v1/seasons"
 	"animar/v1/tools/connector"
 	"animar/v1/tools/tools"
 	"database/sql"
@@ -84,7 +85,7 @@ type TAnimeMinimum struct {
 func ListAnime() *sql.Rows {
 	db := connector.AccessDB()
 	defer db.Close()
-	rows, err := db.Query("Select id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, created_at, updated_at FROM animes ORDER BY created_at ASC")
+	rows, err := db.Query("SELECT id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, created_at, updated_at FROM animes ORDER BY created_at ASC")
 	if err != nil {
 		tools.ErrorLog(err)
 	}
@@ -95,6 +96,16 @@ func ListAnimeMinimum() *sql.Rows {
 	db := connector.AccessDB()
 	defer db.Close()
 	rows, err := db.Query("SELECT id, slug, title from animes")
+	if err != nil {
+		tools.ErrorLog(err)
+	}
+	return rows
+}
+
+func ListAnimeOnAir() *sql.Rows {
+	db := connector.AccessDB()
+	defer db.Close()
+	rows, err := db.Query("SELECT id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, created_at, updated_at FROM animes WHERE state = 'now' ORDER BY created_at ASC")
 	if err != nil {
 		tools.ErrorLog(err)
 	}
@@ -199,14 +210,18 @@ func DetailAnimeBySlug(slug string) TAnimeWithSeries {
 	return a
 }
 
-func AnimesBySeasonId(seasonId int) *sql.Rows {
+func AnimesBySeason(year string, season string) *sql.Rows {
 	db := connector.AccessDB()
+	seasonJp, _ := seasons.SeasonDict[season]
 	defer db.Close()
 	rows, err := db.Query(
-		"SELECT animes.id as id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, "+
-			"created_at, updated_at FROM relation_anime_season "+
-			"LEFT JOIN animes ON relation_anime_season.anime_id = animes.id "+
-			"WHERE season_id = ?", seasonId,
+		"SELECT animes.id as id, slug, title, abbreviation, thumb_url, copyright, "+
+			"description, state, series_id, count_episodes, "+
+			"animes.created_at as created_at, animes.updated_at as updated_at "+
+			"FROM seasons "+
+			"LEFT JOIN relation_anime_season as rel ON seasons.id = rel.season_id "+
+			"LEFT JOIN animes ON rel.anime_id = animes.id "+
+			"WHERE seasons.year = ? AND seasons.season = ?", year, seasonJp,
 	)
 	if err != nil {
 		tools.ErrorLog(err)

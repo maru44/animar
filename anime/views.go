@@ -1,6 +1,7 @@
 package anime
 
 import (
+	"animar/v1/review"
 	"animar/v1/tools/api"
 	"animar/v1/tools/s3"
 	"animar/v1/tools/tools"
@@ -28,6 +29,7 @@ func AnimeView(w http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query()
 	strId := query.Get("id")
 	slug := query.Get("slug")
+	year := query.Get("year")
 	season := query.Get("season")
 	keyword := query.Get("keyword")
 
@@ -46,16 +48,17 @@ func AnimeView(w http.ResponseWriter, r *http.Request) error {
 			w.WriteHeader(http.StatusNotFound)
 			return errors.New("Not Found")
 		}
-		api.JsonResponse(w, map[string]interface{}{"data": ani})
-	case season != "":
-		seasonId, _ := strconv.Atoi(season)
-		animes := AnimesBySeasonIdDomain(seasonId)
+		revs := review.AnimeReviewsDomain(ani.ID, "")
+		api.JsonResponse(w, map[string]interface{}{"anime": ani, "reviews": revs})
+	case year != "":
+		// @TODO fix
+		animes := AnimesBySeasonDomain(year, season)
 		api.JsonResponse(w, map[string]interface{}{"data": animes})
 	case keyword != "":
 		animes := AnimeSearchDomain(keyword)
 		api.JsonResponse(w, map[string]interface{}{"data": animes})
 	default:
-		animes := ListAnimeDomain()
+		animes := ListAnimeOnAirDomain()
 		api.JsonResponse(w, map[string]interface{}{"data": animes})
 	}
 	return nil
