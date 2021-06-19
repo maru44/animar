@@ -4,11 +4,13 @@ import (
 	"animar/v1/tools/api"
 	"animar/v1/usecase"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 )
 
 type AnimeController struct {
+	// interactorがnull
 	Interactor usecase.AnimeInteractor
 }
 
@@ -48,7 +50,9 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 		animes, _ := controller.Interactor.AnimesSearch(keyword)
 		api.JsonResponse(w, map[string]interface{}{"data": animes})
 	default:
-		animes, _ := controller.Interactor.AnimesOnAir()
+		//animes, _ := controller.Interactor.AnimesOnAir()
+		fmt.Println(controller)
+		animes, _ := controller.Interactor.AnimesAll()
 		api.JsonResponse(w, map[string]interface{}{"data": animes})
 	}
 	return nil

@@ -170,39 +170,39 @@ func (repo *AnimeRepository) ListBySeason(year string, season string) (animes do
              Detail
 *******************************/
 
-func (repo *AnimeRepository) FindById(id int) (a domain.TAnime, err error) {
-	row, err := repo.QueryRow(
-		"SELECT id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, "+
-			"count_episodes, created_at, updated_at FROM animes WHERE id = ?",
-		id,
-	)
-	if err != nil {
-		tools.ErrorLog(err)
-	}
-	row.Scan(
-		&a.ID, &a.Slug, &a.Title, &a.Abbreviation,
-		&a.ThumbUrl, &a.CopyRight, &a.Description,
-		&a.State, &a.SeriesId,
-		&a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
-	)
-	return
-}
+// func (repo *AnimeRepository) FindById(id int) (a domain.TAnime, err error) {
+// 	row, err := repo.QueryRow(
+// 		"SELECT id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, "+
+// 			"count_episodes, created_at, updated_at FROM animes WHERE id = ?",
+// 		id,
+// 	)
+// 	if err != nil {
+// 		tools.ErrorLog(err)
+// 	}
+// 	row.Scan(
+// 		&a.ID, &a.Slug, &a.Title, &a.Abbreviation,
+// 		&a.ThumbUrl, &a.CopyRight, &a.Description,
+// 		&a.State, &a.SeriesId,
+// 		&a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
+// 	)
+// 	return
+// }
 
-func (repo *AnimeRepository) FindBySlug(slug string) (a domain.TAnimeWithSeries, err error) {
-	row, err := repo.QueryRow(
-		"SELECT animes.id as id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, animes.created_at, animes.updated_at, "+
-			"series_name FROM animes "+
-			"LEFT JOIN series on animes.series_id = series.id "+
-			"WHERE slug = ?", slug,
-	)
-	if err != nil {
-		tools.ErrorLog(err)
-	}
-	row.Scan(
-		&a.ID, &a.Slug, &a.Title, &a.Abbreviation,
-		&a.ThumbUrl, &a.CopyRight, &a.Description,
-		&a.State, &a.SeriesId, &a.CountEpisodes,
-		&a.CreatedAt, &a.UpdatedAt, &a.SeriesName,
-	)
-	return
-}
+// func (repo *AnimeRepository) FindBySlug(slug string) (a domain.TAnimeWithSeries, err error) {
+// 	row, err := repo.QueryRow(
+// 		"SELECT animes.id as id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, animes.created_at, animes.updated_at, "+
+// 			"series_name FROM animes "+
+// 			"LEFT JOIN series on animes.series_id = series.id "+
+// 			"WHERE slug = ?", slug,
+// 	)
+// 	if err != nil {
+// 		tools.ErrorLog(err)
+// 	}
+// 	row.Scan(
+// 		&a.ID, &a.Slug, &a.Title, &a.Abbreviation,
+// 		&a.ThumbUrl, &a.CopyRight, &a.Description,
+// 		&a.State, &a.SeriesId, &a.CountEpisodes,
+// 		&a.CreatedAt, &a.UpdatedAt, &a.SeriesName,
+// 	)
+// 	return
+// }

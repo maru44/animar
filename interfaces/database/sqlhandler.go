@@ -2,8 +2,8 @@ package database
 
 type SqlHandler interface {
 	Query(string, ...interface{}) (Rows, error)
-	QueryRow(string, ...interface{}) (Row, error)
-	Prepare(string, ...interface{}) (Statement, error)
+	//QueryRow(string, ...interface{}) (Row, error)
+	//Prepare(string, ...interface{}) (Statement, error)
 }
 
 type Statement interface {
