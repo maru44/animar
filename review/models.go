@@ -30,7 +30,7 @@ type TReviewJoinAnime struct {
 	Title        string  `json:"title"`
 	Slug         string  `json:"slug"`
 	AnimeContent *string `json:"anime_content,omitempty"`
-	AState       *int    `json:"anime_state,omitempty"`
+	AState       *string `json:"anime_state,omitempty"`
 }
 
 type TReviewJoinUser struct {
