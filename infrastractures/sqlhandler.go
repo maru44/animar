@@ -1,4 +1,4 @@
-package infrastracture
+package infrastractures
 
 import (
 	"animar/v1/configs"

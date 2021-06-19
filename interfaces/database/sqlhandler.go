@@ -16,12 +16,12 @@ type Result interface {
 	// DeletedRow() (int64, error)
 }
 
-type Rows interface {
-	Scan(...interface{}) error
-	Next() bool
-	Close() error
-}
-
 type Row interface {
 	Scan(...interface{}) error
+}
+
+type Rows interface {
+	Row
+	Next() bool
+	Close() error
 }

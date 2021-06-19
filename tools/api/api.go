@@ -12,6 +12,10 @@ type TBaseJsonResponse struct {
 	Data   interface{} `json:"data"`
 }
 
+// type BaseController interface {
+// 	UseStringHandler(http.ResponseWriter, *http.Request) error
+// }
+
 func SetCookiePackage(w http.ResponseWriter, key string, value string, age int) bool {
 	var cookie *http.Cookie
 	if tools.IsProductionEnv() {
@@ -70,10 +74,6 @@ func DestroyCookie(w http.ResponseWriter, key string) bool {
 	return true
 }
 
-type Api interface {
-	ResponseWrite(w http.ResponseWriter) bool
-}
-
 func (result TBaseJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 	res, err := json.Marshal(result)
 
@@ -98,3 +98,5 @@ func JsonResponse(w http.ResponseWriter, dictionary map[string]interface{}) bool
 	w.Write(data)
 	return true
 }
+
+// func UseStringHandler(w http.ResponseWriter, r *http.Request) error {}
