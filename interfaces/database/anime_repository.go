@@ -10,7 +10,7 @@ type AnimeRepository struct {
 }
 
 func (repo *AnimeRepository) ListAll() (animes domain.TAnimes, err error) {
-	rows, err := repo.Query(
+	rows, err := repo.SqlHandler.Query(
 		"SELECT id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, " +
 			"count_episodes, created_at, updated_at FROM animes ORDER BY created_at ASC",
 	)
@@ -35,7 +35,7 @@ func (repo *AnimeRepository) ListAll() (animes domain.TAnimes, err error) {
 }
 
 func (repo *AnimeRepository) ListMinimumAll() (animes domain.TAnimeMinimums, err error) {
-	rows, err := repo.Query(
+	rows, err := repo.SqlHandler.Query(
 		"SELECT id, slug, title FROM animes",
 	)
 	defer rows.Close()
@@ -57,7 +57,7 @@ func (repo *AnimeRepository) ListMinimumAll() (animes domain.TAnimeMinimums, err
 }
 
 func (repo *AnimeRepository) ListOnAirAll() (animes domain.TAnimes, err error) {
-	rows, err := repo.Query(
+	rows, err := repo.SqlHandler.Query(
 		"SELECT id, slug, title, abbreviation, thumb_url, copyright, " +
 			"description, state, series_id, count_episodes, created_at, updated_at " +
 			"FROM animes WHERE state = 'now' ORDER BY created_at ASC",
@@ -83,7 +83,7 @@ func (repo *AnimeRepository) ListOnAirAll() (animes domain.TAnimes, err error) {
 }
 
 func (repo *AnimeRepository) ListMinimumSearch(title string) (animes domain.TAnimeMinimums, err error) {
-	rows, err := repo.Query(
+	rows, err := repo.SqlHandler.Query(
 		"SELECT DISTINCT id, slug, title from animes where title like " +
 			"'%" + title + "%' " +
 			"OR kana like " +
@@ -110,7 +110,7 @@ func (repo *AnimeRepository) ListMinimumSearch(title string) (animes domain.TAni
 }
 
 func (repo *AnimeRepository) ListSearch(title string) (animes domain.TAnimes, err error) {
-	rows, err := repo.Query(
+	rows, err := repo.SqlHandler.Query(
 		"SELECT DISTINCT id, slug, title from animes where title like " +
 			"'%" + title + "%' " +
 			"OR kana like " +
@@ -139,7 +139,7 @@ func (repo *AnimeRepository) ListSearch(title string) (animes domain.TAnimes, er
 
 func (repo *AnimeRepository) ListBySeason(year string, season string) (animes domain.TAnimes, err error) {
 	seasonJp, _ := domain.SeasonDict[season]
-	rows, err := repo.Query(
+	rows, err := repo.SqlHandler.Query(
 		"SELECT animes.id as id, slug, title, abbreviation, thumb_url, copyright, "+
 			"description, state, series_id, count_episodes, "+
 			"animes.created_at as created_at, animes.updated_at as updated_at "+
@@ -171,7 +171,7 @@ func (repo *AnimeRepository) ListBySeason(year string, season string) (animes do
 *******************************/
 
 // func (repo *AnimeRepository) FindById(id int) (a domain.TAnime, err error) {
-// 	row, err := repo.QueryRow(
+// 	row, err := repo.SqlHandler.QueryRow(
 // 		"SELECT id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, "+
 // 			"count_episodes, created_at, updated_at FROM animes WHERE id = ?",
 // 		id,
@@ -189,7 +189,7 @@ func (repo *AnimeRepository) ListBySeason(year string, season string) (animes do
 // }
 
 // func (repo *AnimeRepository) FindBySlug(slug string) (a domain.TAnimeWithSeries, err error) {
-// 	row, err := repo.QueryRow(
+// 	row, err := repo.SqlHandler.QueryRow(
 // 		"SELECT animes.id as id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, animes.created_at, animes.updated_at, "+
 // 			"series_name FROM animes "+
 // 			"LEFT JOIN series on animes.series_id = series.id "+

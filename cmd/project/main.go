@@ -4,6 +4,7 @@ import (
 	"animar/v1/anime"
 	"animar/v1/auth"
 	"animar/v1/blog"
+	"animar/v1/controllers"
 	"animar/v1/platform"
 	"animar/v1/review"
 	"animar/v1/seasons"
@@ -25,8 +26,13 @@ func main() {
 		w.Write([]byte(host))
 	})
 
+	// sqlHandler := infrastractures.NewSqlHandler()
+	animeController := controllers.NewAnimeController()
+
+	http.HandleFunc("/db/anime/", handler.Handle(animeController.AnimeListView))
+
 	/*   Anime database   */
-	http.HandleFunc("/db/anime/", handler.Handle(anime.AnimeView))
+	// http.HandleFunc("/db/anime/", handler.Handle(anime.AnimeView))
 	http.HandleFunc("/db/anime/search/", handler.Handle(anime.SearchAnimeMinView))
 	http.HandleFunc("/db/anime/minimum/", handler.Handle(anime.ListAnimeMinimumView))
 

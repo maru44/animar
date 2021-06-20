@@ -26,21 +26,21 @@ func NewSqlHandler() *SqlHandler {
 	return sqlHandler
 }
 
-func (handler *SqlHandler) Execute(statement string, args ...interface{}) (database.Result, error) {
-	res := SqlResult{}
-	stmt, err := handler.Conn.Prepare(statement)
-	defer stmt.Close()
-	if err != nil {
-		return nil, err
-	}
+// func (handler *SqlHandler) Execute(statement string, args ...interface{}) (database.Result, error) {
+// 	res := SqlResult{}
+// 	stmt, err := handler.Conn.Prepare(statement)
+// 	defer stmt.Close()
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	exe, err := stmt.Exec(args...)
-	if err != nil {
-		return exe, err
-	}
-	res.Result = exe
-	return exe, nil
-}
+// 	exe, err := stmt.Exec(args...)
+// 	if err != nil {
+// 		return exe, err
+// 	}
+// 	res.Result = exe
+// 	return exe, nil
+// }
 
 func (handler *SqlHandler) Query(statement string, args ...interface{}) (database.Rows, error) {
 	rows, err := handler.Conn.Query(statement, args...)
