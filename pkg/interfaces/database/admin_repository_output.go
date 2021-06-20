@@ -60,8 +60,10 @@ func (repo *AdminRepository) FindById(id int) (a domain.TAnimeAdmin, err error) 
 
 func (repo *AdminRepository) Insert(a domain.TAnimeInsert) (lastInsertId int, err error) {
 	exe, err := repo.Execute(
-		"INSERT INTO animes(title, slug, abbreviation, kana, eng_name, description, thumb_url, state, series_id, count_episodes, copyright) " +
+		"INSERT INTO animes(title, slug, abbreviation, kana, eng_name, description, thumb_url, state, series_id, count_episodes, copyright) "+
 			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		a.Title, a.Slug, a.Abbreviation, a.Kana, a.EngName, a.Description,
+		a.ThumbUrl, a.State, a.SeriesId, a.CountEpisodes, a.Copyright,
 	)
 	if err != nil {
 		tools.ErrorLog(err)
@@ -79,6 +81,7 @@ func (repo *AdminRepository) Insert(a domain.TAnimeInsert) (lastInsertId int, er
 func (repo *AdminRepository) Update(id int, a domain.TAnimeInsert) (rowsAffected int, err error) {
 	exe, err := repo.Execute(
 		"UPDATE animes SET title = ?, abbreviation = ?, kana = ?, eng_name = ?, description = ?, thumb_url = ?, state = ?, series_id = ?, count_episodes = ?, copyright = ? WHERE id = ?",
+		a.Title, a.Abbreviation, a.Kana, a.EngName, a.Description, a.ThumbUrl, a.State, a.SeriesId, a.CountEpisodes, a.Copyright, id,
 	)
 	if err != nil {
 		tools.ErrorLog(err)
@@ -95,7 +98,7 @@ func (repo *AdminRepository) Update(id int, a domain.TAnimeInsert) (rowsAffected
 
 func (repo *AdminRepository) Delete(id int) (rowsAffected int, err error) {
 	exe, err := repo.Execute(
-		"DELETE FROM animes WHERE id = ?",
+		"DELETE FROM animes WHERE id = ?", id,
 	)
 	if err != nil {
 		tools.ErrorLog(err)

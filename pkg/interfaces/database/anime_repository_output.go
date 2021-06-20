@@ -151,6 +151,7 @@ func (repo *AnimeRepository) FindById(id int) (a domain.TAnime, err error) {
 	)
 	if err != nil {
 		tools.ErrorLog(err)
+		return
 	}
 	row.Next()
 	err = row.Scan(
@@ -161,6 +162,7 @@ func (repo *AnimeRepository) FindById(id int) (a domain.TAnime, err error) {
 	)
 	if err != nil {
 		tools.ErrorLog(err)
+		return
 	}
 	return
 }
@@ -174,6 +176,7 @@ func (repo *AnimeRepository) FindBySlug(slug string) (a domain.TAnimeWithSeries,
 	)
 	if err != nil {
 		tools.ErrorLog(err)
+		return
 	}
 	row.Next()
 	err = row.Scan(
@@ -184,6 +187,7 @@ func (repo *AnimeRepository) FindBySlug(slug string) (a domain.TAnimeWithSeries,
 	)
 	if err != nil {
 		tools.ErrorLog(err)
+		return
 	}
 	return
 }
