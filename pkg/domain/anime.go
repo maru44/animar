@@ -57,3 +57,32 @@ type TAnimeAdmin struct {
 	CreatedAt     string  `json:"created_at"`
 	UpdatedAt     *string `json:"updated_at,omitempty"`
 }
+
+type TAnimeAdmins []TAnimeAdmin
+
+// type TAnimeInput struct {
+// 	Title         string `json:"title"`
+// 	Abbrevation   string `json:"abbrevation,omitempty"`
+// 	Kana          string `json:"kana,omitempty"`
+// 	EngName       string `json:"eng_name:omitempty"`
+// 	ThumbUrl      string `json:"thumb_url,omitempty"`
+// 	PreThumbUrl   string `json:"pre_thumb,omitempty"`
+// 	Description   string `json:"description,omitempty"`
+// 	State         int    `json:"state,omitempty"`
+// 	SeriesId      int    `json:"series_id,omitempty"`
+// 	CountEpisodes int    `jsoin:"count_episodes,omitempty"`
+// }
+
+type TAnimeInsert struct {
+	Title         string  `json:"title"`
+	Slug          string  `json:"slug"`
+	Abbreviation  *string `json:"abbrevation,omitempty"`
+	Kana          *string `json:"kana,omitempty"`
+	EngName       *string `json:"eng_name:omitempty"`
+	Description   *string `json:"description,omitempty"`
+	ThumbUrl      *string `json:"thumb_url,omitempty"`
+	State         *string `json:"state,omitempty"`
+	SeriesId      *int    `json:"series_id,omitempty"`
+	CountEpisodes *int    `json:"count_episodes,omitempty"`
+	Copyright     *string `json:"copyright,omitempty"`
+}

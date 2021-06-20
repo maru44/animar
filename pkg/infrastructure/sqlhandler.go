@@ -3,12 +3,17 @@ package infrastructure
 import (
 	"animar/v1/configs"
 	"animar/v1/pkg/interfaces/database"
+	"animar/v1/pkg/tools/tools"
 	"database/sql"
 	"fmt"
 )
 
 type SqlHandler struct {
 	Conn *sql.DB
+}
+
+type SqlRows struct {
+	Rows *sql.Rows
 }
 
 func NewSqlHandler() database.SqlHandler {
@@ -32,10 +37,6 @@ func (handler *SqlHandler) Query(statement string, args ...interface{}) (databas
 	return rows, nil
 }
 
-type SqlRows struct {
-	Rows *sql.Rows
-}
-
 func (r SqlRows) Scan(dest ...interface{}) error {
 	return r.Rows.Scan(dest...)
 }
@@ -46,4 +47,32 @@ func (r SqlRows) Next() bool {
 
 func (r SqlRows) Close() error {
 	return r.Rows.Close()
+}
+
+type SqlResult struct {
+	Result sql.Result
+}
+
+func (handler *SqlHandler) Execute(statement string, args ...interface{}) (database.Result, error) {
+	res := SqlResult{}
+	stmt, err := handler.Conn.Prepare(statement)
+	defer handler.Conn.Close()
+	defer stmt.Close()
+	if err != nil {
+		return res, err
+	}
+	exe, err := stmt.Exec(args...)
+	if err != nil {
+		tools.ErrorLog(err)
+	}
+	res.Result = exe
+	return res, nil
+}
+
+func (r SqlResult) LastInsertId() (int64, error) {
+	return r.Result.LastInsertId()
+}
+
+func (r SqlResult) RowsAffected() (int64, error) {
+	return r.Result.RowsAffected()
 }

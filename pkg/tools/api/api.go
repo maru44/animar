@@ -12,6 +12,10 @@ type TBaseJsonResponse struct {
 	Data   interface{} `json:"data"`
 }
 
+type TUserToken struct {
+	Token string `json:"token,omitempty"`
+}
+
 func SetCookiePackage(w http.ResponseWriter, key string, value string, age int) bool {
 	var cookie *http.Cookie
 	if tools.IsProductionEnv() {
