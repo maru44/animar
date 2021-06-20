@@ -21,4 +21,4 @@ tmp/*
 **/execenv.go
 **/secret_key.json
 
-storage/production/*
+**/seed/production/*
