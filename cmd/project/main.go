@@ -27,12 +27,11 @@ func main() {
 	})
 
 	sqlHandler := infrastructure.NewSqlHandler()
-	animeController := controllers.NewAnimeController(sqlHandler)
-
-	http.HandleFunc("/db/anime/", handler.Handle(animeController.AnimeView))
 
 	/*   Anime database   */
 	// http.HandleFunc("/db/anime/", handler.Handle(anime.AnimeView))
+	animeController := controllers.NewAnimeController(sqlHandler)
+	http.HandleFunc("/db/anime/", handler.Handle(animeController.AnimeView))
 	http.HandleFunc("/db/anime/search/", handler.Handle(anime.SearchAnimeMinView))
 	http.HandleFunc("/db/anime/minimum/", handler.Handle(anime.ListAnimeMinimumView))
 
@@ -70,9 +69,10 @@ func main() {
 	http.HandleFunc("/auth/profile/update/", handler.Handle(middleware.PostOnlyMiddleware, auth.UserUpdateView))
 
 	/*   admin   */
-	http.HandleFunc("/admin/anime/", handler.Handle(middleware.AdminRequiredMiddlewareGet, anime.AnimeListAdminView))
-	http.HandleFunc("/admin/anime/detail/", handler.Handle(middleware.AdminRequiredMiddlewareGet, anime.AnimeDetailAdminView))
-	http.HandleFunc("/admin/anime/post/", handler.Handle(middleware.PostOnlyMiddleware, middleware.AdminRequiredMiddleware, anime.AnimePostView))
+	adminController := controllers.NewAdminController(sqlHandler)
+	http.HandleFunc("/admin/anime/", handler.Handle(middleware.AdminRequiredMiddlewareGet, adminController.AnimeListAdminView))
+	http.HandleFunc("/admin/anime/detail/", handler.Handle(middleware.AdminRequiredMiddlewareGet, adminController.AnimeDetailAdminView))
+	http.HandleFunc("/admin/anime/post/", handler.Handle(middleware.PostOnlyMiddleware, middleware.AdminRequiredMiddleware, adminController.AnimePostAdminView))
 	http.HandleFunc("/admin/anime/update/", handler.Handle(middleware.PutOnlyMiddleware, middleware.AdminRequiredMiddleware, anime.AnimeUpdateView))
 	http.HandleFunc("/admin/anime/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, middleware.AdminRequiredMiddleware, anime.AnimeDeleteView))
 
