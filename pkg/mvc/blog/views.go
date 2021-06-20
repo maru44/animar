@@ -1,8 +1,8 @@
 package blog
 
 import (
-	"animar/v1/tools/api"
-	"animar/v1/tools/fire"
+	"animar/v1/pkg/tools/api"
+	"animar/v1/pkg/tools/fire"
 	"encoding/json"
 	"errors"
 	"net/http"

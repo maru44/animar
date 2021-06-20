@@ -1,8 +1,8 @@
 package blog
 
 import (
-	"animar/v1/auth"
-	"animar/v1/tools/tools"
+	"animar/v1/pkg/mvc/auth"
+	"animar/v1/pkg/tools/tools"
 	"context"
 )
 

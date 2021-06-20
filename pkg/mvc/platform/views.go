@@ -1,8 +1,8 @@
 package platform
 
 import (
-	"animar/v1/tools/api"
-	"animar/v1/tools/s3"
+	"animar/v1/pkg/tools/api"
+	"animar/v1/pkg/tools/s3"
 	"encoding/json"
 	"errors"
 	"fmt"

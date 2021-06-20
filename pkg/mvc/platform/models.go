@@ -1,8 +1,8 @@
 package platform
 
 import (
-	"animar/v1/tools/connector"
-	"animar/v1/tools/tools"
+	"animar/v1/pkg/tools/connector"
+	"animar/v1/pkg/tools/tools"
 	"database/sql"
 )
 

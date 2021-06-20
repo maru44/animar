@@ -29,7 +29,7 @@ func main() {
 	sqlHandler := infrastructure.NewSqlHandler()
 	animeController := controllers.NewAnimeController(sqlHandler)
 
-	http.HandleFunc("/db/anime/", handler.Handle(animeController.AnimeListView))
+	http.HandleFunc("/db/anime/", handler.Handle(animeController.AnimeView))
 
 	/*   Anime database   */
 	// http.HandleFunc("/db/anime/", handler.Handle(anime.AnimeView))
