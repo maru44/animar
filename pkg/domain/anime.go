@@ -86,3 +86,11 @@ type TAnimeInsert struct {
 	CountEpisodes *int    `json:"count_episodes,omitempty"`
 	Copyright     *string `json:"copyright,omitempty"`
 }
+
+func (a *TAnime) GetId() int {
+	return a.ID
+}
+
+func (a *TAnimeWithSeries) GetId() int {
+	return a.ID
+}

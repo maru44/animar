@@ -42,3 +42,10 @@ func (interactor *AnimeInteractor) AnimeDetailBySlug(slug string) (anime domain.
 	anime, err = interactor.AnimeRepository.FindBySlug(slug)
 	return
 }
+
+// review
+
+func (interactor *AnimeInteractor) ReviewFilterByAnime(animeId int, userId string) (reviews domain.TReviews, err error) {
+	reviews, err = interactor.AnimeRepository.ReviewFilterByAnime(animeId, userId)
+	return
+}

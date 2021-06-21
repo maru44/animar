@@ -3,6 +3,7 @@ package database
 import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/tools/tools"
+	"fmt"
 )
 
 type ReviewRepository struct {
@@ -89,8 +90,8 @@ func (repo *ReviewRepository) FilterByUser(userId string) (reviews domain.TRevie
 
 func (repo *ReviewRepository) InsertContent(r domain.TReviewInput) (content string, err error) {
 	exe, err := repo.Execute(
-		"INSERT INTO reviews(anime_id, content, rating, user_id) VALUES(?, ?, ?, ?)",
-		r.AnimeId, r.Content, r.Rating, r.UserId,
+		"INSERT INTO reviews(anime_id, content, user_id) VALUES(?, ?, ?, ?)",
+		r.AnimeId, r.Content, r.UserId,
 	)
 	if err != nil {
 		tools.ErrorLog(err)
@@ -103,4 +104,65 @@ func (repo *ReviewRepository) InsertContent(r domain.TReviewInput) (content stri
 	}
 	content = *r.Content
 	return
+}
+
+func (repo *ReviewRepository) UpsertContent(r domain.TReviewInput) (content string, err error) {
+	review, err := repo.FindByAnimeAndUser(r.AnimeId, r.UserId)
+	if err == nil && review.GetId() != 0 {
+		_, err = repo.Execute(
+			"UPDATE reviews SET content = ? WHERE id = ?", r.Content, review.GetId(),
+		)
+		content = *r.Content
+		if err != nil {
+			tools.ErrorLog(err)
+			return
+		}
+	}
+	return repo.InsertContent(r)
+}
+
+func (repo *ReviewRepository) InsertRating(r domain.TReviewInput) (rating int, err error) {
+	exe, err := repo.Execute(
+		"INSERT INTO reviews(anime_id, rating, user_id) VALUES(?, ?, ?, ?)",
+		r.AnimeId, r.Rating, r.UserId,
+	)
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	_, err = exe.LastInsertId()
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	rating = *r.Rating
+	return
+}
+
+func (repo *ReviewRepository) UpsertRating(r domain.TReviewInput) (rating int, err error) {
+	review, err := repo.FindByAnimeAndUser(r.AnimeId, r.UserId)
+	if err == nil && review.GetId() != 0 {
+		_, err = repo.Execute(
+			"UPDATE reviews SET rating = ? WHERE id = ?", r.Rating, review.GetId(),
+		)
+		rating = *r.Rating
+		if err != nil {
+			tools.ErrorLog(err)
+			return
+		}
+	}
+	return repo.InsertRating(r)
+}
+
+func (repo *ReviewRepository) GetRatingAverage(animeId int) (rating string, err error) {
+	rows, err := repo.Query("SELECT COALESCE(AVG(rating), 0) FROM reviews WHERE anime_id = ?", animeId)
+	defer rows.Close()
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	var avg float32
+	rows.Next()
+	rows.Scan(&avg)
+	return fmt.Sprintf("%.1f", avg), err
 }

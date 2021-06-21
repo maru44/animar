@@ -34,3 +34,7 @@ type TReviewInput struct {
 type TReviews []TReview
 
 type TReviewJoinAnimes []TReviewJoinAnime
+
+func (r TReview) GetId() int {
+	return r.ID
+}

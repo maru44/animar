@@ -11,4 +11,7 @@ type AnimeRepository interface {
 	// detail
 	FindById(int) (domain.TAnime, error)
 	FindBySlug(string) (domain.TAnimeWithSeries, error)
+
+	// review
+	ReviewFilterByAnime(int, string) (domain.TReviews, error)
 }

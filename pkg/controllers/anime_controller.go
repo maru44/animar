@@ -3,6 +3,7 @@ package controllers
 import (
 	"animar/v1/pkg/interfaces/database"
 	"animar/v1/pkg/tools/api"
+	"animar/v1/pkg/tools/fire"
 	"animar/v1/pkg/usecase"
 	"errors"
 	"net/http"
@@ -10,7 +11,8 @@ import (
 )
 
 type AnimeController struct {
-	Interactor usecase.AnimeInteractor
+	Interactor       usecase.AnimeInteractor
+	ReviewInteracotr usecase.ReviewInteractor
 }
 
 func NewAnimeController(sqlHandler database.SqlHandler) *AnimeController {
@@ -20,6 +22,11 @@ func NewAnimeController(sqlHandler database.SqlHandler) *AnimeController {
 				SqlHandler: sqlHandler,
 			},
 		},
+		// ReviewInteracotr: usecase.ReviewInteractor{
+		// 	ReviewRepository: &database.ReviewRepository{
+		// 		SqlHandler: sqlHandler,
+		// 	},
+		// },
 	}
 }
 
@@ -53,7 +60,9 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 			return errors.New("Not Found")
 		}
 		// @TODO add review
-		api.JsonResponse(w, map[string]interface{}{"data": a})
+		userId := fire.GetIdFromCookie(r)
+		revs, _ := controller.Interactor.ReviewFilterByAnime(a.GetId(), userId)
+		api.JsonResponse(w, map[string]interface{}{"anime": a, "reviews": revs})
 	case year != "":
 		animes, _ := controller.Interactor.AnimesBySeason(year, season)
 		api.JsonResponse(w, map[string]interface{}{"data": animes})

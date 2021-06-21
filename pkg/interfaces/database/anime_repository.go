@@ -144,17 +144,18 @@ func (repo *AnimeRepository) ListBySeason(year string, season string) (animes do
 *******************************/
 
 func (repo *AnimeRepository) FindById(id int) (a domain.TAnime, err error) {
-	row, err := repo.Query(
+	rows, err := repo.Query(
 		"SELECT id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, "+
 			"count_episodes, created_at, updated_at FROM animes WHERE id = ?",
 		id,
 	)
+	defer rows.Close()
 	if err != nil {
 		tools.ErrorLog(err)
 		return
 	}
-	row.Next()
-	err = row.Scan(
+	rows.Next()
+	err = rows.Scan(
 		&a.ID, &a.Slug, &a.Title, &a.Abbreviation,
 		&a.ThumbUrl, &a.CopyRight, &a.Description,
 		&a.State, &a.SeriesId,
@@ -168,23 +169,55 @@ func (repo *AnimeRepository) FindById(id int) (a domain.TAnime, err error) {
 }
 
 func (repo *AnimeRepository) FindBySlug(slug string) (a domain.TAnimeWithSeries, err error) {
-	row, err := repo.Query(
+	rows, err := repo.Query(
 		"SELECT animes.id as id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, animes.created_at, animes.updated_at, "+
 			"series_name FROM animes "+
 			"LEFT JOIN series on animes.series_id = series.id "+
 			"WHERE slug = ?", slug,
 	)
+	defer rows.Close()
 	if err != nil {
 		tools.ErrorLog(err)
 		return
 	}
-	row.Next()
-	err = row.Scan(
+	rows.Next()
+	err = rows.Scan(
 		&a.ID, &a.Slug, &a.Title, &a.Abbreviation,
 		&a.ThumbUrl, &a.CopyRight, &a.Description,
 		&a.State, &a.SeriesId, &a.CountEpisodes,
 		&a.CreatedAt, &a.UpdatedAt, &a.SeriesName,
 	)
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	return
+}
+
+/***********************
+          review
+***********************/
+
+func (repo *AnimeRepository) ReviewFilterByAnime(animeId int, userId string) (reviews domain.TReviews, err error) {
+	rows, err := repo.Query(
+		"Select * from reviews WHERE anime_id = ? AND (user_id != ? OR user_id IS NULL)",
+		animeId, userId,
+	)
+	defer rows.Close()
+
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	for rows.Next() {
+		var r domain.TReview
+		err = rows.Scan(&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt)
+		if err != nil {
+			tools.ErrorLog(err)
+			return
+		}
+		reviews = append(reviews, r)
+	}
 	if err != nil {
 		tools.ErrorLog(err)
 		return

@@ -28,7 +28,6 @@ func NewSqlHandler() database.SqlHandler {
 
 func (handler *SqlHandler) Query(statement string, args ...interface{}) (database.Rows, error) {
 	rows, err := handler.Conn.Query(statement, args...)
-	defer handler.Conn.Close()
 	if err != nil {
 		return new(SqlRows), err
 	}
@@ -56,7 +55,6 @@ type SqlResult struct {
 func (handler *SqlHandler) Execute(statement string, args ...interface{}) (database.Result, error) {
 	res := SqlResult{}
 	stmt, err := handler.Conn.Prepare(statement)
-	defer handler.Conn.Close()
 	defer stmt.Close()
 	if err != nil {
 		return res, err
