@@ -8,23 +8,35 @@ import (
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 )
 
 type AdminController struct {
-	AnimeInteractor usecase.AdminAnimeInteractor
+	AnimeInteractor    usecase.AdminAnimeInteractor
+	PlatformInteractor usecase.AdminPlatformInteractor
 }
 
 func NewAdminController(sqlHandler database.SqlHandler) *AdminController {
 	return &AdminController{
 		AnimeInteractor: usecase.AdminAnimeInteractor{
-			AdminAnimeRepository: &database.AdminRepository{
+			AdminAnimeRepository: &database.AdminAnimeRepository{
+				SqlHandler: sqlHandler,
+			},
+		},
+		PlatformInteractor: usecase.AdminPlatformInteractor{
+			AdminPlatformRepository: &database.AdminPlatformRepository{
 				SqlHandler: sqlHandler,
 			},
 		},
 	}
 }
+
+/************************
+         anime
+*************************/
 
 func (controller *AdminController) AnimeListAdminView(w http.ResponseWriter, r *http.Request) error {
 	animes, _ := controller.AnimeInteractor.AnimesAllAdmin()
@@ -90,4 +102,114 @@ func (controller *AdminController) AnimePostAdminView(w http.ResponseWriter, r *
 	return nil
 }
 
-// @TODO edit & delete
+func (controller *AdminController) AnimeUpdateView(w http.ResponseWriter, r *http.Request) error {
+	query := r.URL.Query()
+	strId := query.Get("id")
+	id, _ := strconv.Atoi(strId)
+	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
+
+	file, fileHeader, err := r.FormFile("thumb")
+	var returnFileName string
+	if err == nil {
+		// w/ thumb picture
+		defer file.Close()
+		returnFileName, err = s3.UploadS3(file, fileHeader.Filename, []string{"anime"})
+		if err != nil {
+			tools.ErrorLog(err)
+		}
+	} else {
+		returnFileName = r.FormValue("pre_thumb")
+	}
+	series, _ := strconv.Atoi(r.FormValue("series_id"))
+	episodes, _ := strconv.Atoi(r.FormValue("count_episodes"))
+	a := domain.TAnimeInsert{
+		Title:         r.FormValue("title"),
+		Abbreviation:  tools.NewNullString(r.FormValue("abbreviation")),
+		Kana:          tools.NewNullString(r.FormValue("kana")),
+		EngName:       tools.NewNullString(r.FormValue("engName")),
+		Description:   tools.NewNullString(r.FormValue("description")),
+		State:         tools.NewNullString(r.FormValue("state")),
+		SeriesId:      tools.NewNullInt(series),
+		CountEpisodes: tools.NewNullInt(episodes),
+		Copyright:     tools.NewNullString(r.FormValue("copyright")),
+		ThumbUrl:      tools.NewNullString(returnFileName),
+	}
+
+	rowsAffected, err := controller.AnimeInteractor.AnimeUpdate(id, a)
+	if err != nil {
+		tools.ErrorLog(err)
+		return err
+	}
+	api.JsonResponse(w, map[string]interface{}{"data": rowsAffected})
+	return nil
+}
+
+func (controller *AdminController) AnimeDeleteView(w http.ResponseWriter, r *http.Request) error {
+	query := r.URL.Query()
+	strId := query.Get("id")
+	id, _ := strconv.Atoi(strId)
+
+	rowsAffected, err := controller.AnimeInteractor.AnimeDelete(id)
+	if err != nil {
+		tools.ErrorLog(err)
+		return err
+	}
+	api.JsonResponse(w, map[string]interface{}{"data": rowsAffected})
+	return nil
+}
+
+/************************
+         platform
+*************************/
+
+// @TODO platform endpoint
+
+func (controller *AdminController) PlatformView(w http.ResponseWriter, r *http.Request) error {
+	query := r.URL.Query()
+	id := query.Get("id")
+
+	if id != "" {
+		i, _ := strconv.Atoi(id)
+		platform, err := controller.PlatformInteractor.PlatformDetail(i)
+		if err != nil || platform.ID == 0 {
+			w.WriteHeader(http.StatusNotFound)
+			return errors.New("Not Found")
+		}
+		api.JsonResponse(w, map[string]interface{}{"data": platform})
+	} else {
+		platforms, _ := controller.PlatformInteractor.PlatformAllAdmin()
+		api.JsonResponse(w, map[string]interface{}{"data": platforms})
+	}
+	return nil
+}
+
+func (controller *AdminController) PlatformInsertView(w http.ResponseWriter, r *http.Request) error {
+	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
+
+	file, fileHeader, err := r.FormFile("image")
+	var returnFileName string
+	if err == nil {
+		// w/ thumb picture
+		defer file.Close()
+		returnFileName, err = s3.UploadS3(file, fileHeader.Filename, []string{"platform"})
+
+		if err != nil {
+			fmt.Print(err)
+		}
+	} else {
+		returnFileName = ""
+	}
+	validStr := r.FormValue("valid")
+	isValid, _ := strconv.ParseBool(validStr)
+
+	p := domain.TPlatform{
+		EngName:  r.FormValue("engName"),
+		PlatName: tools.NewNullString(r.FormValue("platName")),
+		BaseUrl:  tools.NewNullString(r.FormValue("baseUrl")),
+		Image:    tools.NewNullString(returnFileName),
+		IsValid:  isValid,
+	}
+	lastInserted, err := controller.PlatformInteractor.PlatformInsert(p)
+	api.JsonResponse(w, map[string]interface{}{"data": lastInserted})
+	return nil
+}
