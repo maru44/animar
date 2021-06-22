@@ -7,7 +7,6 @@ import (
 	"animar/v1/pkg/mvc/auth"
 	"animar/v1/pkg/mvc/blog"
 	"animar/v1/pkg/mvc/platform"
-	"animar/v1/pkg/mvc/review"
 	"animar/v1/pkg/mvc/seasons"
 	"animar/v1/pkg/mvc/series"
 	"animar/v1/pkg/mvc/watch"
@@ -42,14 +41,15 @@ func main() {
 	http.HandleFunc("/blog/update/", handler.Handle(middleware.PutOnlyMiddleware, blog.UpdateBlogWithRelationView)) // ?id=
 
 	/*   reviews   */
-	http.HandleFunc("/reviews/", handler.Handle(review.GetYourReviews))
-	http.HandleFunc("/reviews/user/", handler.Handle(review.GetOnesReviewsView))
-	http.HandleFunc("/reviews/post/star/", handler.Handle(middleware.UpsertOnlyMiddleware, review.UpsertReviewStarView))
-	http.HandleFunc("/reviews/post/content/", handler.Handle(middleware.UpsertOnlyMiddleware, review.UpsertReviewContentView))
+	reviewController := controllers.NewReviewController(sqlHandler)
+	//http.HandleFunc("/reviews/", handler.Handle(reviewController.))
+	http.HandleFunc("/reviews/user/", handler.Handle(reviewController.GetOnesReviewsView))
+	http.HandleFunc("/reviews/post/star/", handler.Handle(middleware.UpsertOnlyMiddleware, reviewController.UpsertReviewRatingView))
+	http.HandleFunc("/reviews/post/content/", handler.Handle(middleware.UpsertOnlyMiddleware, reviewController.UpsertReviewContentView))
 	//http.HandleFunc("/reviews/anime/", handler.Handle(review.GetAnimeReviews))
-	http.HandleFunc("/reviews/anime/", handler.Handle(review.GetAnimeReviewsView))
-	http.HandleFunc("/reviews/ua/", handler.Handle(review.GetAnimeUserReviewView))
-	http.HandleFunc("/reviews/star/", handler.Handle(review.AnimeStarAvgView)) // star average
+	http.HandleFunc("/reviews/anime/", handler.Handle(reviewController.GetAnimeReviewsView))
+	http.HandleFunc("/reviews/ua/", handler.Handle(reviewController.GetAnimeReviewOfUserView))
+	http.HandleFunc("/reviews/star/", handler.Handle(reviewController.AnimeRatingAvgView)) // star average
 
 	/*   watches count   */
 	http.HandleFunc("/watch/", handler.Handle(watch.AnimeWatchCountView))
@@ -73,8 +73,8 @@ func main() {
 	http.HandleFunc("/admin/anime/", handler.Handle(middleware.AdminRequiredMiddlewareGet, adminController.AnimeListAdminView))
 	http.HandleFunc("/admin/anime/detail/", handler.Handle(middleware.AdminRequiredMiddlewareGet, adminController.AnimeDetailAdminView))
 	http.HandleFunc("/admin/anime/post/", handler.Handle(middleware.PostOnlyMiddleware, middleware.AdminRequiredMiddleware, adminController.AnimePostAdminView))
-	http.HandleFunc("/admin/anime/update/", handler.Handle(middleware.PutOnlyMiddleware, middleware.AdminRequiredMiddleware, anime.AnimeUpdateView))
-	http.HandleFunc("/admin/anime/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, middleware.AdminRequiredMiddleware, anime.AnimeDeleteView))
+	http.HandleFunc("/admin/anime/update/", handler.Handle(middleware.PutOnlyMiddleware, middleware.AdminRequiredMiddleware, adminController.AnimeUpdateView))
+	http.HandleFunc("/admin/anime/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, middleware.AdminRequiredMiddleware, adminController.AnimeDeleteView))
 
 	/*   series   */
 	http.HandleFunc("/series/", handler.Handle(middleware.AdminRequiredMiddlewareGet, series.SeriesView))

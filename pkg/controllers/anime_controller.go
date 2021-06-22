@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/database"
 	"animar/v1/pkg/tools/api"
 	"animar/v1/pkg/tools/fire"
@@ -11,27 +12,24 @@ import (
 )
 
 type AnimeController struct {
-	Interactor       usecase.AnimeInteractor
-	ReviewInteracotr usecase.ReviewInteractor
+	interactor domain.AnimeInteractor
 }
 
 func NewAnimeController(sqlHandler database.SqlHandler) *AnimeController {
 	return &AnimeController{
-		Interactor: usecase.AnimeInteractor{
-			AnimeRepository: &database.AnimeRepository{
+		interactor: usecase.NewAnimeInteractor(
+			&database.AnimeRepository{
 				SqlHandler: sqlHandler,
 			},
-		},
-		// ReviewInteracotr: usecase.ReviewInteractor{
-		// 	ReviewRepository: &database.ReviewRepository{
-		// 		SqlHandler: sqlHandler,
-		// 	},
-		// },
+			&database.ReviewRepository{
+				SqlHandler: sqlHandler,
+			},
+		),
 	}
 }
 
 func (controller *AnimeController) AnimeListView(w http.ResponseWriter, r *http.Request) error {
-	animes, _ := controller.Interactor.AnimesAll()
+	animes, _ := controller.interactor.AnimesAll()
 	api.JsonResponse(w, map[string]interface{}{"data": animes})
 	return nil
 }
@@ -47,30 +45,30 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 	switch {
 	case strId != "":
 		id, _ := strconv.Atoi(strId)
-		a, err := controller.Interactor.AnimeDetail(id)
+		a, err := controller.interactor.AnimeDetail(id)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			return errors.New("Not Found")
 		}
 		api.JsonResponse(w, map[string]interface{}{"data": a})
 	case slug != "":
-		a, err := controller.Interactor.AnimeDetailBySlug(slug)
+		a, err := controller.interactor.AnimeDetailBySlug(slug)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			return errors.New("Not Found")
 		}
 		// @TODO add review
 		userId := fire.GetIdFromCookie(r)
-		revs, _ := controller.Interactor.ReviewFilterByAnime(a.GetId(), userId)
+		revs, _ := controller.interactor.ReviewFilterByAnime(a.GetId(), userId)
 		api.JsonResponse(w, map[string]interface{}{"anime": a, "reviews": revs})
 	case year != "":
-		animes, _ := controller.Interactor.AnimesBySeason(year, season)
+		animes, _ := controller.interactor.AnimesBySeason(year, season)
 		api.JsonResponse(w, map[string]interface{}{"data": animes})
 	case keyword != "":
-		animes, _ := controller.Interactor.AnimesSearch(keyword)
+		animes, _ := controller.interactor.AnimesSearch(keyword)
 		api.JsonResponse(w, map[string]interface{}{"data": animes})
 	default:
-		animes, _ := controller.Interactor.AnimesOnAir()
+		animes, _ := controller.interactor.AnimesOnAir()
 		api.JsonResponse(w, map[string]interface{}{"data": animes})
 	}
 	return nil

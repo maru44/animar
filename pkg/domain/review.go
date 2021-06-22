@@ -38,3 +38,14 @@ type TReviewJoinAnimes []TReviewJoinAnime
 func (r TReview) GetId() int {
 	return r.ID
 }
+
+type ReviewInteractor interface {
+	GetOnesReviewByAnime(int, string) (TReview, error)
+	GetAnimeReviews(int, string) (TReviews, error)
+	GetOnesReviews(string) (TReviewJoinAnimes, error)
+	PostReviewContent(TReviewInput) (string, error)
+	UpsertReviewContent(TReviewInput) (string, error)
+	PostReviewRating(TReviewInput) (int, error)
+	UpsertReviewRating(TReviewInput) (int, error)
+	GetRatingAverage(int) (string, error)
+}

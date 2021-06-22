@@ -39,8 +39,33 @@ type TBlogJoinAnime struct {
 	Animes    []TJoinedAnime `json:"animes"`
 }
 
+type TBlogInsert struct {
+	Title    string `json:"title"`
+	Slug     string `json:"slug"`
+	Abstract string `json:"abstract,omitempty"`
+	Content  string `json:"content,omitempty"`
+	UserId   string `json:"user_id,omitempty"`
+	IsPublic bool   `json:"is_public"`
+}
+
 type TBlogs []TBlog
 
 type TJoinedBlogs []TJoinedBlog
 
 type TBlogJoinAnimes []TBlogJoinAnime
+
+type BlogInteractor interface {
+	ListBlog() (TBlogs, error)
+	ListBlogByUser(string, string) (TBlogs, error)
+	BlogUserId(int) (string, error)
+	DetailBlog(int) (TBlogJoinAnime, error)
+	DetailBlogBySlug(string) (TBlogJoinAnime, error)
+	InsertBlog(TBlogInsert) (int, error)
+	UpdateBlog(TBlogInsert, int) (int, error)
+	DeleteBlog(int) (int, error)
+	// relation
+	RelationAnimeByBlog(int) ([]TJoinedAnime, error)
+	// RelationBlogByAnime
+	InsertRelationAnime(int, int) (bool, error)
+	DeleteRelationAnime(int, int) error
+}

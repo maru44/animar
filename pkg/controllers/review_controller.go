@@ -14,16 +14,16 @@ import (
 )
 
 type ReviewController struct {
-	Interactor usecase.ReviewInteractor
+	interactor domain.ReviewInteractor
 }
 
 func NewReviewController(sqlHandler database.SqlHandler) *ReviewController {
 	return &ReviewController{
-		Interactor: usecase.ReviewInteractor{
-			ReviewRepository: &database.ReviewRepository{
+		interactor: usecase.NewReviewInteractor(
+			&database.ReviewRepository{
 				SqlHandler: sqlHandler,
 			},
-		},
+		),
 	}
 }
 
@@ -31,7 +31,7 @@ func (controller *ReviewController) GetAnimeReviewsView(w http.ResponseWriter, r
 	userId := r.URL.Query().Get("user")
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
-	revs, err := controller.Interactor.ReviewRepository.FilterByAnime(animeId, userId)
+	revs, err := controller.interactor.GetAnimeReviews(animeId, userId)
 	if err != nil {
 		tools.ErrorLog(err)
 		w.WriteHeader(http.StatusNotFound)
@@ -50,7 +50,7 @@ func (controller *ReviewController) GetAnimeReviewOfUserView(w http.ResponseWrit
 		w.WriteHeader(http.StatusUnauthorized)
 		return errors.New("Unauthorized")
 	} else {
-		rev, err := controller.Interactor.ReviewRepository.FindByAnimeAndUser(animeId, userId)
+		rev, err := controller.interactor.GetOnesReviewByAnime(animeId, userId)
 		if err != nil {
 			tools.ErrorLog(err)
 			w.WriteHeader(http.StatusNotFound)
@@ -69,7 +69,7 @@ func (controller *ReviewController) UpsertReviewContentView(w http.ResponseWrite
 	} else {
 		var posted domain.TReviewInput
 		json.NewDecoder(r.Body).Decode(&posted)
-		value, _ := controller.Interactor.UpsertReviewContent(posted)
+		value, _ := controller.interactor.UpsertReviewContent(posted)
 		api.JsonResponse(w, map[string]interface{}{"data": value})
 		return nil
 	}
@@ -82,7 +82,7 @@ func (controller *ReviewController) UpsertReviewRatingView(w http.ResponseWriter
 		return errors.New("Unauthorized")
 	} else {
 		var posted domain.TReviewInput
-		value, _ := controller.Interactor.UpsertReviewRating(posted)
+		value, _ := controller.interactor.UpsertReviewRating(posted)
 		api.JsonResponse(w, map[string]interface{}{"data": value})
 		return nil
 	}
@@ -91,14 +91,14 @@ func (controller *ReviewController) UpsertReviewRatingView(w http.ResponseWriter
 func (controller *ReviewController) AnimeRatingAvgView(w http.ResponseWriter, r *http.Request) error {
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
-	avg, _ := controller.Interactor.GetRatingAverage(animeId)
+	avg, _ := controller.interactor.GetRatingAverage(animeId)
 	api.JsonResponse(w, map[string]interface{}{"data": avg})
 	return nil
 }
 
 func (controller *ReviewController) GetOnesReviewsView(w http.ResponseWriter, r *http.Request) error {
 	userId := r.URL.Query().Get("user")
-	revs, _ := controller.Interactor.GetOnesReviews(userId)
+	revs, _ := controller.interactor.GetOnesReviews(userId)
 	api.JsonResponse(w, map[string]interface{}{"data": revs})
 	return nil
 }
