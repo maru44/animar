@@ -15,22 +15,19 @@ import (
 )
 
 type AdminController struct {
-	AnimeInteractor    usecase.AdminAnimeInteractor
-	PlatformInteractor usecase.AdminPlatformInteractor
+	interactor domain.AdminInteractor
 }
 
 func NewAdminController(sqlHandler database.SqlHandler) *AdminController {
 	return &AdminController{
-		AnimeInteractor: usecase.AdminAnimeInteractor{
-			AdminAnimeRepository: &database.AdminAnimeRepository{
+		interactor: usecase.NewAdminAnimeInteractor(
+			&database.AdminAnimeRepository{
 				SqlHandler: sqlHandler,
 			},
-		},
-		PlatformInteractor: usecase.AdminPlatformInteractor{
-			AdminPlatformRepository: &database.AdminPlatformRepository{
+			&database.AdminPlatformRepository{
 				SqlHandler: sqlHandler,
 			},
-		},
+		),
 	}
 }
 
@@ -39,7 +36,7 @@ func NewAdminController(sqlHandler database.SqlHandler) *AdminController {
 *************************/
 
 func (controller *AdminController) AnimeListAdminView(w http.ResponseWriter, r *http.Request) error {
-	animes, _ := controller.AnimeInteractor.AnimesAllAdmin()
+	animes, _ := controller.interactor.AnimesAllAdmin()
 	api.JsonResponse(w, map[string]interface{}{"data": animes})
 	return nil
 }
@@ -52,7 +49,7 @@ func (controller *AdminController) AnimeDetailAdminView(w http.ResponseWriter, r
 	var posted api.TUserToken
 	json.NewDecoder(r.Body).Decode(&posted)
 
-	anime, err := controller.AnimeInteractor.AnimeDetailAdmin(id)
+	anime, err := controller.interactor.AnimeDetailAdmin(id)
 	if err != nil {
 		tools.ErrorLog(err)
 		return err
@@ -93,7 +90,7 @@ func (controller *AdminController) AnimePostAdminView(w http.ResponseWriter, r *
 		CountEpisodes: tools.NewNullInt(episodes),
 		Copyright:     tools.NewNullString(r.FormValue("copyright")),
 	}
-	insertedId, err = controller.AnimeInteractor.AnimeInsert(a)
+	insertedId, err = controller.interactor.AnimeInsert(a)
 	if err != nil {
 		tools.ErrorLog(err)
 		return err
@@ -135,7 +132,7 @@ func (controller *AdminController) AnimeUpdateView(w http.ResponseWriter, r *htt
 		ThumbUrl:      tools.NewNullString(returnFileName),
 	}
 
-	rowsAffected, err := controller.AnimeInteractor.AnimeUpdate(id, a)
+	rowsAffected, err := controller.interactor.AnimeUpdate(id, a)
 	if err != nil {
 		tools.ErrorLog(err)
 		return err
@@ -149,7 +146,7 @@ func (controller *AdminController) AnimeDeleteView(w http.ResponseWriter, r *htt
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
 
-	rowsAffected, err := controller.AnimeInteractor.AnimeDelete(id)
+	rowsAffected, err := controller.interactor.AnimeDelete(id)
 	if err != nil {
 		tools.ErrorLog(err)
 		return err
@@ -170,14 +167,14 @@ func (controller *AdminController) PlatformView(w http.ResponseWriter, r *http.R
 
 	if id != "" {
 		i, _ := strconv.Atoi(id)
-		platform, err := controller.PlatformInteractor.PlatformDetail(i)
+		platform, err := controller.interactor.PlatformDetail(i)
 		if err != nil || platform.ID == 0 {
 			w.WriteHeader(http.StatusNotFound)
 			return errors.New("Not Found")
 		}
 		api.JsonResponse(w, map[string]interface{}{"data": platform})
 	} else {
-		platforms, _ := controller.PlatformInteractor.PlatformAllAdmin()
+		platforms, _ := controller.interactor.PlatformAllAdmin()
 		api.JsonResponse(w, map[string]interface{}{"data": platforms})
 	}
 	return nil
@@ -209,7 +206,7 @@ func (controller *AdminController) PlatformInsertView(w http.ResponseWriter, r *
 		Image:    tools.NewNullString(returnFileName),
 		IsValid:  isValid,
 	}
-	lastInserted, err := controller.PlatformInteractor.PlatformInsert(p)
+	lastInserted, err := controller.interactor.PlatformInsert(p)
 	api.JsonResponse(w, map[string]interface{}{"data": lastInserted})
 	return nil
 }

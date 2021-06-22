@@ -2,36 +2,64 @@ package usecase
 
 import "animar/v1/pkg/domain"
 
-type AdminAnimeInteractor struct {
-	AdminAnimeRepository AdminAnimeRepository
+type AdminInteractor struct {
+	animeRepository    AdminAnimeRepository
+	platformRepository AdminPlatformRepository
 }
 
-type AdminPlatformInteractor struct {
-	AdminPlatformRepository AdminPlatformRepository
+func NewAdminAnimeInteractor(anime AdminAnimeRepository, platform AdminPlatformRepository) domain.AdminInteractor {
+	return &AdminInteractor{
+		animeRepository:    anime,
+		platformRepository: platform,
+	}
+}
+
+/************************
+        repository
+************************/
+
+type AdminAnimeRepository interface {
+	ListAll() (domain.TAnimes, error)
+	FindById(int) (domain.TAnimeAdmin, error)
+	Insert(domain.TAnimeInsert) (int, error)
+	Update(int, domain.TAnimeInsert) (int, error)
+	Delete(int) (int, error)
+}
+
+type AdminPlatformRepository interface {
+	ListAll() (domain.TPlatforms, error)
+	Insert(domain.TPlatform) (int, error)
+	FindById(int) (domain.TPlatform, error)
+	Update(domain.TPlatform, int) (int, error)
+	Delete(int) (int, error)
+	// relation
+	FilterByAnime(int) (domain.TRelationPlatforms, error)
+	InsertRelation(domain.TRelationPlatformInput) (int, error)
+	DeleteRelation(int, int) (int, error)
 }
 
 /************************
          anime
 *************************/
 
-func (interactor *AdminAnimeInteractor) AnimesAllAdmin() (animes domain.TAnimes, err error) {
-	animes, err = interactor.AdminAnimeRepository.ListAll()
+func (interactor *AdminInteractor) AnimesAllAdmin() (animes domain.TAnimes, err error) {
+	animes, err = interactor.animeRepository.ListAll()
 	return
 }
-func (interactor *AdminAnimeInteractor) AnimeDetailAdmin(id int) (anime domain.TAnimeAdmin, err error) {
-	anime, err = interactor.AdminAnimeRepository.FindById(id)
+func (interactor *AdminInteractor) AnimeDetailAdmin(id int) (anime domain.TAnimeAdmin, err error) {
+	anime, err = interactor.animeRepository.FindById(id)
 	return
 }
-func (interactor *AdminAnimeInteractor) AnimeInsert(anime domain.TAnimeInsert) (lastInsertId int, err error) {
-	lastInsertId, err = interactor.AdminAnimeRepository.Insert(anime)
+func (interactor *AdminInteractor) AnimeInsert(anime domain.TAnimeInsert) (lastInsertId int, err error) {
+	lastInsertId, err = interactor.animeRepository.Insert(anime)
 	return
 }
-func (interactor *AdminAnimeInteractor) AnimeUpdate(id int, anime domain.TAnimeInsert) (rowsAffected int, err error) {
-	rowsAffected, err = interactor.AdminAnimeRepository.Update(id, anime)
+func (interactor *AdminInteractor) AnimeUpdate(id int, anime domain.TAnimeInsert) (rowsAffected int, err error) {
+	rowsAffected, err = interactor.animeRepository.Update(id, anime)
 	return
 }
-func (interactor *AdminAnimeInteractor) AnimeDelete(id int) (rowsAffected int, err error) {
-	rowsAffected, err = interactor.AdminAnimeRepository.Delete(id)
+func (interactor *AdminInteractor) AnimeDelete(id int) (rowsAffected int, err error) {
+	rowsAffected, err = interactor.animeRepository.Delete(id)
 	return
 }
 
@@ -39,44 +67,44 @@ func (interactor *AdminAnimeInteractor) AnimeDelete(id int) (rowsAffected int, e
           platform
 *************************/
 
-func (interactor *AdminPlatformInteractor) PlatformAllAdmin() (platforms domain.TPlatforms, err error) {
-	platforms, err = interactor.AdminPlatformRepository.ListAll()
+func (interactor *AdminInteractor) PlatformAllAdmin() (platforms domain.TPlatforms, err error) {
+	platforms, err = interactor.platformRepository.ListAll()
 	return
 }
 
-func (interactor *AdminPlatformInteractor) PlatformDetail(id int) (platform domain.TPlatform, err error) {
-	platform, err = interactor.AdminPlatformRepository.FindById(id)
+func (interactor *AdminInteractor) PlatformDetail(id int) (platform domain.TPlatform, err error) {
+	platform, err = interactor.platformRepository.FindById(id)
 	return
 }
 
-func (interactor *AdminPlatformInteractor) PlatformInsert(platform domain.TPlatform) (lastInserted int, err error) {
-	lastInserted, err = interactor.AdminPlatformRepository.Insert(platform)
+func (interactor *AdminInteractor) PlatformInsert(platform domain.TPlatform) (lastInserted int, err error) {
+	lastInserted, err = interactor.platformRepository.Insert(platform)
 	return
 }
 
-func (interactor *AdminPlatformInteractor) PlatformUpdate(platform domain.TPlatform, id int) (rowsAffected int, err error) {
-	rowsAffected, err = interactor.AdminPlatformRepository.Update(platform, id)
+func (interactor *AdminInteractor) PlatformUpdate(platform domain.TPlatform, id int) (rowsAffected int, err error) {
+	rowsAffected, err = interactor.platformRepository.Update(platform, id)
 	return
 }
 
-func (interactor *AdminPlatformInteractor) PlatformDelete(id int) (rowsAffected int, err error) {
-	rowsAffected, err = interactor.AdminPlatformRepository.Delete(id)
+func (interactor *AdminInteractor) PlatformDelete(id int) (rowsAffected int, err error) {
+	rowsAffected, err = interactor.platformRepository.Delete(id)
 	return
 }
 
 // relation
 
-func (interactor *AdminPlatformInteractor) RelationPlatformInsert(platform domain.TRelationPlatformInput) (lastInserted int, err error) {
-	lastInserted, err = interactor.AdminPlatformRepository.InsertRelation(platform)
+func (interactor *AdminInteractor) RelationPlatformInsert(platform domain.TRelationPlatformInput) (lastInserted int, err error) {
+	lastInserted, err = interactor.platformRepository.InsertRelation(platform)
 	return
 }
 
-func (interactor *AdminPlatformInteractor) RelationPlatformDelete(animeId int, platformId int) (rowsAffected int, err error) {
-	rowsAffected, err = interactor.AdminPlatformRepository.DeleteRelation(animeId, platformId)
+func (interactor *AdminInteractor) RelationPlatformDelete(animeId int, platformId int) (rowsAffected int, err error) {
+	rowsAffected, err = interactor.platformRepository.DeleteRelation(animeId, platformId)
 	return
 }
 
-func (interactor *AdminPlatformInteractor) RelationPlatformByAnime(animeId int) (platforms domain.TRelationPlatforms, err error) {
-	platforms, err = interactor.AdminPlatformRepository.FilterByAnime(animeId)
+func (interactor *AdminInteractor) RelationPlatformByAnime(animeId int) (platforms domain.TRelationPlatforms, err error) {
+	platforms, err = interactor.platformRepository.FilterByAnime(animeId)
 	return
 }

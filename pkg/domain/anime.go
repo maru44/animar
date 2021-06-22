@@ -94,3 +94,27 @@ func (a *TAnime) GetId() int {
 func (a *TAnimeWithSeries) GetId() int {
 	return a.ID
 }
+
+type AdminInteractor interface {
+	AdminAnimeInteractor
+	AdminPlatformInteractor
+}
+
+type AdminAnimeInteractor interface {
+	AnimesAllAdmin() (TAnimes, error)
+	AnimeDetailAdmin(int) (TAnimeAdmin, error)
+	AnimeInsert(TAnimeInsert) (int, error)
+	AnimeUpdate(int, TAnimeInsert) (int, error)
+	AnimeDelete(int) (int, error)
+}
+
+type AdminPlatformInteractor interface {
+	PlatformAllAdmin() (TPlatforms, error)
+	PlatformDetail(int) (TPlatform, error)
+	PlatformInsert(TPlatform) (int, error)
+	PlatformUpdate(TPlatform, int) (int, error)
+	PlatformDelete(int) (int, error)
+	RelationPlatformInsert(TRelationPlatformInput) (int, error)
+	RelationPlatformDelete(int, int) (int, error)
+	RelationPlatformByAnime(int) (TRelationPlatforms, error)
+}
