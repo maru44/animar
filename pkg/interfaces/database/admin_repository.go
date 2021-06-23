@@ -17,6 +17,10 @@ type AdminSeasonRepository struct {
 	SqlHandler
 }
 
+type AdminSeriesRepository struct {
+	SqlHandler
+}
+
 /************************
          anime
 *************************/
@@ -139,7 +143,7 @@ func (repo *AdminPlatformRepository) ListAll() (platforms domain.TPlatforms, err
 		tools.ErrorLog(err)
 		return
 	}
-	if rows.Next() {
+	for rows.Next() {
 		var p domain.TPlatform
 		err = rows.Scan(
 			&p.ID, &p.EngName, &p.PlatName,
@@ -244,7 +248,7 @@ func (repo *AdminPlatformRepository) FilterByAnime(animeId int) (platforms domai
 		tools.ErrorLog(err)
 		return
 	}
-	if rows.Next() {
+	for rows.Next() {
 		var p domain.TRelationPlatform
 		err = rows.Scan(
 			&p.PlatformId, &p.AnimeId, &p.LinkUrl,
@@ -298,3 +302,151 @@ func (repo *AdminPlatformRepository) DeleteRelation(animeId int, platformId int)
 /************************
          season
 *************************/
+
+func (repo *AdminSeasonRepository) ListAll() (seasons []domain.TSeason, err error) {
+	rows, err := repo.Query(
+		"Select * from seasons",
+	)
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var s domain.TSeason
+		err = rows.Scan(
+			&s.ID, &s.Year, &s.Season, &s.CreatedAt, &s.UpdatedAt,
+		)
+		if err != nil {
+			tools.ErrorLog(err)
+		}
+		seasons = append(seasons, s)
+	}
+	return
+}
+
+func (repo *AdminSeasonRepository) FindById(id int) (s domain.TSeason, err error) {
+	rows, err := repo.Query(
+		"SELECT * FROM seasons WHERE id = ?", id,
+	)
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	defer rows.Close()
+	rows.Next()
+	err = rows.Scan(
+		s.ID, s.Year, s.Season, s.CreatedAt, s.UpdatedAt,
+	)
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	return
+}
+
+func (repo *AdminSeasonRepository) Insert(s domain.TSeasonInput) (lastInserted int, err error) {
+	exe, err := repo.Execute(
+		"INSERT INTO seasons(year, season) VALUES(?, ?)", s.Year, s.Season,
+	)
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	rawId, _ := exe.LastInsertId()
+	lastInserted = int(rawId)
+	return
+}
+
+func (repo *AdminSeasonRepository) InsertRelation(r domain.TSeasonRelationInput) (lastInserted int, err error) {
+	exe, err := repo.Execute(
+		"INSERT INTO relation_anime_season(season_id, anime_id) VALUES(?, ?)",
+		r.SeasonId, r.AnimeId,
+	)
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	rawId, _ := exe.LastInsertId()
+	lastInserted = int(rawId)
+	return
+}
+
+// series
+
+func (repo *AdminSeriesRepository) ListAll() (series []domain.TSeries, err error) {
+	rows, err := repo.Query("Select * from series")
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var s domain.TSeries
+		err = rows.Scan(
+			&s.ID, &s.EngName, &s.SeriesName, &s.CreatedAt, &s.UpdatedAt,
+		)
+		if err != nil {
+			tools.ErrorLog(err)
+		}
+		series = append(series, s)
+	}
+	return
+}
+
+func (repo *AdminSeriesRepository) FindById(id int) (s domain.TSeries, err error) {
+	rows, err := repo.Query("SELECT * FROM series WHERE id = ?", id)
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	defer rows.Close()
+	rows.Next()
+	err = rows.Scan(
+		&s.ID, &s.EngName, &s.SeriesName, &s.CreatedAt, &s.UpdatedAt,
+	)
+	if err != nil {
+		tools.ErrorLog(err)
+	}
+	return
+}
+
+func (repo *AdminSeriesRepository) Insert(s domain.TSeriesInput) (lastInserted int, err error) {
+	exe, err := repo.Execute(
+		"INSERT INTO series(eng_name, series_name) VALUES(?, ?)", s.EngName, s.SeriesName,
+	)
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	rawId, _ := exe.LastInsertId()
+	lastInserted = int(rawId)
+	return
+}
+
+func (repo *AdminSeriesRepository) Update(s domain.TSeriesInput, id int) (rowsAffected int, err error) {
+	exe, err := repo.Execute(
+		"UPDATE series SET eng_name = ?, series_name = ? WHERE id = ?",
+		s.EngName, s.SeriesName, id,
+	)
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	rawId, _ := exe.LastInsertId()
+	rowsAffected = int(rawId)
+	return
+}
+
+func (repo *AdminSeriesRepository) Delete(id int) (rowsAffected int, err error) {
+	exe, err := repo.Execute(
+		"DELETE FROM series WHERE id = ?", id,
+	)
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	rawId, _ := exe.LastInsertId()
+	rowsAffected = int(rawId)
+	return
+}

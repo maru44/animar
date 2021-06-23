@@ -6,13 +6,15 @@ type AdminInteractor struct {
 	animeRepository    AdminAnimeRepository
 	platformRepository AdminPlatformRepository
 	seasonRepository   AdminSeasonRepository
+	seriesRepository   AdminSeriesRepository
 }
 
-func NewAdminAnimeInteractor(anime AdminAnimeRepository, platform AdminPlatformRepository, season AdminSeasonRepository) domain.AdminInteractor {
+func NewAdminAnimeInteractor(anime AdminAnimeRepository, platform AdminPlatformRepository, season AdminSeasonRepository, series AdminSeriesRepository) domain.AdminInteractor {
 	return &AdminInteractor{
 		animeRepository:    anime,
 		platformRepository: platform,
 		seasonRepository:   season,
+		seriesRepository:   series,
 	}
 }
 
@@ -45,6 +47,14 @@ type AdminSeasonRepository interface {
 	FindById(int) (domain.TSeason, error)
 	Insert(domain.TSeasonInput) (int, error)
 	InsertRelation(domain.TSeasonRelationInput) (int, error)
+}
+
+type AdminSeriesRepository interface {
+	ListAll() ([]domain.TSeries, error)
+	FindById(int) (domain.TSeries, error)
+	Insert(domain.TSeriesInput) (int, error)
+	Update(domain.TSeriesInput, int) (int, error)
+	Delete(int) (int, error)
 }
 
 /************************
@@ -135,7 +145,34 @@ func (interactor *AdminInteractor) InsertSeason(season domain.TSeasonInput) (las
 	return
 }
 
-func (interactor *AdminInteractor) InsertRelationAnime(rel domain.TSeasonRelationInput) (lastInserted int, err error) {
+func (interactor *AdminInteractor) InsertRelationSeasonAnime(rel domain.TSeasonRelationInput) (lastInserted int, err error) {
 	lastInserted, err = interactor.seasonRepository.InsertRelation(rel)
+	return
+}
+
+// series
+
+func (interactor *AdminInteractor) ListSeries() (series []domain.TSeries, err error) {
+	series, err = interactor.seriesRepository.ListAll()
+	return
+}
+
+func (interactor *AdminInteractor) DetailSeries(id int) (series domain.TSeries, err error) {
+	series, err = interactor.seriesRepository.FindById(id)
+	return
+}
+
+func (interactor *AdminInteractor) InsertSeries(series domain.TSeriesInput) (lastInserted int, err error) {
+	lastInserted, err = interactor.seriesRepository.Insert(series)
+	return
+}
+
+func (interactor *AdminInteractor) UpdateSeries(series domain.TSeriesInput, id int) (rowsAffected int, err error) {
+	rowsAffected, err = interactor.seriesRepository.Update(series, id)
+	return
+}
+
+func (interactor *AdminInteractor) DeleteSeries(id int) (rowsAffected int, err error) {
+	rowsAffected, err = interactor.seriesRepository.Delete(id)
 	return
 }

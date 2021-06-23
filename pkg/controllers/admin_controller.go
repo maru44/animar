@@ -4,6 +4,7 @@ import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/database"
 	"animar/v1/pkg/tools/api"
+	"animar/v1/pkg/tools/fire"
 	"animar/v1/pkg/tools/s3"
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
@@ -28,7 +29,10 @@ func NewAdminController(sqlHandler database.SqlHandler) *AdminController {
 				SqlHandler: sqlHandler,
 			},
 			&database.AdminSeasonRepository{
-				sqlHandler: sqlHandler,
+				SqlHandler: sqlHandler,
+			},
+			&database.AdminSeriesRepository{
+				SqlHandler: sqlHandler,
 			},
 		),
 	}
@@ -211,5 +215,102 @@ func (controller *AdminController) PlatformInsertView(w http.ResponseWriter, r *
 	}
 	lastInserted, err := controller.interactor.PlatformInsert(p)
 	api.JsonResponse(w, map[string]interface{}{"data": lastInserted})
+	return nil
+}
+
+/************************
+         season
+*************************/
+
+func (controller *AdminController) SeasonView(w http.ResponseWriter, r *http.Request) error {
+	query := r.URL.Query()
+	id := query.Get("id")
+
+	if id != "" {
+		i, _ := strconv.Atoi(id)
+		s, _ := controller.interactor.DetailSeason(i)
+		api.JsonResponse(w, map[string]interface{}{"data": s})
+	} else {
+		s, _ := controller.interactor.ListSeason()
+		api.JsonResponse(w, map[string]interface{}{"data": s})
+	}
+	return nil
+}
+
+func (controller *AdminController) InsertSeasonView(w http.ResponseWriter, r *http.Request) error {
+	var p domain.TSeasonInput
+	json.NewDecoder(r.Body).Decode(&p)
+	lastInserted, err := controller.interactor.InsertSeason(p)
+	if err != nil {
+		tools.ErrorLog(err)
+		return err
+	}
+	api.JsonResponse(w, map[string]interface{}{"data": lastInserted})
+	return nil
+}
+
+func (controller *AdminController) InsertRelationSeasonView(w http.ResponseWriter, r *http.Request) error {
+	userId := fire.GetAdminIdFromCookie(r)
+
+	if userId == "" {
+		w.WriteHeader(http.StatusForbidden)
+		return errors.New("Forbidden")
+	} else {
+		var s domain.TSeasonRelationInput
+		json.NewDecoder(r.Body).Decode(&s)
+		lastInserted, err := controller.interactor.InsertRelationSeasonAnime(s)
+		if err != nil {
+			tools.ErrorLog(err)
+			return err
+		}
+		api.JsonResponse(w, map[string]interface{}{"data": lastInserted})
+	}
+	return nil
+}
+
+/************************
+         series
+*************************/
+
+func (controller *AdminController) SeriesView(w http.ResponseWriter, r *http.Request) error {
+	query := r.URL.Query()
+	id := query.Get("id")
+
+	if id != "" {
+		i, _ := strconv.Atoi(id)
+		s, _ := controller.interactor.DetailSeries(i)
+		api.JsonResponse(w, map[string]interface{}{"data": s})
+	} else {
+		s, _ := controller.interactor.ListSeries()
+		api.JsonResponse(w, map[string]interface{}{"data": s})
+	}
+	return nil
+}
+
+func (controller *AdminController) InsertSeriesView(w http.ResponseWriter, r *http.Request) error {
+	var p domain.TSeriesInput
+	json.NewDecoder(r.Body).Decode(&p)
+	lastInserted, err := controller.interactor.InsertSeries(p)
+	if err != nil {
+		tools.ErrorLog(err)
+		return err
+	}
+	api.JsonResponse(w, map[string]interface{}{"data": lastInserted})
+	return nil
+}
+
+func (controller *AdminController) UpdateSeriesView(w http.ResponseWriter, r *http.Request) error {
+	query := r.URL.Query()
+	strId := query.Get("id")
+	id, _ := strconv.Atoi(strId)
+
+	var p domain.TSeriesInput
+	json.NewDecoder(r.Body).Decode(&p)
+	rowsAffected, err := controller.interactor.UpdateSeries(p, id)
+	if err != nil {
+		tools.ErrorLog(err)
+		return err
+	}
+	api.JsonResponse(w, map[string]interface{}{"data": rowsAffected})
 	return nil
 }

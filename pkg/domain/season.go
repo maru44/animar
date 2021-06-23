@@ -14,5 +14,5 @@ var SeasonDict = map[string]string{
 }
 
 type SeasonInteractor interface {
-	relationSeasonByAnime(int) ([]TSeasonRelation, error)
+	RelationSeasonByAnime(int) ([]TSeasonRelation, error)
 }

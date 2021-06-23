@@ -190,7 +190,7 @@ func (repo *BlogRepository) FilterByBlog(blogId int) (animes []domain.TJoinedAni
 			"WHERE blog_id = " + strconv.Itoa(blogId),
 	)
 	defer rows.Close()
-	if rows.Next() {
+	for rows.Next() {
 		var a domain.TJoinedAnime
 		err := rows.Scan(
 			&a.AnimeId, &a.Slug, &a.Title,

@@ -6,8 +6,6 @@ import (
 	"animar/v1/pkg/mvc/anime"
 	"animar/v1/pkg/mvc/auth"
 	"animar/v1/pkg/mvc/platform"
-	"animar/v1/pkg/mvc/seasons"
-	"animar/v1/pkg/mvc/series"
 	"animar/v1/pkg/mvc/watch"
 	"animar/v1/pkg/tools/handler"
 	"animar/v1/pkg/tools/middleware"
@@ -77,15 +75,16 @@ func main() {
 	http.HandleFunc("/admin/anime/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, middleware.AdminRequiredMiddleware, adminController.AnimeDeleteView))
 
 	/*   series   */
-	http.HandleFunc("/series/", handler.Handle(middleware.AdminRequiredMiddlewareGet, series.SeriesView))
-	http.HandleFunc("/series/post/", handler.Handle(middleware.PostOnlyMiddleware, middleware.AdminRequiredMiddleware, series.InsertSeriesView))
+	http.HandleFunc("/series/", handler.Handle(middleware.AdminRequiredMiddlewareGet, adminController.SeriesView))
+	http.HandleFunc("/series/post/", handler.Handle(middleware.PostOnlyMiddleware, middleware.AdminRequiredMiddleware, adminController.InsertSeriesView))
 
 	/*   seasons   */
-	http.HandleFunc("/season/", handler.Handle(middleware.AdminRequiredMiddlewareGet, seasons.SeasonView))
-	http.HandleFunc("/admin/season/post/", handler.Handle(middleware.PostOnlyMiddleware, middleware.PostOnlyMiddleware, seasons.InsertSeasonView))
+	seasonController := controllers.NewSeasonController(sqlHandler)
+	http.HandleFunc("/season/", handler.Handle(middleware.AdminRequiredMiddlewareGet, adminController.SeasonView))
+	http.HandleFunc("/admin/season/post/", handler.Handle(middleware.PostOnlyMiddleware, middleware.PostOnlyMiddleware, adminController.InsertSeasonView))
 	// relations
-	http.HandleFunc("/admin/season/anime/post/", handler.Handle(middleware.PostOnlyMiddleware, middleware.AdminRequiredMiddleware, seasons.InsertRelationSeasonView))
-	http.HandleFunc("/season/anime/", handler.Handle(seasons.SeasonByAnimeIdView)) // ?id=
+	http.HandleFunc("/admin/season/anime/post/", handler.Handle(middleware.PostOnlyMiddleware, middleware.AdminRequiredMiddleware, adminController.InsertRelationSeasonView))
+	http.HandleFunc("/season/anime/", handler.Handle(seasonController.SeasonByAnimeIdView)) // ?id=
 
 	/*   platform   */
 	http.HandleFunc("/admin/platform/", handler.Handle(middleware.AdminRequiredMiddlewareGet, platform.PlatformView))

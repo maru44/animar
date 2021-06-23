@@ -21,7 +21,7 @@ func (repo *PlatformRepository) FilterByAnime(animeId int) (platforms domain.TRe
 		tools.ErrorLog(err)
 		return
 	}
-	if rows.Next() {
+	for rows.Next() {
 		var p domain.TRelationPlatform
 		err = rows.Scan(
 			&p.PlatformId, &p.AnimeId, &p.LinkUrl,

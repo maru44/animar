@@ -3,6 +3,8 @@ package domain
 type AdminInteractor interface {
 	AdminAnimeInteractor
 	AdminPlatformInteractor
+	AdminSeasonInteractor
+	AdminSeriesInteractor
 }
 
 // anime
@@ -99,5 +101,20 @@ type AdminSeasonInteractor interface {
 	InsertSeason(TSeasonInput) (int, error)
 	ListSeason() ([]TSeason, error)
 	DetailSeason(int) (TSeason, error)
-	InsertRelationAnime(TSeasonRelationInput) (int, error)
+	InsertRelationSeasonAnime(TSeasonRelationInput) (int, error)
+}
+
+// series
+
+type TSeriesInput struct {
+	EngName    string `json:"eng_name"`
+	SeriesName string `json:"series_name,omitempty"`
+}
+
+type AdminSeriesInteractor interface {
+	ListSeries() ([]TSeries, error)
+	DetailSeries(int) (TSeries, error)
+	InsertSeries(TSeriesInput) (int, error)
+	UpdateSeries(TSeriesInput, int) (int, error)
+	DeleteSeries(int) (int, error)
 }

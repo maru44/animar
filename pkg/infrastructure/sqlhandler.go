@@ -26,6 +26,10 @@ func NewSqlHandler() database.SqlHandler {
 	return sqlHandler
 }
 
+func (handler *SqlHandler) ErrNoRows() error {
+	return sql.ErrNoRows
+}
+
 func (handler *SqlHandler) Query(statement string, args ...interface{}) (database.Rows, error) {
 	rows, err := handler.Conn.Query(statement, args...)
 	if err != nil {
