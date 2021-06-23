@@ -5,7 +5,6 @@ import (
 	"animar/v1/pkg/infrastructure"
 	"animar/v1/pkg/mvc/anime"
 	"animar/v1/pkg/mvc/auth"
-	"animar/v1/pkg/mvc/blog"
 	"animar/v1/pkg/mvc/platform"
 	"animar/v1/pkg/mvc/seasons"
 	"animar/v1/pkg/mvc/series"
@@ -35,10 +34,11 @@ func main() {
 	http.HandleFunc("/db/anime/minimum/", handler.Handle(anime.ListAnimeMinimumView))
 
 	/*   blogs   */
-	http.HandleFunc("/blog/", handler.Handle(blog.BlogJoinAnimeView))
-	http.HandleFunc("/blog/post/", handler.Handle(middleware.PostOnlyMiddleware, blog.InsertBlogWithRelationView))
-	http.HandleFunc("/blog/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, blog.DeleteBlogView))          // ?id=
-	http.HandleFunc("/blog/update/", handler.Handle(middleware.PutOnlyMiddleware, blog.UpdateBlogWithRelationView)) // ?id=
+	blogController := controllers.NewBlogController(sqlHandler)
+	http.HandleFunc("/blog/", handler.Handle(blogController.BlogJoinAnimeView))
+	http.HandleFunc("/blog/post/", handler.Handle(middleware.PostOnlyMiddleware, blogController.InsertBlogWithRelationView))
+	http.HandleFunc("/blog/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, blogController.DeleteBlogView))          // ?id=
+	http.HandleFunc("/blog/update/", handler.Handle(middleware.PutOnlyMiddleware, blogController.UpdateBlogWithRelationView)) // ?id=
 
 	/*   reviews   */
 	reviewController := controllers.NewReviewController(sqlHandler)

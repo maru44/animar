@@ -10,7 +10,7 @@ type BlogRepository struct {
 	SqlHandler
 }
 
-func (repo *BlogRepository) ListBlog() (blogs domain.TBlogs, err error) {
+func (repo *BlogRepository) ListAll() (blogs domain.TBlogJoinAnimes, err error) {
 	rows, err := repo.Query(
 		"SELECT * FROM blogs WHERE is_public = true",
 	)
@@ -21,11 +21,12 @@ func (repo *BlogRepository) ListBlog() (blogs domain.TBlogs, err error) {
 		return
 	}
 	for rows.Next() {
-		var b domain.TBlog
+		var b domain.TBlogJoinAnime
 		err := rows.Scan(
 			&b.ID, &b.Slug, &b.Title, &b.Abstract, &b.Content,
-			&b.IsPublic, &b.UserId, &b.CreatedAt, &b.UpdatedAt,
+			&b.UserId, &b.IsPublic, &b.CreatedAt, &b.UpdatedAt,
 		)
+		b.Animes, _ = repo.FilterByBlog(b.GetId())
 		if err != nil {
 			tools.ErrorLog(err)
 		}
@@ -34,7 +35,7 @@ func (repo *BlogRepository) ListBlog() (blogs domain.TBlogs, err error) {
 	return
 }
 
-func (repo *BlogRepository) ListBlogByUser(accessUserId string, blogUserId string) (blogs domain.TBlogs, err error) {
+func (repo *BlogRepository) FilterByUser(accessUserId string, blogUserId string) (blogs domain.TBlogJoinAnimes, err error) {
 	var rows Rows
 	if accessUserId == blogUserId {
 		rows, err = repo.Query(
@@ -51,10 +52,12 @@ func (repo *BlogRepository) ListBlogByUser(accessUserId string, blogUserId strin
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var b domain.TBlog
+		var b domain.TBlogJoinAnime
 		err = rows.Scan(
-			b,
+			&b.ID, &b.Slug, &b.Title, &b.Abstract, &b.Content,
+			&b.UserId, &b.IsPublic, &b.CreatedAt, &b.UpdatedAt,
 		)
+		b.Animes, _ = repo.FilterByBlog(b.GetId())
 		if err != nil {
 			tools.ErrorLog(err)
 			return
@@ -64,7 +67,7 @@ func (repo *BlogRepository) ListBlogByUser(accessUserId string, blogUserId strin
 	return
 }
 
-func (repo *BlogRepository) BlogUserId(id int) (userId string, err error) {
+func (repo *BlogRepository) GetUserId(id int) (userId string, err error) {
 	rows, err := repo.Query(
 		"SELECT user_id FROM blogs WHERE id = ?", id,
 	)
@@ -82,7 +85,7 @@ func (repo *BlogRepository) BlogUserId(id int) (userId string, err error) {
 	return
 }
 
-func (repo *BlogRepository) DetailBlog(id int) (b domain.TBlog, err error) {
+func (repo *BlogRepository) FindById(id int) (b domain.TBlogJoinAnime, err error) {
 	rows, err := repo.Query(
 		"SELECT blogs.* FROM blogs WHERE id = ?", id,
 	)
@@ -103,7 +106,7 @@ func (repo *BlogRepository) DetailBlog(id int) (b domain.TBlog, err error) {
 	return
 }
 
-func (repo *BlogRepository) DetailBlogBySlug(slug string) (b domain.TBlog, err error) {
+func (repo *BlogRepository) FindBySlug(slug string) (b domain.TBlogJoinAnime, err error) {
 	rows, err := repo.Query(
 		"SELECT blogs.* FROM blogs WHERE slug = ?", slug,
 	)
@@ -124,10 +127,11 @@ func (repo *BlogRepository) DetailBlogBySlug(slug string) (b domain.TBlog, err e
 	return
 }
 
-func (repo *BlogRepository) InsertBlog(b domain.TBlogInsert) (lastInserted int, err error) {
+func (repo *BlogRepository) Insert(b domain.TBlogInsert, userId string) (lastInserted int, err error) {
+	slug := tools.GenRandSlug(8)
 	exe, err := repo.Execute(
 		"INSERT INTO blogs(slug, title, abstract, content, user_id, is_public) "+
-			"VALUES(?, ?, ?, ?, ?, ?)", b.Slug, b.Title, b.Abstract, b.Content, b.UserId, b.IsPublic,
+			"VALUES(?, ?, ?, ?, ?, ?)", slug, b.Title, b.Abstract, b.Content, userId, b.IsPublic,
 	)
 	if err != nil {
 		tools.ErrorLog(err)
@@ -142,10 +146,10 @@ func (repo *BlogRepository) InsertBlog(b domain.TBlogInsert) (lastInserted int, 
 	return
 }
 
-func (repo *BlogRepository) UpdataeBlog(b domain.TBlogInsert, id int) (rowsAffected int, err error) {
+func (repo *BlogRepository) Update(b domain.TBlogInsert, id int) (rowsAffected int, err error) {
 	exe, err := repo.Execute(
 		"UPDATE blogs SET title = ?, abstract = ?, content = ?, is_public = ? WHERE id = ?",
-		b.Title, b.Abstract, b.Content, b.UserId, b.IsPublic, id,
+		b.Title, b.Abstract, b.Content, b.IsPublic, id,
 	)
 	if err != nil {
 		tools.ErrorLog(err)
@@ -160,7 +164,7 @@ func (repo *BlogRepository) UpdataeBlog(b domain.TBlogInsert, id int) (rowsAffec
 	return
 }
 
-func (repo *BlogRepository) DeleteBlog(id int) (rowsAffected int, err error) {
+func (repo *BlogRepository) Delete(id int) (rowsAffected int, err error) {
 	exe, err := repo.Execute(
 		"DELETE FROM blogs WHERE id = ?", id,
 	)
@@ -179,7 +183,7 @@ func (repo *BlogRepository) DeleteBlog(id int) (rowsAffected int, err error) {
 
 // relation
 
-func (repo *BlogRepository) RelationAnimeByBlog(blogId int) (animes []domain.TJoinedAnime, err error) {
+func (repo *BlogRepository) FilterByBlog(blogId int) (animes []domain.TJoinedAnime, err error) {
 	rows, err := repo.Query(
 		"SELECT relation_blog_animes.anime_id, animes.slug, animes.title FROM relation_blog_animes " +
 			"LEFT JOIN animes ON animes.id = relation_blog_animes.anime_id " +
@@ -225,7 +229,7 @@ func (repo *BlogRepository) RelationAnimeByBlog(blogId int) (animes []domain.TJo
 // 	return
 // }
 
-func (repo *BlogRepository) InsertRelationAnime(animeId int, blogId int) (is_success bool, err error) {
+func (repo *BlogRepository) InsertRelation(animeId int, blogId int) (is_success bool, err error) {
 	exe, err := repo.Execute(
 		"INSERT INTO relation_blog_animes(anime_id, blog_id) VALUES(?, ?)",
 		animeId, blogId,
@@ -243,7 +247,7 @@ func (repo *BlogRepository) InsertRelationAnime(animeId int, blogId int) (is_suc
 	return
 }
 
-func (repo *BlogRepository) DeleteRelationAnime(animeId int, blogId int) (err error) {
+func (repo *BlogRepository) DeleteRelation(animeId int, blogId int) (err error) {
 	exe, err := repo.Execute(
 		"DELETE FROM relation_blog_animes WHERE anime_id = ? AND blog_id = ?",
 		animeId, blogId,

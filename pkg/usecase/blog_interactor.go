@@ -17,12 +17,12 @@ func NewBlogInteractor(blog BlogRepository) domain.BlogInteractor {
 ************************/
 
 type BlogRepository interface {
-	ListAll() (domain.TBlogs, error)
-	FilterByUser(string, string) (domain.TBlogs, error)
+	ListAll() (domain.TBlogJoinAnimes, error)
+	FilterByUser(string, string) (domain.TBlogJoinAnimes, error)
 	GetUserId(int) (string, error)
-	FindById(int) (domain.TBlog, error)
-	FindBySlug(string) (domain.TBlog, error)
-	Insert(domain.TBlogInsert) (int, error)
+	FindById(int) (domain.TBlogJoinAnime, error)
+	FindBySlug(string) (domain.TBlogJoinAnime, error)
+	Insert(domain.TBlogInsert, string) (int, error)
 	Update(domain.TBlogInsert, int) (int, error)
 	Delete(int) (int, error)
 	// relation
@@ -36,12 +36,12 @@ type BlogRepository interface {
    interactor methods
 ***********************/
 
-func (interactor *BlogInteractor) ListBlog() (blogs domain.TBlogs, err error) {
+func (interactor *BlogInteractor) ListBlog() (blogs domain.TBlogJoinAnimes, err error) {
 	blogs, err = interactor.repository.ListAll()
 	return
 }
 
-func (interactor *BlogInteractor) ListBlogByUser(accessUserId string, blogUserId string) (blogs domain.TBlogs, err error) {
+func (interactor *BlogInteractor) ListBlogByUser(accessUserId string, blogUserId string) (blogs domain.TBlogJoinAnimes, err error) {
 	blogs, err = interactor.repository.FilterByUser(accessUserId, blogUserId)
 	return
 }
@@ -51,18 +51,18 @@ func (interactor *BlogInteractor) BlogUserId(blogId int) (userId string, err err
 	return
 }
 
-func (interactor *BlogInteractor) DetailBlog(id int) (blog domain.TBlog, err error) {
+func (interactor *BlogInteractor) DetailBlog(id int) (blog domain.TBlogJoinAnime, err error) {
 	blog, err = interactor.repository.FindById(id)
 	return
 }
 
-func (interactor *BlogInteractor) DetailBlogBySlug(slug string) (blog domain.TBlog, err error) {
+func (interactor *BlogInteractor) DetailBlogBySlug(slug string) (blog domain.TBlogJoinAnime, err error) {
 	blog, err = interactor.repository.FindBySlug(slug)
 	return
 }
 
-func (interactor *BlogInteractor) InsertBlog(blog domain.TBlogInsert) (lastInserted int, err error) {
-	lastInserted, err = interactor.repository.Insert(blog)
+func (interactor *BlogInteractor) InsertBlog(blog domain.TBlogInsert, userId string) (lastInserted int, err error) {
+	lastInserted, err = interactor.repository.Insert(blog, userId)
 	return
 }
 
