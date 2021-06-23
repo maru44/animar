@@ -88,10 +88,10 @@ func (repo *ReviewRepository) FilterByUser(userId string) (reviews domain.TRevie
 	return
 }
 
-func (repo *ReviewRepository) InsertContent(r domain.TReviewInput) (content string, err error) {
+func (repo *ReviewRepository) InsertContent(r domain.TReviewInput, userId string) (content string, err error) {
 	exe, err := repo.Execute(
 		"INSERT INTO reviews(anime_id, content, user_id) VALUES(?, ?, ?, ?)",
-		r.AnimeId, r.Content, r.UserId,
+		r.AnimeId, r.Content, userId,
 	)
 	if err != nil {
 		tools.ErrorLog(err)
@@ -106,8 +106,8 @@ func (repo *ReviewRepository) InsertContent(r domain.TReviewInput) (content stri
 	return
 }
 
-func (repo *ReviewRepository) UpsertContent(r domain.TReviewInput) (content string, err error) {
-	review, err := repo.FindByAnimeAndUser(r.AnimeId, r.UserId)
+func (repo *ReviewRepository) UpsertContent(r domain.TReviewInput, userId string) (content string, err error) {
+	review, err := repo.FindByAnimeAndUser(r.AnimeId, userId)
 	if err == nil && review.GetId() != 0 {
 		_, err = repo.Execute(
 			"UPDATE reviews SET content = ? WHERE id = ?", r.Content, review.GetId(),
@@ -118,13 +118,13 @@ func (repo *ReviewRepository) UpsertContent(r domain.TReviewInput) (content stri
 			return
 		}
 	}
-	return repo.InsertContent(r)
+	return repo.InsertContent(r, userId)
 }
 
-func (repo *ReviewRepository) InsertRating(r domain.TReviewInput) (rating int, err error) {
+func (repo *ReviewRepository) InsertRating(r domain.TReviewInput, userId string) (rating int, err error) {
 	exe, err := repo.Execute(
 		"INSERT INTO reviews(anime_id, rating, user_id) VALUES(?, ?, ?, ?)",
-		r.AnimeId, r.Rating, r.UserId,
+		r.AnimeId, r.Rating, userId,
 	)
 	if err != nil {
 		tools.ErrorLog(err)
@@ -139,8 +139,8 @@ func (repo *ReviewRepository) InsertRating(r domain.TReviewInput) (rating int, e
 	return
 }
 
-func (repo *ReviewRepository) UpsertRating(r domain.TReviewInput) (rating int, err error) {
-	review, err := repo.FindByAnimeAndUser(r.AnimeId, r.UserId)
+func (repo *ReviewRepository) UpsertRating(r domain.TReviewInput, userId string) (rating int, err error) {
+	review, err := repo.FindByAnimeAndUser(r.AnimeId, userId)
 	if err == nil && review.GetId() != 0 {
 		_, err = repo.Execute(
 			"UPDATE reviews SET rating = ? WHERE id = ?", r.Rating, review.GetId(),
@@ -151,7 +151,7 @@ func (repo *ReviewRepository) UpsertRating(r domain.TReviewInput) (rating int, e
 			return
 		}
 	}
-	return repo.InsertRating(r)
+	return repo.InsertRating(r, userId)
 }
 
 func (repo *ReviewRepository) GetRatingAverage(animeId int) (rating string, err error) {

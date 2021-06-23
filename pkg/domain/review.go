@@ -28,7 +28,6 @@ type TReviewInput struct {
 	AnimeId int     `json:"anime_id"`
 	Content *string `json:"content,omitempty"`
 	Rating  *int    `json:"rating,string,omitempty"` // text/plainのpostに対応
-	UserId  string  `json:"user_id"`
 }
 
 type TReviews []TReview
@@ -43,9 +42,9 @@ type ReviewInteractor interface {
 	GetOnesReviewByAnime(int, string) (TReview, error)
 	GetAnimeReviews(int, string) (TReviews, error)
 	GetOnesReviews(string) (TReviewJoinAnimes, error)
-	PostReviewContent(TReviewInput) (string, error)
-	UpsertReviewContent(TReviewInput) (string, error)
-	PostReviewRating(TReviewInput) (int, error)
-	UpsertReviewRating(TReviewInput) (int, error)
+	PostReviewContent(TReviewInput, string) (string, error)
+	UpsertReviewContent(TReviewInput, string) (string, error)
+	PostReviewRating(TReviewInput, string) (int, error)
+	UpsertReviewRating(TReviewInput, string) (int, error)
 	GetRatingAverage(int) (string, error)
 }

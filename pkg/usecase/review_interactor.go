@@ -21,11 +21,11 @@ type ReviewRepository interface {
 	FilterByAnime(int, string) (domain.TReviews, error)
 	FilterByUser(string) (domain.TReviewJoinAnimes, error)
 	// content
-	InsertContent(domain.TReviewInput) (string, error)
-	UpsertContent(domain.TReviewInput) (string, error)
+	InsertContent(domain.TReviewInput, string) (string, error)
+	UpsertContent(domain.TReviewInput, string) (string, error)
 	// Rating
-	InsertRating(domain.TReviewInput) (int, error)
-	UpsertRating(domain.TReviewInput) (int, error)
+	InsertRating(domain.TReviewInput, string) (int, error)
+	UpsertRating(domain.TReviewInput, string) (int, error)
 	GetRatingAverage(int) (string, error)
 }
 
@@ -48,22 +48,22 @@ func (interactor *ReviewInteractor) GetOnesReviews(userId string) (reviews domai
 	return
 }
 
-func (interactor *ReviewInteractor) PostReviewContent(review domain.TReviewInput) (content string, err error) {
-	content, err = interactor.repository.InsertContent(review)
+func (interactor *ReviewInteractor) PostReviewContent(review domain.TReviewInput, userId string) (content string, err error) {
+	content, err = interactor.repository.InsertContent(review, userId)
 	return
 }
-func (interactor *ReviewInteractor) UpsertReviewContent(review domain.TReviewInput) (content string, err error) {
-	content, err = interactor.repository.UpsertContent(review)
-	return
-}
-
-func (interactor *ReviewInteractor) PostReviewRating(review domain.TReviewInput) (rating int, err error) {
-	rating, err = interactor.repository.InsertRating(review)
+func (interactor *ReviewInteractor) UpsertReviewContent(review domain.TReviewInput, userId string) (content string, err error) {
+	content, err = interactor.repository.UpsertContent(review, userId)
 	return
 }
 
-func (interactor *ReviewInteractor) UpsertReviewRating(review domain.TReviewInput) (rating int, err error) {
-	rating, err = interactor.repository.UpsertRating(review)
+func (interactor *ReviewInteractor) PostReviewRating(review domain.TReviewInput, userId string) (rating int, err error) {
+	rating, err = interactor.repository.InsertRating(review, userId)
+	return
+}
+
+func (interactor *ReviewInteractor) UpsertReviewRating(review domain.TReviewInput, userId string) (rating int, err error) {
+	rating, err = interactor.repository.UpsertRating(review, userId)
 	return
 }
 
