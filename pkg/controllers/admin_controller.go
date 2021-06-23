@@ -27,6 +27,9 @@ func NewAdminController(sqlHandler database.SqlHandler) *AdminController {
 			&database.AdminPlatformRepository{
 				SqlHandler: sqlHandler,
 			},
+			&database.AdminSeasonRepository{
+				sqlHandler: sqlHandler,
+			},
 		),
 	}
 }

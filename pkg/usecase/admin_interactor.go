@@ -5,12 +5,14 @@ import "animar/v1/pkg/domain"
 type AdminInteractor struct {
 	animeRepository    AdminAnimeRepository
 	platformRepository AdminPlatformRepository
+	seasonRepository   AdminSeasonRepository
 }
 
-func NewAdminAnimeInteractor(anime AdminAnimeRepository, platform AdminPlatformRepository) domain.AdminInteractor {
+func NewAdminAnimeInteractor(anime AdminAnimeRepository, platform AdminPlatformRepository, season AdminSeasonRepository) domain.AdminInteractor {
 	return &AdminInteractor{
 		animeRepository:    anime,
 		platformRepository: platform,
+		seasonRepository:   season,
 	}
 }
 
@@ -36,6 +38,13 @@ type AdminPlatformRepository interface {
 	FilterByAnime(int) (domain.TRelationPlatforms, error)
 	InsertRelation(domain.TRelationPlatformInput) (int, error)
 	DeleteRelation(int, int) (int, error)
+}
+
+type AdminSeasonRepository interface {
+	ListAll() ([]domain.TSeason, error)
+	FindById(int) (domain.TSeason, error)
+	Insert(domain.TSeasonInput) (int, error)
+	InsertRelation(domain.TSeasonRelationInput) (int, error)
 }
 
 /************************
@@ -106,5 +115,27 @@ func (interactor *AdminInteractor) RelationPlatformDelete(animeId int, platformI
 
 func (interactor *AdminInteractor) RelationPlatformByAnime(animeId int) (platforms domain.TRelationPlatforms, err error) {
 	platforms, err = interactor.platformRepository.FilterByAnime(animeId)
+	return
+}
+
+// season
+
+func (interactor *AdminInteractor) ListSeason() (seasons []domain.TSeason, err error) {
+	seasons, err = interactor.seasonRepository.ListAll()
+	return
+}
+
+func (interactor *AdminInteractor) DetailSeason(id int) (season domain.TSeason, err error) {
+	season, err = interactor.seasonRepository.FindById(id)
+	return
+}
+
+func (interactor *AdminInteractor) InsertSeason(season domain.TSeasonInput) (lastInserted int, err error) {
+	lastInserted, err = interactor.seasonRepository.Insert(season)
+	return
+}
+
+func (interactor *AdminInteractor) InsertRelationAnime(rel domain.TSeasonRelationInput) (lastInserted int, err error) {
+	lastInserted, err = interactor.seasonRepository.InsertRelation(rel)
 	return
 }

@@ -13,6 +13,10 @@ type AdminPlatformRepository struct {
 	SqlHandler
 }
 
+type AdminSeasonRepository struct {
+	SqlHandler
+}
+
 /************************
          anime
 *************************/
@@ -290,3 +294,7 @@ func (repo *AdminPlatformRepository) DeleteRelation(animeId int, platformId int)
 	rowsAffected = int(rawAffected)
 	return
 }
+
+/************************
+         season
+*************************/
