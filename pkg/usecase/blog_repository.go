@@ -20,8 +20,8 @@ type BlogRepository interface {
 	ListAll() (domain.TBlogs, error)
 	FilterByUser(string, string) (domain.TBlogs, error)
 	GetUserId(int) (string, error)
-	FindById(int) (domain.TBlogJoinAnime, error)
-	FindBySlug(string) (domain.TBlogJoinAnime, error)
+	FindById(int) (domain.TBlog, error)
+	FindBySlug(string) (domain.TBlog, error)
 	Insert(domain.TBlogInsert) (int, error)
 	Update(domain.TBlogInsert, int) (int, error)
 	Delete(int) (int, error)
@@ -51,12 +51,12 @@ func (interactor *BlogInteractor) BlogUserId(blogId int) (userId string, err err
 	return
 }
 
-func (interactor *BlogInteractor) DetailBlog(id int) (blog domain.TBlogJoinAnime, err error) {
+func (interactor *BlogInteractor) DetailBlog(id int) (blog domain.TBlog, err error) {
 	blog, err = interactor.repository.FindById(id)
 	return
 }
 
-func (interactor *BlogInteractor) DetailBlogBySlug(slug string) (blog domain.TBlogJoinAnime, err error) {
+func (interactor *BlogInteractor) DetailBlogBySlug(slug string) (blog domain.TBlog, err error) {
 	blog, err = interactor.repository.FindBySlug(slug)
 	return
 }
