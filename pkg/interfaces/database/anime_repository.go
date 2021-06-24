@@ -139,6 +139,27 @@ func (repo *AnimeRepository) ListBySeason(year string, season string) (animes do
 	return
 }
 
+func (repo *AnimeRepository) ListMinimum() (animes domain.TAnimeMinimums, err error) {
+	rows, err := repo.SqlHandler.Query(
+		"SELECT id, slug, title from animes",
+	)
+	defer rows.Close()
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	for rows.Next() {
+		var a domain.TAnimeMinimum
+		err = rows.Scan(&a.ID, &a.Slug, &a.Title)
+		if err != nil {
+			tools.ErrorLog(err)
+			return
+		}
+		animes = append(animes, a)
+	}
+	return
+}
+
 /*******************************
              Detail
 *******************************/

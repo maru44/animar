@@ -3,10 +3,7 @@ package main
 import (
 	"animar/v1/pkg/controllers"
 	"animar/v1/pkg/infrastructure"
-	"animar/v1/pkg/mvc/anime"
 	"animar/v1/pkg/mvc/auth"
-	"animar/v1/pkg/mvc/platform"
-	"animar/v1/pkg/mvc/watch"
 	"animar/v1/pkg/tools/handler"
 	"animar/v1/pkg/tools/middleware"
 	"animar/v1/pkg/tools/tools"
@@ -28,8 +25,8 @@ func main() {
 	// http.HandleFunc("/db/anime/", handler.Handle(anime.AnimeView))
 	animeController := controllers.NewAnimeController(sqlHandler)
 	http.HandleFunc("/db/anime/", handler.Handle(animeController.AnimeView))
-	http.HandleFunc("/db/anime/search/", handler.Handle(anime.SearchAnimeMinView))
-	http.HandleFunc("/db/anime/minimum/", handler.Handle(anime.ListAnimeMinimumView))
+	http.HandleFunc("/db/anime/search/", handler.Handle(animeController.SearchAnimeMinView))
+	http.HandleFunc("/db/anime/minimum/", handler.Handle(animeController.AnimeMinimumsView))
 
 	/*   blogs   */
 	blogController := controllers.NewBlogController(sqlHandler)
@@ -50,11 +47,12 @@ func main() {
 	http.HandleFunc("/reviews/star/", handler.Handle(reviewController.AnimeRatingAvgView)) // star average
 
 	/*   watches count   */
-	http.HandleFunc("/watch/", handler.Handle(watch.AnimeWatchCountView))
-	http.HandleFunc("/watch/u/", handler.Handle(watch.UserWatchStatusView))
-	http.HandleFunc("/watch/post/", handler.Handle(middleware.PostOnlyMiddleware, watch.WatchPostView)) // upsert
-	http.HandleFunc("/watch/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, watch.WatchDeleteView))
-	http.HandleFunc("/watch/ua/", handler.Handle(watch.WatchAnimeStateOfUserView))
+	audienceController := controllers.NewAudienceController(sqlHandler)
+	http.HandleFunc("/watch/", handler.Handle(audienceController.AnimeAudienceCountsView))
+	http.HandleFunc("/watch/u/", handler.Handle(audienceController.AudienceWithAnimeByUserView))
+	http.HandleFunc("/watch/post/", handler.Handle(middleware.PostOnlyMiddleware, audienceController.UpsertAudienceView)) // upsert
+	http.HandleFunc("/watch/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, audienceController.DeleteAudience))
+	http.HandleFunc("/watch/ua/", handler.Handle(audienceController.AudienceWithAnimeByUserView))
 
 	/*   auth   */
 	http.HandleFunc("/auth/user/", handler.Handle(auth.GetUserModelView)) // ?uid=<UID>
@@ -87,14 +85,14 @@ func main() {
 	http.HandleFunc("/season/anime/", handler.Handle(seasonController.SeasonByAnimeIdView)) // ?id=
 
 	/*   platform   */
-	http.HandleFunc("/admin/platform/", handler.Handle(middleware.AdminRequiredMiddlewareGet, platform.PlatformView))
-	http.HandleFunc("/admin/platform/post/", handler.Handle(middleware.PostOnlyMiddleware, middleware.AdminRequiredMiddleware, platform.InsertPlatformView))
-	http.HandleFunc("/admin/platform/update/", handler.Handle(middleware.PutOnlyMiddleware, middleware.AdminRequiredMiddleware, platform.UpdatePlatformView))
-	http.HandleFunc("/admin/platform/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, middleware.AdminRequiredMiddleware, platform.DeletePlatformView))
+	http.HandleFunc("/admin/platform/", handler.Handle(middleware.AdminRequiredMiddlewareGet, adminController.PlatformView))
+	http.HandleFunc("/admin/platform/post/", handler.Handle(middleware.PostOnlyMiddleware, middleware.AdminRequiredMiddleware, adminController.PlatformInsertView))
+	http.HandleFunc("/admin/platform/update/", handler.Handle(middleware.PutOnlyMiddleware, middleware.AdminRequiredMiddleware, adminController.PlatformUpdateView))
+	http.HandleFunc("/admin/platform/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, middleware.AdminRequiredMiddleware, adminController.PlatformDeleteview))
 	// relations
-	http.HandleFunc("/relation/plat/", handler.Handle(platform.RelationPlatformView)) // ?id=<anime_id>
-	http.HandleFunc("/admin/relation/plat/post/", handler.Handle(middleware.PostOnlyMiddleware, middleware.AdminRequiredMiddleware, platform.InsertRelationPlatformView))
-	http.HandleFunc("/admin/relation/plat/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, middleware.AdminRequiredMiddleware, platform.DeleteRelationPlatformView)) // ?anime=<anime_id>&platform=<platform_id>
+	http.HandleFunc("/relation/plat/", handler.Handle(adminController.RelationPlatformView)) // ?id=<anime_id>
+	http.HandleFunc("/admin/relation/plat/post/", handler.Handle(middleware.PostOnlyMiddleware, middleware.AdminRequiredMiddleware, adminController.InsertRelationPlatformView))
+	http.HandleFunc("/admin/relation/plat/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, middleware.AdminRequiredMiddleware, adminController.DeleteRelationPlatformView)) // ?anime=<anime_id>&platform=<platform_id>
 
 	if tools.IsProductionEnv() {
 		//http.ListenAndServeTLS(":443", os.Getenv("SSL_CHAIN_PATH"), os.Getenv("SSL_KEY_PATH"), nil)

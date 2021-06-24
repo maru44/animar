@@ -166,8 +166,6 @@ func (controller *AdminController) AnimeDeleteView(w http.ResponseWriter, r *htt
          platform
 *************************/
 
-// @TODO platform endpoint
-
 func (controller *AdminController) PlatformView(w http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query()
 	id := query.Get("id")
@@ -215,6 +213,88 @@ func (controller *AdminController) PlatformInsertView(w http.ResponseWriter, r *
 	}
 	lastInserted, err := controller.interactor.PlatformInsert(p)
 	api.JsonResponse(w, map[string]interface{}{"data": lastInserted})
+	return nil
+}
+
+func (controller *AdminController) PlatformUpdateView(w http.ResponseWriter, r *http.Request) error {
+	query := r.URL.Query()
+	strId := query.Get("id")
+	id, _ := strconv.Atoi(strId)
+
+	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
+
+	file, fileHeader, err := r.FormFile("image")
+	var returnFileName string
+	if err == nil {
+		// w/ thumb picture
+		defer file.Close()
+		returnFileName, err = s3.UploadS3(file, fileHeader.Filename, []string{"platform"})
+
+		if err != nil {
+			fmt.Print(err)
+		}
+	} else {
+		returnFileName = ""
+	}
+	validStr := r.FormValue("valid")
+	isValid, _ := strconv.ParseBool(validStr)
+
+	p := domain.TPlatform{
+		EngName:  r.FormValue("engName"),
+		PlatName: tools.NewNullString(r.FormValue("platName")),
+		BaseUrl:  tools.NewNullString(r.FormValue("baseUrl")),
+		Image:    tools.NewNullString(returnFileName),
+		IsValid:  isValid,
+	}
+	rowsAffected, err := controller.interactor.PlatformUpdate(p, id)
+	api.JsonResponse(w, map[string]interface{}{"data": rowsAffected})
+	return nil
+}
+
+func (controller *AdminController) PlatformDeleteview(w http.ResponseWriter, r *http.Request) error {
+	query := r.URL.Query()
+	strId := query.Get("id")
+	id, _ := strconv.Atoi(strId)
+
+	rowsAffected, _ := controller.interactor.PlatformDelete(id)
+	api.JsonResponse(w, map[string]interface{}{"data": rowsAffected})
+	return nil
+}
+
+func (controller *AdminController) RelationPlatformView(w http.ResponseWriter, r *http.Request) error {
+	query := r.URL.Query()
+	strId := query.Get("id") // animeId
+	id, _ := strconv.Atoi(strId)
+	relations, _ := controller.interactor.RelationPlatformByAnime(id)
+	api.JsonResponse(w, map[string]interface{}{"data": relations})
+	return nil
+}
+
+func (controller *AdminController) InsertRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
+	var p domain.TRelationPlatformInput
+	json.NewDecoder(r.Body).Decode(&p)
+	lastInserted, err := controller.interactor.RelationPlatformInsert(p)
+	if err != nil {
+		tools.ErrorLog(err)
+		return err
+	}
+	api.JsonResponse(w, map[string]interface{}{"data": lastInserted})
+	return nil
+}
+
+func (controller *AdminController) DeleteRelationPlatformView(w http.ResponseWriter, r *http.Request) error {
+	query := r.URL.Query()
+	strAnimeId := query.Get("anime")
+	strPlatformId := query.Get("platform")
+	animeId, _ := strconv.Atoi(strAnimeId)
+	platformId, _ := strconv.Atoi(strPlatformId)
+
+	rowsAffected, err := controller.interactor.RelationPlatformDelete(animeId, platformId)
+	if err != nil {
+		tools.ErrorLog(err)
+		return err
+	}
+	api.JsonResponse(w, map[string]interface{}{"data": rowsAffected})
 	return nil
 }
 

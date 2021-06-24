@@ -106,3 +106,24 @@ func (repo *AudienceRepository) Delete(animeId int, userId string) (rowsAffected
 	rowsAffected = int(rawId)
 	return
 }
+
+func (repo *AudienceRepository) FindByAnimeAndUser(animeId int, userId string) (a domain.TAudience, err error) {
+	rows, err := repo.Query(
+		"Select * from audiences WHERE user_id = ? AND anime_id = ?",
+		userId, animeId,
+	)
+	defer rows.Close()
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	rows.Next()
+	err = rows.Scan(
+		&a.ID, &a.State, &a.AnimeId, &a.UserId, &a.CreatedAt, &a.UpdatedAt,
+	)
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	return
+}

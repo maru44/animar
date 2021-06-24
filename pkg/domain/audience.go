@@ -36,6 +36,7 @@ type AudienceInteractor interface {
 	AnimeAudienceCounts(int) ([]TAudienceCount, error)
 	//AudienceByUser(string) ([]TAudience, error)
 	AudienceWithAnimeByUser(string) ([]TAudienceJoinAnime, error)
+	AudienceByAnimeAndUser(int, string) (TAudience, error)
 	InsertAudience(TAudienceInput, string) (int, error)
 	UpsertAudience(TAudienceInput, string) (int, error)
 	DeleteAudience(int, string) (int, error)

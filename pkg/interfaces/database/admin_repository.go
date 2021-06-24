@@ -372,7 +372,9 @@ func (repo *AdminSeasonRepository) InsertRelation(r domain.TSeasonRelationInput)
 	return
 }
 
-// series
+/************************
+         series
+*************************/
 
 func (repo *AdminSeriesRepository) ListAll() (series []domain.TSeries, err error) {
 	rows, err := repo.Query("Select * from series")

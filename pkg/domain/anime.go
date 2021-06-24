@@ -54,6 +54,7 @@ type AnimeInteractor interface {
 	AnimesOnAir() (TAnimes, error)
 	AnimesSearch(string) (TAnimes, error)
 	AnimesBySeason(string, string) (TAnimes, error)
+	AnimeMinimums() (TAnimeMinimums, error)
 	AnimeSearchMinimum(string) (TAnimeMinimums, error)
 	AnimeDetail(int) (TAnime, error)
 	AnimeDetailBySlug(string) (TAnimeWithSeries, error)

@@ -19,6 +19,7 @@ func NewAudienceInteractor(a AudienceRepository) domain.AudienceInteractor {
 type AudienceRepository interface {
 	Counts(int) ([]domain.TAudienceCount, error)
 	FilterByUser(string) ([]domain.TAudienceJoinAnime, error)
+	FindByAnimeAndUser(int, string) (domain.TAudience, error)
 	Insert(domain.TAudienceInput, string) (int, error)
 	Upsert(domain.TAudienceInput, string) (int, error)
 	Delete(int, string) (int, error)
@@ -31,6 +32,11 @@ func (interactor *AudienceInteractor) AnimeAudienceCounts(animeId int) (audience
 
 func (interactor *AudienceInteractor) AudienceWithAnimeByUser(userId string) (audiences []domain.TAudienceJoinAnime, err error) {
 	audiences, err = interactor.repository.FilterByUser(userId)
+	return
+}
+
+func (interactor *AudienceInteractor) AudienceByAnimeAndUser(animeId int, userId string) (audience domain.TAudience, err error) {
+	audience, err = interactor.repository.FindByAnimeAndUser(animeId, userId)
 	return
 }
 

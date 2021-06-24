@@ -7,7 +7,9 @@ type AdminInteractor interface {
 	AdminSeriesInteractor
 }
 
-// anime
+/************************
+         anime
+*************************/
 
 type TAnimeAdmin struct {
 	ID            int     `json:"id"`
@@ -50,7 +52,9 @@ type AdminAnimeInteractor interface {
 	AnimeDelete(int) (int, error)
 }
 
-// platform
+/************************
+         platform
+*************************/
 
 type TPlatformInput struct {
 	EngName  string  `json:"eng_name"`
@@ -77,7 +81,9 @@ type AdminPlatformInteractor interface {
 	RelationPlatformByAnime(int) (TRelationPlatforms, error)
 }
 
-// season
+/************************
+         season
+*************************/
 
 type TSeason struct {
 	ID        int    `json:"id"`
@@ -104,7 +110,9 @@ type AdminSeasonInteractor interface {
 	InsertRelationSeasonAnime(TSeasonRelationInput) (int, error)
 }
 
-// series
+/************************
+         series
+*************************/
 
 type TSeriesInput struct {
 	EngName    string `json:"eng_name"`

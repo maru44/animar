@@ -5,6 +5,7 @@ import (
 	"animar/v1/pkg/interfaces/database"
 	"animar/v1/pkg/tools/api"
 	"animar/v1/pkg/tools/fire"
+	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
 	"errors"
 	"net/http"
@@ -71,5 +72,28 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 		animes, _ := controller.interactor.AnimesOnAir()
 		api.JsonResponse(w, map[string]interface{}{"data": animes})
 	}
+	return nil
+}
+
+func (controller *AnimeController) SearchAnimeMinView(w http.ResponseWriter, r *http.Request) error {
+	query := r.URL.Query()
+	title := query.Get("t")
+
+	animes, err := controller.interactor.AnimeSearchMinimum(title)
+	if err != nil {
+		tools.ErrorLog(err)
+		return err
+	}
+	api.JsonResponse(w, map[string]interface{}{"data": animes})
+	return nil
+}
+
+func (controller *AnimeController) AnimeMinimumsView(w http.ResponseWriter, r *http.Request) error {
+	animes, err := controller.interactor.AnimeMinimums()
+	if err != nil {
+		tools.ErrorLog(err)
+		return err
+	}
+	api.JsonResponse(w, map[string]interface{}{"data": animes})
 	return nil
 }

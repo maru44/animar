@@ -27,7 +27,7 @@ func NewAudienceController(sqlHandler database.SqlHandler) *AudienceController {
 	}
 }
 
-func (controller *AudienceController) AnimeWatchCountsView(w http.ResponseWriter, r *http.Request) error {
+func (controller *AudienceController) AnimeAudienceCountsView(w http.ResponseWriter, r *http.Request) error {
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
