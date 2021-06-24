@@ -82,6 +82,7 @@ func (controller *ReviewController) UpsertReviewRatingView(w http.ResponseWriter
 		return errors.New("Unauthorized")
 	} else {
 		var posted domain.TReviewInput
+		json.NewDecoder(r.Body).Decode(&posted)
 		value, _ := controller.interactor.UpsertReviewRating(posted, userId)
 		api.JsonResponse(w, map[string]interface{}{"data": value})
 		return nil

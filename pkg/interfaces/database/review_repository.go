@@ -90,7 +90,7 @@ func (repo *ReviewRepository) FilterByUser(userId string) (reviews domain.TRevie
 
 func (repo *ReviewRepository) InsertContent(r domain.TReviewInput, userId string) (content string, err error) {
 	exe, err := repo.Execute(
-		"INSERT INTO reviews(anime_id, content, user_id) VALUES(?, ?, ?, ?)",
+		"INSERT INTO reviews(anime_id, content, user_id) VALUES(?, ?, ?)",
 		r.AnimeId, r.Content, userId,
 	)
 	if err != nil {
@@ -102,7 +102,7 @@ func (repo *ReviewRepository) InsertContent(r domain.TReviewInput, userId string
 		tools.ErrorLog(err)
 		return
 	}
-	content = *r.Content
+	content = r.Content
 	return
 }
 
@@ -112,18 +112,19 @@ func (repo *ReviewRepository) UpsertContent(r domain.TReviewInput, userId string
 		_, err = repo.Execute(
 			"UPDATE reviews SET content = ? WHERE id = ?", r.Content, review.GetId(),
 		)
-		content = *r.Content
+		content = r.Content
 		if err != nil {
 			tools.ErrorLog(err)
 			return
 		}
+		return
 	}
 	return repo.InsertContent(r, userId)
 }
 
 func (repo *ReviewRepository) InsertRating(r domain.TReviewInput, userId string) (rating int, err error) {
 	exe, err := repo.Execute(
-		"INSERT INTO reviews(anime_id, rating, user_id) VALUES(?, ?, ?, ?)",
+		"INSERT INTO reviews(anime_id, rating, user_id) VALUES(?, ?, ?)",
 		r.AnimeId, r.Rating, userId,
 	)
 	if err != nil {
@@ -135,21 +136,22 @@ func (repo *ReviewRepository) InsertRating(r domain.TReviewInput, userId string)
 		tools.ErrorLog(err)
 		return
 	}
-	rating = *r.Rating
+	rating = r.Rating
 	return
 }
 
 func (repo *ReviewRepository) UpsertRating(r domain.TReviewInput, userId string) (rating int, err error) {
 	review, err := repo.FindByAnimeAndUser(r.AnimeId, userId)
-	if err == nil && review.GetId() != 0 {
+	if err == nil {
 		_, err = repo.Execute(
 			"UPDATE reviews SET rating = ? WHERE id = ?", r.Rating, review.GetId(),
 		)
-		rating = *r.Rating
 		if err != nil {
 			tools.ErrorLog(err)
 			return
 		}
+		rating = r.Rating
+		return
 	}
 	return repo.InsertRating(r, userId)
 }

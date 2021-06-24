@@ -6,6 +6,8 @@ import (
 	"animar/v1/pkg/tools/tools"
 	"database/sql"
 	"fmt"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type SqlHandler struct {

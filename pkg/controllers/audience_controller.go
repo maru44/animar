@@ -37,15 +37,11 @@ func (controller *AudienceController) AnimeAudienceCountsView(w http.ResponseWri
 }
 
 func (controller *AudienceController) AudienceWithAnimeByUserView(w http.ResponseWriter, r *http.Request) error {
-	userId := fire.GetIdFromCookie(r)
-	if userId == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return errors.New("Unauthorize")
-	} else {
-		audiences, _ := controller.interactor.AudienceWithAnimeByUser(userId)
-		api.JsonResponse(w, map[string]interface{}{"data": audiences})
-		return nil
-	}
+	userId := r.URL.Query().Get("user")
+	audiences, _ := controller.interactor.AudienceWithAnimeByUser(userId)
+	api.JsonResponse(w, map[string]interface{}{"data": audiences})
+	return nil
+
 }
 
 func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, r *http.Request) error {
@@ -65,7 +61,7 @@ func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, 
 	return nil
 }
 
-func (controller *AudienceController) DeleteAudience(w http.ResponseWriter, r *http.Request) error {
+func (controller *AudienceController) DeleteAudienceView(w http.ResponseWriter, r *http.Request) error {
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -77,5 +73,20 @@ func (controller *AudienceController) DeleteAudience(w http.ResponseWriter, r *h
 
 	_, _ = controller.interactor.DeleteAudience(animeId, userId)
 	api.JsonResponse(w, map[string]interface{}{})
+	return nil
+}
+
+func (controller *AudienceController) AudienceByAnimeAndUserView(w http.ResponseWriter, r *http.Request) error {
+	animeIdStr := r.URL.Query().Get("anime")
+	animeId, _ := strconv.Atoi(animeIdStr)
+
+	userId := fire.GetIdFromCookie(r)
+	if userId == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return errors.New("Unauthorize")
+	} else {
+		watch, _ := controller.interactor.AudienceByAnimeAndUser(animeId, userId)
+		api.JsonResponse(w, map[string]interface{}{"data": watch})
+	}
 	return nil
 }

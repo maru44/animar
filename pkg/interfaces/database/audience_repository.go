@@ -13,15 +13,15 @@ func (repo *AudienceRepository) Counts(animeId int) (audiences []domain.TAudienc
 	rows, err := repo.Query(
 		"Select state, count(state) from audiences WHERE anime_id = ? GROUP BY state", animeId,
 	)
-	defer rows.Close()
 	if err != nil {
 		tools.ErrorLog(err)
 		return
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var a domain.TAudienceCount
 		err := rows.Scan(
-			a.State, a.Count,
+			&a.State, &a.Count,
 		)
 		if err != nil {
 			tools.ErrorLog(err)
@@ -44,8 +44,8 @@ func (repo *AudienceRepository) FilterByUser(userId string) (audiences []domain.
 	for rows.Next() {
 		var a domain.TAudienceJoinAnime
 		err := rows.Scan(
-			a.ID, a.State, a.AnimeId, a.UserId, a.CreatedAt, a.UpdatedAt,
-			a.Title, a.Slug, a.Content, a.AState,
+			&a.ID, &a.State, &a.AnimeId, &a.UserId, &a.CreatedAt, &a.UpdatedAt,
+			&a.Title, &a.Slug, &a.Content, &a.AState,
 		)
 		if err != nil {
 			tools.ErrorLog(err)
@@ -70,16 +70,8 @@ func (repo *AudienceRepository) Insert(a domain.TAudienceInput, userId string) (
 }
 
 func (repo *AudienceRepository) Upsert(a domain.TAudienceInput, userId string) (rowsAffected int, err error) {
-	_, err = repo.Query(
-		"Select * from audiences WHERE user_id = ? AND anime_id = ?",
-		userId, a.AnimeId,
-	)
-	if err == repo.ErrNoRows() {
-		rowsAffected, err = repo.Insert(a, userId)
-		if err != nil {
-			tools.ErrorLog(err)
-		}
-	} else {
+	_, err = repo.FindByAnimeAndUser(a.AnimeId, userId)
+	if err == nil {
 		exe, err := repo.Execute(
 			"UPDATE audiences SET state = ? WHERE user_id = ? AND anime_id = ?",
 			a.State, userId, a.AnimeId,
@@ -89,6 +81,11 @@ func (repo *AudienceRepository) Upsert(a domain.TAudienceInput, userId string) (
 		}
 		rawId, _ := exe.RowsAffected()
 		rowsAffected = int(rawId)
+	} else {
+		rowsAffected, err = repo.Insert(a, userId)
+		if err != nil {
+			tools.ErrorLog(err)
+		}
 	}
 	return
 }

@@ -51,8 +51,8 @@ func main() {
 	http.HandleFunc("/watch/", handler.Handle(audienceController.AnimeAudienceCountsView))
 	http.HandleFunc("/watch/u/", handler.Handle(audienceController.AudienceWithAnimeByUserView))
 	http.HandleFunc("/watch/post/", handler.Handle(middleware.PostOnlyMiddleware, audienceController.UpsertAudienceView)) // upsert
-	http.HandleFunc("/watch/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, audienceController.DeleteAudience))
-	http.HandleFunc("/watch/ua/", handler.Handle(audienceController.AudienceWithAnimeByUserView))
+	http.HandleFunc("/watch/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, audienceController.DeleteAudienceView))
+	http.HandleFunc("/watch/ua/", handler.Handle(audienceController.AudienceByAnimeAndUserView))
 
 	/*   auth   */
 	http.HandleFunc("/auth/user/", handler.Handle(auth.GetUserModelView)) // ?uid=<UID>
