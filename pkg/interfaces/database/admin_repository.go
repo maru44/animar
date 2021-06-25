@@ -408,7 +408,9 @@ func (repo *AdminSeriesRepository) FindById(id int) (s domain.TSeries, err error
 		&s.ID, &s.EngName, &s.SeriesName, &s.CreatedAt, &s.UpdatedAt,
 	)
 	if err != nil {
+		err = domain.ErrNotFound
 		tools.ErrorLog(err)
+		return
 	}
 	return
 }

@@ -2,19 +2,19 @@ package controllers
 
 import (
 	"animar/v1/pkg/domain"
+	"animar/v1/pkg/infrastructure"
+	"animar/v1/pkg/interfaces/apis"
 	"animar/v1/pkg/interfaces/database"
-	"animar/v1/pkg/tools/api"
 	"animar/v1/pkg/tools/fire"
-	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"strconv"
 )
 
 type ReviewController struct {
 	interactor domain.ReviewInteractor
+	api        apis.ApiResponse
 }
 
 func NewReviewController(sqlHandler database.SqlHandler) *ReviewController {
@@ -24,82 +24,70 @@ func NewReviewController(sqlHandler database.SqlHandler) *ReviewController {
 				SqlHandler: sqlHandler,
 			},
 		),
+		api: infrastructure.NewApiResponse(),
 	}
 }
 
-func (controller *ReviewController) GetAnimeReviewsView(w http.ResponseWriter, r *http.Request) error {
+func (controller *ReviewController) GetAnimeReviewsView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := r.URL.Query().Get("user")
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 	revs, err := controller.interactor.GetAnimeReviews(animeId, userId)
-	if err != nil {
-		tools.ErrorLog(err)
-		w.WriteHeader(http.StatusNotFound)
-		return err
-	}
 
-	api.JsonResponse(w, map[string]interface{}{"data": revs})
-	return nil
+	ret = controller.api.Response(w, err, map[string]interface{}{"data": revs})
+	return ret
 }
 
-func (controller *ReviewController) GetAnimeReviewOfUserView(w http.ResponseWriter, r *http.Request) error {
+func (controller *ReviewController) GetAnimeReviewOfUserView(w http.ResponseWriter, r *http.Request) (ret error) {
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return errors.New("Unauthorized")
+		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
 	} else {
 		rev, err := controller.interactor.GetOnesReviewByAnime(animeId, userId)
-		if err != nil {
-			tools.ErrorLog(err)
-			w.WriteHeader(http.StatusNotFound)
-			return err
-		}
-		api.JsonResponse(w, map[string]interface{}{"data": rev})
-		return nil
+		ret = controller.api.Response(w, err, map[string]interface{}{"data": rev})
 	}
+	return ret
 }
 
-func (controller *ReviewController) UpsertReviewContentView(w http.ResponseWriter, r *http.Request) error {
+func (controller *ReviewController) UpsertReviewContentView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return errors.New("Unauthorized")
+		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
 	} else {
 		var posted domain.TReviewInput
 		json.NewDecoder(r.Body).Decode(&posted)
-		value, _ := controller.interactor.UpsertReviewContent(posted, userId)
-		api.JsonResponse(w, map[string]interface{}{"data": value})
-		return nil
+		value, err := controller.interactor.UpsertReviewContent(posted, userId)
+		ret = controller.api.Response(w, err, map[string]interface{}{"data": value})
 	}
+	return ret
 }
 
-func (controller *ReviewController) UpsertReviewRatingView(w http.ResponseWriter, r *http.Request) error {
+func (controller *ReviewController) UpsertReviewRatingView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return errors.New("Unauthorized")
+		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
 	} else {
 		var posted domain.TReviewInput
 		json.NewDecoder(r.Body).Decode(&posted)
-		value, _ := controller.interactor.UpsertReviewRating(posted, userId)
-		api.JsonResponse(w, map[string]interface{}{"data": value})
-		return nil
+		value, err := controller.interactor.UpsertReviewRating(posted, userId)
+		ret = controller.api.Response(w, err, map[string]interface{}{"data": value})
 	}
+	return ret
 }
 
-func (controller *ReviewController) AnimeRatingAvgView(w http.ResponseWriter, r *http.Request) error {
+func (controller *ReviewController) AnimeRatingAvgView(w http.ResponseWriter, r *http.Request) (ret error) {
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
-	avg, _ := controller.interactor.GetRatingAverage(animeId)
-	api.JsonResponse(w, map[string]interface{}{"data": avg})
-	return nil
+	avg, err := controller.interactor.GetRatingAverage(animeId)
+	ret = controller.api.Response(w, err, map[string]interface{}{"data": avg})
+	return ret
 }
 
-func (controller *ReviewController) GetOnesReviewsView(w http.ResponseWriter, r *http.Request) error {
+func (controller *ReviewController) GetOnesReviewsView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := r.URL.Query().Get("user")
-	revs, _ := controller.interactor.GetOnesReviews(userId)
-	api.JsonResponse(w, map[string]interface{}{"data": revs})
-	return nil
+	revs, err := controller.interactor.GetOnesReviews(userId)
+	ret = controller.api.Response(w, err, map[string]interface{}{"data": revs})
+	return ret
 }

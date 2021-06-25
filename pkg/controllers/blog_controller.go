@@ -2,18 +2,19 @@ package controllers
 
 import (
 	"animar/v1/pkg/domain"
+	"animar/v1/pkg/infrastructure"
+	"animar/v1/pkg/interfaces/apis"
 	"animar/v1/pkg/interfaces/database"
-	"animar/v1/pkg/tools/api"
 	"animar/v1/pkg/tools/fire"
 	"animar/v1/pkg/usecase"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"strconv"
 )
 
 type BlogController struct {
 	interactor domain.BlogInteractor
+	api        apis.ApiResponse
 }
 
 func NewBlogController(sqlHandler database.SqlHandler) *BlogController {
@@ -23,16 +24,17 @@ func NewBlogController(sqlHandler database.SqlHandler) *BlogController {
 				SqlHandler: sqlHandler,
 			},
 		),
+		api: infrastructure.NewApiResponse(),
 	}
 }
 
-func (controller *BlogController) BlogListView(w http.ResponseWriter, r *http.Request) error {
-	blogs, _ := controller.interactor.ListBlog()
-	api.JsonResponse(w, map[string]interface{}{"data": blogs})
-	return nil
+func (controller *BlogController) BlogListView(w http.ResponseWriter, r *http.Request) (ret error) {
+	blogs, err := controller.interactor.ListBlog()
+	ret = controller.api.Response(w, err, map[string]interface{}{"data": blogs})
+	return ret
 }
 
-func (controller *BlogController) BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) error {
+func (controller *BlogController) BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) (ret error) {
 	var userId string
 	switch r.Method {
 	case "GET":
@@ -51,42 +53,41 @@ func (controller *BlogController) BlogJoinAnimeView(w http.ResponseWriter, r *ht
 	uid := query.Get("u")
 
 	if slug != "" {
-		blog, _ := controller.interactor.DetailBlogBySlug(slug)
+		blog, err := controller.interactor.DetailBlogBySlug(slug)
 		blog.Animes, _ = controller.interactor.RelationAnimeByBlog(blog.GetId())
-		api.JsonResponse(w, map[string]interface{}{"data": blog})
+		ret = controller.api.Response(w, err, map[string]interface{}{"data": blog})
 	} else if id != "" {
 		i, _ := strconv.Atoi(id)
-		blog, _ := controller.interactor.DetailBlog(i)
+		blog, err := controller.interactor.DetailBlog(i)
 		blog.Animes, _ = controller.interactor.RelationAnimeByBlog(i)
-		api.JsonResponse(w, map[string]interface{}{"data": blog})
+		ret = controller.api.Response(w, err, map[string]interface{}{"data": blog})
 	} else if uid != "" {
-		blogs, _ := controller.interactor.ListBlogByUser(userId, uid)
-		api.JsonResponse(w, map[string]interface{}{"data": blogs})
+		blogs, err := controller.interactor.ListBlogByUser(userId, uid)
+		ret = controller.api.Response(w, err, map[string]interface{}{"data": blogs})
 	} else {
-		blogs, _ := controller.interactor.ListBlog()
-		api.JsonResponse(w, map[string]interface{}{"data": blogs})
+		blogs, err := controller.interactor.ListBlog()
+		ret = controller.api.Response(w, err, map[string]interface{}{"data": blogs})
 	}
-	return nil
+	return ret
 }
 
-func (controller *BlogController) InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
+func (controller *BlogController) InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return errors.New("Unauthorized")
+		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
 	} else {
 		var p domain.TBlogInsert
 		json.NewDecoder(r.Body).Decode(&p)
-		lastInserted, _ := controller.interactor.InsertBlog(p, userId)
+		lastInserted, err := controller.interactor.InsertBlog(p, userId)
 		for _, animeId := range p.AnimeIds {
 			controller.interactor.InsertRelationAnime(animeId, lastInserted)
 		}
-		api.JsonResponse(w, map[string]interface{}{"data": lastInserted})
+		ret = controller.api.Response(w, err, map[string]interface{}{"data": lastInserted})
 	}
-	return nil
+	return ret
 }
 
-func (controller *BlogController) UpdateBlogWithRelationView(w http.ResponseWriter, r *http.Request) error {
+func (controller *BlogController) UpdateBlogWithRelationView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := fire.GetIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -96,17 +97,17 @@ func (controller *BlogController) UpdateBlogWithRelationView(w http.ResponseWrit
 	// user 不一致
 	blogUserId, _ := controller.interactor.BlogUserId(id)
 	if blogUserId != userId {
-		w.WriteHeader(http.StatusForbidden)
-		return errors.New("Forbidden")
+		ret = controller.api.Response(w, domain.ErrForbidden, nil)
+	} else {
+		var p domain.TBlogInsert
+		json.NewDecoder(r.Body).Decode(&p)
+		rowsAffected, err := controller.interactor.UpdateBlog(p, id)
+		ret = controller.api.Response(w, err, map[string]interface{}{"data": rowsAffected})
 	}
-	var p domain.TBlogInsert
-	json.NewDecoder(r.Body).Decode(&p)
-	rowsAffected, _ := controller.interactor.UpdateBlog(p, id)
-	api.JsonResponse(w, map[string]interface{}{"data": rowsAffected})
-	return nil
+	return ret
 }
 
-func (controller *BlogController) DeleteBlogView(w http.ResponseWriter, r *http.Request) error {
+func (controller *BlogController) DeleteBlogView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := fire.GetIdFromCookie(r)
 
 	query := r.URL.Query()
@@ -116,10 +117,10 @@ func (controller *BlogController) DeleteBlogView(w http.ResponseWriter, r *http.
 	// user 不一致
 	blogUserId, _ := controller.interactor.BlogUserId(id)
 	if blogUserId != userId {
-		w.WriteHeader(http.StatusForbidden)
-		return errors.New("Forbidden")
+		ret = controller.api.Response(w, domain.ErrForbidden, nil)
+	} else {
+		deletedRow, err := controller.interactor.DeleteBlog(id)
+		ret = controller.api.Response(w, err, map[string]interface{}{"data": deletedRow})
 	}
-	deletedRow, _ := controller.interactor.DeleteBlog(id)
-	api.JsonResponse(w, map[string]interface{}{"data": deletedRow})
-	return nil
+	return ret
 }

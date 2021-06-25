@@ -209,6 +209,7 @@ func (repo *AnimeRepository) FindBySlug(slug string) (a domain.TAnimeWithSeries,
 		&a.CreatedAt, &a.UpdatedAt, &a.SeriesName,
 	)
 	if err != nil {
+		err = domain.ErrNotFound
 		tools.ErrorLog(err)
 		return
 	}
