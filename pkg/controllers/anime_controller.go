@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"animar/v1/pkg/domain"
+	"animar/v1/pkg/infrastructure"
+	"animar/v1/pkg/interfaces/apis"
 	"animar/v1/pkg/interfaces/database"
 	"animar/v1/pkg/tools/api"
 	"animar/v1/pkg/tools/fire"
@@ -14,6 +16,7 @@ import (
 
 type AnimeController struct {
 	interactor domain.AnimeInteractor
+	api        apis.ApiResponse
 }
 
 func NewAnimeController(sqlHandler database.SqlHandler) *AnimeController {
@@ -26,6 +29,7 @@ func NewAnimeController(sqlHandler database.SqlHandler) *AnimeController {
 				SqlHandler: sqlHandler,
 			},
 		),
+		api: infrastructure.NewApiResponse(),
 	}
 }
 
@@ -58,7 +62,6 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 			w.WriteHeader(http.StatusNotFound)
 			return errors.New("Not Found")
 		}
-		// @TODO add review
 		userId := fire.GetIdFromCookie(r)
 		revs, _ := controller.interactor.ReviewFilterByAnime(a.GetId(), userId)
 		api.JsonResponse(w, map[string]interface{}{"anime": a, "reviews": revs})
