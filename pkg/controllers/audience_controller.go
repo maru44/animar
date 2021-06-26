@@ -2,12 +2,14 @@ package controllers
 
 import (
 	"animar/v1/pkg/domain"
+	"animar/v1/pkg/infrastructure"
 	"animar/v1/pkg/interfaces/apis"
 	"animar/v1/pkg/interfaces/database"
 	"animar/v1/pkg/tools/fire"
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -24,6 +26,7 @@ func NewAudienceController(sqlHandler database.SqlHandler) *AudienceController {
 				SqlHandler: sqlHandler,
 			},
 		),
+		api: infrastructure.NewApiResponse(),
 	}
 }
 
@@ -32,6 +35,7 @@ func (controller *AudienceController) AnimeAudienceCountsView(w http.ResponseWri
 	animeId, _ := strconv.Atoi(animeIdStr)
 
 	audiences, err := controller.interactor.AnimeAudienceCounts(animeId)
+	fmt.Println(audiences, err)
 	ret = controller.api.Response(w, err, map[string]interface{}{"data": audiences})
 	return ret
 }
