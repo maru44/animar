@@ -94,6 +94,10 @@ func main() {
 	http.HandleFunc("/admin/relation/plat/post/", handler.Handle(middleware.PostOnlyMiddleware, middleware.AdminRequiredMiddleware, adminController.InsertRelationPlatformView))
 	http.HandleFunc("/admin/relation/plat/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, middleware.AdminRequiredMiddleware, adminController.DeleteRelationPlatformView)) // ?anime=<anime_id>&platform=<platform_id>
 
+	/*   utilities   */
+	utilityController := controllers.NewUtilityController()
+	http.HandleFunc("/utils/s3/", handler.Handle(middleware.PostOnlyMiddleware, utilityController.SimpleUploadImage))
+
 	if tools.IsProductionEnv() {
 		//http.ListenAndServeTLS(":443", os.Getenv("SSL_CHAIN_PATH"), os.Getenv("SSL_KEY_PATH"), nil)
 		http.ListenAndServe(":8000", nil) // reverse proxy

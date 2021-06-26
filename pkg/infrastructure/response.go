@@ -42,6 +42,8 @@ func getStatusCode(err error) int {
 		return http.StatusBadRequest
 	case domain.StatusCreated:
 		return http.StatusCreated
+	case domain.ErrUnknownType:
+		return http.StatusUnsupportedMediaType
 	default:
 		return http.StatusInternalServerError
 	}

@@ -8,5 +8,6 @@ var (
 	ErrForbidden           = errors.New("Forbidden")
 	ErrUnauthorized        = errors.New("Unauthorized")
 	ErrBadRequest          = errors.New("Bad Request")
+	ErrUnknownType         = errors.New("Unknow Type")
 	StatusCreated          = errors.New("Created")
 )
