@@ -2,9 +2,9 @@ package s3
 
 import (
 	"animar/v1/configs"
+	"animar/v1/pkg/domain"
 	"animar/v1/pkg/tools/tools"
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -36,7 +36,7 @@ func S3Session() *session.Session {
 func UploadS3(file multipart.File, fileName string, pathList []string) (string, error) {
 	contentType := getContentType(filepath.Ext(fileName))
 	if contentType == "" {
-		return "", errors.New("Unknown type")
+		return "", domain.ErrUnknownType
 	}
 
 	sess := S3Session()
