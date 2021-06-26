@@ -45,8 +45,9 @@ func (controller *ReviewController) GetAnimeReviewOfUserView(w http.ResponseWrit
 	if userId == "" {
 		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
 	} else {
-		rev, err := controller.interactor.GetOnesReviewByAnime(animeId, userId)
-		ret = controller.api.Response(w, err, map[string]interface{}{"data": rev})
+		rev, _ := controller.interactor.GetOnesReviewByAnime(animeId, userId)
+		// 一旦 nil にしない。これはユーザーの視聴データが無いときにも対応するため
+		ret = controller.api.Response(w, nil, map[string]interface{}{"data": rev})
 	}
 	return ret
 }

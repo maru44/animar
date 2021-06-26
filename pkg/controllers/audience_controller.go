@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"animar/v1/pkg/domain"
+	"animar/v1/pkg/infrastructure"
 	"animar/v1/pkg/interfaces/apis"
 	"animar/v1/pkg/interfaces/database"
 	"animar/v1/pkg/tools/fire"
@@ -24,6 +25,7 @@ func NewAudienceController(sqlHandler database.SqlHandler) *AudienceController {
 				SqlHandler: sqlHandler,
 			},
 		),
+		api: infrastructure.NewApiResponse(),
 	}
 }
 
@@ -82,8 +84,9 @@ func (controller *AudienceController) AudienceByAnimeAndUserView(w http.Response
 	if userId == "" {
 		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
 	} else {
-		watch, err := controller.interactor.AudienceByAnimeAndUser(animeId, userId)
-		ret = controller.api.Response(w, err, map[string]interface{}{"data": watch})
+		watch, _ := controller.interactor.AudienceByAnimeAndUser(animeId, userId)
+		// 一旦 nil にしない。これはユーザーの視聴データが無いときにも対応するため
+		ret = controller.api.Response(w, nil, map[string]interface{}{"data": watch})
 	}
 	return ret
 }
