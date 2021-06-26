@@ -2,19 +2,19 @@ package controllers
 
 import (
 	"animar/v1/pkg/domain"
+	"animar/v1/pkg/interfaces/apis"
 	"animar/v1/pkg/interfaces/database"
-	"animar/v1/pkg/tools/api"
 	"animar/v1/pkg/tools/fire"
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"strconv"
 )
 
 type AudienceController struct {
 	interactor domain.AudienceInteractor
+	api        apis.ApiResponse
 }
 
 func NewAudienceController(sqlHandler database.SqlHandler) *AudienceController {
@@ -27,66 +27,63 @@ func NewAudienceController(sqlHandler database.SqlHandler) *AudienceController {
 	}
 }
 
-func (controller *AudienceController) AnimeAudienceCountsView(w http.ResponseWriter, r *http.Request) error {
+func (controller *AudienceController) AnimeAudienceCountsView(w http.ResponseWriter, r *http.Request) (ret error) {
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
-	audiences, _ := controller.interactor.AnimeAudienceCounts(animeId)
-	api.JsonResponse(w, map[string]interface{}{"data": audiences})
-	return nil
+	audiences, err := controller.interactor.AnimeAudienceCounts(animeId)
+	ret = controller.api.Response(w, err, map[string]interface{}{"data": audiences})
+	return ret
 }
 
-func (controller *AudienceController) AudienceWithAnimeByUserView(w http.ResponseWriter, r *http.Request) error {
+func (controller *AudienceController) AudienceWithAnimeByUserView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := r.URL.Query().Get("user")
-	audiences, _ := controller.interactor.AudienceWithAnimeByUser(userId)
-	api.JsonResponse(w, map[string]interface{}{"data": audiences})
-	return nil
-
+	audiences, err := controller.interactor.AudienceWithAnimeByUser(userId)
+	ret = controller.api.Response(w, err, map[string]interface{}{"data": audiences})
+	return ret
 }
 
-func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, r *http.Request) error {
+func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return errors.New("Unauthorize")
+		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
+		return ret
 	}
 	var p domain.TAudienceInput
 	json.NewDecoder(r.Body).Decode(&p)
 	_, err := controller.interactor.UpsertAudience(p, userId)
 	if err != nil {
 		tools.ErrorLog(err)
-		return err
 	}
-	api.JsonResponse(w, map[string]interface{}{"data": p.State})
-	return nil
+	ret = controller.api.Response(w, err, map[string]interface{}{"data": p.State})
+	return ret
 }
 
-func (controller *AudienceController) DeleteAudienceView(w http.ResponseWriter, r *http.Request) error {
+func (controller *AudienceController) DeleteAudienceView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return errors.New("Unauthorize")
+		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
+		return ret
 	}
 
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
-	_, _ = controller.interactor.DeleteAudience(animeId, userId)
-	api.JsonResponse(w, map[string]interface{}{})
-	return nil
+	_, err := controller.interactor.DeleteAudience(animeId, userId)
+	ret = controller.api.Response(w, err, nil)
+	return ret
 }
 
-func (controller *AudienceController) AudienceByAnimeAndUserView(w http.ResponseWriter, r *http.Request) error {
+func (controller *AudienceController) AudienceByAnimeAndUserView(w http.ResponseWriter, r *http.Request) (ret error) {
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return errors.New("Unauthorize")
+		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
 	} else {
-		watch, _ := controller.interactor.AudienceByAnimeAndUser(animeId, userId)
-		api.JsonResponse(w, map[string]interface{}{"data": watch})
+		watch, err := controller.interactor.AudienceByAnimeAndUser(animeId, userId)
+		ret = controller.api.Response(w, err, map[string]interface{}{"data": watch})
 	}
-	return nil
+	return ret
 }
