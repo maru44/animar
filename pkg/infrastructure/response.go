@@ -4,6 +4,7 @@ import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/apis"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -16,6 +17,7 @@ func NewApiResponse() apis.ApiResponse {
 
 func (api *ApiResponse) Response(w http.ResponseWriter, err error, body map[string]interface{}) error {
 	status := getStatusCode(err)
+	fmt.Println(err, status)
 	w.WriteHeader(status)
 	if status == http.StatusOK {
 		data, _ := json.Marshal(body)

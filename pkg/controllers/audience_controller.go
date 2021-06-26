@@ -9,7 +9,6 @@ import (
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -35,7 +34,6 @@ func (controller *AudienceController) AnimeAudienceCountsView(w http.ResponseWri
 	animeId, _ := strconv.Atoi(animeIdStr)
 
 	audiences, err := controller.interactor.AnimeAudienceCounts(animeId)
-	fmt.Println(audiences, err)
 	ret = controller.api.Response(w, err, map[string]interface{}{"data": audiences})
 	return ret
 }
@@ -86,8 +84,9 @@ func (controller *AudienceController) AudienceByAnimeAndUserView(w http.Response
 	if userId == "" {
 		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
 	} else {
-		watch, err := controller.interactor.AudienceByAnimeAndUser(animeId, userId)
-		ret = controller.api.Response(w, err, map[string]interface{}{"data": watch})
+		watch, _ := controller.interactor.AudienceByAnimeAndUser(animeId, userId)
+		// 一旦 nil にしない。これはユーザーの視聴データが無いときにも対応するため
+		ret = controller.api.Response(w, nil, map[string]interface{}{"data": watch})
 	}
 	return ret
 }
