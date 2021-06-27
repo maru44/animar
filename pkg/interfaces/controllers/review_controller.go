@@ -2,8 +2,6 @@ package controllers
 
 import (
 	"animar/v1/pkg/domain"
-	"animar/v1/pkg/infrastructure"
-	"animar/v1/pkg/interfaces/apis"
 	"animar/v1/pkg/interfaces/database"
 	"animar/v1/pkg/tools/fire"
 	"animar/v1/pkg/usecase"
@@ -14,7 +12,6 @@ import (
 
 type ReviewController struct {
 	interactor domain.ReviewInteractor
-	api        apis.ApiResponse
 }
 
 func NewReviewController(sqlHandler database.SqlHandler) *ReviewController {
@@ -24,7 +21,6 @@ func NewReviewController(sqlHandler database.SqlHandler) *ReviewController {
 				SqlHandler: sqlHandler,
 			},
 		),
-		api: infrastructure.NewApiResponse(),
 	}
 }
 
@@ -34,7 +30,7 @@ func (controller *ReviewController) GetAnimeReviewsView(w http.ResponseWriter, r
 	animeId, _ := strconv.Atoi(animeIdStr)
 	revs, err := controller.interactor.GetAnimeReviews(animeId, userId)
 
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": revs})
+	ret = response(w, err, map[string]interface{}{"data": revs})
 	return ret
 }
 
@@ -43,11 +39,11 @@ func (controller *ReviewController) GetAnimeReviewOfUserView(w http.ResponseWrit
 	animeId, _ := strconv.Atoi(animeIdStr)
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
+		ret = response(w, domain.ErrUnauthorized, nil)
 	} else {
 		rev, _ := controller.interactor.GetOnesReviewByAnime(animeId, userId)
 		// 一旦 nil にしない。これはユーザーの視聴データが無いときにも対応するため
-		ret = controller.api.Response(w, nil, map[string]interface{}{"data": rev})
+		ret = response(w, nil, map[string]interface{}{"data": rev})
 	}
 	return ret
 }
@@ -55,12 +51,12 @@ func (controller *ReviewController) GetAnimeReviewOfUserView(w http.ResponseWrit
 func (controller *ReviewController) UpsertReviewContentView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
+		ret = response(w, domain.ErrUnauthorized, nil)
 	} else {
 		var posted domain.TReviewInput
 		json.NewDecoder(r.Body).Decode(&posted)
 		value, err := controller.interactor.UpsertReviewContent(posted, userId)
-		ret = controller.api.Response(w, err, map[string]interface{}{"data": value})
+		ret = response(w, err, map[string]interface{}{"data": value})
 	}
 	return ret
 }
@@ -68,12 +64,12 @@ func (controller *ReviewController) UpsertReviewContentView(w http.ResponseWrite
 func (controller *ReviewController) UpsertReviewRatingView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
+		ret = response(w, domain.ErrUnauthorized, nil)
 	} else {
 		var posted domain.TReviewInput
 		json.NewDecoder(r.Body).Decode(&posted)
 		value, err := controller.interactor.UpsertReviewRating(posted, userId)
-		ret = controller.api.Response(w, err, map[string]interface{}{"data": value})
+		ret = response(w, err, map[string]interface{}{"data": value})
 	}
 	return ret
 }
@@ -82,13 +78,13 @@ func (controller *ReviewController) AnimeRatingAvgView(w http.ResponseWriter, r 
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 	avg, err := controller.interactor.GetRatingAverage(animeId)
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": avg})
+	ret = response(w, err, map[string]interface{}{"data": avg})
 	return ret
 }
 
 func (controller *ReviewController) GetOnesReviewsView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := r.URL.Query().Get("user")
 	revs, err := controller.interactor.GetOnesReviews(userId)
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": revs})
+	ret = response(w, err, map[string]interface{}{"data": revs})
 	return ret
 }

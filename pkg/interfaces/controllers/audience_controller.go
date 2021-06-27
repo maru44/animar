@@ -2,8 +2,6 @@ package controllers
 
 import (
 	"animar/v1/pkg/domain"
-	"animar/v1/pkg/infrastructure"
-	"animar/v1/pkg/interfaces/apis"
 	"animar/v1/pkg/interfaces/database"
 	"animar/v1/pkg/tools/fire"
 	"animar/v1/pkg/tools/tools"
@@ -15,7 +13,6 @@ import (
 
 type AudienceController struct {
 	interactor domain.AudienceInteractor
-	api        apis.ApiResponse
 }
 
 func NewAudienceController(sqlHandler database.SqlHandler) *AudienceController {
@@ -25,7 +22,6 @@ func NewAudienceController(sqlHandler database.SqlHandler) *AudienceController {
 				SqlHandler: sqlHandler,
 			},
 		),
-		api: infrastructure.NewApiResponse(),
 	}
 }
 
@@ -34,21 +30,21 @@ func (controller *AudienceController) AnimeAudienceCountsView(w http.ResponseWri
 	animeId, _ := strconv.Atoi(animeIdStr)
 
 	audiences, err := controller.interactor.AnimeAudienceCounts(animeId)
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": audiences})
+	ret = response(w, err, map[string]interface{}{"data": audiences})
 	return ret
 }
 
 func (controller *AudienceController) AudienceWithAnimeByUserView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := r.URL.Query().Get("user")
 	audiences, err := controller.interactor.AudienceWithAnimeByUser(userId)
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": audiences})
+	ret = response(w, err, map[string]interface{}{"data": audiences})
 	return ret
 }
 
 func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
+		ret = response(w, domain.ErrUnauthorized, nil)
 		return ret
 	}
 	var p domain.TAudienceInput
@@ -57,14 +53,14 @@ func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, 
 	if err != nil {
 		tools.ErrorLog(err)
 	}
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": p.State})
+	ret = response(w, err, map[string]interface{}{"data": p.State})
 	return ret
 }
 
 func (controller *AudienceController) DeleteAudienceView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
+		ret = response(w, domain.ErrUnauthorized, nil)
 		return ret
 	}
 
@@ -72,7 +68,7 @@ func (controller *AudienceController) DeleteAudienceView(w http.ResponseWriter, 
 	animeId, _ := strconv.Atoi(animeIdStr)
 
 	_, err := controller.interactor.DeleteAudience(animeId, userId)
-	ret = controller.api.Response(w, err, nil)
+	ret = response(w, err, nil)
 	return ret
 }
 
@@ -82,11 +78,11 @@ func (controller *AudienceController) AudienceByAnimeAndUserView(w http.Response
 
 	userId := fire.GetIdFromCookie(r)
 	if userId == "" {
-		ret = controller.api.Response(w, domain.ErrUnauthorized, nil)
+		ret = response(w, domain.ErrUnauthorized, nil)
 	} else {
 		watch, _ := controller.interactor.AudienceByAnimeAndUser(animeId, userId)
 		// 一旦 nil にしない。これはユーザーの視聴データが無いときにも対応するため
-		ret = controller.api.Response(w, nil, map[string]interface{}{"data": watch})
+		ret = response(w, nil, map[string]interface{}{"data": watch})
 	}
 	return ret
 }
