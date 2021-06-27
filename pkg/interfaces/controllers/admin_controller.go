@@ -2,8 +2,6 @@ package controllers
 
 import (
 	"animar/v1/pkg/domain"
-	"animar/v1/pkg/infrastructure"
-	"animar/v1/pkg/interfaces/apis"
 	"animar/v1/pkg/interfaces/database"
 	"animar/v1/pkg/tools/api"
 	"animar/v1/pkg/tools/fire"
@@ -18,7 +16,6 @@ import (
 
 type AdminController struct {
 	interactor domain.AdminInteractor
-	api        apis.ApiResponse
 }
 
 func NewAdminController(sqlHandler database.SqlHandler) *AdminController {
@@ -37,7 +34,6 @@ func NewAdminController(sqlHandler database.SqlHandler) *AdminController {
 				SqlHandler: sqlHandler,
 			},
 		),
-		api: infrastructure.NewApiResponse(),
 	}
 }
 
@@ -47,7 +43,7 @@ func NewAdminController(sqlHandler database.SqlHandler) *AdminController {
 
 func (controller *AdminController) AnimeListAdminView(w http.ResponseWriter, r *http.Request) (ret error) {
 	animes, err := controller.interactor.AnimesAllAdmin()
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": animes})
+	ret = response(w, err, map[string]interface{}{"data": animes})
 	return ret
 }
 
@@ -63,7 +59,7 @@ func (controller *AdminController) AnimeDetailAdminView(w http.ResponseWriter, r
 	if err != nil {
 		tools.ErrorLog(err)
 	}
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": anime})
+	ret = response(w, err, map[string]interface{}{"data": anime})
 	return ret
 }
 
@@ -78,7 +74,7 @@ func (controller *AdminController) AnimePostAdminView(w http.ResponseWriter, r *
 
 		if err != nil {
 			tools.ErrorLog(err)
-			ret = controller.api.Response(w, err, nil)
+			ret = response(w, err, nil)
 			return ret
 		}
 	} else { // w/o thumb picture
@@ -104,7 +100,7 @@ func (controller *AdminController) AnimePostAdminView(w http.ResponseWriter, r *
 	if err != nil {
 		tools.ErrorLog(err)
 	}
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": insertedId})
+	ret = response(w, err, map[string]interface{}{"data": insertedId})
 	return ret
 }
 
@@ -122,7 +118,7 @@ func (controller *AdminController) AnimeUpdateView(w http.ResponseWriter, r *htt
 		returnFileName, err = s3.UploadS3(file, fileHeader.Filename, []string{"anime"})
 		if err != nil {
 			tools.ErrorLog(err)
-			ret = controller.api.Response(w, err, nil)
+			ret = response(w, err, nil)
 			return ret
 		}
 	} else {
@@ -147,7 +143,7 @@ func (controller *AdminController) AnimeUpdateView(w http.ResponseWriter, r *htt
 	if err != nil {
 		tools.ErrorLog(err)
 	}
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": rowsAffected})
+	ret = response(w, err, map[string]interface{}{"data": rowsAffected})
 	return ret
 }
 
@@ -160,7 +156,7 @@ func (controller *AdminController) AnimeDeleteView(w http.ResponseWriter, r *htt
 	if err != nil {
 		tools.ErrorLog(err)
 	}
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": rowsAffected})
+	ret = response(w, err, map[string]interface{}{"data": rowsAffected})
 	return ret
 }
 
@@ -178,10 +174,10 @@ func (controller *AdminController) PlatformView(w http.ResponseWriter, r *http.R
 		if err != nil || platform.ID == 0 {
 			err = domain.ErrNotFound
 		}
-		ret = controller.api.Response(w, err, map[string]interface{}{"data": platform})
+		ret = response(w, err, map[string]interface{}{"data": platform})
 	} else {
 		platforms, err := controller.interactor.PlatformAllAdmin()
-		ret = controller.api.Response(w, err, map[string]interface{}{"data": platforms})
+		ret = response(w, err, map[string]interface{}{"data": platforms})
 	}
 	return ret
 }
@@ -213,7 +209,7 @@ func (controller *AdminController) PlatformInsertView(w http.ResponseWriter, r *
 		IsValid:  isValid,
 	}
 	lastInserted, err := controller.interactor.PlatformInsert(p)
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": lastInserted})
+	ret = response(w, err, map[string]interface{}{"data": lastInserted})
 	return ret
 }
 
@@ -248,7 +244,7 @@ func (controller *AdminController) PlatformUpdateView(w http.ResponseWriter, r *
 		IsValid:  isValid,
 	}
 	rowsAffected, err := controller.interactor.PlatformUpdate(p, id)
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": rowsAffected})
+	ret = response(w, err, map[string]interface{}{"data": rowsAffected})
 	return ret
 }
 
@@ -258,7 +254,7 @@ func (controller *AdminController) PlatformDeleteview(w http.ResponseWriter, r *
 	id, _ := strconv.Atoi(strId)
 
 	rowsAffected, err := controller.interactor.PlatformDelete(id)
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": rowsAffected})
+	ret = response(w, err, map[string]interface{}{"data": rowsAffected})
 	return ret
 }
 
@@ -267,7 +263,7 @@ func (controller *AdminController) RelationPlatformView(w http.ResponseWriter, r
 	strId := query.Get("id") // animeId
 	id, _ := strconv.Atoi(strId)
 	relations, err := controller.interactor.RelationPlatformByAnime(id)
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": relations})
+	ret = response(w, err, map[string]interface{}{"data": relations})
 	return ret
 }
 
@@ -278,7 +274,7 @@ func (controller *AdminController) InsertRelationPlatformView(w http.ResponseWri
 	if err != nil {
 		tools.ErrorLog(err)
 	}
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": lastInserted})
+	ret = response(w, err, map[string]interface{}{"data": lastInserted})
 	return ret
 }
 
@@ -293,7 +289,7 @@ func (controller *AdminController) DeleteRelationPlatformView(w http.ResponseWri
 	if err != nil {
 		tools.ErrorLog(err)
 	}
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": rowsAffected})
+	ret = response(w, err, map[string]interface{}{"data": rowsAffected})
 	return ret
 }
 
@@ -308,10 +304,10 @@ func (controller *AdminController) SeasonView(w http.ResponseWriter, r *http.Req
 	if id != "" {
 		i, _ := strconv.Atoi(id)
 		s, err := controller.interactor.DetailSeason(i)
-		ret = controller.api.Response(w, err, map[string]interface{}{"data": s})
+		ret = response(w, err, map[string]interface{}{"data": s})
 	} else {
 		s, err := controller.interactor.ListSeason()
-		ret = controller.api.Response(w, err, map[string]interface{}{"data": s})
+		ret = response(w, err, map[string]interface{}{"data": s})
 	}
 	return ret
 }
@@ -323,7 +319,7 @@ func (controller *AdminController) InsertSeasonView(w http.ResponseWriter, r *ht
 	if err != nil {
 		tools.ErrorLog(err)
 	}
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": lastInserted})
+	ret = response(w, err, map[string]interface{}{"data": lastInserted})
 	return ret
 }
 
@@ -331,7 +327,7 @@ func (controller *AdminController) InsertRelationSeasonView(w http.ResponseWrite
 	userId := fire.GetAdminIdFromCookie(r)
 
 	if userId == "" {
-		ret = controller.api.Response(w, domain.ErrForbidden, nil)
+		ret = response(w, domain.ErrForbidden, nil)
 	} else {
 		var s domain.TSeasonRelationInput
 		json.NewDecoder(r.Body).Decode(&s)
@@ -339,7 +335,7 @@ func (controller *AdminController) InsertRelationSeasonView(w http.ResponseWrite
 		if err != nil {
 			tools.ErrorLog(err)
 		}
-		ret = controller.api.Response(w, err, map[string]interface{}{"data": lastInserted})
+		ret = response(w, err, map[string]interface{}{"data": lastInserted})
 	}
 	return ret
 }
@@ -355,10 +351,10 @@ func (controller *AdminController) SeriesView(w http.ResponseWriter, r *http.Req
 	if id != "" {
 		i, _ := strconv.Atoi(id)
 		s, err := controller.interactor.DetailSeries(i)
-		ret = controller.api.Response(w, err, map[string]interface{}{"data": s})
+		ret = response(w, err, map[string]interface{}{"data": s})
 	} else {
 		s, err := controller.interactor.ListSeries()
-		ret = controller.api.Response(w, err, map[string]interface{}{"data": s})
+		ret = response(w, err, map[string]interface{}{"data": s})
 	}
 	return ret
 }
@@ -370,7 +366,7 @@ func (controller *AdminController) InsertSeriesView(w http.ResponseWriter, r *ht
 	if err != nil {
 		tools.ErrorLog(err)
 	}
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": lastInserted})
+	ret = response(w, err, map[string]interface{}{"data": lastInserted})
 	return ret
 }
 
@@ -385,6 +381,6 @@ func (controller *AdminController) UpdateSeriesView(w http.ResponseWriter, r *ht
 	if err != nil {
 		tools.ErrorLog(err)
 	}
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": rowsAffected})
+	ret = response(w, err, map[string]interface{}{"data": rowsAffected})
 	return ret
 }

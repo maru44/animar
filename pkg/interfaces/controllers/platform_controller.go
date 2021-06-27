@@ -2,8 +2,6 @@ package controllers
 
 import (
 	"animar/v1/pkg/domain"
-	"animar/v1/pkg/infrastructure"
-	"animar/v1/pkg/interfaces/apis"
 	"animar/v1/pkg/interfaces/database"
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
@@ -13,7 +11,6 @@ import (
 
 type PlatformController struct {
 	interactor domain.PlatformInteractor
-	api        apis.ApiResponse
 }
 
 func NewPlatformController(sqlHandler database.SqlHandler) *PlatformController {
@@ -23,7 +20,6 @@ func NewPlatformController(sqlHandler database.SqlHandler) *PlatformController {
 				SqlHandler: sqlHandler,
 			},
 		),
-		api: infrastructure.NewApiResponse(),
 	}
 }
 
@@ -36,6 +32,6 @@ func (controller *PlatformController) RelationPlatformByAnimeView(w http.Respons
 	if err != nil {
 		tools.ErrorLog(err)
 	}
-	ret = controller.api.Response(w, err, map[string]interface{}{"data": platforms})
+	ret = response(w, err, map[string]interface{}{"data": platforms})
 	return ret
 }

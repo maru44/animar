@@ -1,8 +1,8 @@
 package main
 
 import (
-	"animar/v1/pkg/controllers"
 	"animar/v1/pkg/infrastructure"
+	"animar/v1/pkg/interfaces/controllers"
 	"animar/v1/pkg/mvc/auth"
 	"animar/v1/pkg/tools/handler"
 	"animar/v1/pkg/tools/middleware"

@@ -74,10 +74,6 @@ func DestroyCookie(w http.ResponseWriter, key string) bool {
 	return true
 }
 
-type Api interface {
-	ResponseWrite(w http.ResponseWriter) bool
-}
-
 func (result TBaseJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
 	res, err := json.Marshal(result)
 
