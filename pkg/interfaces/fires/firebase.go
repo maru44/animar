@@ -6,16 +6,6 @@ import (
 	"firebase.google.com/go/v4/auth"
 )
 
-// type Option interface {
-// 	WithCredentialsFile(string) ClientOption
-// }
-
-// type ClientOption interface {
-// 	Apply(DialSettings)
-// }
-
-// app
-
 type Firebase interface {
 	Auth(context.Context) (Client, error)
 }
