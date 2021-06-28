@@ -3,9 +3,12 @@ package fires
 import (
 	"animar/v1/configs"
 	"animar/v1/pkg/domain"
+	"animar/v1/pkg/tools/mysmtp"
 	"animar/v1/pkg/tools/tools"
 	"context"
 	"strings"
+
+	"firebase.google.com/go/v4/auth"
 )
 
 type AuthRepository struct {
@@ -39,15 +42,50 @@ func (repo *AuthRepository) IsAdmin(userId string) bool {
 	return tools.IsContainString(admins, userId)
 }
 
-func (repo *AuthRepository) GetAdminId(ctx context.Context, idToken string) string {
+func (repo *AuthRepository) GetAdminId(ctx context.Context, idToken string) (userId string, err error) {
 	claims, err := repo.GetClaims(ctx, idToken)
 	if err != nil {
-		return ""
+		return
 	}
-	id := claims["user_id"].(string)
-	isAdmin := repo.IsAdmin(id)
+	userId = claims["user_id"].(string)
+	isAdmin := repo.IsAdmin(userId)
 	if !isAdmin {
-		return ""
+		err = domain.ErrForbidden
+		return
 	}
-	return id
+	return
+}
+
+func (repo *AuthRepository) SendVerifyEmail(ctx context.Context, email string) (err error) {
+	protocol := "http://"
+	if tools.IsProductionEnv() {
+		protocol = "https://"
+	}
+
+	client, err := repo.Firebase.Auth(ctx)
+	settings := &auth.ActionCodeSettings{
+		URL:             protocol + configs.FrontHost + configs.FrontPort + "/auth" + "/confirmed",
+		HandleCodeInApp: false,
+	}
+	link, err := client.EmailVerificationLinkWithSettings(ctx, email, settings)
+	err = mysmtp.SendVerifyEmail(email, link)
+	return err
+}
+
+func (repo *AuthRepository) Update(ctx context.Context, userId string, params domain.TProfileForm) (domain.TUserInfo, error) {
+	client, err := repo.Firebase.Auth(ctx)
+	var params_ auth.UserToUpdate
+	if params.PhotoUrl != "" {
+		params_.DisplayName(params.DisplayName)
+	}
+	params_.PhotoURL(params.DisplayName)
+	u, err := client.UpdateUser(ctx, userId, &params_)
+	user := domain.TUserInfo{
+		DisplayName: u.UserInfo.DisplayName,
+		Email:       u.UserInfo.Email,
+		PhotoURL:    u.UserInfo.PhotoURL,
+		ProviderID:  u.UserInfo.ProviderID,
+		UID:         u.UserInfo.UID,
+	}
+	return user, err
 }

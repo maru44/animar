@@ -22,8 +22,10 @@ func NewAuthInteractor(auth AuthRepository) domain.AuthInteractor {
 type AuthRepository interface {
 	GetUserInfo(context.Context, string) (domain.TUserInfo, error)
 	GetClaims(context.Context, string) (map[string]interface{}, error)
-	IsAmin(string) bool
-	GetAdminId(context.Context, string) string
+	IsAdmin(string) bool
+	GetAdminId(context.Context, string) (string, error)
+	SendVerifyEmail(context.Context, string) error
+	Update(context.Context, string, domain.TProfileForm) (domain.TUserInfo, error)
 }
 
 /**********************
@@ -41,9 +43,17 @@ func (interactor *AuthInteractor) Claims(ctx context.Context, idToken string) (c
 }
 
 func (interactor *AuthInteractor) IsAdmin(userId string) bool {
-	return interactor.repository.IsAmin(userId)
+	return interactor.repository.IsAdmin(userId)
 }
 
-func (interactor *AuthInteractor) AdminId(ctx context.Context, idToken string) string {
+func (interactor *AuthInteractor) AdminId(ctx context.Context, idToken string) (string, error) {
 	return interactor.repository.GetAdminId(ctx, idToken)
+}
+
+func (interactor *AuthInteractor) SendVerify(ctx context.Context, email string) error {
+	return interactor.repository.SendVerifyEmail(ctx, email)
+}
+
+func (interactor *AuthInteractor) UpdateProfile(ctx context.Context, userId string, params domain.TProfileForm) (domain.TUserInfo, error) {
+	return interactor.repository.Update(ctx, userId, params)
 }
