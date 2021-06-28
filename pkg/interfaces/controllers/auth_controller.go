@@ -3,6 +3,7 @@ package controllers
 import (
 	"animar/v1/configs"
 	"animar/v1/pkg/domain"
+	"animar/v1/pkg/infrastructure"
 	"animar/v1/pkg/interfaces/fires"
 	"animar/v1/pkg/tools/api"
 	"animar/v1/pkg/tools/s3"
@@ -196,12 +197,20 @@ func (controller *AuthController) UpdateProfileView(w http.ResponseWriter, r *ht
 func (controller *AuthController) AdminRequiredMiddleware(w http.ResponseWriter, r *http.Request) (ret error) {
 	ctx := context.Background()
 	idToken, err := r.Cookie("idToken")
+	if err != nil {
+		ret = response(w, err, nil)
+		return
+	}
 	_, err = controller.interactor.AdminId(ctx, idToken.Value)
-	ret = response(w, err, nil)
+	if err != nil {
+		ret = response(w, err, nil)
+	} else {
+		err = nil
+	}
 	return
 }
 
-func (controller *AuthController) SSRAdminRequiredMiddleware(w http.ResponseWriter, r *http.Request) (ret error) {
+func (controller *AuthController) SSRAdminRequiredMiddleware(w http.ResponseWriter, r *http.Request) error {
 	ctx := context.Background()
 	var idToken string
 	var err error
@@ -209,7 +218,7 @@ func (controller *AuthController) SSRAdminRequiredMiddleware(w http.ResponseWrit
 	case "GET":
 		token, err := r.Cookie("idToken")
 		if err != nil {
-			ret = response(w, err, nil)
+			return response(w, err, nil)
 		}
 		idToken = token.Value
 	case "POST":
@@ -218,14 +227,14 @@ func (controller *AuthController) SSRAdminRequiredMiddleware(w http.ResponseWrit
 		idToken = p.Token
 	default:
 		err = domain.ErrForbidden
+		return err
 	}
 	_, err = controller.interactor.AdminId(ctx, idToken)
-	ret = response(w, err, nil)
-	return
+	return err
 }
 
 /************************
-        middleware
+        utility
 *************************/
 
 func (controller *AuthController) getClaimsFromCookie(r *http.Request, ctx context.Context) (claims map[string]interface{}, err error) {
@@ -233,3 +242,30 @@ func (controller *AuthController) getClaimsFromCookie(r *http.Request, ctx conte
 	claims, err = controller.interactor.Claims(ctx, idToken.Value)
 	return
 }
+
+func (controller *AuthController) getUserIdFromCookie(r *http.Request) (userId string, err error) {
+	ctx := context.Background()
+	idToken, err := r.Cookie("idToken")
+	if err != nil {
+		return
+	} else if idToken.Value == "" {
+		return
+	}
+	claims, err := controller.interactor.Claims(ctx, idToken.Value)
+	if err != nil {
+		return
+	}
+	userId = claims["user_id"].(string)
+	return
+}
+
+// @TODO 後で直す(基底ユースケース、コントローラーを作る)
+func GetUserId(r *http.Request) (string, error) {
+	fire := infrastructure.NewFireBaseClient()
+	controller := NewAuthController(fire)
+	return controller.getUserIdFromCookie(r)
+}
+
+// @TODO 追加 (これも基底ユースケース、コントローラー行)
+// fire.GetUserIdFromToken(posted.Token) を参照
+// func SSRGetUserId

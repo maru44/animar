@@ -3,8 +3,6 @@ package controllers
 import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/database"
-	"animar/v1/pkg/tools/api"
-	"animar/v1/pkg/tools/fire"
 	"animar/v1/pkg/tools/s3"
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
@@ -15,6 +13,7 @@ import (
 )
 
 type AdminController struct {
+	AuthController
 	interactor domain.AdminInteractor
 }
 
@@ -52,7 +51,7 @@ func (controller *AdminController) AnimeDetailAdminView(w http.ResponseWriter, r
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
 
-	var posted api.TUserToken
+	var posted domain.TUserToken
 	json.NewDecoder(r.Body).Decode(&posted)
 
 	anime, err := controller.interactor.AnimeDetailAdmin(id)
@@ -324,19 +323,13 @@ func (controller *AdminController) InsertSeasonView(w http.ResponseWriter, r *ht
 }
 
 func (controller *AdminController) InsertRelationSeasonView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId := fire.GetAdminIdFromCookie(r)
-
-	if userId == "" {
-		ret = response(w, domain.ErrForbidden, nil)
-	} else {
-		var s domain.TSeasonRelationInput
-		json.NewDecoder(r.Body).Decode(&s)
-		lastInserted, err := controller.interactor.InsertRelationSeasonAnime(s)
-		if err != nil {
-			tools.ErrorLog(err)
-		}
-		ret = response(w, err, map[string]interface{}{"data": lastInserted})
+	var s domain.TSeasonRelationInput
+	json.NewDecoder(r.Body).Decode(&s)
+	lastInserted, err := controller.interactor.InsertRelationSeasonAnime(s)
+	if err != nil {
+		tools.ErrorLog(err)
 	}
+	ret = response(w, err, map[string]interface{}{"data": lastInserted})
 	return ret
 }
 

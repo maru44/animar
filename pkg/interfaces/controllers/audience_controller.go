@@ -3,7 +3,6 @@ package controllers
 import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/database"
-	"animar/v1/pkg/tools/fire"
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
 	"encoding/json"
@@ -42,7 +41,7 @@ func (controller *AudienceController) AudienceWithAnimeByUserView(w http.Respons
 }
 
 func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId := fire.GetIdFromCookie(r)
+	userId, _ := GetUserId(r)
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
 		return ret
@@ -58,7 +57,7 @@ func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, 
 }
 
 func (controller *AudienceController) DeleteAudienceView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId := fire.GetIdFromCookie(r)
+	userId, _ := GetUserId(r)
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
 		return ret
@@ -76,7 +75,7 @@ func (controller *AudienceController) AudienceByAnimeAndUserView(w http.Response
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
-	userId := fire.GetIdFromCookie(r)
+	userId, _ := GetUserId(r)
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
 	} else {

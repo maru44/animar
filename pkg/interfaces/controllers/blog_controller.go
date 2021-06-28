@@ -68,7 +68,7 @@ func (controller *BlogController) BlogJoinAnimeView(w http.ResponseWriter, r *ht
 }
 
 func (controller *BlogController) InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId := fire.GetIdFromCookie(r)
+	userId, _ := GetUserId(r)
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
 	} else {
@@ -84,7 +84,7 @@ func (controller *BlogController) InsertBlogWithRelationView(w http.ResponseWrit
 }
 
 func (controller *BlogController) UpdateBlogWithRelationView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId := fire.GetIdFromCookie(r)
+	userId, _ := GetUserId(r)
 
 	query := r.URL.Query()
 	strId := query.Get("id")

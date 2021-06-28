@@ -4,7 +4,6 @@ import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/database"
 	"animar/v1/pkg/tools/api"
-	"animar/v1/pkg/tools/fire"
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
 	"net/http"
@@ -49,7 +48,7 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 		ret = response(w, err, map[string]interface{}{"data": a})
 	case slug != "":
 		a, err := controller.interactor.AnimeDetailBySlug(slug)
-		userId := fire.GetIdFromCookie(r)
+		userId, _ := GetUserId(r)
 		revs, _ := controller.interactor.ReviewFilterByAnime(a.GetId(), userId)
 		ret = response(w, err, map[string]interface{}{"anime": a, "reviews": revs})
 	case year != "":

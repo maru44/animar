@@ -139,8 +139,6 @@ func CreateUserFirstView(w http.ResponseWriter, r *http.Request) error {
 	if posted.DisplayName == "" {
 		posted.DisplayName = strings.Split(posted.Email, "@")[0]
 	}
-	// @TODO 後でちゃんとした画像にする
-	// posted.PhotoUrl = fmt.Sprintf("https://%s.s3-%s.amazonaws.com/%s", configs.Bucket, "ap-northeast-1", "auth/ogp.png")
 
 	posted_json, _ := json.Marshal(posted)
 	url := `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=` + configs.FirebaseApiKey

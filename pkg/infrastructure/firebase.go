@@ -17,7 +17,8 @@ type FirebaseClient struct {
 	Client *auth.Client
 }
 
-func NewFireBaseClient(ctx context.Context) fires.Firebase {
+func NewFireBaseClient() fires.Firebase {
+	ctx := context.Background()
 	opt := option.WithCredentialsFile("../../configs/secret_key.json")
 	app, _ := firebase.NewApp(ctx, nil, opt)
 	firebase_ := new(Firebase)
