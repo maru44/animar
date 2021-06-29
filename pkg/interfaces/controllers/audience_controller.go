@@ -2,9 +2,13 @@ package controllers
 
 import (
 	"animar/v1/pkg/domain"
+	"animar/v1/pkg/infrastructure"
 	"animar/v1/pkg/interfaces/database"
+	"animar/v1/pkg/interfaces/httphandle"
+	"animar/v1/pkg/mvc/auth"
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -12,7 +16,8 @@ import (
 
 type AudienceController struct {
 	interactor domain.AudienceInteractor
-	BaseController
+	//BaseController // うまくいかず
+	base domain.BaseInteractor // うまくいかず
 }
 
 func NewAudienceController(sqlHandler database.SqlHandler) *AudienceController {
@@ -20,6 +25,12 @@ func NewAudienceController(sqlHandler database.SqlHandler) *AudienceController {
 		interactor: usecase.NewAudienceInteractor(
 			&database.AudienceRepository{
 				SqlHandler: sqlHandler,
+			},
+		),
+		// 以下機能せず
+		base: usecase.NewBaseInteractor(
+			&httphandle.BaseRepository{
+				Firebase: infrastructure.NewFireBaseClient(),
 			},
 		),
 	}
@@ -42,7 +53,11 @@ func (controller *AudienceController) AudienceWithAnimeByUserView(w http.Respons
 }
 
 func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId, _ := controller.getUserIdFromCookie(r)
+	/*  userId 取得  */
+	idToken, _ := r.Cookie("idToken")
+	claims := auth.VerifyFirebase(context.Background(), idToken.Value)
+	userId := claims["user_id"].(string)
+
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
 		return ret
@@ -58,7 +73,11 @@ func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, 
 }
 
 func (controller *AudienceController) DeleteAudienceView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId, _ := controller.getUserIdFromCookie(r)
+	/*  userId 取得  */
+	idToken, _ := r.Cookie("idToken")
+	claims := auth.VerifyFirebase(context.Background(), idToken.Value)
+	userId := claims["user_id"].(string)
+
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
 		return ret
@@ -76,9 +95,14 @@ func (controller *AudienceController) AudienceByAnimeAndUserView(w http.Response
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
-	userId, _ := controller.getUserIdFromCookie(r)
-	// idToken, _ := r.Cookie("idToken")
-	// userId, _ := controller.GetUserIdFromToken(idToken.Value)
+	/*  userId 取得  */
+	// userId, _ := controller.getUserIdFromCookie(r)
+	//userId, _ := GetUserId(r)
+	//userId, _ := controller.getUserIdFromCookie(r)
+	idToken, _ := r.Cookie("idToken")
+	claims := auth.VerifyFirebase(context.Background(), idToken.Value)
+	userId := claims["user_id"].(string)
+
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
 	} else {
@@ -87,4 +111,17 @@ func (controller *AudienceController) AudienceByAnimeAndUserView(w http.Response
 		ret = response(w, nil, map[string]interface{}{"data": watch})
 	}
 	return ret
+}
+
+// utility
+
+func (controller *AudienceController) getUserIdFromCookie(r *http.Request) (userId string, err error) {
+	idToken, err := r.Cookie("idToken")
+	if err != nil {
+		return
+	} else if idToken.Value == "" {
+		return
+	}
+	userId, err = controller.base.UserId(idToken.Value)
+	return
 }

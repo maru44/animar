@@ -47,7 +47,7 @@ type TProfileForm struct {
 
 type AuthInteractor interface {
 	UserInfo(string) (TUserInfo, error)
-	//Claims(string) (map[string]interface{}, error)
+	Claims(string) (map[string]interface{}, error)
 	IsAdmin(string) bool
 	AdminId(string) (string, error)
 	SendVerify(string) error

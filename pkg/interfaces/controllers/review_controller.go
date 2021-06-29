@@ -3,8 +3,9 @@ package controllers
 import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/database"
-	"animar/v1/pkg/tools/fire"
+	"animar/v1/pkg/mvc/auth"
 	"animar/v1/pkg/usecase"
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -37,7 +38,12 @@ func (controller *ReviewController) GetAnimeReviewsView(w http.ResponseWriter, r
 func (controller *ReviewController) GetAnimeReviewOfUserView(w http.ResponseWriter, r *http.Request) (ret error) {
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
-	userId := fire.GetIdFromCookie(r)
+
+	/*  userId 取得  */
+	idToken, _ := r.Cookie("idToken")
+	claims := auth.VerifyFirebase(context.Background(), idToken.Value)
+	userId := claims["user_id"].(string)
+
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
 	} else {
@@ -49,7 +55,11 @@ func (controller *ReviewController) GetAnimeReviewOfUserView(w http.ResponseWrit
 }
 
 func (controller *ReviewController) UpsertReviewContentView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId := fire.GetIdFromCookie(r)
+	/*  userId 取得  */
+	idToken, _ := r.Cookie("idToken")
+	claims := auth.VerifyFirebase(context.Background(), idToken.Value)
+	userId := claims["user_id"].(string)
+
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
 	} else {
@@ -62,7 +72,11 @@ func (controller *ReviewController) UpsertReviewContentView(w http.ResponseWrite
 }
 
 func (controller *ReviewController) UpsertReviewRatingView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId := fire.GetIdFromCookie(r)
+	/*  userId 取得  */
+	idToken, _ := r.Cookie("idToken")
+	claims := auth.VerifyFirebase(context.Background(), idToken.Value)
+	userId := claims["user_id"].(string)
+
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
 	} else {

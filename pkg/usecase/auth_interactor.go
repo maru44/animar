@@ -51,3 +51,7 @@ func (interactor *AuthInteractor) SendVerify(email string) error {
 func (interactor *AuthInteractor) UpdateProfile(userId string, params domain.TProfileForm) (domain.TUserInfo, error) {
 	return interactor.repository.Update(userId, params)
 }
+
+func (interactor *AuthInteractor) Claims(idToken string) (claims map[string]interface{}, err error) {
+	return interactor.repository.GetClaims(idToken)
+}

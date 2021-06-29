@@ -3,6 +3,7 @@ package controllers
 import (
 	"animar/v1/configs"
 	"animar/v1/pkg/domain"
+	"animar/v1/pkg/infrastructure"
 	"animar/v1/pkg/interfaces/fires"
 	"animar/v1/pkg/tools/api"
 	"animar/v1/pkg/tools/s3"
@@ -18,7 +19,7 @@ import (
 
 type AuthController struct {
 	interactor domain.AuthInteractor
-	BaseController
+	//BaseController
 }
 
 func NewAuthController(firebase fires.Firebase) *AuthController {
@@ -230,33 +231,33 @@ func (controller *AuthController) SSRAdminRequiredMiddleware(w http.ResponseWrit
         utility
 *************************/
 
-// func (controller *AuthController) getClaimsFromCookie(r *http.Request) (claims map[string]interface{}, err error) {
-// 	idToken, err := r.Cookie("idToken")
-// 	claims, err = controller.interactor.Claims(idToken.Value)
-// 	return
-// }
+func (controller *AuthController) getClaimsFromCookie(r *http.Request) (claims map[string]interface{}, err error) {
+	idToken, err := r.Cookie("idToken")
+	claims, err = controller.interactor.Claims(idToken.Value)
+	return
+}
 
-// func (controller *AuthController) getUserIdFromCookie(r *http.Request) (userId string, err error) {
-// 	idToken, err := r.Cookie("idToken")
-// 	if err != nil {
-// 		return
-// 	} else if idToken.Value == "" {
-// 		return
-// 	}
-// 	claims, err := controller.interactor.Claims(idToken.Value)
-// 	if err != nil {
-// 		return
-// 	}
-// 	userId = claims["user_id"].(string)
-// 	return
-// }
+func (controller *AuthController) getUserIdFromCookie(r *http.Request) (userId string, err error) {
+	idToken, err := r.Cookie("idToken")
+	if err != nil {
+		return
+	} else if idToken.Value == "" {
+		return
+	}
+	claims, err := controller.interactor.Claims(idToken.Value)
+	if err != nil {
+		return
+	}
+	userId = claims["user_id"].(string)
+	return
+}
 
-// // @TODO 後で直す(基底ユースケース、コントローラーを作る)
-// func GetUserId(r *http.Request) (string, error) {
-// 	fire := infrastructure.NewFireBaseClient()
-// 	controller := NewAuthController(fire)
-// 	return controller.getUserIdFromCookie(r)
-// }
+// @TODO 後で直す(基底ユースケース、コントローラーを作る)
+func GetUserId(r *http.Request) (string, error) {
+	fire := infrastructure.NewFireBaseClient()
+	controller := NewAuthController(fire)
+	return controller.getUserIdFromCookie(r)
+}
 
 // @TODO 追加 (これも基底ユースケース、コントローラー行)
 // fire.GetUserIdFromToken(posted.Token) を参照

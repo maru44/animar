@@ -2,11 +2,24 @@ package controllers
 
 import (
 	"animar/v1/pkg/domain"
+	"animar/v1/pkg/infrastructure"
+	"animar/v1/pkg/interfaces/httphandle"
+	"animar/v1/pkg/usecase"
 	"net/http"
 )
 
 type BaseController struct {
 	interactor domain.BaseInteractor
+}
+
+func NewBaseController() *BaseController {
+	return &BaseController{
+		interactor: usecase.NewBaseInteractor(
+			&httphandle.BaseRepository{
+				Firebase: infrastructure.NewFireBaseClient(),
+			},
+		),
+	}
 }
 
 func (controller *BaseController) getClaimsFromCookie(r *http.Request) (claims map[string]interface{}, err error) {

@@ -3,8 +3,10 @@ package controllers
 import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/database"
+	"animar/v1/pkg/mvc/auth"
 	"animar/v1/pkg/tools/fire"
 	"animar/v1/pkg/usecase"
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -69,7 +71,11 @@ func (controller *BlogController) BlogJoinAnimeView(w http.ResponseWriter, r *ht
 }
 
 func (controller *BlogController) InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId, _ := controller.getUserIdFromCookie(r)
+	/*  userId 取得  */
+	idToken, _ := r.Cookie("idToken")
+	claims := auth.VerifyFirebase(context.Background(), idToken.Value)
+	userId := claims["user_id"].(string)
+
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
 	} else {
@@ -85,7 +91,10 @@ func (controller *BlogController) InsertBlogWithRelationView(w http.ResponseWrit
 }
 
 func (controller *BlogController) UpdateBlogWithRelationView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId, _ := controller.getUserIdFromCookie(r)
+	/*  userId 取得  */
+	idToken, _ := r.Cookie("idToken")
+	claims := auth.VerifyFirebase(context.Background(), idToken.Value)
+	userId := claims["user_id"].(string)
 
 	query := r.URL.Query()
 	strId := query.Get("id")
@@ -105,7 +114,10 @@ func (controller *BlogController) UpdateBlogWithRelationView(w http.ResponseWrit
 }
 
 func (controller *BlogController) DeleteBlogView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId := fire.GetIdFromCookie(r)
+	/*  userId 取得  */
+	idToken, _ := r.Cookie("idToken")
+	claims := auth.VerifyFirebase(context.Background(), idToken.Value)
+	userId := claims["user_id"].(string)
 
 	query := r.URL.Query()
 	strId := query.Get("id")
