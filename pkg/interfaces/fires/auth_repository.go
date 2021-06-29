@@ -15,7 +15,8 @@ type AuthRepository struct {
 	Firebase
 }
 
-func (repo *AuthRepository) GetUserInfo(ctx context.Context, userId string) (uInfo domain.TUserInfo, err error) {
+func (repo *AuthRepository) GetUserInfo(userId string) (uInfo domain.TUserInfo, err error) {
+	ctx := context.Background()
 	client, err := repo.Firebase.Auth(ctx)
 	u, err := client.GetUser(ctx, userId)
 	info := u.UserInfo
@@ -29,7 +30,8 @@ func (repo *AuthRepository) GetUserInfo(ctx context.Context, userId string) (uIn
 	return
 }
 
-func (repo *AuthRepository) GetClaims(ctx context.Context, idToken string) (claims map[string]interface{}, err error) {
+func (repo *AuthRepository) GetClaims(idToken string) (claims map[string]interface{}, err error) {
+	ctx := context.Background()
 	client, err := repo.Firebase.Auth(ctx)
 	token, err := client.VerifyIDToken(ctx, idToken)
 	claims = token.Claims
@@ -42,8 +44,8 @@ func (repo *AuthRepository) IsAdmin(userId string) bool {
 	return tools.IsContainString(admins, userId)
 }
 
-func (repo *AuthRepository) GetAdminId(ctx context.Context, idToken string) (userId string, err error) {
-	claims, err := repo.GetClaims(ctx, idToken)
+func (repo *AuthRepository) GetAdminId(idToken string) (userId string, err error) {
+	claims, err := repo.GetClaims(idToken)
 	if err != nil {
 		return
 	}
@@ -56,12 +58,13 @@ func (repo *AuthRepository) GetAdminId(ctx context.Context, idToken string) (use
 	return
 }
 
-func (repo *AuthRepository) SendVerifyEmail(ctx context.Context, email string) (err error) {
+func (repo *AuthRepository) SendVerifyEmail(email string) (err error) {
 	protocol := "http://"
 	if tools.IsProductionEnv() {
 		protocol = "https://"
 	}
 
+	ctx := context.Background()
 	client, err := repo.Firebase.Auth(ctx)
 	settings := &auth.ActionCodeSettings{
 		URL:             protocol + configs.FrontHost + configs.FrontPort + "/auth" + "/confirmed",
@@ -72,7 +75,8 @@ func (repo *AuthRepository) SendVerifyEmail(ctx context.Context, email string) (
 	return err
 }
 
-func (repo *AuthRepository) Update(ctx context.Context, userId string, params domain.TProfileForm) (domain.TUserInfo, error) {
+func (repo *AuthRepository) Update(userId string, params domain.TProfileForm) (domain.TUserInfo, error) {
+	ctx := context.Background()
 	client, err := repo.Firebase.Auth(ctx)
 	var params_ auth.UserToUpdate
 	if params.PhotoUrl != "" {

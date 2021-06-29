@@ -12,6 +12,7 @@ import (
 
 type AnimeController struct {
 	interactor domain.AnimeInteractor
+	BaseController
 }
 
 func NewAnimeController(sqlHandler database.SqlHandler) *AnimeController {
@@ -48,7 +49,7 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 		ret = response(w, err, map[string]interface{}{"data": a})
 	case slug != "":
 		a, err := controller.interactor.AnimeDetailBySlug(slug)
-		userId, _ := GetUserId(r)
+		userId, _ := controller.getUserIdFromCookie(r)
 		revs, _ := controller.interactor.ReviewFilterByAnime(a.GetId(), userId)
 		ret = response(w, err, map[string]interface{}{"anime": a, "reviews": revs})
 	case year != "":

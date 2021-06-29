@@ -12,6 +12,7 @@ import (
 
 type AudienceController struct {
 	interactor domain.AudienceInteractor
+	BaseController
 }
 
 func NewAudienceController(sqlHandler database.SqlHandler) *AudienceController {
@@ -41,7 +42,7 @@ func (controller *AudienceController) AudienceWithAnimeByUserView(w http.Respons
 }
 
 func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId, _ := GetUserId(r)
+	userId, _ := controller.getUserIdFromCookie(r)
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
 		return ret
@@ -57,7 +58,7 @@ func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, 
 }
 
 func (controller *AudienceController) DeleteAudienceView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId, _ := GetUserId(r)
+	userId, _ := controller.getUserIdFromCookie(r)
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
 		return ret
@@ -75,7 +76,9 @@ func (controller *AudienceController) AudienceByAnimeAndUserView(w http.Response
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
-	userId, _ := GetUserId(r)
+	userId, _ := controller.getUserIdFromCookie(r)
+	// idToken, _ := r.Cookie("idToken")
+	// userId, _ := controller.GetUserIdFromToken(idToken.Value)
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
 	} else {
