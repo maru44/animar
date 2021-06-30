@@ -29,7 +29,7 @@ func NewSqlHandler() database.SqlHandler {
 }
 
 func (handler *SqlHandler) ErrNoRows() error {
-	return sql.ErrNoRows
+	return handler.ErrNoRows()
 }
 
 func (handler *SqlHandler) Query(statement string, args ...interface{}) (database.Rows, error) {
@@ -63,6 +63,7 @@ func (handler *SqlHandler) Execute(statement string, args ...interface{}) (datab
 	stmt, err := handler.Conn.Prepare(statement)
 	defer stmt.Close()
 	if err != nil {
+		tools.ErrorLog(err)
 		return res, err
 	}
 	exe, err := stmt.Exec(args...)

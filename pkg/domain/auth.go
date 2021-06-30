@@ -1,7 +1,5 @@
 package domain
 
-import "context"
-
 type TUserInfo struct {
 	DisplayName string `json:"displayName,omitempty"`
 	Email       string `json:"email,omitempty"`
@@ -48,10 +46,10 @@ type TProfileForm struct {
 }
 
 type AuthInteractor interface {
-	UserInfo(context.Context, string) (TUserInfo, error)
-	Claims(context.Context, string) (map[string]interface{}, error)
+	UserInfo(string) (TUserInfo, error)
+	Claims(string) (map[string]interface{}, error)
 	IsAdmin(string) bool
-	AdminId(context.Context, string) (string, error)
-	SendVerify(context.Context, string) error
-	UpdateProfile(context.Context, string, TProfileForm) (TUserInfo, error)
+	AdminId(string) (string, error)
+	SendVerify(string) error
+	UpdateProfile(string, TProfileForm) (TUserInfo, error)
 }

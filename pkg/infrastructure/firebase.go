@@ -1,6 +1,7 @@
 package infrastructure
 
 import (
+	"animar/v1/configs"
 	"animar/v1/pkg/interfaces/fires"
 	"context"
 
@@ -17,10 +18,12 @@ type FirebaseClient struct {
 	Client *auth.Client
 }
 
+// initialize firebase sdk
 func NewFireBaseClient() fires.Firebase {
 	ctx := context.Background()
-	opt := option.WithCredentialsFile("../../configs/secret_key.json")
-	app, _ := firebase.NewApp(ctx, nil, opt)
+	opt := option.WithCredentialsFile("../../../configs/secret_key.json")
+	config := &firebase.Config{ProjectID: configs.ProjectId} // for Google Oauth
+	app, _ := firebase.NewApp(ctx, config, opt)
 	firebase_ := new(Firebase)
 	firebase_.App = app
 	return firebase_

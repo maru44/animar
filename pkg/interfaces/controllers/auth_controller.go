@@ -10,7 +10,6 @@ import (
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -20,6 +19,7 @@ import (
 
 type AuthController struct {
 	interactor domain.AuthInteractor
+	//BaseController
 }
 
 func NewAuthController(firebase fires.Firebase) *AuthController {
@@ -34,18 +34,16 @@ func NewAuthController(firebase fires.Firebase) *AuthController {
 
 func (controller *AuthController) GetUserFromQueryView(w http.ResponseWriter, r *http.Request) (ret error) {
 	userId := r.URL.Query().Get("uid")
-	ctx := context.Background()
 
-	user, err := controller.interactor.UserInfo(ctx, userId)
+	user, err := controller.interactor.UserInfo(userId)
 	ret = response(w, err, map[string]interface{}{"user": user})
 	return
 }
 
 func (controller *AuthController) GetUserFromCookieView(w http.ResponseWriter, r *http.Request) (ret error) {
-	ctx := context.Background()
-	claims, err := controller.getClaimsFromCookie(r, ctx)
+	claims, err := controller.getClaimsFromCookie(r)
 	userId := claims["user_id"].(string)
-	user, err := controller.interactor.UserInfo(ctx, userId)
+	user, err := controller.interactor.UserInfo(userId)
 	ret = response(w, err, map[string]interface{}{"user": user, "is_verify": claims["email_verified"]})
 	return
 }
@@ -119,8 +117,7 @@ func (controller *AuthController) RegisterView(w http.ResponseWriter, r *http.Re
 		api.SetCookiePackage(w, "idToken", d.IdToken, 60*60*24)
 		api.SetCookiePackage(w, "refreshToken", d.RefreshToken, 60*60*24*30)
 
-		ctx := context.Background()
-		err = controller.interactor.SendVerify(ctx, p.Email)
+		err = controller.interactor.SendVerify(p.Email)
 		ret = response(w, err, nil)
 	}
 	return ret
@@ -160,8 +157,7 @@ func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.
 }
 
 func (controller *AuthController) UpdateProfileView(w http.ResponseWriter, r *http.Request) (ret error) {
-	ctx := context.Background()
-	claims, err := controller.getClaimsFromCookie(r, ctx)
+	claims, err := controller.getClaimsFromCookie(r)
 	userId := claims["user_id"].(string)
 
 	var p domain.TProfileForm
@@ -185,7 +181,7 @@ func (controller *AuthController) UpdateProfileView(w http.ResponseWriter, r *ht
 		params.PhotoUrl = p.PhotoUrl
 	}
 
-	user, err := controller.interactor.UpdateProfile(ctx, userId, params)
+	user, err := controller.interactor.UpdateProfile(userId, params)
 	ret = response(w, err, map[string]interface{}{"user": user})
 	return ret
 }
@@ -195,13 +191,12 @@ func (controller *AuthController) UpdateProfileView(w http.ResponseWriter, r *ht
 *************************/
 
 func (controller *AuthController) AdminRequiredMiddleware(w http.ResponseWriter, r *http.Request) (ret error) {
-	ctx := context.Background()
 	idToken, err := r.Cookie("idToken")
 	if err != nil {
 		ret = response(w, err, nil)
 		return
 	}
-	_, err = controller.interactor.AdminId(ctx, idToken.Value)
+	_, err = controller.interactor.AdminId(idToken.Value)
 	if err != nil {
 		ret = response(w, err, nil)
 	} else {
@@ -211,7 +206,6 @@ func (controller *AuthController) AdminRequiredMiddleware(w http.ResponseWriter,
 }
 
 func (controller *AuthController) SSRAdminRequiredMiddleware(w http.ResponseWriter, r *http.Request) error {
-	ctx := context.Background()
 	var idToken string
 	var err error
 	switch r.Method {
@@ -229,7 +223,7 @@ func (controller *AuthController) SSRAdminRequiredMiddleware(w http.ResponseWrit
 		err = domain.ErrForbidden
 		return err
 	}
-	_, err = controller.interactor.AdminId(ctx, idToken)
+	_, err = controller.interactor.AdminId(idToken)
 	return err
 }
 
@@ -237,21 +231,20 @@ func (controller *AuthController) SSRAdminRequiredMiddleware(w http.ResponseWrit
         utility
 *************************/
 
-func (controller *AuthController) getClaimsFromCookie(r *http.Request, ctx context.Context) (claims map[string]interface{}, err error) {
+func (controller *AuthController) getClaimsFromCookie(r *http.Request) (claims map[string]interface{}, err error) {
 	idToken, err := r.Cookie("idToken")
-	claims, err = controller.interactor.Claims(ctx, idToken.Value)
+	claims, err = controller.interactor.Claims(idToken.Value)
 	return
 }
 
 func (controller *AuthController) getUserIdFromCookie(r *http.Request) (userId string, err error) {
-	ctx := context.Background()
 	idToken, err := r.Cookie("idToken")
 	if err != nil {
 		return
 	} else if idToken.Value == "" {
 		return
 	}
-	claims, err := controller.interactor.Claims(ctx, idToken.Value)
+	claims, err := controller.interactor.Claims(idToken.Value)
 	if err != nil {
 		return
 	}

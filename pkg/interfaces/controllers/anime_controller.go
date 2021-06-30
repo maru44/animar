@@ -3,15 +3,18 @@ package controllers
 import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/database"
+	"animar/v1/pkg/mvc/auth"
 	"animar/v1/pkg/tools/api"
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
+	"context"
 	"net/http"
 	"strconv"
 )
 
 type AnimeController struct {
 	interactor domain.AnimeInteractor
+	BaseController
 }
 
 func NewAnimeController(sqlHandler database.SqlHandler) *AnimeController {
@@ -48,7 +51,12 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 		ret = response(w, err, map[string]interface{}{"data": a})
 	case slug != "":
 		a, err := controller.interactor.AnimeDetailBySlug(slug)
-		userId, _ := GetUserId(r)
+
+		/*  userId 取得  */
+		idToken, _ := r.Cookie("idToken")
+		claims := auth.VerifyFirebase(context.Background(), idToken.Value)
+		userId := claims["user_id"].(string)
+
 		revs, _ := controller.interactor.ReviewFilterByAnime(a.GetId(), userId)
 		ret = response(w, err, map[string]interface{}{"anime": a, "reviews": revs})
 	case year != "":
