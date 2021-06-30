@@ -7,5 +7,6 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0 // indirect
 	github.com/aws/aws-sdk-go v1.38.41 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
+	github.com/stretchr/testify v1.7.0 // indirect
 	google.golang.org/api v0.40.0 // indirect
 )
