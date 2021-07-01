@@ -73,7 +73,7 @@ func TestFetchAnimeReviews(t *testing.T) {
 	if err != nil {
 		t.Fatalf("DB FAIL: %s", err)
 	}
-	rows := sqlmock.NewRows([]string{"id", "content", "rating", "anime_id", "user_id", "created_at", "updated_at"}).
+	rows := sqlmock.NewRows([]string{"id", "rating", "anime_id", "user_id", "created_at", "updated_at"}).
 		AddRow(m[0].ID, m[0].Content, m[0].Rating, m[0].AnimeId, m[0].UserId, m[0].CreatedAt, m[0].UpdatedAt).
 		AddRow(m[1].ID, m[1].Content, m[1].Rating, m[1].AnimeId, m[1].UserId, m[1].CreatedAt, m[1].UpdatedAt)
 

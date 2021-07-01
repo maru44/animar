@@ -5,12 +5,12 @@ import (
 )
 
 type BaseInteractor struct {
-	repository BaseRepository
+	authRepo AuthRepository
 }
 
-func NewBaseInteractor(b BaseRepository) domain.BaseInteractor {
+func NewBaseInteractor(a AuthRepository) domain.BaseInteractor {
 	return &BaseInteractor{
-		repository: b,
+		authRepo: a,
 	}
 }
 
@@ -18,20 +18,21 @@ func NewBaseInteractor(b BaseRepository) domain.BaseInteractor {
         repository
 ************************/
 
-type BaseRepository interface {
-	GetUserId(string) (string, error)
-	GetClaims(string) (map[string]interface{}, error)
-}
+// type BaseRepository interface {
+// 	GetUserId(string) (string, error)
+// 	GetClaims(string) (map[string]interface{}, error)
+// }
 
 /**********************
    interactor methods
 ***********************/
 
+// idTokenが渡せていない
 func (interactor *BaseInteractor) UserId(idToken string) (string, error) {
-	return interactor.repository.GetUserId(idToken)
+	return interactor.authRepo.GetUserId(idToken)
 }
 
 func (interactor *BaseInteractor) Claims(idToken string) (claims map[string]interface{}, err error) {
-	claims, err = interactor.repository.GetClaims(idToken)
+	claims, err = interactor.authRepo.GetClaims(idToken)
 	return
 }

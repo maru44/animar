@@ -21,7 +21,7 @@ type FirebaseClient struct {
 // initialize firebase sdk
 func NewFireBaseClient() fires.Firebase {
 	ctx := context.Background()
-	opt := option.WithCredentialsFile("../../../configs/secret_key.json")
+	opt := option.WithCredentialsFile("../../configs/secret_key.json")
 	config := &firebase.Config{ProjectID: configs.ProjectId} // for Google Oauth
 	app, _ := firebase.NewApp(ctx, config, opt)
 	firebase_ := new(Firebase)

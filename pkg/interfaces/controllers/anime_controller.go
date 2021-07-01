@@ -3,11 +3,9 @@ package controllers
 import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/database"
-	"animar/v1/pkg/mvc/auth"
 	"animar/v1/pkg/tools/api"
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
-	"context"
 	"net/http"
 	"strconv"
 )
@@ -53,11 +51,12 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 		a, err := controller.interactor.AnimeDetailBySlug(slug)
 
 		/*  userId 取得  */
-		idToken, _ := r.Cookie("idToken")
-		claims := auth.VerifyFirebase(context.Background(), idToken.Value)
-		userId := claims["user_id"].(string)
+		// 一旦コメントアウト
+		// idToken, _ := r.Cookie("idToken")
+		// claims := auth.VerifyFirebase(context.Background(), idToken.Value)
+		// userId := claims["user_id"].(string)
 
-		revs, _ := controller.interactor.ReviewFilterByAnime(a.GetId(), userId)
+		revs, _ := controller.interactor.ReviewFilterByAnime(a.GetId(), "")
 		ret = response(w, err, map[string]interface{}{"anime": a, "reviews": revs})
 	case year != "":
 		animes, err := controller.interactor.AnimesBySeason(year, season)

@@ -25,6 +25,7 @@ type AuthRepository interface {
 	GetAdminId(string) (string, error)
 	SendVerifyEmail(string) error
 	Update(string, domain.TProfileForm) (domain.TUserInfo, error)
+	GetUserId(string) (string, error)
 }
 
 /**********************
