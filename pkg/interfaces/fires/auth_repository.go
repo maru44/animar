@@ -6,7 +6,6 @@ import (
 	"animar/v1/pkg/tools/mysmtp"
 	"animar/v1/pkg/tools/tools"
 	"context"
-	"fmt"
 	"strings"
 
 	"firebase.google.com/go/v4/auth"
@@ -34,9 +33,7 @@ func (repo *AuthRepository) GetUserInfo(userId string) (uInfo domain.TUserInfo, 
 func (repo *AuthRepository) GetClaims(idToken string) (claims map[string]interface{}, err error) {
 	ctx := context.Background()
 	client, err := repo.Firebase.Auth(ctx)
-	fmt.Println("client: ", client, "idToken: ", idToken)
 	token, err := client.VerifyIDToken(ctx, idToken)
-	fmt.Println("Token: ", token, "Error: ", err)
 	claims = token.Claims
 	return
 }

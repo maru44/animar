@@ -3,9 +3,7 @@ package controllers
 import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/database"
-	"animar/v1/pkg/mvc/auth"
 	"animar/v1/pkg/usecase"
-	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -13,6 +11,7 @@ import (
 
 type ReviewController struct {
 	interactor domain.ReviewInteractor
+	BaseController
 }
 
 func NewReviewController(sqlHandler database.SqlHandler) *ReviewController {
@@ -22,6 +21,7 @@ func NewReviewController(sqlHandler database.SqlHandler) *ReviewController {
 				SqlHandler: sqlHandler,
 			},
 		),
+		BaseController: *NewBaseController(),
 	}
 }
 
@@ -39,10 +39,7 @@ func (controller *ReviewController) GetAnimeReviewOfUserView(w http.ResponseWrit
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
-	/*  userId 取得  */
-	idToken, _ := r.Cookie("idToken")
-	claims := auth.VerifyFirebase(context.Background(), idToken.Value)
-	userId := claims["user_id"].(string)
+	userId, _ := controller.getUserIdFromCookie(r)
 
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
@@ -55,10 +52,7 @@ func (controller *ReviewController) GetAnimeReviewOfUserView(w http.ResponseWrit
 }
 
 func (controller *ReviewController) UpsertReviewContentView(w http.ResponseWriter, r *http.Request) (ret error) {
-	/*  userId 取得  */
-	idToken, _ := r.Cookie("idToken")
-	claims := auth.VerifyFirebase(context.Background(), idToken.Value)
-	userId := claims["user_id"].(string)
+	userId, _ := controller.getUserIdFromCookie(r)
 
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
@@ -72,10 +66,7 @@ func (controller *ReviewController) UpsertReviewContentView(w http.ResponseWrite
 }
 
 func (controller *ReviewController) UpsertReviewRatingView(w http.ResponseWriter, r *http.Request) (ret error) {
-	/*  userId 取得  */
-	idToken, _ := r.Cookie("idToken")
-	claims := auth.VerifyFirebase(context.Background(), idToken.Value)
-	userId := claims["user_id"].(string)
+	userId, _ := controller.getUserIdFromCookie(r)
 
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)

@@ -3,10 +3,8 @@ package controllers
 import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/database"
-	"animar/v1/pkg/mvc/auth"
 	"animar/v1/pkg/tools/fire"
 	"animar/v1/pkg/usecase"
-	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -24,6 +22,7 @@ func NewBlogController(sqlHandler database.SqlHandler) *BlogController {
 				SqlHandler: sqlHandler,
 			},
 		),
+		BaseController: *NewBaseController(),
 	}
 }
 
@@ -41,7 +40,7 @@ func (controller *BlogController) BlogJoinAnimeView(w http.ResponseWriter, r *ht
 	case "POST":
 		var posted fire.TUserIdCookieInput
 		json.NewDecoder(r.Body).Decode(&posted)
-		userId = fire.GetUserIdFromToken(posted.Token)
+		userId, _ = controller.GetUserIdFromToken(posted.Token)
 	default:
 		userId = ""
 	}
@@ -71,10 +70,7 @@ func (controller *BlogController) BlogJoinAnimeView(w http.ResponseWriter, r *ht
 }
 
 func (controller *BlogController) InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) (ret error) {
-	/*  userId 取得  */
-	idToken, _ := r.Cookie("idToken")
-	claims := auth.VerifyFirebase(context.Background(), idToken.Value)
-	userId := claims["user_id"].(string)
+	userId, _ := controller.getUserIdFromCookie(r)
 
 	if userId == "" {
 		ret = response(w, domain.ErrUnauthorized, nil)
@@ -91,10 +87,7 @@ func (controller *BlogController) InsertBlogWithRelationView(w http.ResponseWrit
 }
 
 func (controller *BlogController) UpdateBlogWithRelationView(w http.ResponseWriter, r *http.Request) (ret error) {
-	/*  userId 取得  */
-	idToken, _ := r.Cookie("idToken")
-	claims := auth.VerifyFirebase(context.Background(), idToken.Value)
-	userId := claims["user_id"].(string)
+	userId, _ := controller.getUserIdFromCookie(r)
 
 	query := r.URL.Query()
 	strId := query.Get("id")
@@ -114,10 +107,7 @@ func (controller *BlogController) UpdateBlogWithRelationView(w http.ResponseWrit
 }
 
 func (controller *BlogController) DeleteBlogView(w http.ResponseWriter, r *http.Request) (ret error) {
-	/*  userId 取得  */
-	idToken, _ := r.Cookie("idToken")
-	claims := auth.VerifyFirebase(context.Background(), idToken.Value)
-	userId := claims["user_id"].(string)
+	userId, _ := controller.getUserIdFromCookie(r)
 
 	query := r.URL.Query()
 	strId := query.Get("id")

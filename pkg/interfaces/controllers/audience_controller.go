@@ -2,9 +2,7 @@ package controllers
 
 import (
 	"animar/v1/pkg/domain"
-	"animar/v1/pkg/infrastructure"
 	"animar/v1/pkg/interfaces/database"
-	"animar/v1/pkg/interfaces/fires"
 	"animar/v1/pkg/mvc/auth"
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
@@ -16,23 +14,17 @@ import (
 
 type AudienceController struct {
 	interactor domain.AudienceInteractor
-	base       domain.BaseInteractor
 	BaseController
 }
 
 func NewAudienceController(sqlHandler database.SqlHandler) *AudienceController {
-	//NewBaseController()
 	return &AudienceController{
 		interactor: usecase.NewAudienceInteractor(
 			&database.AudienceRepository{
 				SqlHandler: sqlHandler,
 			},
 		),
-		base: usecase.NewBaseInteractor(
-			&fires.AuthRepository{
-				Firebase: infrastructure.NewFireBaseClient(),
-			},
-		),
+		BaseController: *NewBaseController(),
 	}
 }
 
@@ -95,16 +87,9 @@ func (controller *AudienceController) AudienceByAnimeAndUserView(w http.Response
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 
-	/*  userId 取得  */
-	idToken, _ := r.Cookie("idToken")
-	userId, _ := controller.base.UserId(idToken.Value)
-
-	if userId == "" {
-		ret = response(w, domain.ErrUnauthorized, nil)
-	} else {
-		watch, _ := controller.interactor.AudienceByAnimeAndUser(animeId, userId)
-		// 一旦 nil にしない。これはユーザーの視聴データが無いときにも対応するため
-		ret = response(w, nil, map[string]interface{}{"data": watch})
-	}
+	userId, _ := controller.getUserIdFromCookie(r)
+	watch, _ := controller.interactor.AudienceByAnimeAndUser(animeId, userId)
+	// 一旦 nil にしない。これはユーザーの視聴データが無いときにも対応するため
+	ret = response(w, nil, map[string]interface{}{"data": watch})
 	return ret
 }

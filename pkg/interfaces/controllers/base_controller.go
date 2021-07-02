@@ -5,7 +5,6 @@ import (
 	"animar/v1/pkg/infrastructure"
 	"animar/v1/pkg/interfaces/fires"
 	"animar/v1/pkg/usecase"
-	"fmt"
 	"net/http"
 )
 
@@ -36,7 +35,6 @@ func (controller *BaseController) getUserIdFromCookie(r *http.Request) (userId s
 	} else if idToken.Value == "" {
 		return
 	}
-	fmt.Print(controller.interactor)
 	userId, err = controller.interactor.UserId(idToken.Value)
 	return
 }

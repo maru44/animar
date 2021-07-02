@@ -3,7 +3,6 @@ package controllers
 import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/database"
-	"animar/v1/pkg/tools/api"
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
 	"net/http"
@@ -25,13 +24,14 @@ func NewAnimeController(sqlHandler database.SqlHandler) *AnimeController {
 				SqlHandler: sqlHandler,
 			},
 		),
+		BaseController: *NewBaseController(),
 	}
 }
 
-func (controller *AnimeController) AnimeListView(w http.ResponseWriter, r *http.Request) error {
-	animes, _ := controller.interactor.AnimesAll()
-	api.JsonResponse(w, map[string]interface{}{"data": animes})
-	return nil
+func (controller *AnimeController) AnimeListView(w http.ResponseWriter, r *http.Request) (ret error) {
+	animes, err := controller.interactor.AnimesAll()
+	ret = response(w, err, map[string]interface{}{"data": animes})
+	return ret
 }
 
 func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Request) (ret error) {
@@ -56,7 +56,8 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 		// claims := auth.VerifyFirebase(context.Background(), idToken.Value)
 		// userId := claims["user_id"].(string)
 
-		revs, _ := controller.interactor.ReviewFilterByAnime(a.GetId(), "")
+		userId, _ := controller.getUserIdFromCookie(r)
+		revs, _ := controller.interactor.ReviewFilterByAnime(a.GetId(), userId)
 		ret = response(w, err, map[string]interface{}{"anime": a, "reviews": revs})
 	case year != "":
 		animes, err := controller.interactor.AnimesBySeason(year, season)
@@ -88,7 +89,6 @@ func (controller *AnimeController) AnimeMinimumsView(w http.ResponseWriter, r *h
 	if err != nil {
 		tools.ErrorLog(err)
 	}
-	api.JsonResponse(w, map[string]interface{}{"data": animes})
 	ret = response(w, err, map[string]interface{}{"data": animes})
 	return ret
 }
