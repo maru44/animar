@@ -13,8 +13,8 @@ import (
 )
 
 type AdminController struct {
-	AuthController
 	interactor domain.AdminInteractor
+	BaseController
 }
 
 func NewAdminController(sqlHandler database.SqlHandler) *AdminController {
@@ -33,6 +33,7 @@ func NewAdminController(sqlHandler database.SqlHandler) *AdminController {
 				SqlHandler: sqlHandler,
 			},
 		),
+		BaseController: *NewBaseController(),
 	}
 }
 

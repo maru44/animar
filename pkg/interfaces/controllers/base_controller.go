@@ -9,7 +9,6 @@ import (
 	"animar/v1/pkg/usecase"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -261,7 +260,6 @@ func (controller *BaseController) AdminRequiredMiddlewareGet(next http.Handler) 
 			return
 		}
 
-		fmt.Print(controller.interactor)
 		userId, err := controller.interactor.AdminId(idToken)
 		if err != nil {
 			response(w, domain.ErrForbidden, nil)
