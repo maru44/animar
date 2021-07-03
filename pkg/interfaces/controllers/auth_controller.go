@@ -29,27 +29,37 @@ func NewAuthController(firebase fires.Firebase) *AuthController {
 			},
 		),
 		BaseController: *NewBaseController(),
+		// BaseController: BaseController{
+		// 	interactor: usecase.NewBaseInteractor(
+		// 		&fires.AuthRepository{
+		// 			Firebase: firebase,
+		// 		},
+		// 	),
+		// },
 	}
 }
 
-func (controller *AuthController) GetUserFromQueryView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId := r.URL.Query().Get("uid")
+// user modal from query ?uid=<userId>
+func (controller *AuthController) GetUserModelFromQueryView(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	uid := query.Get("uid")
+	user, err := controller.interactor.UserInfo(uid)
 
-	user, err := controller.interactor.UserInfo(userId)
-	ret = response(w, err, map[string]interface{}{"user": user})
+	response(w, err, map[string]interface{}{"user": user})
 	return
 }
 
-func (controller *AuthController) GetUserFromCookieView(w http.ResponseWriter, r *http.Request) (ret error) {
-	claims, err := controller.getClaimsFromCookie(r)
-	userId := claims["user_id"].(string)
+// user model from cookie
+func (controller *AuthController) GetUserModelFromCookieView(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(USER_ID).(string)
 	user, err := controller.interactor.UserInfo(userId)
-	ret = response(w, err, map[string]interface{}{"user": user, "is_verify": claims["email_verified"]})
+	claims, err := controller.getClaimsFromCookie(r)
+	response(w, err, map[string]interface{}{"user": user, "is_verify": claims["email_verified"]})
 	return
 }
 
 // set cookie
-func (controller *AuthController) LoginView(w http.ResponseWriter, r *http.Request) (ret error) {
+func (controller *AuthController) LoginView(w http.ResponseWriter, r *http.Request) {
 	var p domain.TLoginForm
 	json.NewDecoder(r.Body).Decode(&p)
 	p.ReturnSecureToken = true
@@ -65,7 +75,7 @@ func (controller *AuthController) LoginView(w http.ResponseWriter, r *http.Reque
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		ret = response(w, err, nil)
+		response(w, err, nil)
 		return
 	}
 	defer resp.Body.Close()
@@ -78,13 +88,13 @@ func (controller *AuthController) LoginView(w http.ResponseWriter, r *http.Reque
 		api.SetCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
 		api.SetCookiePackage(w, "refreshToken", tokens.RefreshToken, 60*60*24*30)
 	} else {
-		ret = response(w, domain.ErrUnauthorized, nil)
+		response(w, domain.ErrUnauthorized, nil)
 	}
-	ret = response(w, err, nil)
-	return ret
+	response(w, err, nil)
+	return
 }
 
-func (controller *AuthController) RegisterView(w http.ResponseWriter, r *http.Request) (ret error) {
+func (controller *AuthController) RegisterView(w http.ResponseWriter, r *http.Request) {
 	var p domain.TLoginForm
 	json.NewDecoder(r.Body).Decode(&p)
 	p.ReturnSecureToken = true
@@ -104,7 +114,7 @@ func (controller *AuthController) RegisterView(w http.ResponseWriter, r *http.Re
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		ret = response(w, err, nil)
+		response(w, err, nil)
 		return
 	}
 	defer resp.Body.Close()
@@ -112,21 +122,22 @@ func (controller *AuthController) RegisterView(w http.ResponseWriter, r *http.Re
 	var d domain.TCreateReturn
 	err = json.Unmarshal(body, &d)
 	if err != nil {
-		ret = response(w, err, nil)
+		response(w, err, nil)
 	} else {
 		api.SetCookiePackage(w, "idToken", d.IdToken, 60*60*24)
 		api.SetCookiePackage(w, "refreshToken", d.RefreshToken, 60*60*24*30)
 
 		err = controller.interactor.SendVerify(p.Email)
-		ret = response(w, err, nil)
+		response(w, err, nil)
 	}
-	return ret
+	return
 }
 
-func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.Request) error {
-	refreshToken, _ := r.Cookie("refreshToken")
-	if refreshToken.Value == "" {
-		return response(w, domain.ErrBadRequest, nil)
+func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.Request) {
+	refreshToken, err := r.Cookie("refreshToken")
+	if err != nil {
+		response(w, domain.ErrUnauthorized, nil)
+		return
 	}
 	jsonStr := `{"grant_type": "refresh_token", "refresh_token": "` + refreshToken.Value + `"}`
 	url := `https://securetoken.googleapis.com/v1/token?key=` + configs.FirebaseApiKey
@@ -151,12 +162,12 @@ func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.
 		api.DestroyCookie(w, "idToken") // destroy cookie
 		api.SetCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
 	} else {
-		return response(w, domain.ErrUnauthorized, nil)
+		response(w, domain.ErrUnauthorized, nil)
 	}
-	return nil
+	return
 }
 
-func (controller *AuthController) UpdateProfileView(w http.ResponseWriter, r *http.Request) (ret error) {
+func (controller *AuthController) UpdateProfileView(w http.ResponseWriter, r *http.Request) {
 	claims, err := controller.getClaimsFromCookie(r)
 	userId := claims["user_id"].(string)
 
@@ -182,47 +193,6 @@ func (controller *AuthController) UpdateProfileView(w http.ResponseWriter, r *ht
 	}
 
 	user, err := controller.interactor.UpdateProfile(userId, params)
-	ret = response(w, err, map[string]interface{}{"user": user})
-	return ret
-}
-
-/************************
-        middleware
-*************************/
-
-func (controller *AuthController) AdminRequiredMiddleware(w http.ResponseWriter, r *http.Request) (ret error) {
-	idToken, err := r.Cookie("idToken")
-	if err != nil {
-		ret = response(w, err, nil)
-		return
-	}
-	_, err = controller.interactor.AdminId(idToken.Value)
-	if err != nil {
-		ret = response(w, err, nil)
-	} else {
-		err = nil
-	}
+	response(w, err, map[string]interface{}{"user": user})
 	return
-}
-
-func (controller *AuthController) SSRAdminRequiredMiddleware(w http.ResponseWriter, r *http.Request) error {
-	var idToken string
-	var err error
-	switch r.Method {
-	case "GET":
-		token, err := r.Cookie("idToken")
-		if err != nil {
-			return response(w, err, nil)
-		}
-		idToken = token.Value
-	case "POST":
-		var p domain.TUserToken
-		json.NewDecoder(r.Body).Decode(&p)
-		idToken = p.Token
-	default:
-		err = domain.ErrForbidden
-		return err
-	}
-	_, err = controller.interactor.AdminId(idToken)
-	return err
 }

@@ -23,7 +23,7 @@ func NewPlatformController(sqlHandler database.SqlHandler) *PlatformController {
 	}
 }
 
-func (controller *PlatformController) RelationPlatformByAnimeView(w http.ResponseWriter, r *http.Request) (ret error) {
+func (controller *PlatformController) RelationPlatformByAnimeView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
@@ -32,6 +32,6 @@ func (controller *PlatformController) RelationPlatformByAnimeView(w http.Respons
 	if err != nil {
 		tools.ErrorLog(err)
 	}
-	ret = response(w, err, map[string]interface{}{"data": platforms})
-	return ret
+	response(w, err, map[string]interface{}{"data": platforms})
+	return
 }

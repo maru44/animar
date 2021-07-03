@@ -11,6 +11,7 @@ import (
 
 type SeasonController struct {
 	interactor domain.SeasonInteractor
+	BaseController
 }
 
 func NewSeasonController(sqlHandler database.SqlHandler) *SeasonController {
@@ -20,10 +21,11 @@ func NewSeasonController(sqlHandler database.SqlHandler) *SeasonController {
 				SqlHandler: sqlHandler,
 			},
 		),
+		BaseController: *NewBaseController(),
 	}
 }
 
-func (controller *SeasonController) SeasonByAnimeIdView(w http.ResponseWriter, r *http.Request) (ret error) {
+func (controller *SeasonController) SeasonByAnimeIdView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
@@ -32,6 +34,5 @@ func (controller *SeasonController) SeasonByAnimeIdView(w http.ResponseWriter, r
 	if err != nil {
 		tools.ErrorLog(err)
 	}
-	ret = response(w, err, map[string]interface{}{"data": seasons})
-	return ret
+	response(w, err, map[string]interface{}{"data": seasons})
 }

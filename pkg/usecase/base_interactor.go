@@ -27,7 +27,6 @@ func NewBaseInteractor(a AuthRepository) domain.BaseInteractor {
    interactor methods
 ***********************/
 
-// idTokenが渡せていない
 func (interactor *BaseInteractor) UserId(idToken string) (string, error) {
 	return interactor.authRepo.GetUserId(idToken)
 }
@@ -35,4 +34,8 @@ func (interactor *BaseInteractor) UserId(idToken string) (string, error) {
 func (interactor *BaseInteractor) Claims(idToken string) (claims map[string]interface{}, err error) {
 	claims, err = interactor.authRepo.GetClaims(idToken)
 	return
+}
+
+func (interactor *BaseInteractor) AdminId(idToken string) (string, error) {
+	return interactor.authRepo.GetAdminId(idToken)
 }

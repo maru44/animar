@@ -3,9 +3,6 @@ package main
 import (
 	"animar/v1/pkg/infrastructure"
 	"animar/v1/pkg/interfaces/controllers"
-	"animar/v1/pkg/mvc/auth"
-	"animar/v1/pkg/tools/handler"
-	"animar/v1/pkg/tools/middleware"
 	"animar/v1/pkg/tools/tools"
 	"net/http"
 	"os"
@@ -21,85 +18,80 @@ func main() {
 
 	sqlHandler := infrastructure.NewSqlHandler()
 
-	firebase := infrastructure.NewFireBaseClient()
-	authController := controllers.NewAuthController(firebase)
-
 	/*   Anime database   */
 	// http.HandleFunc("/db/anime/", handler.Handle(anime.AnimeView))
 	animeController := controllers.NewAnimeController(sqlHandler)
-	http.HandleFunc("/db/anime/", handler.Handle(animeController.AnimeView))
-	http.HandleFunc("/db/anime/search/", handler.Handle(animeController.SearchAnimeMinView))
-	http.HandleFunc("/db/anime/minimum/", handler.Handle(animeController.AnimeMinimumsView))
+	http.Handle("/db/anime/", animeController.BaseMiddleware(animeController.GiveUserIdMiddlewareAbleSSR(http.HandlerFunc(animeController.AnimeView))))
+	http.Handle("/db/anime/search/", animeController.BaseMiddleware(http.HandlerFunc(animeController.SearchAnimeMinimumView)))
+	http.Handle("/db/anime/minimum/", animeController.BaseMiddleware(http.HandlerFunc(animeController.AnimeMinimumsView)))
 
 	/*   blogs   */
 	blogController := controllers.NewBlogController(sqlHandler)
-	http.HandleFunc("/blog/", handler.Handle(blogController.BlogJoinAnimeView))
-	http.HandleFunc("/blog/post/", handler.Handle(middleware.PostOnlyMiddleware, blogController.InsertBlogWithRelationView))
-	http.HandleFunc("/blog/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, blogController.DeleteBlogView))          // ?id=
-	http.HandleFunc("/blog/update/", handler.Handle(middleware.PutOnlyMiddleware, blogController.UpdateBlogWithRelationView)) // ?id=
+	http.Handle("/blog/", blogController.BaseMiddleware(blogController.GiveUserIdMiddlewareAbleSSR(http.HandlerFunc(blogController.BlogJoinAnimeView))))
+	http.Handle("/blog/post/", blogController.BaseMiddleware(blogController.PostOnlyMiddleware(blogController.LoginRequireMiddleware(http.HandlerFunc(blogController.InsertBlogWithRelationView)))))
+	http.Handle("/blog/delete/", blogController.BaseMiddleware(blogController.DeleteOnlyMiddleware(blogController.LoginRequireMiddleware(http.HandlerFunc(blogController.DeleteBlogView)))))          // ?id=
+	http.Handle("/blog/update/", blogController.BaseMiddleware(blogController.PutOnlyMiddleware(blogController.LoginRequireMiddleware(http.HandlerFunc(blogController.UpdateBlogWithRelationView))))) // ?id=
 
 	/*   reviews   */
 	reviewController := controllers.NewReviewController(sqlHandler)
-	//http.HandleFunc("/reviews/", handler.Handle(reviewController.))
-	http.HandleFunc("/reviews/user/", handler.Handle(reviewController.GetOnesReviewsView))
-	http.HandleFunc("/reviews/post/star/", handler.Handle(middleware.UpsertOnlyMiddleware, reviewController.UpsertReviewRatingView))
-	http.HandleFunc("/reviews/post/content/", handler.Handle(middleware.UpsertOnlyMiddleware, reviewController.UpsertReviewContentView))
-	//http.HandleFunc("/reviews/anime/", handler.Handle(review.GetAnimeReviews))
-	http.HandleFunc("/reviews/anime/", handler.Handle(reviewController.GetAnimeReviewsView))
-	http.HandleFunc("/reviews/ua/", handler.Handle(reviewController.GetAnimeReviewOfUserView))
-	http.HandleFunc("/reviews/star/", handler.Handle(reviewController.AnimeRatingAvgView)) // star average
+	http.Handle("/reviews/user/", reviewController.BaseMiddleware(http.HandlerFunc(reviewController.GetOnesReviewsView)))
+	http.Handle("/reviews/post/star/", reviewController.BaseMiddleware(reviewController.UpsertOnlyMiddleware(reviewController.LoginRequireMiddleware(http.HandlerFunc(reviewController.UpsertReviewRatingView)))))
+	http.Handle("/reviews/post/content/", reviewController.BaseMiddleware(reviewController.UpsertOnlyMiddleware(reviewController.LoginRequireMiddleware(http.HandlerFunc(reviewController.UpsertReviewContentView)))))
+	http.Handle("/reviews/anime/", reviewController.BaseMiddleware(http.HandlerFunc(reviewController.GetAnimeReviewsView)))
+	http.Handle("/reviews/ua/", reviewController.BaseMiddleware(reviewController.GiveUserIdMiddleware(http.HandlerFunc(reviewController.GetAnimeReviewOfUserView))))
+	http.Handle("/reviews/star/", reviewController.BaseMiddleware(http.HandlerFunc(reviewController.AnimeRatingAvgView))) // star average
 
 	/*   watches count   */
 	audienceController := controllers.NewAudienceController(sqlHandler)
-	http.HandleFunc("/watch/", handler.Handle(audienceController.AnimeAudienceCountsView))
-	http.HandleFunc("/watch/u/", handler.Handle(audienceController.AudienceWithAnimeByUserView))
-	http.HandleFunc("/watch/post/", handler.Handle(middleware.PostOnlyMiddleware, audienceController.UpsertAudienceView)) // upsert
-	http.HandleFunc("/watch/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, audienceController.DeleteAudienceView))
-	http.HandleFunc("/watch/ua/", handler.Handle(audienceController.AudienceByAnimeAndUserView))
+	http.Handle("/watch/", audienceController.BaseMiddleware(http.HandlerFunc(audienceController.AnimeAudienceCountsView)))
+	http.Handle("/watch/u/", audienceController.BaseMiddleware(http.HandlerFunc(audienceController.AudienceWithAnimeByUserView)))
+	http.Handle("/watch/post/", audienceController.BaseMiddleware(audienceController.UpsertOnlyMiddleware(audienceController.LoginRequireMiddleware(http.HandlerFunc(audienceController.UpsertAudienceView))))) // upsert
+	http.Handle("/watch/delete/", audienceController.BaseMiddleware(audienceController.DeleteOnlyMiddleware(audienceController.LoginRequireMiddleware(http.HandlerFunc(audienceController.DeleteAudienceView)))))
+	http.Handle("/watch/ua/", audienceController.BaseMiddleware(audienceController.GiveUserIdMiddleware(http.HandlerFunc(audienceController.AudienceByAnimeAndUserView))))
 
 	/*   auth   */
-	http.HandleFunc("/auth/user/", handler.Handle(auth.GetUserModelView)) // ?uid=<UID>
-	http.HandleFunc("/auth/login/post/", handler.Handle(middleware.PostOnlyMiddleware, auth.SetJWTCookieView))
-	http.HandleFunc("/auth/refresh/", handler.Handle(auth.RenewTokenFCView))
-	http.HandleFunc("/auth/cookie/", handler.Handle(auth.TestGetCookie))
-	http.HandleFunc("/auth/user/cookie/", handler.Handle(auth.GetUserModelFCView))
-	//http.HandleFunc("/auth/user/cookie/", handler.Handle(auth.GetUserModelFCWithVerifiedView))
-	http.HandleFunc("/auth/register/", handler.Handle(middleware.PostOnlyMiddleware, auth.CreateUserFirstView))
-	http.HandleFunc("/auth/profile/update/", handler.Handle(middleware.PostOnlyMiddleware, auth.UserUpdateView))
+	firebase := infrastructure.NewFireBaseClient()
+	authController := controllers.NewAuthController(firebase)
+	http.Handle("/auth/user/", authController.BaseMiddleware(http.HandlerFunc(authController.GetUserModelFromQueryView)))
+	http.Handle("/auth/login/post/", authController.BaseMiddleware(authController.PostOnlyMiddleware(http.HandlerFunc(authController.LoginView))))
+	http.Handle("/auth/refresh/", authController.BaseMiddleware(http.HandlerFunc(authController.RenewTokenView)))
+	http.Handle("/auth/user/cookie/", authController.BaseMiddleware(authController.LoginRequireMiddleware(http.HandlerFunc(authController.GetUserModelFromCookieView))))
+	http.Handle("/auth/register/", authController.BaseMiddleware(authController.PostOnlyMiddleware(http.HandlerFunc(authController.RegisterView))))
+	http.Handle("/auth/profile/update/", authController.BaseMiddleware(authController.PostOnlyMiddleware(http.HandlerFunc(authController.UpdateProfileView))))
 
 	/*   admin   */
 	adminController := controllers.NewAdminController(sqlHandler)
-	http.HandleFunc("/admin/anime/", handler.Handle(authController.SSRAdminRequiredMiddleware, adminController.AnimeListAdminView))
-	http.HandleFunc("/admin/anime/detail/", handler.Handle(authController.SSRAdminRequiredMiddleware, adminController.AnimeDetailAdminView))
-	http.HandleFunc("/admin/anime/post/", handler.Handle(middleware.PostOnlyMiddleware, authController.AdminRequiredMiddleware, adminController.AnimePostAdminView))
-	http.HandleFunc("/admin/anime/update/", handler.Handle(middleware.PutOnlyMiddleware, authController.AdminRequiredMiddleware, adminController.AnimeUpdateView))
-	http.HandleFunc("/admin/anime/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, authController.AdminRequiredMiddleware, adminController.AnimeDeleteView))
+	http.Handle("/admin/anime/", adminController.BaseMiddleware(adminController.AdminRequiredMiddlewareGet(http.HandlerFunc(adminController.AnimeListAdminView))))
+	http.Handle("/admin/anime/detail/", adminController.BaseMiddleware(adminController.AdminRequiredMiddlewareGet(http.HandlerFunc(adminController.AnimeDetailAdminView))))
+	http.Handle("/admin/anime/post/", adminController.BaseMiddleware(adminController.PostOnlyMiddleware(adminController.AdminRequiredMiddleware(http.HandlerFunc(adminController.AnimePostAdminView)))))
+	http.Handle("/admin/anime/update/", adminController.BaseMiddleware(adminController.PutOnlyMiddleware(adminController.AdminRequiredMiddleware(http.HandlerFunc(adminController.AnimeUpdateView)))))
+	http.Handle("/admin/anime/delete/", adminController.BaseMiddleware(adminController.DeleteOnlyMiddleware(adminController.AdminRequiredMiddleware(http.HandlerFunc(adminController.AnimeDeleteView)))))
 
 	/*   series   */
-	http.HandleFunc("/series/", handler.Handle(authController.SSRAdminRequiredMiddleware, adminController.SeriesView))
-	http.HandleFunc("/series/post/", handler.Handle(middleware.PostOnlyMiddleware, authController.AdminRequiredMiddleware, adminController.InsertSeriesView))
+	http.Handle("/series/", adminController.BaseMiddleware(adminController.AdminRequiredMiddlewareGet(http.HandlerFunc(adminController.SeriesView))))
+	http.Handle("/series/post/", adminController.BaseMiddleware(adminController.PostOnlyMiddleware(adminController.AdminRequiredMiddleware(http.HandlerFunc(adminController.InsertSeriesView)))))
 
 	/*   seasons   */
 	seasonController := controllers.NewSeasonController(sqlHandler)
-	http.HandleFunc("/season/", handler.Handle(authController.SSRAdminRequiredMiddleware, adminController.SeasonView))
-	http.HandleFunc("/admin/season/post/", handler.Handle(middleware.PostOnlyMiddleware, authController.AdminRequiredMiddleware, adminController.InsertSeasonView))
+	http.Handle("/season/", adminController.BaseMiddleware(adminController.AdminRequiredMiddlewareGet(http.HandlerFunc(adminController.SeasonView))))
+	http.Handle("/admin/season/post/", adminController.BaseMiddleware(adminController.AdminRequiredMiddleware(adminController.PostOnlyMiddleware(http.HandlerFunc(adminController.InsertSeasonView)))))
 	// relations
-	http.HandleFunc("/admin/season/anime/post/", handler.Handle(middleware.PostOnlyMiddleware, adminController.SSRAdminRequiredMiddleware, adminController.InsertRelationSeasonView))
-	http.HandleFunc("/season/anime/", handler.Handle(seasonController.SeasonByAnimeIdView)) // ?id=
+	http.Handle("/admin/season/anime/post/", adminController.BaseMiddleware(adminController.AdminRequiredMiddleware(adminController.PostOnlyMiddleware(http.HandlerFunc(adminController.InsertRelationSeasonView)))))
+	http.Handle("/season/anime/", seasonController.BaseMiddleware(http.HandlerFunc(seasonController.SeasonByAnimeIdView))) // ?id=
 
 	/*   platform   */
-	http.HandleFunc("/admin/platform/", handler.Handle(authController.SSRAdminRequiredMiddleware, adminController.PlatformView))
-	http.HandleFunc("/admin/platform/post/", handler.Handle(middleware.PostOnlyMiddleware, authController.AdminRequiredMiddleware, adminController.PlatformInsertView))
-	http.HandleFunc("/admin/platform/update/", handler.Handle(middleware.PutOnlyMiddleware, authController.AdminRequiredMiddleware, adminController.PlatformUpdateView))
-	http.HandleFunc("/admin/platform/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, authController.AdminRequiredMiddleware, adminController.PlatformDeleteview))
+	http.Handle("/admin/platform/", adminController.BaseMiddleware(adminController.AdminRequiredMiddlewareGet(http.HandlerFunc(adminController.PlatformView))))
+	http.Handle("/admin/platform/post/", adminController.BaseMiddleware(adminController.PostOnlyMiddleware(adminController.AdminRequiredMiddleware(http.HandlerFunc(adminController.PlatformInsertView)))))
+	http.Handle("/admin/platform/update/", adminController.BaseMiddleware(adminController.PutOnlyMiddleware(adminController.AdminRequiredMiddleware(http.HandlerFunc(adminController.PlatformUpdateView)))))
+	http.Handle("/admin/platform/delete/", adminController.BaseMiddleware(adminController.DeleteOnlyMiddleware(adminController.AdminRequiredMiddleware(http.HandlerFunc(adminController.PlatformDeleteview)))))
 	// relations
-	http.HandleFunc("/relation/plat/", handler.Handle(adminController.RelationPlatformView)) // ?id=<anime_id>
-	http.HandleFunc("/admin/relation/plat/post/", handler.Handle(middleware.PostOnlyMiddleware, authController.AdminRequiredMiddleware, adminController.InsertRelationPlatformView))
-	http.HandleFunc("/admin/relation/plat/delete/", handler.Handle(middleware.DeleteOnlyMiddleware, authController.AdminRequiredMiddleware, adminController.DeleteRelationPlatformView)) // ?anime=<anime_id>&platform=<platform_id>
+	http.Handle("/relation/plat/", adminController.BaseMiddleware(http.HandlerFunc(adminController.RelationPlatformView))) // ?id=<anime_id>
+	http.Handle("/admin/relation/plat/post/", adminController.BaseMiddleware(adminController.PostOnlyMiddleware(adminController.AdminRequiredMiddleware(http.HandlerFunc(adminController.InsertRelationPlatformView)))))
+	http.Handle("/admin/relation/plat/delete/", adminController.BaseMiddleware(adminController.DeleteOnlyMiddleware(adminController.AdminRequiredMiddleware(http.HandlerFunc(adminController.DeleteRelationPlatformView))))) // ?anime=<anime_id>&platform=<platform_id>
 
 	/*   utilities   */
 	utilityController := controllers.NewUtilityController()
-	http.HandleFunc("/utils/s3/", handler.Handle(middleware.PostOnlyMiddleware, utilityController.SimpleUploadImage))
+	http.Handle("/utils/s3/", utilityController.BaseMiddleware(utilityController.PostOnlyMiddleware(utilityController.LoginRequireMiddleware(http.HandlerFunc(utilityController.SimpleUploadImage)))))
 
 	if tools.IsProductionEnv() {
 		http.ListenAndServe(":8000", nil) // reverse proxy

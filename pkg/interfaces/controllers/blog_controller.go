@@ -3,7 +3,6 @@ package controllers
 import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/database"
-	"animar/v1/pkg/tools/fire"
 	"animar/v1/pkg/usecase"
 	"encoding/json"
 	"net/http"
@@ -26,25 +25,14 @@ func NewBlogController(sqlHandler database.SqlHandler) *BlogController {
 	}
 }
 
-func (controller *BlogController) BlogListView(w http.ResponseWriter, r *http.Request) (ret error) {
+func (controller *BlogController) BlogListView(w http.ResponseWriter, r *http.Request) {
 	blogs, err := controller.interactor.ListBlog()
-	ret = response(w, err, map[string]interface{}{"data": blogs})
-	return ret
+	response(w, err, map[string]interface{}{"data": blogs})
+	return
 }
 
-func (controller *BlogController) BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) (ret error) {
-	var userId string
-	switch r.Method {
-	case "GET":
-		userId, _ = controller.getUserIdFromCookie(r)
-	case "POST":
-		var posted fire.TUserIdCookieInput
-		json.NewDecoder(r.Body).Decode(&posted)
-		userId, _ = controller.GetUserIdFromToken(posted.Token)
-	default:
-		userId = ""
-	}
-
+func (controller *BlogController) BlogJoinAnimeView(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(USER_ID).(string)
 	query := r.URL.Query()
 	slug := query.Get("s")
 	id := query.Get("id")
@@ -53,42 +41,37 @@ func (controller *BlogController) BlogJoinAnimeView(w http.ResponseWriter, r *ht
 	if slug != "" {
 		blog, err := controller.interactor.DetailBlogBySlug(slug)
 		blog.Animes, _ = controller.interactor.RelationAnimeByBlog(blog.GetId())
-		ret = response(w, err, map[string]interface{}{"data": blog})
+		response(w, err, map[string]interface{}{"data": blog})
 	} else if id != "" {
 		i, _ := strconv.Atoi(id)
 		blog, err := controller.interactor.DetailBlog(i)
 		blog.Animes, _ = controller.interactor.RelationAnimeByBlog(i)
-		ret = response(w, err, map[string]interface{}{"data": blog})
+		response(w, err, map[string]interface{}{"data": blog})
 	} else if uid != "" {
 		blogs, err := controller.interactor.ListBlogByUser(userId, uid)
-		ret = response(w, err, map[string]interface{}{"data": blogs})
+		response(w, err, map[string]interface{}{"data": blogs})
 	} else {
 		blogs, err := controller.interactor.ListBlog()
-		ret = response(w, err, map[string]interface{}{"data": blogs})
+		response(w, err, map[string]interface{}{"data": blogs})
 	}
-	return ret
+	return
 }
 
-func (controller *BlogController) InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId, _ := controller.getUserIdFromCookie(r)
+func (controller *BlogController) InsertBlogWithRelationView(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(USER_ID).(string)
 
-	if userId == "" {
-		ret = response(w, domain.ErrUnauthorized, nil)
-	} else {
-		var p domain.TBlogInsert
-		json.NewDecoder(r.Body).Decode(&p)
-		lastInserted, err := controller.interactor.InsertBlog(p, userId)
-		for _, animeId := range p.AnimeIds {
-			controller.interactor.InsertRelationAnime(animeId, lastInserted)
-		}
-		ret = response(w, err, map[string]interface{}{"data": lastInserted})
+	var p domain.TBlogInsert
+	json.NewDecoder(r.Body).Decode(&p)
+	lastInserted, err := controller.interactor.InsertBlog(p, userId)
+	for _, animeId := range p.AnimeIds {
+		controller.interactor.InsertRelationAnime(animeId, lastInserted)
 	}
-	return ret
+	response(w, err, map[string]interface{}{"data": lastInserted})
+	return
 }
 
-func (controller *BlogController) UpdateBlogWithRelationView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId, _ := controller.getUserIdFromCookie(r)
-
+func (controller *BlogController) UpdateBlogWithRelationView(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(USER_ID).(string)
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
@@ -96,19 +79,18 @@ func (controller *BlogController) UpdateBlogWithRelationView(w http.ResponseWrit
 	// user 不一致
 	blogUserId, _ := controller.interactor.BlogUserId(id)
 	if blogUserId != userId {
-		ret = response(w, domain.ErrForbidden, nil)
+		response(w, domain.ErrForbidden, nil)
 	} else {
 		var p domain.TBlogInsert
 		json.NewDecoder(r.Body).Decode(&p)
 		rowsAffected, err := controller.interactor.UpdateBlog(p, id)
-		ret = response(w, err, map[string]interface{}{"data": rowsAffected})
+		response(w, err, map[string]interface{}{"data": rowsAffected})
 	}
-	return ret
+	return
 }
 
-func (controller *BlogController) DeleteBlogView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId, _ := controller.getUserIdFromCookie(r)
-
+func (controller *BlogController) DeleteBlogView(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(USER_ID).(string)
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
@@ -116,10 +98,10 @@ func (controller *BlogController) DeleteBlogView(w http.ResponseWriter, r *http.
 	// user 不一致
 	blogUserId, _ := controller.interactor.BlogUserId(id)
 	if blogUserId != userId {
-		ret = response(w, domain.ErrForbidden, nil)
+		response(w, domain.ErrForbidden, nil)
 	} else {
 		deletedRow, err := controller.interactor.DeleteBlog(id)
-		ret = response(w, err, map[string]interface{}{"data": deletedRow})
+		response(w, err, map[string]interface{}{"data": deletedRow})
 	}
-	return ret
+	return
 }

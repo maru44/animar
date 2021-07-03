@@ -32,8 +32,11 @@ func (repo *AuthRepository) GetUserInfo(userId string) (uInfo domain.TUserInfo, 
 
 func (repo *AuthRepository) GetClaims(idToken string) (claims map[string]interface{}, err error) {
 	ctx := context.Background()
-	client, err := repo.Firebase.Auth(ctx)
+	client, _ := repo.Firebase.Auth(ctx)
 	token, err := client.VerifyIDToken(ctx, idToken)
+	if err != nil {
+		return
+	}
 	claims = token.Claims
 	return
 }

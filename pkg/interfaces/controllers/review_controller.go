@@ -25,71 +25,55 @@ func NewReviewController(sqlHandler database.SqlHandler) *ReviewController {
 	}
 }
 
-func (controller *ReviewController) GetAnimeReviewsView(w http.ResponseWriter, r *http.Request) (ret error) {
+func (controller *ReviewController) GetAnimeReviewsView(w http.ResponseWriter, r *http.Request) {
 	userId := r.URL.Query().Get("user")
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 	revs, err := controller.interactor.GetAnimeReviews(animeId, userId)
-
-	ret = response(w, err, map[string]interface{}{"data": revs})
-	return ret
+	response(w, err, map[string]interface{}{"data": revs})
+	return
 }
 
-func (controller *ReviewController) GetAnimeReviewOfUserView(w http.ResponseWriter, r *http.Request) (ret error) {
+func (controller *ReviewController) GetAnimeReviewOfUserView(w http.ResponseWriter, r *http.Request) {
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
+	userId := r.Context().Value(USER_ID).(string)
 
-	userId, _ := controller.getUserIdFromCookie(r)
-
-	if userId == "" {
-		ret = response(w, domain.ErrUnauthorized, nil)
-	} else {
-		rev, _ := controller.interactor.GetOnesReviewByAnime(animeId, userId)
-		// 一旦 nil にしない。これはユーザーの視聴データが無いときにも対応するため
-		ret = response(w, nil, map[string]interface{}{"data": rev})
-	}
-	return ret
+	rev, _ := controller.interactor.GetOnesReviewByAnime(animeId, userId)
+	// 一旦 nil にしない。これはユーザーの視聴データが無いときにも対応するため
+	response(w, nil, map[string]interface{}{"data": rev})
+	return
 }
 
-func (controller *ReviewController) UpsertReviewContentView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId, _ := controller.getUserIdFromCookie(r)
-
-	if userId == "" {
-		ret = response(w, domain.ErrUnauthorized, nil)
-	} else {
-		var posted domain.TReviewInput
-		json.NewDecoder(r.Body).Decode(&posted)
-		value, err := controller.interactor.UpsertReviewContent(posted, userId)
-		ret = response(w, err, map[string]interface{}{"data": value})
-	}
-	return ret
+func (controller *ReviewController) UpsertReviewContentView(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(USER_ID).(string)
+	var posted domain.TReviewInput
+	json.NewDecoder(r.Body).Decode(&posted)
+	value, err := controller.interactor.UpsertReviewContent(posted, userId)
+	response(w, err, map[string]interface{}{"data": value})
+	return
 }
 
-func (controller *ReviewController) UpsertReviewRatingView(w http.ResponseWriter, r *http.Request) (ret error) {
-	userId, _ := controller.getUserIdFromCookie(r)
-
-	if userId == "" {
-		ret = response(w, domain.ErrUnauthorized, nil)
-	} else {
-		var posted domain.TReviewInput
-		json.NewDecoder(r.Body).Decode(&posted)
-		value, err := controller.interactor.UpsertReviewRating(posted, userId)
-		ret = response(w, err, map[string]interface{}{"data": value})
-	}
-	return ret
+func (controller *ReviewController) UpsertReviewRatingView(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(USER_ID).(string)
+	var posted domain.TReviewInput
+	json.NewDecoder(r.Body).Decode(&posted)
+	value, err := controller.interactor.UpsertReviewRating(posted, userId)
+	response(w, err, map[string]interface{}{"data": value})
+	return
 }
 
-func (controller *ReviewController) AnimeRatingAvgView(w http.ResponseWriter, r *http.Request) (ret error) {
+func (controller *ReviewController) AnimeRatingAvgView(w http.ResponseWriter, r *http.Request) {
 	animeIdStr := r.URL.Query().Get("anime")
 	animeId, _ := strconv.Atoi(animeIdStr)
 	avg, err := controller.interactor.GetRatingAverage(animeId)
-	ret = response(w, err, map[string]interface{}{"data": avg})
-	return ret
+	response(w, err, map[string]interface{}{"data": avg})
+	return
 }
 
-func (controller *ReviewController) GetOnesReviewsView(w http.ResponseWriter, r *http.Request) (ret error) {
+func (controller *ReviewController) GetOnesReviewsView(w http.ResponseWriter, r *http.Request) {
 	userId := r.URL.Query().Get("user")
 	revs, err := controller.interactor.GetOnesReviews(userId)
-	ret = response(w, err, map[string]interface{}{"data": revs})
-	return ret
+	response(w, err, map[string]interface{}{"data": revs})
+	return
 }

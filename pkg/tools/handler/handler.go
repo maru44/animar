@@ -16,3 +16,13 @@ func Handle(handlers ...func(w http.ResponseWriter, r *http.Request) error) func
 		}
 	}
 }
+
+func BaseHandle(handler func(w http.ResponseWriter, r *http.Request) error) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		middleware.CorsMiddleware(w, r)
+		middleware.AllowOptionsMiddleware(w, r)
+		if err := handler(w, r); err != nil {
+			return
+		}
+	}
+}

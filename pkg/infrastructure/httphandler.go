@@ -1,4 +1,4 @@
-package controllers
+package infrastructure
 
 import (
 	"animar/v1/pkg/domain"
@@ -6,8 +6,10 @@ import (
 	"net/http"
 )
 
-func response(w http.ResponseWriter, err error, body map[string]interface{}) error {
-	status := getStatusCode(err)
+type Httphandler struct{}
+
+func (h *Httphandler) response(w http.ResponseWriter, err error, body map[string]interface{}) error {
+	status := h.getStatusCode(err)
 	w.WriteHeader(status)
 	if status == http.StatusOK {
 		data, _ := json.Marshal(body)
@@ -16,7 +18,7 @@ func response(w http.ResponseWriter, err error, body map[string]interface{}) err
 	return err
 }
 
-func getStatusCode(err error) int {
+func (h *Httphandler) getStatusCode(err error) int {
 	if err == nil {
 		return http.StatusOK
 	}
@@ -36,8 +38,6 @@ func getStatusCode(err error) int {
 		return http.StatusCreated
 	case domain.ErrUnknownType:
 		return http.StatusUnsupportedMediaType
-	case domain.ErrMethodNotAllowed:
-		return http.StatusMethodNotAllowed
 	default:
 		return http.StatusInternalServerError
 	}
