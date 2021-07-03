@@ -18,6 +18,12 @@ type SqlRows struct {
 	Rows *sql.Rows
 }
 
+type SqlResult struct {
+	Result sql.Result
+}
+
+// init
+
 func NewSqlHandler() database.SqlHandler {
 	conn, err := sql.Open("mysql", fmt.Sprintf("%s:%s%s/%s", configs.MysqlUser, configs.MysqlPassword, configs.MysqlHost, configs.MysqlDataBase))
 	if err != nil {
@@ -27,6 +33,10 @@ func NewSqlHandler() database.SqlHandler {
 	sqlHandler.Conn = conn
 	return sqlHandler
 }
+
+/********************
+    sqlHandler methods
+**************************/
 
 func (handler *SqlHandler) ErrNoRows() error {
 	return handler.ErrNoRows()
@@ -40,22 +50,6 @@ func (handler *SqlHandler) Query(statement string, args ...interface{}) (databas
 	row := new(SqlRows)
 	row.Rows = rows
 	return rows, nil
-}
-
-func (r SqlRows) Scan(dest ...interface{}) error {
-	return r.Rows.Scan(dest...)
-}
-
-func (r SqlRows) Next() bool {
-	return r.Rows.Next()
-}
-
-func (r SqlRows) Close() error {
-	return r.Rows.Close()
-}
-
-type SqlResult struct {
-	Result sql.Result
 }
 
 func (handler *SqlHandler) Execute(statement string, args ...interface{}) (database.Result, error) {
@@ -73,6 +67,26 @@ func (handler *SqlHandler) Execute(statement string, args ...interface{}) (datab
 	res.Result = exe
 	return res, nil
 }
+
+/********************
+    Rows methods
+**************************/
+
+func (r SqlRows) Scan(dest ...interface{}) error {
+	return r.Rows.Scan(dest...)
+}
+
+func (r SqlRows) Next() bool {
+	return r.Rows.Next()
+}
+
+func (r SqlRows) Close() error {
+	return r.Rows.Close()
+}
+
+/********************
+    Results methods
+**************************/
 
 func (r SqlResult) LastInsertId() (int64, error) {
 	return r.Result.LastInsertId()

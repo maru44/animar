@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"animar/v1/pkg/domain"
-	"fmt"
 )
 
 type AuthInteractor struct {
@@ -43,7 +42,6 @@ func (interactor *AuthInteractor) IsAdmin(userId string) bool {
 }
 
 func (interactor *AuthInteractor) AdminId(idToken string) (string, error) {
-	fmt.Print("interactor")
 	return interactor.repository.GetAdminId(idToken)
 }
 

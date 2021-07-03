@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"animar/v1/configs"
 	"animar/v1/pkg/interfaces/fires"
+	"animar/v1/pkg/tools/tools"
 	"context"
 
 	firebase "firebase.google.com/go/v4"
@@ -18,6 +19,26 @@ type FirebaseClient struct {
 	Client *auth.Client
 }
 
+type FirebaseToken struct {
+	Token *auth.Token
+}
+
+type FirebaseRecord struct {
+	UserRecord *auth.UserRecord
+}
+
+type FirebaseUserInfo struct {
+	UserInfo *auth.UserInfo
+}
+
+type FirebaseSettings struct {
+	ActionCodeSettings *auth.ActionCodeSettings
+}
+
+type FirebaseUpdate struct {
+	UserToUpdate *auth.UserToUpdate
+}
+
 // initialize firebase sdk
 func NewFireBaseClient() fires.Firebase {
 	ctx := context.Background()
@@ -30,15 +51,25 @@ func NewFireBaseClient() fires.Firebase {
 }
 
 func (f *Firebase) Auth(ctx context.Context) (fires.Client, error) {
-	client, err := f.App.Auth(ctx)
+	client := new(FirebaseClient)
+	res, err := f.App.Auth(ctx)
 	if err != nil {
-		return new(FirebaseClient), err
+		return client, err
 	}
+	client.Client = res
 	return client, nil
 }
 
+// あと少し *auth.Tokenと型が違うからだめ fieldを追加してみたがダメ     (fires.Token, error)
 func (fc *FirebaseClient) VerifyIDToken(ctx context.Context, idToken string) (*auth.Token, error) {
-	return fc.Client.VerifyIDToken(ctx, idToken)
+	token := new(FirebaseToken)
+	realToken, err := fc.Client.VerifyIDToken(ctx, idToken)
+	if err != nil {
+		tools.ErrorLog(err)
+	}
+	token.Token = realToken
+	// return token, err
+	return token.Token, err
 }
 
 func (fc *FirebaseClient) GetUser(ctx context.Context, userId string) (*auth.UserRecord, error) {
@@ -51,4 +82,8 @@ func (fc *FirebaseClient) EmailVerificationLinkWithSettings(ctx context.Context,
 
 func (fc *FirebaseClient) UpdateUser(ctx context.Context, userId string, user *auth.UserToUpdate) (*auth.UserRecord, error) {
 	return fc.Client.UpdateUser(ctx, userId, user)
+}
+
+func (token *FirebaseToken) Claims() map[string]interface{} {
+	return token.Token.Claims
 }
