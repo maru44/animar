@@ -58,6 +58,9 @@ func main() {
 	http.Handle("/auth/user/cookie/", authController.BaseMiddleware(authController.LoginRequireMiddleware(http.HandlerFunc(authController.GetUserModelFromCookieView))))
 	http.Handle("/auth/register/", authController.BaseMiddleware(authController.PostOnlyMiddleware(http.HandlerFunc(authController.RegisterView))))
 	http.Handle("/auth/profile/update/", authController.BaseMiddleware(authController.PostOnlyMiddleware(http.HandlerFunc(authController.UpdateProfileView))))
+	// oauth
+	http.Handle("/auth/google/", authController.BaseMiddleware(http.HandlerFunc(authController.GoogleOAuthView)))
+	http.Handle("/auth/google/redirect/", authController.BaseMiddleware(http.HandlerFunc(authController.GoogleRedirectView)))
 
 	/*   admin   */
 	adminController := controllers.NewAdminController(sqlHandler)

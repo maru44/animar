@@ -196,3 +196,20 @@ func (controller *AuthController) UpdateProfileView(w http.ResponseWriter, r *ht
 	response(w, err, map[string]interface{}{"user": user})
 	return
 }
+
+func (controller *AuthController) GoogleOAuthView(w http.ResponseWriter, r *http.Request) {
+	controller.interactor.OauthGoogle()
+	response(w, nil, nil)
+	return
+}
+
+func (controller *AuthController) GoogleRedirectView(w http.ResponseWriter, r *http.Request) {
+	controller.interactor.GoogleRedirect(r.FormValue("code"))
+	response(w, nil, nil)
+	return
+}
+
+// func (controller *AuthController) CreateGoogleLinkView(w http.ResponseWriter, r *http.Request) {
+// 	state := "aaa"
+// 	u, err := url.Parse(authorization)
+// }

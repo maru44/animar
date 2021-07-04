@@ -52,4 +52,7 @@ type AuthInteractor interface {
 	AdminId(string) (string, error)
 	SendVerify(string) error
 	UpdateProfile(string, TProfileForm) (TUserInfo, error)
+	// google oauth
+	OauthGoogle()
+	GoogleRedirect(string)
 }

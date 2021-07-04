@@ -26,6 +26,9 @@ type AuthRepository interface {
 	SendVerifyEmail(string) error
 	Update(string, domain.TProfileForm) (domain.TUserInfo, error)
 	GetUserId(string) (string, error)
+	// google oauth
+	GoogleOAuthCallback()
+	GoogleRedirect(code string)
 }
 
 /**********************
@@ -55,4 +58,12 @@ func (interactor *AuthInteractor) UpdateProfile(userId string, params domain.TPr
 
 func (interactor *AuthInteractor) Claims(idToken string) (claims map[string]interface{}, err error) {
 	return interactor.repository.GetClaims(idToken)
+}
+
+func (interactor *AuthInteractor) OauthGoogle() {
+	interactor.repository.GoogleOAuthCallback()
+}
+
+func (interactor *AuthInteractor) GoogleRedirect(code string) {
+	interactor.repository.GoogleRedirect(code)
 }
