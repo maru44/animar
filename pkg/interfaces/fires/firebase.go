@@ -12,7 +12,7 @@ type Firebase interface {
 }
 
 type Client interface {
-	// VerifyIDToken(context.Context, string) (Token, error)
+	//VerifyIDToken(context.Context, string) (Token, error)
 	VerifyIDToken(context.Context, string) (*auth.Token, error)
 	GetUser(context.Context, string) (*auth.UserRecord, error)
 	EmailVerificationLinkWithSettings(context.Context, string, *auth.ActionCodeSettings) (string, error)
@@ -22,6 +22,10 @@ type Client interface {
 type Token struct {
 	Claims map[string]interface{}
 }
+
+// type Token interface {
+// 	//Claims() map[string]interface{}
+// }
 
 type UserRecode interface {
 	UserInfo

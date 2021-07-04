@@ -23,6 +23,9 @@ type FirebaseToken struct {
 	Token *auth.Token
 }
 
+//
+type FirebaseClaims map[string]interface{}
+
 type FirebaseRecord struct {
 	UserRecord *auth.UserRecord
 }
@@ -60,7 +63,7 @@ func (f *Firebase) Auth(ctx context.Context) (fires.Client, error) {
 	return client, nil
 }
 
-// あと少し *auth.Tokenと型が違うからだめ fieldを追加してみたがダメ     (fires.Token, error)
+// あと少し *auth.Tokenと型が違うからだめっぽ *auth.Tokenに合わせてfieldを追加してみたがダメ     (fires.Token, error)
 func (fc *FirebaseClient) VerifyIDToken(ctx context.Context, idToken string) (*auth.Token, error) {
 	token := new(FirebaseToken)
 	realToken, err := fc.Client.VerifyIDToken(ctx, idToken)
@@ -84,6 +87,7 @@ func (fc *FirebaseClient) UpdateUser(ctx context.Context, userId string, user *a
 	return fc.Client.UpdateUser(ctx, userId, user)
 }
 
+// 不要では?
 func (token *FirebaseToken) Claims() map[string]interface{} {
 	return token.Token.Claims
 }
