@@ -9,11 +9,14 @@ import (
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"golang.org/x/oauth2"
 )
 
 type AuthController struct {
@@ -49,12 +52,26 @@ func (controller *AuthController) GetUserModelFromQueryView(w http.ResponseWrite
 	return
 }
 
+// @TODO add google oauth
 // user model from cookie
 func (controller *AuthController) GetUserModelFromCookieView(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(USER_ID).(string)
 	user, err := controller.interactor.UserInfo(userId)
 	claims, err := controller.getClaimsFromCookie(r)
-	response(w, err, map[string]interface{}{"user": user, "is_verify": claims["email_verified"]})
+	if err != nil {
+		// google oauth
+		gUser := controller.interactor.GoogleUser(userId)
+		user := domain.TUserInfo{
+			DisplayName: gUser.DisplayName,
+			Email:       gUser.Email,
+			UID:         gUser.UID,
+			PhotoURL:    gUser.PhotoURL,
+			ProviderID:  "google",
+		}
+		response(w, err, map[string]interface{}{"user": user, "is_verify": true})
+	} else {
+		response(w, err, map[string]interface{}{"user": user, "is_verify": claims["email_verified"]})
+	}
 	return
 }
 
@@ -198,13 +215,20 @@ func (controller *AuthController) UpdateProfileView(w http.ResponseWriter, r *ht
 }
 
 func (controller *AuthController) GoogleOAuthView(w http.ResponseWriter, r *http.Request) {
-	controller.interactor.OauthGoogle()
-	response(w, nil, nil)
+	config := controller.interactor.GoogleConfig()
+	url := config.AuthCodeURL("aaa", oauth2.AccessTypeOffline)
+	response(w, nil, map[string]interface{}{"data": url})
 	return
 }
 
 func (controller *AuthController) GoogleRedirectView(w http.ResponseWriter, r *http.Request) {
-	controller.interactor.GoogleRedirect(r.FormValue("code"))
+	// controller.interactor.OauthGoogle()
+	config := controller.interactor.GoogleConfig()
+	code := r.FormValue("code")
+	ctx := context.Background()
+	var tok *oauth2.Token
+	tok, _ = config.Exchange(ctx, code)
+	api.SetCookiePackage(w, "googleToken", tok.AccessToken, tok.Expiry.Second())
 	response(w, nil, nil)
 	return
 }

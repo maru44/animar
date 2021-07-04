@@ -1,5 +1,7 @@
 package domain
 
+import "golang.org/x/oauth2"
+
 type TUserInfo struct {
 	DisplayName string `json:"displayName,omitempty"`
 	Email       string `json:"email,omitempty"`
@@ -45,6 +47,14 @@ type TProfileForm struct {
 	PhotoUrl    string `json:"photoUrl"`
 }
 
+type TGoogleOauth struct {
+	UID         string `json:"id"`
+	DisplayName string `json:"name,omitempty"`
+	Email       string `json:"email,omitempty"`
+	ProviderID  string `json:"providerId,omitempty"`
+	PhotoURL    string `json:"picture,omitempty"`
+}
+
 type AuthInteractor interface {
 	UserInfo(string) (TUserInfo, error)
 	Claims(string) (map[string]interface{}, error)
@@ -53,6 +63,7 @@ type AuthInteractor interface {
 	SendVerify(string) error
 	UpdateProfile(string, TProfileForm) (TUserInfo, error)
 	// google oauth
+	GoogleConfig() *oauth2.Config
 	OauthGoogle()
-	GoogleRedirect(string)
+	GoogleUser(string) TGoogleOauth
 }

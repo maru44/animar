@@ -6,6 +6,7 @@ import (
 	"animar/v1/pkg/tools/mysmtp"
 	"animar/v1/pkg/tools/tools"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -136,32 +137,22 @@ func (repo *AuthRepository) GoogleOAuth() *oauth2.Config {
 
 func (repo *AuthRepository) GoogleOAuthCallback() {
 	config := repo.GoogleOAuth()
-	// ctx := context.Background()
-	// var tok *oauth2.Token
-	// tok, err := config.Exchange(ctx, "aaa")
-	// fmt.Print(tok)
-	// if err != nil {
-	// 	tools.ErrorLog(err)
-	// }
-	// if tok.Valid() == false {
-	// }
-	fmt.Print(config.AuthCodeURL("aaa"))
-
-	// service, _ := v2.New(config.Client(ctx, tok))
-	//var tokenInfo *v2.Tokeninfo
-	// tokenInfo, _ = service.Tokeninfo().AccessToken(tok.AccessToken).Context(ctx).Do()
-	// fmt.Print(tokenInfo)
+	fmt.Print(config.AuthCodeURL("aaa", oauth2.AccessTypeOffline))
 }
 
-func (repo *AuthRepository) GoogleRedirect(code string) {
+func (repo *AuthRepository) GetGoogleUser(code string) domain.TGoogleOauth {
 	config := repo.GoogleOAuth()
 	ctx := context.Background()
 	var tok *oauth2.Token
 	tok, err := config.Exchange(ctx, code)
+	//fmt.Print(tok.AccessToken)
+	fmt.Print(tok.Expiry)
+	fmt.Print(tok.RefreshToken)
 
 	if err != nil {
 		tools.ErrorLog(err)
 	}
+	// userInfo
 	client := config.Client(ctx, tok)
 	res, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + tok.AccessToken)
 	if err != nil {
@@ -170,4 +161,7 @@ func (repo *AuthRepository) GoogleRedirect(code string) {
 	defer res.Body.Close()
 	byteArray, _ := ioutil.ReadAll(res.Body)
 	fmt.Println(string(byteArray))
+	var user domain.TGoogleOauth
+	err = json.Unmarshal(byteArray, &user)
+	return user
 }

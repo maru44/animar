@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"animar/v1/pkg/domain"
+
+	"golang.org/x/oauth2"
 )
 
 type AuthInteractor struct {
@@ -27,8 +29,9 @@ type AuthRepository interface {
 	Update(string, domain.TProfileForm) (domain.TUserInfo, error)
 	GetUserId(string) (string, error)
 	// google oauth
+	GoogleOAuth() *oauth2.Config
 	GoogleOAuthCallback()
-	GoogleRedirect(code string)
+	GetGoogleUser(code string) domain.TGoogleOauth
 }
 
 /**********************
@@ -60,10 +63,14 @@ func (interactor *AuthInteractor) Claims(idToken string) (claims map[string]inte
 	return interactor.repository.GetClaims(idToken)
 }
 
+func (interactor *AuthInteractor) GoogleConfig() *oauth2.Config {
+	return interactor.repository.GoogleOAuth()
+}
+
 func (interactor *AuthInteractor) OauthGoogle() {
 	interactor.repository.GoogleOAuthCallback()
 }
 
-func (interactor *AuthInteractor) GoogleRedirect(code string) {
-	interactor.repository.GoogleRedirect(code)
+func (interactor *AuthInteractor) GoogleUser(code string) domain.TGoogleOauth {
+	return interactor.repository.GetGoogleUser(code)
 }

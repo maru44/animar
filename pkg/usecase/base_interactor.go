@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"animar/v1/pkg/domain"
+
+	"golang.org/x/oauth2"
 )
 
 type BaseInteractor struct {
@@ -38,4 +40,12 @@ func (interactor *BaseInteractor) Claims(idToken string) (claims map[string]inte
 
 func (interactor *BaseInteractor) AdminId(idToken string) (string, error) {
 	return interactor.authRepo.GetAdminId(idToken)
+}
+
+func (interactor *BaseInteractor) GoogleConfig() *oauth2.Config {
+	return interactor.authRepo.GoogleOAuth()
+}
+
+func (interactor *BaseInteractor) GoogleUser(code string) domain.TGoogleOauth {
+	return interactor.authRepo.GetGoogleUser(code)
 }

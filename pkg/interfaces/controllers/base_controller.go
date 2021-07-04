@@ -9,6 +9,7 @@ import (
 	"animar/v1/pkg/usecase"
 	"context"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -60,6 +61,25 @@ func (controller *BaseController) getUserIdFromToken(idToken string) (userId str
 	}
 	userId = claims["user_id"].(string)
 	return
+}
+
+func (controller *BaseController) getGoogleUser(accessToken string) domain.TGoogleOauth {
+	url := "https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + accessToken
+	req, err := http.NewRequest(
+		"GET", url, nil,
+	)
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		tools.ErrorLog(err)
+	}
+	defer res.Body.Close()
+
+	defer res.Body.Close()
+	byteArray, _ := ioutil.ReadAll(res.Body)
+	var user domain.TGoogleOauth
+	err = json.Unmarshal(byteArray, &user)
+	return user
 }
 
 /************************
@@ -154,7 +174,14 @@ func (controller *BaseController) GiveUserIdMiddleware(next http.Handler) http.H
 		idToken, err := r.Cookie("idToken")
 		var userId string
 		if err != nil {
-			userId = ""
+			// google Oauth
+			googleCookie, err := r.Cookie("googleToken")
+			if err != nil {
+				userId = ""
+			} else {
+				user := controller.getGoogleUser(googleCookie.Value)
+				userId = user.UID
+			}
 		} else {
 			userId, err = controller.interactor.UserId(idToken.Value)
 			if err != nil {
@@ -197,6 +224,7 @@ func (controller *BaseController) LoginRequireMiddleware(next http.Handler) http
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		idToken, err := r.Cookie("idToken")
 		if err != nil {
+
 			response(w, domain.ErrUnauthorized, nil)
 			return
 		}
