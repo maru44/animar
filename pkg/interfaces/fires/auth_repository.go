@@ -154,7 +154,14 @@ func (repo *AuthRepository) GetGoogleUser(code string) domain.TGoogleOauth {
 	}
 	// userInfo
 	client := config.Client(ctx, tok)
-	res, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + tok.AccessToken)
+	// res, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + tok.AccessToken)
+	// res, err := *&http.Client{}
+	res, err := client.Get(
+		fmt.Sprintf(
+			"https://www.googleapis.com/oauth2/v4/token?code=%s&client_id=%s&client_secret=%s&redirect_uri=%s&grant_type=%s",
+			code, configs.GoogleWebClientId, configs.GoogleWebClientSecret, "http://localhost:8000/auth/google/redirect", "authorization_code",
+		),
+	)
 	if err != nil {
 		tools.ErrorLog(err)
 	}
