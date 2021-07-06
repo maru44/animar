@@ -9,14 +9,11 @@ import (
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
-
-	"golang.org/x/oauth2"
 )
 
 type AuthController struct {
@@ -59,15 +56,6 @@ func (controller *AuthController) GetUserModelFromCookieView(w http.ResponseWrit
 	user, err := controller.interactor.UserInfo(userId)
 	claims, err := controller.getClaimsFromCookie(r)
 	if err != nil {
-		// google oauth
-		gUser := controller.interactor.GoogleUser(userId)
-		user := domain.TUserInfo{
-			DisplayName: gUser.DisplayName,
-			Email:       gUser.Email,
-			UID:         gUser.UID,
-			PhotoURL:    gUser.PhotoURL,
-			ProviderID:  "google",
-		}
 		response(w, err, map[string]interface{}{"user": user, "is_verify": true})
 	} else {
 		response(w, err, map[string]interface{}{"user": user, "is_verify": claims["email_verified"]})
@@ -219,7 +207,7 @@ func (controller *AuthController) GoogleOAuthView(w http.ResponseWriter, r *http
 	// url := config.AuthCodeURL("aaa", oauth2.AccessTypeOffline)
 	// response(w, nil, map[string]interface{}{"data": url})
 	scope := []string{
-		// "https://www.googleapis.com/auth/firebase",
+		"https://www.googleapis.com/auth/firebase",
 		"https://www.googleapis.com/auth/userinfo.email",
 		"https://www.googleapis.com/auth/userinfo.profile",
 		//"https://www.googleapis.com/auth/cloud-platform", // 全然ダメ
@@ -235,97 +223,3 @@ func (controller *AuthController) GoogleOAuthView(w http.ResponseWriter, r *http
 	fmt.Fprint(w, url)
 	return
 }
-
-/*
-opt := option.WithCredentialsFile("path/to/refreshToken.json")
-config := &firebase.Config{ProjectID: "my-project-id"}
-app, err := firebase.NewApp(context.Background(), config, opt)
-if err != nil {
-        log.Fatalf("error initializing app: %v\n", err)
-}
-*/
-
-func (controller *AuthController) GoogleRedirectView(w http.ResponseWriter, r *http.Request) {
-	// controller.interactor.OauthGoogle()
-	config := controller.interactor.GoogleConfig()
-	code := r.FormValue("code")
-	ctx := context.Background()
-	var tok *oauth2.Token
-	tok, _ = config.Exchange(ctx, code)
-
-	redirectUri := "http://localhost:8000/auth/google/redirect"
-	jsonStr := fmt.Sprintf(
-		`{"requestUri": "%s", "postBody": "accessToken=%s&providerId=%s", "returnSecureToken": %v, "returnIdpCredential": %v}`,
-		redirectUri, tok.AccessToken, "google.com", true, false,
-	)
-	url := "https://www.googleapis.com/oauth2/v4/token"
-	req, err := http.NewRequest(
-		"POST",
-		url,
-		bytes.NewBuffer([]byte(jsonStr)),
-	)
-	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	res, err := client.Do(req)
-	if err != nil {
-		tools.ErrorLog(err)
-	}
-	defer res.Body.Close()
-	var tokens GoogleJson
-	body, _ := ioutil.ReadAll(res.Body)
-	err = json.Unmarshal(body, &tokens)
-	fmt.Print(tokens)
-
-	response(w, nil, nil)
-	return
-}
-
-type GoogleJson struct {
-	AccessToken  string `json:"access_token,omitempty"`
-	RefreshToken string `json:"refresh_token,omitempty"`
-	ExpiresIn    string `json:"expires_in,omitempty"`
-	// TokenType    string `json:"token_type,omitempty"`
-}
-
-// func (controller *AuthController) GoogleRedirectView(w http.ResponseWriter, r *http.Request) {
-// 	code := r.FormValue("code")
-// 	redirectUri := "http://localhost:8000/auth/google/redirect"
-// 	jsonStr := fmt.Sprintf(
-// 		`{"code": "%s", "client_id": "%s", "client_secret": "%s", "redirect_uri", "%s", "grant_type": "authorization_code"}`,
-// 		code, configs.GoogleWebClientId, configs.GoogleWebClientSecret, redirectUri,
-// 	)
-// 	url := "https://www.googleapis.com/oauth2/v4/token"
-// 	req, err := http.NewRequest(
-// 		"POST",
-// 		url,
-// 		bytes.NewBuffer([]byte(jsonStr)),
-// 	)
-// 	req.Header.Set("Content-Type", "application/json")
-// 	client := &http.Client{}
-// 	res, err := client.Do(req)
-// 	if err != nil {
-// 		tools.ErrorLog(err)
-// 	}
-// 	defer res.Body.Close()
-// 	body, _ := ioutil.ReadAll(res.Body)
-// 	var tokens GoogleJson
-// 	err = json.Unmarshal(body, &tokens)
-// 	fmt.Print(tokens)
-// }
-
-// func (controller *AuthController) CreateGoogleLinkView(w http.ResponseWriter, r *http.Request) {
-// 	state := "aaa"
-// 	u, err := url.Parse(authorization)
-// }
-
-// func (controller *AuthController) GoogleFirebaseView(w http.ResponseWriter, r *http.Request) {
-// 	ctx := context.Background()
-// 	creds := google.Credentials{
-// 		JSON: []byte(fmt.Sprintf(`{
-// 			"client_id": "%s",
-// 			"client_secret": "%s"
-// 		}`, configs.GoogleWebClientId, configs.GoogleWebClientSecret)),
-// 	}
-// 	opt := option.WithCredentials(&creds)
-// 	app, err := firebase.NewApp(ctx, nil, opt)
-// }

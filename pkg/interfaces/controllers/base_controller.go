@@ -174,14 +174,7 @@ func (controller *BaseController) GiveUserIdMiddleware(next http.Handler) http.H
 		idToken, err := r.Cookie("idToken")
 		var userId string
 		if err != nil {
-			// google Oauth
-			googleCookie, err := r.Cookie("googleToken")
-			if err != nil {
-				userId = ""
-			} else {
-				user := controller.getGoogleUser(googleCookie.Value)
-				userId = user.UID
-			}
+			userId = ""
 		} else {
 			userId, err = controller.interactor.UserId(idToken.Value)
 			if err != nil {

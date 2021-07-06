@@ -6,13 +6,9 @@ import (
 	"animar/v1/pkg/tools/mysmtp"
 	"animar/v1/pkg/tools/tools"
 	"context"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"strings"
 
 	"firebase.google.com/go/v4/auth"
-	"golang.org/x/oauth2"
 )
 
 type AuthRepository struct {
@@ -113,62 +109,4 @@ func (repo *AuthRepository) GetUserId(idToken string) (userId string, err error)
 	}
 	userId = claims["user_id"].(string)
 	return
-}
-
-// 仮のベタ書き
-func (repo *AuthRepository) GoogleOAuth() *oauth2.Config {
-	config := &oauth2.Config{
-		ClientID:     configs.GoogleWebClientId,
-		ClientSecret: configs.GoogleWebClientSecret,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  authorizeEndpoint,
-			TokenURL: tokenEndpoint,
-		},
-		Scopes: []string{
-			// "https://www.googleapis.com/auth/firebase",
-			"https://www.googleapis.com/auth/userinfo.email",
-			"https://www.googleapis.com/auth/userinfo.profile",
-			//"https://www.googleapis.com/auth/cloud-platform", // 全然ダメ
-		},
-		RedirectURL: "http://localhost:8000/auth/google/redirect",
-	}
-	return config
-}
-
-func (repo *AuthRepository) GoogleOAuthCallback() {
-	config := repo.GoogleOAuth()
-	fmt.Print(config.AuthCodeURL("aaa", oauth2.AccessTypeOffline))
-}
-
-func (repo *AuthRepository) GetGoogleUser(code string) domain.TGoogleOauth {
-	config := repo.GoogleOAuth()
-	ctx := context.Background()
-	var tok *oauth2.Token
-	tok, err := config.Exchange(ctx, code)
-	//fmt.Print(tok.AccessToken)
-	fmt.Print(tok.Expiry)
-	fmt.Print(tok.RefreshToken)
-
-	if err != nil {
-		tools.ErrorLog(err)
-	}
-	// userInfo
-	client := config.Client(ctx, tok)
-	// res, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + tok.AccessToken)
-	// res, err := *&http.Client{}
-	res, err := client.Get(
-		fmt.Sprintf(
-			"https://www.googleapis.com/oauth2/v4/token?code=%s&client_id=%s&client_secret=%s&redirect_uri=%s&grant_type=%s",
-			code, configs.GoogleWebClientId, configs.GoogleWebClientSecret, "http://localhost:8000/auth/google/redirect", "authorization_code",
-		),
-	)
-	if err != nil {
-		tools.ErrorLog(err)
-	}
-	defer res.Body.Close()
-	byteArray, _ := ioutil.ReadAll(res.Body)
-	fmt.Println(string(byteArray))
-	var user domain.TGoogleOauth
-	err = json.Unmarshal(byteArray, &user)
-	return user
 }

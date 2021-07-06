@@ -1,7 +1,5 @@
 package domain
 
-import "golang.org/x/oauth2"
-
 type TUserInfo struct {
 	DisplayName string `json:"displayName,omitempty"`
 	Email       string `json:"email,omitempty"`
@@ -62,8 +60,4 @@ type AuthInteractor interface {
 	AdminId(string) (string, error)
 	SendVerify(string) error
 	UpdateProfile(string, TProfileForm) (TUserInfo, error)
-	// google oauth
-	GoogleConfig() *oauth2.Config
-	OauthGoogle()
-	GoogleUser(string) TGoogleOauth
 }
