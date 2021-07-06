@@ -12,7 +12,6 @@ import (
 
 type AudienceController struct {
 	interactor domain.AudienceInteractor
-	BaseController
 }
 
 func NewAudienceController(sqlHandler database.SqlHandler) *AudienceController {
@@ -22,7 +21,6 @@ func NewAudienceController(sqlHandler database.SqlHandler) *AudienceController {
 				SqlHandler: sqlHandler,
 			},
 		),
-		BaseController: *NewBaseController(),
 	}
 }
 

@@ -14,7 +14,7 @@ import (
 
 type AdminController struct {
 	interactor domain.AdminInteractor
-	BaseController
+	// BaseController
 }
 
 func NewAdminController(sqlHandler database.SqlHandler) *AdminController {
@@ -33,7 +33,7 @@ func NewAdminController(sqlHandler database.SqlHandler) *AdminController {
 				SqlHandler: sqlHandler,
 			},
 		),
-		BaseController: *NewBaseController(),
+		//BaseController: *NewBaseController(),
 	}
 }
 

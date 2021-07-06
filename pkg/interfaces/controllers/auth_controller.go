@@ -18,7 +18,6 @@ import (
 
 type AuthController struct {
 	interactor domain.AuthInteractor
-	BaseController
 }
 
 func NewAuthController(firebase fires.Firebase) *AuthController {
@@ -28,18 +27,16 @@ func NewAuthController(firebase fires.Firebase) *AuthController {
 				Firebase: firebase,
 			},
 		),
-		BaseController: *NewBaseController(),
-		// BaseController: BaseController{
-		// 	interactor: usecase.NewBaseInteractor(
-		// 		&fires.AuthRepository{
-		// 			Firebase: firebase,
-		// 		},
-		// 	),
-		// },
 	}
 }
 
-// user modal from query ?uid=<userId>
+func (controller *AuthController) getClaimsFromCookie(r *http.Request) (claims map[string]interface{}, err error) {
+	idToken, err := r.Cookie("idToken")
+	claims, err = controller.interactor.Claims(idToken.Value)
+	return
+}
+
+// user model from query ?uid=<userId>
 func (controller *AuthController) GetUserModelFromQueryView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	uid := query.Get("uid")

@@ -11,7 +11,6 @@ import (
 
 type AnimeController struct {
 	interactor domain.AnimeInteractor
-	BaseController
 }
 
 func NewAnimeController(sqlHandler database.SqlHandler) *AnimeController {
@@ -24,7 +23,6 @@ func NewAnimeController(sqlHandler database.SqlHandler) *AnimeController {
 				SqlHandler: sqlHandler,
 			},
 		),
-		BaseController: *NewBaseController(),
 	}
 }
 

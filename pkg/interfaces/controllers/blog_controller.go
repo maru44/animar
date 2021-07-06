@@ -11,7 +11,6 @@ import (
 
 type BlogController struct {
 	interactor domain.BlogInteractor
-	BaseController
 }
 
 func NewBlogController(sqlHandler database.SqlHandler) *BlogController {
@@ -21,7 +20,6 @@ func NewBlogController(sqlHandler database.SqlHandler) *BlogController {
 				SqlHandler: sqlHandler,
 			},
 		),
-		BaseController: *NewBaseController(),
 	}
 }
 

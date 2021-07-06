@@ -11,7 +11,6 @@ import (
 
 type SeasonController struct {
 	interactor domain.SeasonInteractor
-	BaseController
 }
 
 func NewSeasonController(sqlHandler database.SqlHandler) *SeasonController {
@@ -21,7 +20,6 @@ func NewSeasonController(sqlHandler database.SqlHandler) *SeasonController {
 				SqlHandler: sqlHandler,
 			},
 		),
-		BaseController: *NewBaseController(),
 	}
 }
 

@@ -11,7 +11,6 @@ import (
 
 type ReviewController struct {
 	interactor domain.ReviewInteractor
-	BaseController
 }
 
 func NewReviewController(sqlHandler database.SqlHandler) *ReviewController {
@@ -21,7 +20,6 @@ func NewReviewController(sqlHandler database.SqlHandler) *ReviewController {
 				SqlHandler: sqlHandler,
 			},
 		),
-		BaseController: *NewBaseController(),
 	}
 }
 

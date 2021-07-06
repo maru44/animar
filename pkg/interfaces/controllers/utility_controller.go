@@ -5,14 +5,10 @@ import (
 	"net/http"
 )
 
-type UtilityController struct {
-	BaseController
-}
+type UtilityController struct{}
 
 func NewUtilityController() *UtilityController {
-	return &UtilityController{
-		BaseController: *NewBaseController(),
-	}
+	return &UtilityController{}
 }
 
 func (controller *UtilityController) SimpleUploadImage(w http.ResponseWriter, r *http.Request) {

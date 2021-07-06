@@ -37,12 +37,6 @@ func NewBaseController() *BaseController {
          user
 ************************/
 
-func (controller *BaseController) getClaimsFromCookie(r *http.Request) (claims map[string]interface{}, err error) {
-	idToken, err := r.Cookie("idToken")
-	claims, err = controller.interactor.Claims(idToken.Value)
-	return
-}
-
 func (controller *BaseController) getUserIdFromCookie(r *http.Request) (userId string, err error) {
 	idToken, err := r.Cookie("idToken")
 	if err != nil {

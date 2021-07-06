@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"animar/v1/pkg/domain"
+	"fmt"
 )
 
 type AuthInteractor struct {
@@ -33,6 +34,7 @@ type AuthRepository interface {
 ***********************/
 
 func (interactor *AuthInteractor) UserInfo(userId string) (user domain.TUserInfo, err error) {
+	fmt.Print("interactor")
 	user, err = interactor.repository.GetUserInfo(userId)
 	return
 }
