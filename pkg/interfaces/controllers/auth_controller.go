@@ -173,17 +173,15 @@ func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.
 }
 
 func (controller *AuthController) UpdateProfileView(w http.ResponseWriter, r *http.Request) {
-	claims, err := controller.getClaimsFromCookie(r)
-	userId := claims["user_id"].(string)
+	userId := r.Context().Value(USER_ID).(string)
 
 	var p domain.TProfileForm
 	r.Body = http.MaxBytesReader(w, r.Body, 20*1024*1024) // 20MB
 	p.DisplayName = r.FormValue("dname")
-	file, fileHeader, err := r.FormFile("image")
-
 	params := domain.TProfileForm{
 		DisplayName: p.DisplayName,
 	}
+	file, fileHeader, err := r.FormFile("image")
 
 	if err == nil {
 		defer file.Close()
@@ -202,24 +200,15 @@ func (controller *AuthController) UpdateProfileView(w http.ResponseWriter, r *ht
 	return
 }
 
-func (controller *AuthController) GoogleOAuthView(w http.ResponseWriter, r *http.Request) {
-	// config := controller.interactor.GoogleConfig()
-	// url := config.AuthCodeURL("aaa", oauth2.AccessTypeOffline)
-	// response(w, nil, map[string]interface{}{"data": url})
-	scope := []string{
-		"https://www.googleapis.com/auth/firebase",
-		"https://www.googleapis.com/auth/userinfo.email",
-		"https://www.googleapis.com/auth/userinfo.profile",
-		//"https://www.googleapis.com/auth/cloud-platform", // 全然ダメ
+func (controller *AuthController) SetJwtTokenView(w http.ResponseWriter, r *http.Request) {
+	var p domain.TTokensForm
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		api.SetCookiePackage(w, "idToken", p.IdToken, 60*60*24)
+		api.SetCookiePackage(w, "refreshToken", p.RefreshToken, 60*60*24*30)
+		response(w, err, nil)
 	}
-	strScope := strings.Join(scope, "+")
-	redirectURL := "http://localhost:8000/auth/google/redirect"
-	url := fmt.Sprintf(
-		"https://accounts.google.com/o/oauth2/v2/auth"+
-			"?scope=%s&include_granted_scopes=true&redirect_uri=%s"+
-			"&response_type=code&client_id=%s&access_type=%s",
-		strScope, redirectURL, configs.GoogleWebClientId, "offline",
-	)
-	fmt.Fprint(w, url)
 	return
 }

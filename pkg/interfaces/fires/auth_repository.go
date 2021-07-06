@@ -88,9 +88,9 @@ func (repo *AuthRepository) Update(userId string, params domain.TProfileForm) (d
 	client, err := repo.Firebase.Auth(ctx)
 	var params_ auth.UserToUpdate
 	if params.PhotoUrl != "" {
-		params_.DisplayName(params.DisplayName)
+		params_.PhotoURL(params.PhotoUrl)
 	}
-	params_.PhotoURL(params.DisplayName)
+	params_.DisplayName(params.DisplayName)
 	u, err := client.UpdateUser(ctx, userId, &params_)
 	user := domain.TUserInfo{
 		DisplayName: u.UserInfo.DisplayName,
