@@ -131,7 +131,7 @@ func (repo *BlogRepository) Insert(b domain.TBlogInsert, userId string) (lastIns
 	slug := tools.GenRandSlug(8)
 	exe, err := repo.Execute(
 		"INSERT INTO blogs(slug, title, abstract, content, user_id, is_public) "+
-			"VALUES(?, ?, ?, ?, ?, ?)", slug, b.Title, b.Abstract, b.Content, userId, b.IsPublic,
+			"VALUES(?, ?, ?, ?, ?, ?)", slug, b.Title, tools.NewNullString(b.Abstract), b.Content, userId, b.IsPublic,
 	)
 	if err != nil {
 		tools.ErrorLog(err)
@@ -149,7 +149,7 @@ func (repo *BlogRepository) Insert(b domain.TBlogInsert, userId string) (lastIns
 func (repo *BlogRepository) Update(b domain.TBlogInsert, id int) (rowsAffected int, err error) {
 	exe, err := repo.Execute(
 		"UPDATE blogs SET title = ?, abstract = ?, content = ?, is_public = ? WHERE id = ?",
-		b.Title, b.Abstract, b.Content, b.IsPublic, id,
+		b.Title, tools.NewNullString(b.Abstract), b.Content, b.IsPublic, id,
 	)
 	if err != nil {
 		tools.ErrorLog(err)

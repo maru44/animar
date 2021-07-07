@@ -87,7 +87,7 @@ func (controller *AdminController) AnimePostAdminView(w http.ResponseWriter, r *
 		Title:         r.FormValue("title"),
 		Slug:          slug,
 		Kana:          tools.NewNullString(r.FormValue("kana")),
-		EngName:       tools.NewNullString(r.FormValue("eng_name")),
+		EngName:       tools.NewNullString(r.FormValue("engName")),
 		Abbreviation:  tools.NewNullString(r.FormValue("abbreviation")),
 		Description:   tools.NewNullString(r.FormValue("description")),
 		State:         tools.NewNullString(r.FormValue("state")),

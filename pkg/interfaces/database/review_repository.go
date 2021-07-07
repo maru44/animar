@@ -144,7 +144,7 @@ func (repo *ReviewRepository) UpsertRating(r domain.TReviewInput, userId string)
 	review, err := repo.FindByAnimeAndUser(r.AnimeId, userId)
 	if err == nil {
 		_, err = repo.Execute(
-			"UPDATE reviews SET rating = ? WHERE id = ?", r.Rating, review.GetId(),
+			"UPDATE reviews SET rating = ? WHERE id = ?", tools.NewNullInt(r.Rating), review.GetId(),
 		)
 		if err != nil {
 			tools.ErrorLog(err)
