@@ -86,7 +86,7 @@ func (controller *AdminController) AnimePostAdminView(w http.ResponseWriter, r *
 	a := domain.TAnimeInsert{
 		Title:         r.FormValue("title"),
 		Slug:          slug,
-		Kana:          tools.NewNullString("kana"),
+		Kana:          tools.NewNullString(r.FormValue("kana")),
 		EngName:       tools.NewNullString(r.FormValue("eng_name")),
 		Abbreviation:  tools.NewNullString(r.FormValue("abbreviation")),
 		Description:   tools.NewNullString(r.FormValue("description")),
