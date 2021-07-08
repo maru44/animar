@@ -24,6 +24,9 @@ func (repo *AuthRepository) GetUserInfo(userId string) (uInfo domain.TUserInfo, 
 	ctx := context.Background()
 	client, err := repo.Firebase.Auth(ctx)
 	u, err := client.GetUser(ctx, userId)
+	if err != nil {
+		return
+	}
 	info := u.UserInfo
 	uInfo = domain.TUserInfo{
 		DisplayName: info.DisplayName,

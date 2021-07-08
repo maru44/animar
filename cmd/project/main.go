@@ -5,19 +5,20 @@ import (
 	"animar/v1/pkg/interfaces/controllers"
 	"animar/v1/pkg/tools/tools"
 	"net/http"
-	"os"
 )
 
 func main() {
 
 	// connection
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		host, _ := os.Hostname()
-		w.Write([]byte(host))
-	})
+	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	// 	host, _ := os.Hostname()
+	// 	w.Write([]byte(host))
+	// })
 
 	sqlHandler := infrastructure.NewSqlHandler()
 	base := controllers.NewBaseController()
+
+	http.Handle("/", base.BaseMiddleware(http.HandlerFunc(base.GatewayView)))
 
 	/*   Anime database   */
 	// http.HandleFunc("/db/anime/", handler.Handle(anime.AnimeView))

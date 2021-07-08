@@ -34,6 +34,15 @@ func NewBaseController() *BaseController {
 }
 
 /************************
+         view
+************************/
+
+func (controller *BaseController) GatewayView(w http.ResponseWriter, r *http.Request) {
+	response(w, domain.ErrNotFound, nil)
+	return
+}
+
+/************************
          user
 ************************/
 
@@ -82,7 +91,7 @@ func (controller *BaseController) getGoogleUser(accessToken string) domain.TGoog
 
 func (controller *BaseController) allowOptionsMiddleware(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
-		w.WriteHeader(http.StatusOK)
+		response(w, nil, nil)
 	}
 }
 
@@ -91,7 +100,7 @@ func (controller *BaseController) UpsertOnlyMiddleware(next http.Handler) http.H
 		if r.Method == "POST" || r.Method == "PUT" {
 			next.ServeHTTP(w, r)
 		} else {
-			w.WriteHeader(http.StatusMethodNotAllowed)
+			response(w, domain.ErrMethodNotAllowed, nil)
 			return
 		}
 	})
@@ -102,7 +111,7 @@ func (controller *BaseController) PostOnlyMiddleware(next http.Handler) http.Han
 		if r.Method == "POST" {
 			next.ServeHTTP(w, r)
 		} else {
-			w.WriteHeader(http.StatusMethodNotAllowed)
+			response(w, domain.ErrMethodNotAllowed, nil)
 			return
 		}
 	})
@@ -113,7 +122,7 @@ func (controller *BaseController) PutOnlyMiddleware(next http.Handler) http.Hand
 		if r.Method == "PUT" {
 			next.ServeHTTP(w, r)
 		} else {
-			w.WriteHeader(http.StatusMethodNotAllowed)
+			response(w, domain.ErrMethodNotAllowed, nil)
 			return
 		}
 	})
@@ -124,7 +133,7 @@ func (controller *BaseController) DeleteOnlyMiddleware(next http.Handler) http.H
 		if r.Method == "DELETE" {
 			next.ServeHTTP(w, r)
 		} else {
-			w.WriteHeader(http.StatusMethodNotAllowed)
+			response(w, domain.ErrMethodNotAllowed, nil)
 			return
 		}
 	})

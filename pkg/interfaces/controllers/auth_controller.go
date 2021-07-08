@@ -46,7 +46,6 @@ func (controller *AuthController) GetUserModelFromQueryView(w http.ResponseWrite
 	return
 }
 
-// @TODO add google oauth
 // user model from cookie
 func (controller *AuthController) GetUserModelFromCookieView(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(USER_ID).(string)
