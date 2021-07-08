@@ -46,20 +46,8 @@ type FirebaseUpdate struct {
 func NewFireBaseClient() fires.Firebase {
 	ctx := context.Background()
 	opt := option.WithCredentialsFile("../../configs/secret_key.json")
-	// google credentials
-	// creds := &google.Credentials{
-	// 	JSON: []byte(fmt.Sprintf(`{
-	// 		"client_id": "%s",
-	// 		"client_secret": "%s"
-	// 	}`, configs.GoogleWebClientId, configs.GoogleWebClientSecret)),
-	// }
-	// opts := []option.ClientOption{
-	// 	option.WithCredentials(creds), // google option
-	// 	opt,
-	// }
 	config := &firebase.Config{ProjectID: configs.ProjectId} // for Google Oauth
 	app, _ := firebase.NewApp(ctx, config, opt)
-	// app, _ := firebase.NewApp(ctx, config, opts...)
 	firebase_ := new(Firebase)
 	firebase_.App = app
 	return firebase_

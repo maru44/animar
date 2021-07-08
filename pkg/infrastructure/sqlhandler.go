@@ -6,6 +6,7 @@ import (
 	"animar/v1/pkg/tools/tools"
 	"database/sql"
 	"fmt"
+	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -20,6 +21,10 @@ type SqlRows struct {
 
 type SqlResult struct {
 	Result sql.Result
+}
+
+type SqlTransaction struct {
+	Tx *sql.Tx
 }
 
 // init
@@ -66,6 +71,55 @@ func (handler *SqlHandler) Execute(statement string, args ...interface{}) (datab
 	}
 	res.Result = exe
 	return res, nil
+}
+
+// begin transaction
+func (handler *SqlHandler) Begin() (database.Tx, error) {
+	res := SqlTransaction{}
+	transaction, err := handler.Conn.Begin()
+	if err != nil {
+		log.Print(err)
+	}
+	res.Tx = transaction
+	return res, err
+}
+
+/***************************
+         transaction
+***************************/
+
+func (t SqlTransaction) Commit() error {
+	return t.Tx.Commit()
+}
+
+func (t SqlTransaction) Rollback() error {
+	return t.Tx.Rollback()
+}
+
+func (t SqlTransaction) Execute(statement string, args ...interface{}) (database.Result, error) {
+	res := SqlResult{}
+	stmt, err := t.Tx.Prepare(statement)
+	defer stmt.Close()
+	if err != nil {
+		log.Print(err)
+		return res, err
+	}
+	exe, err := stmt.Exec(args...)
+	if err != nil {
+		log.Print(err)
+	}
+	res.Result = exe
+	return res, nil
+}
+
+func (t SqlTransaction) Query(statement string, args ...interface{}) (database.Rows, error) {
+	rows, err := t.Tx.Query(statement, args...)
+	if err != nil {
+		return new(SqlRows), err
+	}
+	row := new(SqlRows)
+	row.Rows = rows
+	return rows, nil
 }
 
 /********************
