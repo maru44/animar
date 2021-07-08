@@ -1,22 +1,18 @@
-package api
+package controllers
 
 import (
 	"animar/v1/configs"
 	"animar/v1/pkg/tools/tools"
-	"encoding/json"
 	"net/http"
 )
 
-type TBaseJsonResponse struct {
-	Status int         `json:"status"`
-	Data   interface{} `json:"data"`
+type CookieController struct{}
+
+func NewCookieController() *CookieController {
+	return &CookieController{}
 }
 
-type TUserToken struct {
-	Token string `json:"token,omitempty"`
-}
-
-func SetCookiePackage(w http.ResponseWriter, key string, value string, age int) bool {
+func (c *CookieController) setCookiePackage(w http.ResponseWriter, key string, value string, age int) bool {
 	var cookie *http.Cookie
 	if tools.IsProductionEnv() {
 		cookie = &http.Cookie{
@@ -45,7 +41,7 @@ func SetCookiePackage(w http.ResponseWriter, key string, value string, age int) 
 	return true
 }
 
-func DestroyCookie(w http.ResponseWriter, key string) bool {
+func (c *CookieController) destroyCookie(w http.ResponseWriter, key string) bool {
 	var cookie *http.Cookie
 	if tools.IsProductionEnv() {
 		cookie = &http.Cookie{
@@ -71,30 +67,5 @@ func DestroyCookie(w http.ResponseWriter, key string) bool {
 		}
 	}
 	http.SetCookie(w, cookie)
-	return true
-}
-
-func (result TBaseJsonResponse) ResponseWrite(w http.ResponseWriter) bool {
-	res, err := json.Marshal(result)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-
-	w.Write(res)
-	w.WriteHeader(http.StatusOK)
-	return true
-}
-
-func JsonResponse(w http.ResponseWriter, dictionary map[string]interface{}) bool {
-	data, err := json.Marshal(dictionary)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return false
-	}
-	w.WriteHeader(http.StatusOK)
-	w.Write(data)
 	return true
 }

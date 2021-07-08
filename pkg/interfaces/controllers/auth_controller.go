@@ -4,7 +4,6 @@ import (
 	"animar/v1/configs"
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/fires"
-	"animar/v1/pkg/tools/api"
 	"animar/v1/pkg/tools/s3"
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
@@ -18,6 +17,7 @@ import (
 
 type AuthController struct {
 	interactor domain.AuthInteractor
+	CookieController
 }
 
 func NewAuthController(firebase fires.Firebase) *AuthController {
@@ -27,6 +27,7 @@ func NewAuthController(firebase fires.Firebase) *AuthController {
 				Firebase: firebase,
 			},
 		),
+		CookieController: *NewCookieController(),
 	}
 }
 
@@ -86,8 +87,8 @@ func (controller *AuthController) LoginView(w http.ResponseWriter, r *http.Reque
 	err = json.Unmarshal(body, &tokens)
 
 	if tokens.IdToken != "" {
-		api.SetCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
-		api.SetCookiePackage(w, "refreshToken", tokens.RefreshToken, 60*60*24*30)
+		controller.setCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
+		controller.setCookiePackage(w, "refreshToken", tokens.RefreshToken, 60*60*24*30)
 	} else {
 		response(w, domain.ErrUnauthorized, nil)
 	}
@@ -125,8 +126,8 @@ func (controller *AuthController) RegisterView(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		response(w, err, nil)
 	} else {
-		api.SetCookiePackage(w, "idToken", d.IdToken, 60*60*24)
-		api.SetCookiePackage(w, "refreshToken", d.RefreshToken, 60*60*24*30)
+		controller.setCookiePackage(w, "idToken", d.IdToken, 60*60*24)
+		controller.setCookiePackage(w, "refreshToken", d.RefreshToken, 60*60*24*30)
 
 		err = controller.interactor.SendVerify(p.Email)
 		response(w, err, nil)
@@ -160,8 +161,8 @@ func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.
 	err = json.Unmarshal(body, &tokens)
 
 	if tokens.IdToken != "" {
-		api.DestroyCookie(w, "idToken") // destroy cookie
-		api.SetCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
+		controller.destroyCookie(w, "idToken") // destroy cookie
+		controller.setCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
 	} else {
 		response(w, domain.ErrUnauthorized, nil)
 	}
@@ -202,8 +203,8 @@ func (controller *AuthController) SetJwtTokenView(w http.ResponseWriter, r *http
 	if err != nil {
 		response(w, err, nil)
 	} else {
-		api.SetCookiePackage(w, "idToken", p.IdToken, 60*60*24)
-		api.SetCookiePackage(w, "refreshToken", p.RefreshToken, 60*60*24*30)
+		controller.setCookiePackage(w, "idToken", p.IdToken, 60*60*24)
+		controller.setCookiePackage(w, "refreshToken", p.RefreshToken, 60*60*24*30)
 		response(w, err, nil)
 	}
 	return
