@@ -4,7 +4,7 @@ import (
 	"animar/v1/configs"
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/fires"
-	"animar/v1/pkg/tools/s3"
+	"animar/v1/pkg/interfaces/s3"
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
 	"bytes"
@@ -17,14 +17,20 @@ import (
 
 type AuthController struct {
 	interactor domain.AuthInteractor
+	s3         domain.S3Interactor
 	CookieController
 }
 
-func NewAuthController(firebase fires.Firebase) *AuthController {
+func NewAuthController(firebase fires.Firebase, uploader s3.Uploader) *AuthController {
 	return &AuthController{
 		interactor: usecase.NewAuthInteractor(
 			&fires.AuthRepository{
 				Firebase: firebase,
+			},
+		),
+		s3: usecase.NewS3Interactor(
+			&s3.S3Repository{
+				Uploader: uploader,
 			},
 		),
 		CookieController: *NewCookieController(),
@@ -183,7 +189,7 @@ func (controller *AuthController) UpdateProfileView(w http.ResponseWriter, r *ht
 	if err == nil {
 		defer file.Close()
 
-		returnFileName, err := s3.UploadS3(file, fileHeader.Filename, []string{"auth"})
+		returnFileName, err := controller.s3.Image(file, fileHeader.Filename, []string{"auth"})
 		if err != nil {
 			fmt.Print(err)
 		}

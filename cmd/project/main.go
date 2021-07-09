@@ -55,7 +55,7 @@ func main() {
 
 	/*   auth   */
 	firebase := infrastructure.NewFireBaseClient()
-	authController := controllers.NewAuthController(firebase)
+	authController := controllers.NewAuthController(firebase, uploader)
 	http.Handle("/auth/user/", base.BaseMiddleware(http.HandlerFunc(authController.GetUserModelFromQueryView)))
 	http.Handle("/auth/login/post/", base.BaseMiddleware(base.PostOnlyMiddleware(http.HandlerFunc(authController.LoginView))))
 	http.Handle("/auth/refresh/", base.BaseMiddleware(http.HandlerFunc(authController.RenewTokenView)))
