@@ -8,7 +8,7 @@ import (
 
 type Httphandler struct{}
 
-func (h *Httphandler) response(w http.ResponseWriter, err error, body map[string]interface{}) error {
+func (h *Httphandler) Response(w http.ResponseWriter, err error, body map[string]interface{}) error {
 	status := h.getStatusCode(err)
 	w.WriteHeader(status)
 	if status == http.StatusOK {

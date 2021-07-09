@@ -16,6 +16,7 @@ func main() {
 	// })
 
 	sqlHandler := infrastructure.NewSqlHandler()
+	uploader := infrastructure.NewS3Uploader()
 	base := controllers.NewBaseController()
 
 	http.Handle("/", base.BaseMiddleware(http.HandlerFunc(base.GatewayView)))
@@ -28,11 +29,12 @@ func main() {
 	http.Handle("/db/anime/minimum/", base.BaseMiddleware(http.HandlerFunc(animeController.AnimeMinimumsView)))
 
 	/*   blogs   */
-	blogController := controllers.NewBlogController(sqlHandler)
+	blogController := controllers.NewBlogController(sqlHandler, uploader)
 	http.Handle("/blog/", base.BaseMiddleware(base.GiveUserIdMiddlewareAbleSSR(http.HandlerFunc(blogController.BlogJoinAnimeView))))
 	http.Handle("/blog/post/", base.BaseMiddleware(base.PostOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(blogController.InsertBlogWithRelationView)))))
 	http.Handle("/blog/delete/", base.BaseMiddleware(base.DeleteOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(blogController.DeleteBlogView)))))          // ?id=
 	http.Handle("/blog/update/", base.BaseMiddleware(base.PutOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(blogController.UpdateBlogWithRelationView))))) // ?id=
+	http.Handle("/blog/image/", base.BaseMiddleware(base.PostOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(blogController.SimpleUploadImage)))))
 
 	/*   reviews   */
 	reviewController := controllers.NewReviewController(sqlHandler)
@@ -64,7 +66,7 @@ func main() {
 	http.Handle("/auth/setcookie/", base.BaseMiddleware(base.PostOnlyMiddleware(http.HandlerFunc(authController.SetJwtTokenView))))
 
 	/*   admin   */
-	adminController := controllers.NewAdminController(sqlHandler)
+	adminController := controllers.NewAdminController(sqlHandler, uploader)
 	http.Handle("/admin/anime/", base.BaseMiddleware(base.AdminRequiredMiddlewareGet(http.HandlerFunc(adminController.AnimeListAdminView))))
 	http.Handle("/admin/anime/detail/", base.BaseMiddleware(base.AdminRequiredMiddlewareGet(http.HandlerFunc(adminController.AnimeDetailAdminView))))
 	http.Handle("/admin/anime/post/", base.BaseMiddleware(base.PostOnlyMiddleware(base.AdminRequiredMiddleware(http.HandlerFunc(adminController.AnimePostAdminView)))))
@@ -92,10 +94,6 @@ func main() {
 	http.Handle("/relation/plat/", base.BaseMiddleware(http.HandlerFunc(adminController.RelationPlatformView))) // ?id=<anime_id>
 	http.Handle("/admin/relation/plat/post/", base.BaseMiddleware(base.PostOnlyMiddleware(base.AdminRequiredMiddleware(http.HandlerFunc(adminController.InsertRelationPlatformView)))))
 	http.Handle("/admin/relation/plat/delete/", base.BaseMiddleware(base.DeleteOnlyMiddleware(base.AdminRequiredMiddleware(http.HandlerFunc(adminController.DeleteRelationPlatformView))))) // ?anime=<anime_id>&platform=<platform_id>
-
-	/*   utilities   */
-	utilityController := controllers.NewUtilityController()
-	http.Handle("/utils/s3/", base.BaseMiddleware(base.PostOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(utilityController.SimpleUploadImage)))))
 
 	if tools.IsProductionEnv() {
 		http.ListenAndServe(":8000", nil) // reverse proxy

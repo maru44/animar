@@ -3,6 +3,7 @@ package controllers
 import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/database"
+	"animar/v1/pkg/interfaces/s3"
 	"animar/v1/pkg/usecase"
 	"encoding/json"
 	"net/http"
@@ -11,13 +12,19 @@ import (
 
 type BlogController struct {
 	interactor domain.BlogInteractor
+	s3         domain.S3Interactor
 }
 
-func NewBlogController(sqlHandler database.SqlHandler) *BlogController {
+func NewBlogController(sqlHandler database.SqlHandler, uploader s3.Uploader) *BlogController {
 	return &BlogController{
 		interactor: usecase.NewBlogInteractor(
 			&database.BlogRepository{
 				SqlHandler: sqlHandler,
+			},
+		),
+		s3: usecase.NewS3Interactor(
+			&s3.S3Repository{
+				Uploader: uploader,
 			},
 		),
 	}
@@ -101,5 +108,22 @@ func (controller *BlogController) DeleteBlogView(w http.ResponseWriter, r *http.
 		deletedRow, err := controller.interactor.DeleteBlog(id)
 		response(w, err, map[string]interface{}{"data": deletedRow})
 	}
+	return
+}
+
+/*************************
+        image upload
+************************/
+
+func (controller *BlogController) SimpleUploadImage(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
+	var returnFileName string
+
+	file, fileHeader, err := r.FormFile("image")
+	if err == nil {
+		defer file.Close()
+		returnFileName, err = controller.s3.Image(file, fileHeader.Filename, []string{"column", "content"})
+	}
+	response(w, err, map[string]interface{}{"data": returnFileName})
 	return
 }

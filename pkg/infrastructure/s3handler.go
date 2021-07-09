@@ -1,8 +1,9 @@
-package s3
+package infrastructure
 
 import (
 	"animar/v1/configs"
 	"animar/v1/pkg/domain"
+	"animar/v1/pkg/interfaces/s3"
 	"animar/v1/pkg/tools/tools"
 	"bytes"
 	"fmt"
@@ -17,7 +18,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-func S3Session() *session.Session {
+type S3Uploader struct {
+	Connect *s3manager.Uploader
+}
+
+func NewS3Uploader() s3.Uploader {
 	creds := credentials.NewStaticCredentials(
 		configs.S3AccessKeyId,
 		configs.S3SecretKey,
@@ -30,19 +35,19 @@ func S3Session() *session.Session {
 		},
 	))
 
-	return sess
+	uploader := s3manager.NewUploader(sess)
+	s3Uploader := new(S3Uploader)
+	s3Uploader.Connect = uploader
+	return s3Uploader
 }
 
-func UploadS3(file multipart.File, fileName string, pathList []string) (string, error) {
+func (uploader *S3Uploader) ImageUploading(file multipart.File, fileName string, pathList []string) (string, error) {
 	contentType := getContentType(filepath.Ext(fileName))
 	if contentType == "" {
 		return "", domain.ErrUnknownType
 	}
 
-	sess := S3Session()
-	u := s3manager.NewUploader(sess)
 	slug := tools.GenRandSlug(6)
-
 	buf := bytes.NewBuffer(nil)
 	if _, err := io.Copy(buf, file); err != nil {
 		fmt.Print(err)
@@ -51,7 +56,7 @@ func UploadS3(file multipart.File, fileName string, pathList []string) (string, 
 	path := strings.Join(pathList, "/")
 	key := fmt.Sprintf("%s/%s__%s", path, slug, fileName)
 
-	_, err := u.Upload(&s3manager.UploadInput{
+	_, err := uploader.Connect.Upload(&s3manager.UploadInput{
 		Body:        buf,
 		Bucket:      aws.String(configs.Bucket),
 		ContentType: aws.String(contentType),

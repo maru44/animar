@@ -3,7 +3,7 @@ package controllers
 import (
 	"animar/v1/pkg/domain"
 	"animar/v1/pkg/interfaces/database"
-	"animar/v1/pkg/tools/s3"
+	"animar/v1/pkg/interfaces/s3"
 	"animar/v1/pkg/tools/tools"
 	"animar/v1/pkg/usecase"
 	"encoding/json"
@@ -14,10 +14,10 @@ import (
 
 type AdminController struct {
 	interactor domain.AdminInteractor
-	// BaseController
+	s3         domain.S3Interactor
 }
 
-func NewAdminController(sqlHandler database.SqlHandler) *AdminController {
+func NewAdminController(sqlHandler database.SqlHandler, uploader s3.Uploader) *AdminController {
 	return &AdminController{
 		interactor: usecase.NewAdminAnimeInteractor(
 			&database.AdminAnimeRepository{
@@ -33,7 +33,11 @@ func NewAdminController(sqlHandler database.SqlHandler) *AdminController {
 				SqlHandler: sqlHandler,
 			},
 		),
-		//BaseController: *NewBaseController(),
+		s3: usecase.NewS3Interactor(
+			&s3.S3Repository{
+				Uploader: uploader,
+			},
+		),
 	}
 }
 
@@ -70,7 +74,7 @@ func (controller *AdminController) AnimePostAdminView(w http.ResponseWriter, r *
 	file, fileHeader, err := r.FormFile("thumb")
 	if err == nil { // w/ thumb picture
 		defer file.Close()
-		returnFileName, err = s3.UploadS3(file, fileHeader.Filename, []string{"anime"})
+		returnFileName, err = controller.s3.Image(file, fileHeader.Filename, []string{"anime"})
 
 		if err != nil {
 			tools.ErrorLog(err)
@@ -115,7 +119,7 @@ func (controller *AdminController) AnimeUpdateView(w http.ResponseWriter, r *htt
 	if err == nil {
 		// w/ thumb picture
 		defer file.Close()
-		returnFileName, err = s3.UploadS3(file, fileHeader.Filename, []string{"anime"})
+		returnFileName, err = controller.s3.Image(file, fileHeader.Filename, []string{"anime"})
 		if err != nil {
 			tools.ErrorLog(err)
 			response(w, err, nil)
@@ -190,7 +194,7 @@ func (controller *AdminController) PlatformInsertView(w http.ResponseWriter, r *
 	if err == nil {
 		// w/ thumb picture
 		defer file.Close()
-		returnFileName, err = s3.UploadS3(file, fileHeader.Filename, []string{"platform"})
+		returnFileName, err = controller.s3.Image(file, fileHeader.Filename, []string{"platform"})
 
 		if err != nil {
 			fmt.Print(err)
@@ -225,7 +229,7 @@ func (controller *AdminController) PlatformUpdateView(w http.ResponseWriter, r *
 	if err == nil {
 		// w/ thumb picture
 		defer file.Close()
-		returnFileName, err = s3.UploadS3(file, fileHeader.Filename, []string{"platform"})
+		returnFileName, err = controller.s3.Image(file, fileHeader.Filename, []string{"platform"})
 
 		if err != nil {
 			fmt.Print(err)
