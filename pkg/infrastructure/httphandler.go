@@ -1,44 +1,29 @@
 package infrastructure
 
-import (
-	"animar/v1/pkg/domain"
-	"encoding/json"
-	"net/http"
-)
+// type HttpHandler struct{}
 
-type Httphandler struct{}
+// type HttpRequest struct {
+// 	Request http.Request
+// }
 
-func (h *Httphandler) Response(w http.ResponseWriter, err error, body map[string]interface{}) error {
-	status := h.getStatusCode(err)
-	w.WriteHeader(status)
-	if status == http.StatusOK {
-		data, _ := json.Marshal(body)
-		w.Write(data)
-	}
-	return err
-}
+// type HttpClient struct {
+// 	Client http.Client
+// }
 
-func (h *Httphandler) getStatusCode(err error) int {
-	if err == nil {
-		return http.StatusOK
-	}
+// type HttpResponse struct {
+// 	Response *http.Response
+// }
 
-	switch err {
-	case domain.ErrInternalServerError:
-		return http.StatusInternalServerError
-	case domain.ErrNotFound:
-		return http.StatusNotFound
-	case domain.ErrForbidden:
-		return http.StatusForbidden
-	case domain.ErrUnauthorized:
-		return http.StatusUnauthorized
-	case domain.ErrBadRequest:
-		return http.StatusBadRequest
-	case domain.StatusCreated:
-		return http.StatusCreated
-	case domain.ErrUnknownType:
-		return http.StatusUnsupportedMediaType
-	default:
-		return http.StatusInternalServerError
-	}
-}
+// type ClientDo struct {
+// 	Do *http.Response
+// }
+
+// func NewHttpHandler() httphandle.Httphandler {
+// 	httpHandler := new(HttpHandler)
+// 	return httpHandler
+// }
+
+// func (h *HttpHandler) CallClient() httphandle.Client {
+// 	client := new(HttpClient)
+// 	return client
+// }

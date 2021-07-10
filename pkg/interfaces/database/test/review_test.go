@@ -1,6 +1,7 @@
 package database_test
 
 import (
+	"animar/v1/pkg/domain"
 	infrastructure_test "animar/v1/pkg/infrastructure/test"
 	"animar/v1/pkg/interfaces/database"
 	"regexp"
@@ -10,15 +11,6 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 )
-
-// type fakeReiviewReposioty struct {
-// 	database.ReviewRepository
-// 	FakeFilterByAnime func(int, string) (domain.TReviews, error)
-// }
-
-// func (f *fakeReiviewReposioty) FilterByAnime(animeId int, userId string) (domain.TReviews, error) {
-// 	return f.FakeFilterByAnime(animeId, userId)
-// }
 
 func TestFetchAnimeReviews(t *testing.T) {
 	db, mock, err := sqlmock.New()
@@ -52,11 +44,57 @@ func TestFetchAnimeReviews(t *testing.T) {
 	assert.Equal(t, reviews[0].Rating, tempRating)
 	tempContent = nil
 	assert.Equal(t, reviews[1].Content, tempContent)
+	assert.Equal(t, *reviews[2].Content, "神アニメ")
 
 	if err != nil {
-		t.Errorf("INSERT FAIL: %s", err)
+		t.Errorf("FETCH FAIL: %s", err)
 	}
 	if err = mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("Test GetAnimeReviews: %s", err)
+	}
+}
+
+func TestUpsertAnimeReview(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Error("sqlmock not work")
+	}
+	defer db.Close()
+
+	animeId := 1
+	userId := "aaaaaaaa"
+	testReviewId := 1
+
+	rows := sqlmock.NewRows([]string{
+		"id", "content", "rating", "anime_id", "user_id", "created_at", "updated_at",
+	}).
+		AddRow(testReviewId, "よかった", 6, animeId, userId, time.Now(), time.Now())
+
+	query1 := "SELECT * FROM reviews WHERE anime_id = ? AND user_id = ?"
+	mock.ExpectQuery(regexp.QuoteMeta(query1)).WithArgs(animeId, userId).WillReturnRows(rows)
+
+	// query2 := "INSERT INTO reviews(anime_id, content, user_id) VALUES(?, ?, ?)" // これはinsert
+	query2 := "UPDATE reviews SET content = ? WHERE id = ?" // 対象がある場合のUPDATE
+	stmt := mock.ExpectPrepare(regexp.QuoteMeta(query2))
+	stmt.ExpectExec().WithArgs("面白かった。\n\n大満足!!", testReviewId).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	repo := &database.ReviewRepository{
+		SqlHandler: infrastructure_test.NewDummyHandler(db),
+	}
+	r1 := &domain.TReviewInput{
+		AnimeId: 1,
+		Content: "面白かった。\n\n大満足!!",
+	}
+	insertContent, err := repo.UpsertContent(*r1, "aaaaaaaa")
+
+	assert.Equal(t, err, nil)
+	assert.Equal(t, insertContent, "面白かった。\n\n大満足!!")
+
+	if err != nil {
+		t.Errorf("INSERT Review content FAIL: %s", err)
+	}
+	if err = mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Test InsertReviewContent: %s", err)
 	}
 }
