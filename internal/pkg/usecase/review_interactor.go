@@ -17,6 +17,8 @@ func NewReviewInteractor(review ReviewRepository) domain.ReviewInteractor {
 ************************/
 
 type ReviewRepository interface {
+	FindAll() ([]int, error)
+	FindById(id int) (domain.ReviewWithAnimeSlug, error)
 	FindByAnimeAndUser(int, string) (domain.TReview, error)
 	FilterByAnime(int, string) (domain.TReviews, error)
 	FilterByUser(string) (domain.TReviewJoinAnimes, error)
@@ -32,6 +34,14 @@ type ReviewRepository interface {
 /**********************
    interactor methods
 ***********************/
+
+func (interactor *ReviewInteractor) GetAllReviewIds() ([]int, error) {
+	return interactor.repository.FindAll()
+}
+
+func (interactor *ReviewInteractor) GetReviewById(id int) (domain.ReviewWithAnimeSlug, error) {
+	return interactor.repository.FindById(id)
+}
 
 func (interactor *ReviewInteractor) GetOnesReviewByAnime(animeId int, userId string) (animes domain.TReview, err error) {
 	animes, err = interactor.repository.FindByAnimeAndUser(animeId, userId)

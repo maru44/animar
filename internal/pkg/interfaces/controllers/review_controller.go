@@ -23,6 +23,19 @@ func NewReviewController(sqlHandler database.SqlHandler) *ReviewController {
 	}
 }
 
+func (controller *ReviewController) GetReviewView(w http.ResponseWriter, r *http.Request) {
+	strId := r.URL.Query().Get("id")
+	if strId != "" {
+		id, _ := strconv.Atoi(strId)
+		rev, err := controller.interactor.GetReviewById(id)
+		response(w, err, map[string]interface{}{"data": rev})
+	} else {
+		revs, err := controller.interactor.GetAllReviewIds()
+		response(w, err, map[string]interface{}{"data": revs})
+	}
+	return
+}
+
 func (controller *ReviewController) GetAnimeReviewsView(w http.ResponseWriter, r *http.Request) {
 	userId := r.URL.Query().Get("user")
 	animeIdStr := r.URL.Query().Get("anime")

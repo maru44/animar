@@ -38,6 +38,7 @@ func main() {
 
 	/*   reviews   */
 	reviewController := controllers.NewReviewController(sqlHandler)
+	http.Handle("/reviews/", base.BaseMiddleware(http.HandlerFunc(reviewController.GetReviewView)))
 	http.Handle("/reviews/user/", base.BaseMiddleware(http.HandlerFunc(reviewController.GetOnesReviewsView)))
 	http.Handle("/reviews/post/star/", base.BaseMiddleware(base.UpsertOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(reviewController.UpsertReviewRatingView)))))
 	http.Handle("/reviews/post/content/", base.BaseMiddleware(base.UpsertOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(reviewController.UpsertReviewContentView)))))

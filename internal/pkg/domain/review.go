@@ -10,6 +10,11 @@ type TReview struct {
 	UpdatedAt string  `json:"updated_at,omitempty"`
 }
 
+type ReviewWithAnimeSlug struct {
+	TReview
+	AnimeSlug string `json:"anime_slug,omitempty"`
+}
+
 type TReviewJoinAnime struct {
 	ID           int     `json:"id"`
 	Content      *string `json:"content,omitempty"`
@@ -39,6 +44,8 @@ func (r TReview) GetId() int {
 }
 
 type ReviewInteractor interface {
+	GetAllReviewIds() ([]int, error)
+	GetReviewById(int) (ReviewWithAnimeSlug, error)
 	GetOnesReviewByAnime(int, string) (TReview, error)
 	GetAnimeReviews(int, string) (TReviews, error)
 	GetOnesReviews(string) (TReviewJoinAnimes, error)

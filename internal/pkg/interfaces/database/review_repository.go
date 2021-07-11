@@ -10,6 +10,51 @@ type ReviewRepository struct {
 	SqlHandler
 }
 
+func (repo *ReviewRepository) FindAll() (reviewIds []int, err error) {
+	rows, err := repo.Query(
+		"SELECT id FROM reviews",
+	)
+	defer rows.Close()
+
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	for rows.Next() {
+		var id int
+		err = rows.Scan(&id)
+		if err != nil {
+			tools.ErrorLog(err)
+			return
+		}
+		reviewIds = append(reviewIds, id)
+	}
+	return
+}
+
+func (repo *ReviewRepository) FindById(id int) (r domain.ReviewWithAnimeSlug, err error) {
+	rows, err := repo.Query(
+		"SELECT r.*, a.slug FROM reviews AS r "+
+			"LEFT JOIN animes AS a ON r.anime_id = a.id "+
+			"WHERE r.id = ?", id,
+	)
+	defer rows.Close()
+
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	rows.Next()
+	err = rows.Scan(
+		&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt, &r.AnimeSlug,
+	)
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	return
+}
+
 func (repo *ReviewRepository) FindByAnimeAndUser(animeId int, userId string) (r domain.TReview, err error) {
 	rows, err := repo.Query(
 		"SELECT * FROM reviews WHERE anime_id = ? AND user_id = ?", animeId, userId,
