@@ -1,7 +1,7 @@
 package mysmtp
 
 import (
-	"animar/v1/internal/configs"
+	"animar/v1/configs"
 	"fmt"
 	"net/smtp"
 )

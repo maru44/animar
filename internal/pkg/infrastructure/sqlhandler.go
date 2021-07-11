@@ -1,7 +1,7 @@
 package infrastructure
 
 import (
-	"animar/v1/internal/configs"
+	"animar/v1/configs"
 	"animar/v1/internal/pkg/interfaces/database"
 	"animar/v1/internal/pkg/tools/tools"
 	"database/sql"

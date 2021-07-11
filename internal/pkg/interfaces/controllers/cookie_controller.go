@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"animar/v1/internal/configs"
+	"animar/v1/configs"
 	"animar/v1/internal/pkg/tools/tools"
 	"net/http"
 )

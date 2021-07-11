@@ -1,7 +1,7 @@
 package infrastructure
 
 import (
-	"animar/v1/internal/configs"
+	"animar/v1/configs"
 	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/interfaces/s3"
 	"animar/v1/internal/pkg/tools/tools"

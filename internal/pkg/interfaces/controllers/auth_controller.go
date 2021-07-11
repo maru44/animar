@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"animar/v1/internal/configs"
+	"animar/v1/configs"
 	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/interfaces/fires"
 	"animar/v1/internal/pkg/interfaces/s3"

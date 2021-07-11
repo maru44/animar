@@ -1,7 +1,7 @@
 package tools
 
 import (
-	"animar/v1/internal/configs"
+	"animar/v1/configs"
 	"fmt"
 	"log"
 	"math/rand"

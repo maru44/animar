@@ -1,7 +1,7 @@
 package fires
 
 import (
-	"animar/v1/internal/configs"
+	"animar/v1/configs"
 	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/tools/mysmtp"
 	"animar/v1/internal/pkg/tools/tools"
