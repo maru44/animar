@@ -1,9 +1,9 @@
 package main
 
 import (
-	"animar/v1/pkg/infrastructure"
-	"animar/v1/pkg/interfaces/controllers"
-	"animar/v1/pkg/tools/tools"
+	"animar/v1/internal/pkg/infrastructure"
+	"animar/v1/internal/pkg/interfaces/controllers"
+	"animar/v1/internal/pkg/tools/tools"
 	"net/http"
 )
 
