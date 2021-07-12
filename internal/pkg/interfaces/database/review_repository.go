@@ -34,7 +34,7 @@ func (repo *ReviewRepository) FindAll() (reviewIds []int, err error) {
 
 func (repo *ReviewRepository) FindById(id int) (r domain.ReviewWithAnimeSlug, err error) {
 	rows, err := repo.Query(
-		"SELECT r.*, a.slug FROM reviews AS r "+
+		"SELECT r.*, a.slug, a.title FROM reviews AS r "+
 			"LEFT JOIN animes AS a ON r.anime_id = a.id "+
 			"WHERE r.id = ?", id,
 	)
@@ -46,7 +46,8 @@ func (repo *ReviewRepository) FindById(id int) (r domain.ReviewWithAnimeSlug, er
 	}
 	rows.Next()
 	err = rows.Scan(
-		&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt, &r.AnimeSlug,
+		&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt,
+		&r.AnimeSlug, &r.AnimeTitle,
 	)
 	if err != nil {
 		tools.ErrorLog(err)

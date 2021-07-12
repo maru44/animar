@@ -12,7 +12,8 @@ type TReview struct {
 
 type ReviewWithAnimeSlug struct {
 	TReview
-	AnimeSlug string `json:"anime_slug,omitempty"`
+	AnimeSlug  string `json:"anime_slug,omitempty"`
+	AnimeTitle string `json:"anime_title,omitempty"`
 }
 
 type TReviewJoinAnime struct {
