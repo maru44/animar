@@ -50,7 +50,7 @@ func (repo *AdminAnimeRepository) ListAll() (animes domain.TAnimes, err error) {
 	return
 }
 
-func (repo *AdminAnimeRepository) FindById(id int) (a domain.TAnimeAdmin, err error) {
+func (repo *AdminAnimeRepository) FindById(id int) (a domain.AnimeAdmin, err error) {
 	rows, err := repo.Query(
 		"SELECT * FROM animes WHERE id = ?", id,
 	)
@@ -74,7 +74,7 @@ func (repo *AdminAnimeRepository) FindById(id int) (a domain.TAnimeAdmin, err er
 	return
 }
 
-func (repo *AdminAnimeRepository) Insert(a domain.TAnimeInsert) (lastInsertId int, err error) {
+func (repo *AdminAnimeRepository) Insert(a domain.AnimeInsert) (lastInsertId int, err error) {
 	exe, err := repo.Execute(
 		"INSERT INTO animes(title, slug, abbreviation, kana, eng_name, description, thumb_url, state, series_id, count_episodes, copyright) "+
 			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -94,7 +94,7 @@ func (repo *AdminAnimeRepository) Insert(a domain.TAnimeInsert) (lastInsertId in
 	return
 }
 
-func (repo *AdminAnimeRepository) Update(id int, a domain.TAnimeInsert) (rowsAffected int, err error) {
+func (repo *AdminAnimeRepository) Update(id int, a domain.AnimeInsert) (rowsAffected int, err error) {
 	exe, err := repo.Execute(
 		"UPDATE animes SET title = ?, abbreviation = ?, kana = ?, eng_name = ?, description = ?, thumb_url = ?, state = ?, series_id = ?, count_episodes = ?, copyright = ? WHERE id = ?",
 		a.Title, a.Abbreviation, a.Kana, a.EngName, a.Description, a.ThumbUrl, a.State, a.SeriesId, a.CountEpisodes, a.Copyright, id,

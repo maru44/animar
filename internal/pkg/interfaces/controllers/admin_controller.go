@@ -87,7 +87,7 @@ func (controller *AdminController) AnimePostAdminView(w http.ResponseWriter, r *
 	slug := tools.GenRandSlug(12)
 	series, _ := strconv.Atoi(r.FormValue("series_id"))
 	episodes, _ := strconv.Atoi(r.FormValue("count_episodes"))
-	a := domain.TAnimeInsert{
+	a := domain.AnimeInsert{
 		Title:         r.FormValue("title"),
 		Slug:          slug,
 		Kana:          tools.NewNullString(r.FormValue("kana")),
@@ -130,7 +130,7 @@ func (controller *AdminController) AnimeUpdateView(w http.ResponseWriter, r *htt
 	}
 	series, _ := strconv.Atoi(r.FormValue("series_id"))
 	episodes, _ := strconv.Atoi(r.FormValue("count_episodes"))
-	a := domain.TAnimeInsert{
+	a := domain.AnimeInsert{
 		Title:         r.FormValue("title"),
 		Abbreviation:  tools.NewNullString(r.FormValue("abbreviation")),
 		Kana:          tools.NewNullString(r.FormValue("kana")),

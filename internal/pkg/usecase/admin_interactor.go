@@ -24,9 +24,9 @@ func NewAdminAnimeInteractor(anime AdminAnimeRepository, platform AdminPlatformR
 
 type AdminAnimeRepository interface {
 	ListAll() (domain.TAnimes, error)
-	FindById(int) (domain.TAnimeAdmin, error)
-	Insert(domain.TAnimeInsert) (int, error)
-	Update(int, domain.TAnimeInsert) (int, error)
+	FindById(int) (domain.AnimeAdmin, error)
+	Insert(domain.AnimeInsert) (int, error)
+	Update(int, domain.AnimeInsert) (int, error)
 	Delete(int) (int, error)
 }
 
@@ -65,15 +65,15 @@ func (interactor *AdminInteractor) AnimesAllAdmin() (animes domain.TAnimes, err 
 	animes, err = interactor.animeRepository.ListAll()
 	return
 }
-func (interactor *AdminInteractor) AnimeDetailAdmin(id int) (anime domain.TAnimeAdmin, err error) {
+func (interactor *AdminInteractor) AnimeDetailAdmin(id int) (anime domain.AnimeAdmin, err error) {
 	anime, err = interactor.animeRepository.FindById(id)
 	return
 }
-func (interactor *AdminInteractor) AnimeInsert(anime domain.TAnimeInsert) (lastInsertId int, err error) {
+func (interactor *AdminInteractor) AnimeInsert(anime domain.AnimeInsert) (lastInsertId int, err error) {
 	lastInsertId, err = interactor.animeRepository.Insert(anime)
 	return
 }
-func (interactor *AdminInteractor) AnimeUpdate(id int, anime domain.TAnimeInsert) (rowsAffected int, err error) {
+func (interactor *AdminInteractor) AnimeUpdate(id int, anime domain.AnimeInsert) (rowsAffected int, err error) {
 	rowsAffected, err = interactor.animeRepository.Update(id, anime)
 	return
 }

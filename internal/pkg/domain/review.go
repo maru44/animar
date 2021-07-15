@@ -33,7 +33,7 @@ type TReviewJoinAnime struct {
 type TReviewInput struct {
 	AnimeId int    `json:"anime_id"`
 	Content string `json:"content,omitempty"`
-	Rating  int    `json:"rating,string,omitempty"` // text/plainのpostに対応
+	Rating  int    `json:"rating,omitempty"` // text/plainのpostに対応
 }
 
 type TReviews []TReview

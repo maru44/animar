@@ -11,7 +11,7 @@ type AdminInteractor interface {
          anime
 *************************/
 
-type TAnimeAdmin struct {
+type AnimeAdmin struct {
 	ID            int     `json:"id"`
 	Slug          string  `json:"slug"`
 	Title         string  `json:"title"`
@@ -28,9 +28,9 @@ type TAnimeAdmin struct {
 	UpdatedAt     *string `json:"updated_at,omitempty"`
 }
 
-type TAnimeAdmins []TAnimeAdmin
+type AnimeAdmins []AnimeAdmin
 
-type TAnimeInsert struct {
+type AnimeInsert struct {
 	Title         string  `json:"title"`
 	Slug          string  `json:"slug"`
 	Abbreviation  *string `json:"abbrevation,omitempty"`
@@ -46,9 +46,9 @@ type TAnimeInsert struct {
 
 type AdminAnimeInteractor interface {
 	AnimesAllAdmin() (TAnimes, error)
-	AnimeDetailAdmin(int) (TAnimeAdmin, error)
-	AnimeInsert(TAnimeInsert) (int, error)
-	AnimeUpdate(int, TAnimeInsert) (int, error)
+	AnimeDetailAdmin(int) (AnimeAdmin, error)
+	AnimeInsert(AnimeInsert) (int, error)
+	AnimeUpdate(int, AnimeInsert) (int, error)
 	AnimeDelete(int) (int, error)
 }
 
