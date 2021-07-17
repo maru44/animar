@@ -39,6 +39,7 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 	year := query.Get("year")
 	season := query.Get("season")
 	keyword := query.Get("keyword")
+	rawSeries := query.Get("series")
 
 	switch {
 	case strId != "":
@@ -56,6 +57,10 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 		response(w, err, map[string]interface{}{"data": animes})
 	case keyword != "":
 		animes, err := controller.interactor.AnimesSearch(keyword)
+		response(w, err, map[string]interface{}{"data": animes})
+	case rawSeries != "":
+		seriesId, _ := strconv.Atoi(rawSeries)
+		animes, err := controller.interactor.AnimesBySeries(seriesId)
 		response(w, err, map[string]interface{}{"data": animes})
 	default:
 		animes, err := controller.interactor.AnimesOnAir()

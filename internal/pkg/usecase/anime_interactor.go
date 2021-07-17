@@ -25,6 +25,7 @@ type AnimeRepository interface {
 	ListMinimum() (domain.TAnimeMinimums, error)
 	ListSearch(string) (domain.TAnimes, error)
 	ListBySeason(string, string) (domain.TAnimes, error)
+	ListBySeries(int) ([]domain.TAnimeWithSeries, error)
 	// detail
 	FindById(int) (domain.TAnime, error)
 	FindBySlug(string) (domain.TAnimeWithSeries, error)
@@ -66,6 +67,11 @@ func (interactor *AnimeInteractor) AnimesBySeason(year string, season string) (a
 
 func (interactor *AnimeInteractor) AnimeSearchMinimum(title string) (animes domain.TAnimeMinimums, err error) {
 	animes, err = interactor.animeRepository.ListMinimumSearch(title)
+	return
+}
+
+func (interactor *AnimeInteractor) AnimesBySeries(id int) (animes []domain.TAnimeWithSeries, err error) {
+	animes, err = interactor.animeRepository.ListBySeries(id)
 	return
 }
 
