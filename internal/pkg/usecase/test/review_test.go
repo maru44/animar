@@ -12,8 +12,10 @@ import (
 )
 
 var (
+	reviewId   = 100
 	rawContent = "良かった"
-	rawRating  = 10
+	rawRating  = 8
+	animeId    = 10
 	rawUserId  = "aaaaaaaa"
 	slug       = "slug"
 	title      = "タイトル"
@@ -29,7 +31,7 @@ func (repo *fakeReviewRepository) FindById(id int) (domain.ReviewWithAnimeSlug, 
 			ID:        id,
 			Content:   tools.NewNullString(rawContent),
 			Rating:    tools.NewNullInt(rawRating),
-			AnimeId:   10,
+			AnimeId:   animeId,
 			UserId:    tools.NewNullString(rawUserId),
 			CreatedAt: time.Now().Format("2006-01-02T15:04:05Z07:00"),
 			UpdatedAt: time.Now().Format("2006-01-02T15:04:05Z07:00"),
@@ -44,12 +46,11 @@ func TestFindById(t *testing.T) {
 	mockReviewRepo := new(fakeReviewRepository)
 
 	interactor := usecase.NewReviewInteractor(mockReviewRepo)
-	r, err := interactor.GetReviewById(rawRating)
+	r, err := interactor.GetReviewById(reviewId)
 
-	t.Run("success", func(t *testing.T) {
-		assert.NoError(t, err)
-		assert.NotNil(t, r)
+	assert.NoError(t, err)
+	assert.NotNil(t, r)
 
-		assert.Equal(t, rawContent, *r.Content)
-	})
+	assert.Equal(t, rawContent, *r.Content)
+	assert.Equal(t, animeId, r.AnimeId)
 }
