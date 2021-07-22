@@ -7,7 +7,7 @@ import (
 	"os/exec"
 )
 
-const backupFileName = "../../seed/backup/backup_main.sql"
+const backupFileName = "seed/backup/backup_main.sql"
 
 func BackupMainDatabase() {
 
@@ -60,8 +60,8 @@ func BackupMainDatabase() {
 // 	}
 // }
 
-func Test() {
-	cmd := exec.Command("pwd")
-	result, _ := cmd.Output()
-	fmt.Print(string(result))
-}
+// func Test() {
+// 	cmd := exec.Command("pwd")
+// 	result, _ := cmd.Output()
+// 	fmt.Print(string(result))
+// }

@@ -5,6 +5,6 @@ import (
 )
 
 func main() {
-	dbbackup.Test()
+	// dbbackup.Test()
 	dbbackup.BackupMainDatabase()
 }
