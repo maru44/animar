@@ -22,3 +22,5 @@ tmp/*
 **/secret_key.json
 
 **/seed/production/*
+
+**/seed/backup/*.sql
