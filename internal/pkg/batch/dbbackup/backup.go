@@ -63,5 +63,5 @@ func BackupMainDatabase() {
 func Test() {
 	cmd := exec.Command("pwd")
 	result, _ := cmd.Output()
-	fmt.Print(result)
+	fmt.Print(string(result))
 }
