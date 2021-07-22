@@ -31,7 +31,7 @@ func BackupMainDatabase() {
 	if err != nil {
 		fmt.Print(err)
 	}
-	if err = ioutil.WriteFile(backupFileName, bytes, 0644); err != nil {
+	if err = ioutil.WriteFile(backupFileName, bytes, 0600); err != nil {
 		fmt.Print(err)
 	}
 }
