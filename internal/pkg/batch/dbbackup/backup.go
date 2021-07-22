@@ -7,7 +7,7 @@ import (
 	"os/exec"
 )
 
-const backupFileName = "seed/backup/backup_main.sql"
+const backupFileName = "animar/seed/backup/backup_main.sql"
 
 func BackupMainDatabase() {
 
