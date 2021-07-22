@@ -7,8 +7,6 @@ import (
 	"os/exec"
 )
 
-const backupFileName = "animar/seed/backup/backup_main.sql"
-
 func BackupMainDatabase() {
 
 	cmd := exec.Command(
@@ -31,7 +29,7 @@ func BackupMainDatabase() {
 	if err != nil {
 		fmt.Print(err)
 	}
-	if err = ioutil.WriteFile(backupFileName, bytes, 0600); err != nil {
+	if err = ioutil.WriteFile(configs.MysqlBackupFile, bytes, 0600); err != nil {
 		fmt.Print(err)
 	}
 }
