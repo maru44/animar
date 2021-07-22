@@ -222,9 +222,12 @@ func (repo *AnimeRepository) FindById(id int) (a domain.TAnime, err error) {
 
 func (repo *AnimeRepository) FindBySlug(slug string) (a domain.TAnimeWithSeries, err error) {
 	rows, err := repo.Query(
-		"SELECT animes.id as id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, count_episodes, animes.created_at, animes.updated_at, "+
-			"series_name FROM animes "+
-			"LEFT JOIN series on animes.series_id = series.id "+
+		"SELECT a.id as id, slug, title, abbreviation, thumb_url, copyright, description, state, series_id, "+
+			"count_episodes, hash_tag, twitter_url, a.official_url, a.created_at, a.updated_at, "+
+			"series_name, co.name, co.eng_name "+
+			"FROM animes AS a "+
+			"LEFT JOIN series on a.series_id = series.id "+
+			"LEFT JOIN companies AS co ON a.company_id = co.id "+
 			"WHERE slug = ?", slug,
 	)
 	defer rows.Close()
@@ -237,7 +240,9 @@ func (repo *AnimeRepository) FindBySlug(slug string) (a domain.TAnimeWithSeries,
 		&a.ID, &a.Slug, &a.Title, &a.Abbreviation,
 		&a.ThumbUrl, &a.CopyRight, &a.Description,
 		&a.State, &a.SeriesId, &a.CountEpisodes,
+		&a.HashTag, &a.TwitterUrl, &a.OfficialUrl,
 		&a.CreatedAt, &a.UpdatedAt, &a.SeriesName,
+		&a.CompanyName, &a.CompanyEngName,
 	)
 	if err != nil {
 		err = domain.ErrNotFound

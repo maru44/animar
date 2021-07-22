@@ -26,6 +26,10 @@ type AnimeAdmin struct {
 	CountEpisodes *int    `json:"count_episodes,omitempty"`
 	CreatedAt     string  `json:"created_at"`
 	UpdatedAt     *string `json:"updated_at,omitempty"`
+	CompanyId     *int    `json:"company_id,omitempty"`
+	HashTag       *string `json:"hash_tag,omitempty"`
+	TwitterUrl    *string `json:"twitter_url,omitempty"`
+	OfficialUrl   *string `json:"official_url,omitempty"`
 }
 
 type AnimeAdmins []AnimeAdmin
@@ -42,6 +46,10 @@ type AnimeInsert struct {
 	SeriesId      *int    `json:"series_id,omitempty"`
 	CountEpisodes *int    `json:"count_episodes,omitempty"`
 	Copyright     *string `json:"copyright,omitempty"`
+	CompanyId     *int    `json:"company_id,omitempty"`
+	HashTag       *string `json:"hash_tag,omitempty"`
+	TwitterUrl    *string `json:"twitter_url,omitempty"`
+	OfficialUrl   *string `json:"official_url,omitempty"`
 }
 
 type AdminAnimeInteractor interface {

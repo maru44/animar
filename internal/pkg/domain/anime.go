@@ -22,19 +22,26 @@ type TAnimeMinimum struct {
 }
 
 type TAnimeWithSeries struct {
-	ID            int     `json:"id"`
-	Slug          string  `json:"slug"`
-	Title         string  `json:"title"`
-	ThumbUrl      *string `json:"thumb_url,omitempty"`
-	CopyRight     *string `json:"copyright,omitempty"`
-	Abbreviation  *string `json:"abbreviation,omitempty"`
-	Description   *string `json:"description,omitempty"`
-	State         *string `json:"state,omitempty"`
-	SeriesId      *int    `json:"series_id,omitempty"`
-	CountEpisodes *int    `json:"count_episodes,omitemptys"`
-	CreatedAt     string  `json:"created_at"`
-	UpdatedAt     *string `json:"updated_at,omitempty"`
-	SeriesName    *string `json:"series_name"`
+	// detail of anime
+	ID             int     `json:"id"`
+	Slug           string  `json:"slug"`
+	Title          string  `json:"title"`
+	ThumbUrl       *string `json:"thumb_url,omitempty"`
+	CopyRight      *string `json:"copyright,omitempty"`
+	Abbreviation   *string `json:"abbreviation,omitempty"`
+	Description    *string `json:"description,omitempty"`
+	State          *string `json:"state,omitempty"`
+	SeriesId       *int    `json:"series_id,omitempty"`
+	CompanyId      *int    `json:"company_id,omitempty"`
+	CountEpisodes  *int    `json:"count_episodes,omitemptys"`
+	HashTag        *string `json:"hash_tag,omitempty"`
+	TwitterUrl     *string `json:"twitter_url,omitempty"`
+	OfficialUrl    *string `json:"official_url,omitempty"`
+	CreatedAt      string  `json:"created_at"`
+	UpdatedAt      *string `json:"updated_at,omitempty"`
+	SeriesName     *string `json:"series_name,omitempty"`
+	CompanyName    *string `json:"company_name,omitempty"`
+	CompanyEngName *string `json:"company_eng_name,omitempty"`
 }
 
 type TAnimes []TAnime

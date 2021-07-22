@@ -87,6 +87,7 @@ func (controller *AdminController) AnimePostAdminView(w http.ResponseWriter, r *
 	slug := tools.GenRandSlug(12)
 	series, _ := strconv.Atoi(r.FormValue("series_id"))
 	episodes, _ := strconv.Atoi(r.FormValue("count_episodes"))
+	companyId, _ := strconv.Atoi(r.FormValue("company_id"))
 	a := domain.AnimeInsert{
 		Title:         r.FormValue("title"),
 		Slug:          slug,
@@ -99,6 +100,10 @@ func (controller *AdminController) AnimePostAdminView(w http.ResponseWriter, r *
 		SeriesId:      tools.NewNullInt(series),
 		CountEpisodes: tools.NewNullInt(episodes),
 		Copyright:     tools.NewNullString(r.FormValue("copyright")),
+		CompanyId:     tools.NewNullInt(companyId),
+		HashTag:       tools.NewNullString(r.FormValue("hash_tag")),
+		TwitterUrl:    tools.NewNullString(r.FormValue("twitter_url")),
+		OfficialUrl:   tools.NewNullString(r.FormValue("official_url")),
 	}
 	insertedId, err = controller.interactor.AnimeInsert(a)
 	if err != nil {
@@ -130,6 +135,7 @@ func (controller *AdminController) AnimeUpdateView(w http.ResponseWriter, r *htt
 	}
 	series, _ := strconv.Atoi(r.FormValue("series_id"))
 	episodes, _ := strconv.Atoi(r.FormValue("count_episodes"))
+	companyId, _ := strconv.Atoi(r.FormValue("company_id"))
 	a := domain.AnimeInsert{
 		Title:         r.FormValue("title"),
 		Abbreviation:  tools.NewNullString(r.FormValue("abbreviation")),
@@ -141,6 +147,10 @@ func (controller *AdminController) AnimeUpdateView(w http.ResponseWriter, r *htt
 		CountEpisodes: tools.NewNullInt(episodes),
 		Copyright:     tools.NewNullString(r.FormValue("copyright")),
 		ThumbUrl:      tools.NewNullString(returnFileName),
+		CompanyId:     tools.NewNullInt(companyId),
+		HashTag:       tools.NewNullString(r.FormValue("hash_tag")),
+		TwitterUrl:    tools.NewNullString(r.FormValue("twitter_url")),
+		OfficialUrl:   tools.NewNullString(r.FormValue("official_url")),
 	}
 
 	rowsAffected, err := controller.interactor.AnimeUpdate(id, a)

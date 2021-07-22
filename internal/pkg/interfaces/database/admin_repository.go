@@ -64,8 +64,9 @@ func (repo *AdminAnimeRepository) FindById(id int) (a domain.AnimeAdmin, err err
 	err = rows.Scan(
 		&a.ID, &a.Slug, &a.Title, &a.Abbreviation,
 		&a.Kana, &a.EngName, &a.ThumbUrl, &a.CopyRight, &a.Description,
-		&a.State, &a.SeriesId,
-		&a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
+		&a.State, &a.SeriesId, &a.CompanyId,
+		&a.CountEpisodes, &a.HashTag, &a.TwitterUrl, &a.OfficialUrl,
+		&a.CreatedAt, &a.UpdatedAt,
 	)
 	if err != nil {
 		tools.ErrorLog(err)
@@ -76,10 +77,11 @@ func (repo *AdminAnimeRepository) FindById(id int) (a domain.AnimeAdmin, err err
 
 func (repo *AdminAnimeRepository) Insert(a domain.AnimeInsert) (lastInsertId int, err error) {
 	exe, err := repo.Execute(
-		"INSERT INTO animes(title, slug, abbreviation, kana, eng_name, description, thumb_url, state, series_id, count_episodes, copyright) "+
-			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		"INSERT INTO animes(title, slug, abbreviation, kana, eng_name, description, thumb_url, state, series_id, count_episodes, copyright, company_id, hash_tag, twitter_url, official_url) "+
+			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		a.Title, a.Slug, a.Abbreviation, a.Kana, a.EngName, a.Description,
 		a.ThumbUrl, a.State, a.SeriesId, a.CountEpisodes, a.Copyright,
+		a.CompanyId, a.HashTag, a.TwitterUrl, a.OfficialUrl,
 	)
 	if err != nil {
 		tools.ErrorLog(err)
@@ -96,8 +98,10 @@ func (repo *AdminAnimeRepository) Insert(a domain.AnimeInsert) (lastInsertId int
 
 func (repo *AdminAnimeRepository) Update(id int, a domain.AnimeInsert) (rowsAffected int, err error) {
 	exe, err := repo.Execute(
-		"UPDATE animes SET title = ?, abbreviation = ?, kana = ?, eng_name = ?, description = ?, thumb_url = ?, state = ?, series_id = ?, count_episodes = ?, copyright = ? WHERE id = ?",
-		a.Title, a.Abbreviation, a.Kana, a.EngName, a.Description, a.ThumbUrl, a.State, a.SeriesId, a.CountEpisodes, a.Copyright, id,
+		"UPDATE animes SET title = ?, abbreviation = ?, kana = ?, eng_name = ?, description = ?, thumb_url = ?, state = ?, "+
+			"series_id = ?, count_episodes = ?, copyright = ?, hash_tag = ?, twitter_url = ?, official_url = ? WHERE id = ?",
+		a.Title, a.Abbreviation, a.Kana, a.EngName, a.Description, a.ThumbUrl, a.State, a.SeriesId, a.CountEpisodes, a.Copyright,
+		a.HashTag, a.TwitterUrl, a.OfficialUrl, id,
 	)
 	if err != nil {
 		tools.ErrorLog(err)
