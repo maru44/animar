@@ -59,3 +59,9 @@ func BackupMainDatabase() {
 // 		log.Print(string(result))
 // 	}
 // }
+
+func Test() {
+	cmd := exec.Command("pwd")
+	result, _ := cmd.Output()
+	fmt.Print(result)
+}
