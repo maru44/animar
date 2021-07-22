@@ -1,4 +1,4 @@
-package database
+package dbbackup
 
 import (
 	"animar/v1/configs"
