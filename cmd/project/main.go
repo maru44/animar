@@ -54,6 +54,9 @@ func main() {
 	http.Handle("/watch/delete/", base.BaseMiddleware(base.DeleteOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(audienceController.DeleteAudienceView)))))
 	http.Handle("/watch/ua/", base.BaseMiddleware(base.GiveUserIdMiddleware(http.HandlerFunc(audienceController.AudienceByAnimeAndUserView))))
 
+	companyController := controllers.NewCompanyController(sqlHandler)
+	http.Handle("/company/", base.BaseMiddleware(http.HandlerFunc(companyController.ListCompanyView)))
+
 	/*   auth   */
 	firebase := infrastructure.NewFireBaseClient()
 	authController := controllers.NewAuthController(firebase, uploader)
@@ -66,7 +69,12 @@ func main() {
 	// oauth
 	http.Handle("/auth/setcookie/", base.BaseMiddleware(base.PostOnlyMiddleware(http.HandlerFunc(authController.SetJwtTokenView))))
 
-	/*   admin   */
+	/*************************************************
+	*                                                *
+	*                     Admin                      *
+	*                                                *
+	*************************************************/
+
 	adminController := controllers.NewAdminController(sqlHandler, uploader)
 	http.Handle("/admin/anime/", base.BaseMiddleware(base.AdminRequiredMiddlewareGet(http.HandlerFunc(adminController.AnimeListAdminView))))
 	http.Handle("/admin/anime/detail/", base.BaseMiddleware(base.AdminRequiredMiddlewareGet(http.HandlerFunc(adminController.AnimeDetailAdminView))))
@@ -95,6 +103,9 @@ func main() {
 	http.Handle("/relation/plat/", base.BaseMiddleware(http.HandlerFunc(adminController.RelationPlatformView))) // ?id=<anime_id>
 	http.Handle("/admin/relation/plat/post/", base.BaseMiddleware(base.PostOnlyMiddleware(base.AdminRequiredMiddleware(http.HandlerFunc(adminController.InsertRelationPlatformView)))))
 	http.Handle("/admin/relation/plat/delete/", base.BaseMiddleware(base.DeleteOnlyMiddleware(base.AdminRequiredMiddleware(http.HandlerFunc(adminController.DeleteRelationPlatformView))))) // ?anime=<anime_id>&platform=<platform_id>
+
+	// company
+	http.Handle("/admin/company/post/", base.BaseMiddleware(base.AdminRequiredMiddleware(http.HandlerFunc(adminController.InsertCompanyView))))
 
 	if tools.IsProductionEnv() {
 		http.ListenAndServe(":8000", nil) // reverse proxy
