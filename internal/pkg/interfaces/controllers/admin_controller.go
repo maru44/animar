@@ -36,6 +36,12 @@ func NewAdminController(sqlHandler database.SqlHandler, uploader s3.Uploader) *A
 			&database.CompanyRepository{
 				SqlHandler: sqlHandler,
 			},
+			&database.StaffRepository{
+				SqlHandler: sqlHandler,
+			},
+			&database.RoleRepository{
+				SqlHandler: sqlHandler,
+			},
 		),
 		s3: usecase.NewS3Interactor(
 			&s3.S3Repository{
@@ -411,3 +417,56 @@ func (controller *AdminController) InsertCompanyView(w http.ResponseWriter, r *h
 	response(w, err, map[string]interface{}{"data": lastInserted})
 	return
 }
+
+// @TODO:ADD update and delete
+
+/************************
+         staff
+*************************/
+
+func (controller *AdminController) InsertStaffView(w http.ResponseWriter, r *http.Request) {
+	var p domain.StaffInput
+	json.NewDecoder(r.Body).Decode(&p)
+	lastInserted, err := controller.interactor.InsertStaff(p)
+	if err != nil {
+		log.Print(err)
+	}
+	response(w, err, map[string]interface{}{"data": lastInserted})
+	return
+}
+
+// @TODO:ADD update and delete
+
+/************************
+         role
+*************************/
+
+func (controller *AdminController) InsertRoleView(w http.ResponseWriter, r *http.Request) {
+	var p domain.RoleInput
+	json.NewDecoder(r.Body).Decode(&p)
+	lastInserted, err := controller.interactor.InsertRole(p)
+	if err != nil {
+		log.Print(err)
+	}
+	response(w, err, map[string]interface{}{"data": lastInserted})
+	return
+}
+
+func (controller *AdminController) ListRoleView(w http.ResponseWriter, r *http.Request) {
+	roles, err := controller.interactor.RoleList()
+	response(w, err, map[string]interface{}{"data": roles})
+	return
+}
+
+func (controller *AdminController) InsertStaffRoleView(w http.ResponseWriter, r *http.Request) {
+	var p domain.AnimeStaffRoleInput
+	json.NewDecoder(r.Body).Decode(&p)
+	lastInserted, err := controller.interactor.InsertStaffRole(p)
+	if err != nil {
+		log.Print(err)
+	}
+	response(w, err, map[string]interface{}{"data": lastInserted})
+	return
+}
+
+// @TODO:ADD update and delete

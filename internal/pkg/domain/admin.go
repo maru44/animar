@@ -6,6 +6,8 @@ type AdminInteractor interface {
 	AdminSeasonInteractor
 	AdminSeriesInteractor
 	AdminCompanyInteractor
+	AdminStaffInteractor
+	AdminRoleInteractor
 }
 
 /************************
@@ -148,4 +150,40 @@ type CompanyInput struct {
 
 type AdminCompanyInteractor interface {
 	InsertCompany(CompanyInput) (int, error)
+}
+
+/************************
+         staff
+*************************/
+
+type StaffInput struct {
+	EngName    string  `json:"eng_name,omitempty"`
+	FamilyName *string `json:"family_name,omitempty"`
+	GivenName  *string `json:"given_name,omitempty"`
+}
+
+type AdminStaffInteractor interface {
+	InsertStaff(StaffInput) (int, error)
+	// UpdateStaff(StaffInput, int) (int, error)
+}
+
+/************************
+         role
+*************************/
+
+type RoleInput struct {
+	Num  int    `json:"num"`
+	Role string `json:"role"`
+}
+
+type AnimeStaffRoleInput struct {
+	AnimeId int `json:"anime_id"`
+	RoleId  int `json:"role_id"`
+	StaffId int `json:"staff_id"`
+}
+
+type AdminRoleInteractor interface {
+	RoleList() ([]Role, error)
+	InsertRole(RoleInput) (int, error)
+	InsertStaffRole(AnimeStaffRoleInput) (int, error)
 }

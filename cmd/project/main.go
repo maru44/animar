@@ -54,8 +54,14 @@ func main() {
 	http.Handle("/watch/delete/", base.BaseMiddleware(base.DeleteOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(audienceController.DeleteAudienceView)))))
 	http.Handle("/watch/ua/", base.BaseMiddleware(base.GiveUserIdMiddleware(http.HandlerFunc(audienceController.AudienceByAnimeAndUserView))))
 
+	staffController := controllers.NewStaffController(sqlHandler)
+	http.Handle("/staff/", base.BaseMiddleware(http.HandlerFunc(staffController.StaffListView)))
+
 	companyController := controllers.NewCompanyController(sqlHandler)
 	http.Handle("/company/", base.BaseMiddleware(http.HandlerFunc(companyController.ListCompanyView)))
+
+	roleController := controllers.NewRoleController(sqlHandler)
+	http.Handle("/staffrole/", base.BaseMiddleware(http.HandlerFunc(roleController.ListStaffRoleView))) // ?anime=
 
 	/*   auth   */
 	firebase := infrastructure.NewFireBaseClient()
@@ -106,6 +112,14 @@ func main() {
 
 	// company
 	http.Handle("/admin/company/post/", base.BaseMiddleware(base.AdminRequiredMiddleware(http.HandlerFunc(adminController.InsertCompanyView))))
+
+	// staff
+	http.Handle("/admin/staff/post/", base.BaseMiddleware(base.AdminRequiredMiddleware(base.PostOnlyMiddleware(http.HandlerFunc(adminController.InsertStaffView)))))
+
+	// role
+	http.Handle("/admin/role/", base.BaseMiddleware(base.AdminRequiredMiddleware(http.HandlerFunc(adminController.ListRoleView))))
+	http.Handle("/admin/role/post/", base.BaseMiddleware(base.AdminRequiredMiddleware(base.PostOnlyMiddleware(http.HandlerFunc(adminController.InsertRoleView)))))
+	http.Handle("/admin/staffrole/post/", base.BaseMiddleware(base.AdminRequiredMiddleware(base.PostOnlyMiddleware(http.HandlerFunc(adminController.InsertStaffRoleView)))))
 
 	if tools.IsProductionEnv() {
 		http.ListenAndServe(":8000", nil) // reverse proxy

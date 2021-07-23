@@ -8,15 +8,19 @@ type AdminInteractor struct {
 	seasonRepository   AdminSeasonRepository
 	seriesRepository   AdminSeriesRepository
 	companyRepository  CompanyRepository
+	staffRepository    StaffRepository
+	roleRepository     RoleRepository
 }
 
-func NewAdminAnimeInteractor(anime AdminAnimeRepository, platform AdminPlatformRepository, season AdminSeasonRepository, series AdminSeriesRepository, comp CompanyRepository) domain.AdminInteractor {
+func NewAdminAnimeInteractor(anime AdminAnimeRepository, platform AdminPlatformRepository, season AdminSeasonRepository, series AdminSeriesRepository, comp CompanyRepository, staff StaffRepository, role RoleRepository) domain.AdminInteractor {
 	return &AdminInteractor{
 		animeRepository:    anime,
 		platformRepository: platform,
 		seasonRepository:   season,
 		seriesRepository:   series,
 		companyRepository:  comp,
+		staffRepository:    staff,
+		roleRepository:     role,
 	}
 }
 
@@ -57,10 +61,6 @@ type AdminSeriesRepository interface {
 	Insert(domain.TSeriesInput) (int, error)
 	Update(domain.TSeriesInput, int) (int, error)
 	Delete(int) (int, error)
-}
-
-type AdminCompanyRepository interface {
-	Insert(domain.CompanyInput) (int, error)
 }
 
 /************************
@@ -187,4 +187,24 @@ func (interactor *AdminInteractor) DeleteSeries(id int) (rowsAffected int, err e
 
 func (interactor *AdminInteractor) InsertCompany(com domain.CompanyInput) (int, error) {
 	return interactor.companyRepository.Insert(com)
+}
+
+// staff
+
+func (interactor *AdminInteractor) InsertStaff(s domain.StaffInput) (int, error) {
+	return interactor.staffRepository.Insert(s)
+}
+
+// role
+
+func (interactor *AdminInteractor) RoleList() ([]domain.Role, error) {
+	return interactor.roleRepository.List()
+}
+
+func (interactor *AdminInteractor) InsertRole(r domain.RoleInput) (int, error) {
+	return interactor.roleRepository.Insert(r)
+}
+
+func (interactor *AdminInteractor) InsertStaffRole(r domain.AnimeStaffRoleInput) (int, error) {
+	return interactor.roleRepository.InsertStaffRole(r)
 }
