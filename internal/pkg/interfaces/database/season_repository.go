@@ -25,6 +25,7 @@ func (repo *SeasonRepository) FilterByAnimeId(animeId int) (seasons []domain.TSe
 		err := rows.Scan(
 			&s.ID, &s.Year, &s.Season,
 		)
+		s.SeasonEng = domain.SeasonDictReverse[s.Season]
 		if err != nil {
 			tools.ErrorLog(err)
 		}

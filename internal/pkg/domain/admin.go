@@ -5,6 +5,7 @@ type AdminInteractor interface {
 	AdminPlatformInteractor
 	AdminSeasonInteractor
 	AdminSeriesInteractor
+	AdminCompanyInteractor
 }
 
 /************************
@@ -133,4 +134,18 @@ type AdminSeriesInteractor interface {
 	InsertSeries(TSeriesInput) (int, error)
 	UpdateSeries(TSeriesInput, int) (int, error)
 	DeleteSeries(int) (int, error)
+}
+
+/************************
+         company
+*************************/
+
+type CompanyInput struct {
+	Name        string  `json:"name"`
+	EngName     string  `json:"eng_name"`
+	OfficialUrl *string `json:"official_url,omitempty"`
+}
+
+type AdminCompanyInteractor interface {
+	InsertCompany(CompanyInput) (int, error)
 }

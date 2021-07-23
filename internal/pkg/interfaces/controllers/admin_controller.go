@@ -8,6 +8,7 @@ import (
 	"animar/v1/internal/pkg/usecase"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -30,6 +31,9 @@ func NewAdminController(sqlHandler database.SqlHandler, uploader s3.Uploader) *A
 				SqlHandler: sqlHandler,
 			},
 			&database.AdminSeriesRepository{
+				SqlHandler: sqlHandler,
+			},
+			&database.CompanyRepository{
 				SqlHandler: sqlHandler,
 			},
 		),
@@ -390,5 +394,20 @@ func (controller *AdminController) UpdateSeriesView(w http.ResponseWriter, r *ht
 		tools.ErrorLog(err)
 	}
 	response(w, err, map[string]interface{}{"data": rowsAffected})
+	return
+}
+
+/************************
+         company
+*************************/
+
+func (controller *AdminController) InsertCompanyView(w http.ResponseWriter, r *http.Request) {
+	var p domain.CompanyInput
+	json.NewDecoder(r.Body).Decode(&p)
+	lastInserted, err := controller.interactor.InsertCompany(p)
+	if err != nil {
+		log.Print(err)
+	}
+	response(w, err, map[string]interface{}{"data": lastInserted})
 	return
 }

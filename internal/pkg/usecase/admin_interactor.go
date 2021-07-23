@@ -7,14 +7,16 @@ type AdminInteractor struct {
 	platformRepository AdminPlatformRepository
 	seasonRepository   AdminSeasonRepository
 	seriesRepository   AdminSeriesRepository
+	companyRepository  CompanyRepository
 }
 
-func NewAdminAnimeInteractor(anime AdminAnimeRepository, platform AdminPlatformRepository, season AdminSeasonRepository, series AdminSeriesRepository) domain.AdminInteractor {
+func NewAdminAnimeInteractor(anime AdminAnimeRepository, platform AdminPlatformRepository, season AdminSeasonRepository, series AdminSeriesRepository, comp CompanyRepository) domain.AdminInteractor {
 	return &AdminInteractor{
 		animeRepository:    anime,
 		platformRepository: platform,
 		seasonRepository:   season,
 		seriesRepository:   series,
+		companyRepository:  comp,
 	}
 }
 
@@ -55,6 +57,10 @@ type AdminSeriesRepository interface {
 	Insert(domain.TSeriesInput) (int, error)
 	Update(domain.TSeriesInput, int) (int, error)
 	Delete(int) (int, error)
+}
+
+type AdminCompanyRepository interface {
+	Insert(domain.CompanyInput) (int, error)
 }
 
 /************************
@@ -175,4 +181,10 @@ func (interactor *AdminInteractor) UpdateSeries(series domain.TSeriesInput, id i
 func (interactor *AdminInteractor) DeleteSeries(id int) (rowsAffected int, err error) {
 	rowsAffected, err = interactor.seriesRepository.Delete(id)
 	return
+}
+
+// company
+
+func (interactor *AdminInteractor) InsertCompany(com domain.CompanyInput) (int, error) {
+	return interactor.companyRepository.Insert(com)
 }
