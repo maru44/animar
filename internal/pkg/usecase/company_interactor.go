@@ -18,7 +18,7 @@ func NewCompanyInteractor(cor CompanyRepository) domain.CompanyInteractor {
 
 type CompanyRepository interface {
 	List() ([]domain.Company, error)
-	DetailByEng(string) (domain.Company, error)
+	DetailByEng(string) (domain.CompanyDetail, error)
 	// admin
 	Insert(domain.CompanyInput) (int, error)
 }

@@ -143,9 +143,11 @@ type AdminSeriesInteractor interface {
 *************************/
 
 type CompanyInput struct {
-	Name        string  `json:"name"`
-	EngName     string  `json:"eng_name"`
-	OfficialUrl *string `json:"official_url,omitempty"`
+	Name           string  `json:"name"`
+	EngName        string  `json:"eng_name"`
+	OfficialUrl    *string `json:"official_url,omitempty"`
+	Explanation    *string `json:"explanation,omitempty"`
+	TwitterAccount *string `json:"twitter_account,omitempty"`
 }
 
 type AdminCompanyInteractor interface {

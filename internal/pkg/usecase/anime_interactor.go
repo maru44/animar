@@ -103,6 +103,6 @@ func (interactor *AnimeInteractor) ReviewFilterByAnime(animeId int, userId strin
 
 // company
 
-func (interactor *AnimeInteractor) DetailCompanyByEng(engName string) (domain.Company, error) {
+func (interactor *AnimeInteractor) DetailCompanyByEng(engName string) (domain.CompanyDetail, error) {
 	return interactor.companyRepository.DetailByEng(engName)
 }

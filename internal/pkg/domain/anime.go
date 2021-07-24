@@ -71,5 +71,5 @@ type AnimeInteractor interface {
 	/*   review   */
 	ReviewFilterByAnime(int, string) (TReviews, error)
 	/*   company   */
-	DetailCompanyByEng(string) (Company, error)
+	DetailCompanyByEng(string) (CompanyDetail, error)
 }

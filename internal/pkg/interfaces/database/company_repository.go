@@ -30,9 +30,9 @@ func (cr *CompanyRepository) List() (cs []domain.Company, err error) {
 	return
 }
 
-func (cr *CompanyRepository) DetailByEng(engName string) (c domain.Company, err error) {
+func (cr *CompanyRepository) DetailByEng(engName string) (c domain.CompanyDetail, err error) {
 	rows, err := cr.Query(
-		"SELECT id, name, eng_name, official_url, created_at, updated_at "+
+		"SELECT id, name, eng_name, official_url, explanation, twitter_account, created_at, updated_at "+
 			"FROM companies "+
 			"WHERE eng_name = ?",
 		engName,
@@ -43,7 +43,7 @@ func (cr *CompanyRepository) DetailByEng(engName string) (c domain.Company, err 
 	}
 	rows.Next()
 	rows.Scan(
-		&c.ID, &c.Name, &c.EngName, &c.OfficialUrl, &c.CreatedAt, &c.UpdatedAt,
+		&c.ID, &c.Name, &c.EngName, &c.OfficialUrl, &c.Explanation, &c.TwitterAccount, &c.CreatedAt, &c.UpdatedAt,
 	)
 	return
 }
@@ -51,8 +51,9 @@ func (cr *CompanyRepository) DetailByEng(engName string) (c domain.Company, err 
 // this is for admin
 func (cr *CompanyRepository) Insert(c domain.CompanyInput) (inserted int, err error) {
 	exe, err := cr.Execute(
-		"INSERT INTO companies(name, eng_name, official_url) VALUES(?, ?, ?)",
-		c.Name, c.EngName, c.OfficialUrl,
+		"INSERT INTO companies(name, eng_name, official_url, explanation, twitter_account) "+
+			"VALUES(?, ?, ?, ?, ?)",
+		c.Name, c.EngName, c.OfficialUrl, c.Explanation, c.TwitterAccount,
 	)
 	if err != nil {
 		log.Print(err)
