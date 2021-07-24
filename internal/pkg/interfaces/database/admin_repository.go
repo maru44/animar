@@ -99,9 +99,9 @@ func (repo *AdminAnimeRepository) Insert(a domain.AnimeInsert) (lastInsertId int
 func (repo *AdminAnimeRepository) Update(id int, a domain.AnimeInsert) (rowsAffected int, err error) {
 	exe, err := repo.Execute(
 		"UPDATE animes SET title = ?, abbreviation = ?, kana = ?, eng_name = ?, description = ?, thumb_url = ?, state = ?, "+
-			"series_id = ?, count_episodes = ?, copyright = ?, hash_tag = ?, twitter_url = ?, official_url = ? WHERE id = ?",
+			"series_id = ?, count_episodes = ?, copyright = ?, hash_tag = ?, twitter_url = ?, official_url = ?, company_id = ? WHERE id = ?",
 		a.Title, a.Abbreviation, a.Kana, a.EngName, a.Description, a.ThumbUrl, a.State, a.SeriesId, a.CountEpisodes, a.Copyright,
-		a.HashTag, a.TwitterUrl, a.OfficialUrl, id,
+		a.HashTag, a.TwitterUrl, a.OfficialUrl, a.CompanyId, id,
 	)
 	if err != nil {
 		tools.ErrorLog(err)

@@ -22,6 +22,9 @@ func NewAnimeController(sqlHandler database.SqlHandler) *AnimeController {
 			&database.ReviewRepository{
 				SqlHandler: sqlHandler,
 			},
+			&database.CompanyRepository{
+				SqlHandler: sqlHandler,
+			},
 		),
 	}
 }
@@ -40,6 +43,7 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 	season := query.Get("season")
 	keyword := query.Get("keyword")
 	rawSeries := query.Get("series")
+	company := query.Get("company")
 
 	switch {
 	case strId != "":
@@ -62,6 +66,10 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 		seriesId, _ := strconv.Atoi(rawSeries)
 		animes, err := controller.interactor.AnimesBySeries(seriesId)
 		response(w, err, map[string]interface{}{"data": animes})
+	case company != "":
+		comp, _ := controller.interactor.DetailCompanyByEng(company)
+		animes, err := controller.interactor.AnimesByCompany(company)
+		response(w, err, map[string]interface{}{"data": animes, "company": comp})
 	default:
 		animes, err := controller.interactor.AnimesOnAir()
 		response(w, err, map[string]interface{}{"data": animes})

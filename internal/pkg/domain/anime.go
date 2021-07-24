@@ -62,9 +62,14 @@ type AnimeInteractor interface {
 	AnimesSearch(string) (TAnimes, error)
 	AnimesBySeason(string, string) (TAnimes, error)
 	AnimesBySeries(id int) ([]TAnimeWithSeries, error)
+	AnimesByCompany(string) (TAnimes, error)
 	AnimeMinimums() (TAnimeMinimums, error)
 	AnimeSearchMinimum(string) (TAnimeMinimums, error)
+	/*   detail   */
 	AnimeDetail(int) (TAnime, error)
 	AnimeDetailBySlug(string) (TAnimeWithSeries, error)
+	/*   review   */
 	ReviewFilterByAnime(int, string) (TReviews, error)
+	/*   company   */
+	DetailCompanyByEng(string) (Company, error)
 }

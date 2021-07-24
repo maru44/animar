@@ -3,14 +3,16 @@ package usecase
 import "animar/v1/internal/pkg/domain"
 
 type AnimeInteractor struct {
-	animeRepository  AnimeRepository
-	reviewRepository ReviewAnimeRepository
+	animeRepository   AnimeRepository
+	reviewRepository  ReviewAnimeRepository
+	companyRepository CompanyRepository
 }
 
-func NewAnimeInteractor(anime AnimeRepository, review ReviewAnimeRepository) domain.AnimeInteractor {
+func NewAnimeInteractor(anime AnimeRepository, review ReviewAnimeRepository, cop CompanyRepository) domain.AnimeInteractor {
 	return &AnimeInteractor{
-		animeRepository:  anime,
-		reviewRepository: review,
+		animeRepository:   anime,
+		reviewRepository:  review,
+		companyRepository: cop,
 	}
 }
 
@@ -26,6 +28,7 @@ type AnimeRepository interface {
 	ListSearch(string) (domain.TAnimes, error)
 	ListBySeason(string, string) (domain.TAnimes, error)
 	ListBySeries(int) ([]domain.TAnimeWithSeries, error)
+	ListByCompany(string) (domain.TAnimes, error)
 	// detail
 	FindById(int) (domain.TAnime, error)
 	FindBySlug(string) (domain.TAnimeWithSeries, error)
@@ -75,6 +78,10 @@ func (interactor *AnimeInteractor) AnimesBySeries(id int) (animes []domain.TAnim
 	return
 }
 
+func (interactor *AnimeInteractor) AnimesByCompany(engName string) (domain.TAnimes, error) {
+	return interactor.animeRepository.ListByCompany(engName)
+}
+
 // detail
 
 func (interactor *AnimeInteractor) AnimeDetail(id int) (anime domain.TAnime, err error) {
@@ -92,4 +99,10 @@ func (interactor *AnimeInteractor) AnimeDetailBySlug(slug string) (anime domain.
 func (interactor *AnimeInteractor) ReviewFilterByAnime(animeId int, userId string) (reviews domain.TReviews, err error) {
 	reviews, err = interactor.reviewRepository.FilterByAnime(animeId, userId)
 	return
+}
+
+// company
+
+func (interactor *AnimeInteractor) DetailCompanyByEng(engName string) (domain.Company, error) {
+	return interactor.companyRepository.DetailByEng(engName)
 }

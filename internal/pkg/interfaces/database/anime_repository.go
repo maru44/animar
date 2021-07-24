@@ -170,6 +170,37 @@ func (repo *AnimeRepository) ListBySeries(id int) (animes []domain.TAnimeWithSer
 	return
 }
 
+func (repo *AnimeRepository) ListByCompany(engName string) (animes domain.TAnimes, err error) {
+	rows, err := repo.Query(
+		"SELECT animes.id as id, slug, title, abbreviation, thumb_url, copyright, "+
+			"description, state, series_id, count_episodes, "+
+			"animes.created_at as created_at, animes.updated_at as updated_at "+
+			"FROM companies AS co "+
+			"LEFT JOIN animes ON co.id = animes.company_id "+
+			"WHERE co.eng_name = ?", engName,
+	)
+	defer rows.Close()
+	if err != nil {
+		tools.ErrorLog(err)
+		return
+	}
+	for rows.Next() {
+		var a domain.TAnime
+		err = rows.Scan(
+			&a.ID, &a.Slug, &a.Title, &a.Abbreviation,
+			&a.ThumbUrl, &a.CopyRight, &a.Description,
+			&a.State, &a.SeriesId, &a.CountEpisodes,
+			&a.CreatedAt, &a.UpdatedAt,
+		)
+		if err != nil {
+			tools.ErrorLog(err)
+			return
+		}
+		animes = append(animes, a)
+	}
+	return
+}
+
 func (repo *AnimeRepository) ListMinimum() (animes domain.TAnimeMinimums, err error) {
 	rows, err := repo.Query(
 		"SELECT id, slug, title from animes",
