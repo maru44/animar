@@ -407,6 +407,20 @@ func (controller *AdminController) UpdateSeriesView(w http.ResponseWriter, r *ht
          company
 *************************/
 
+func (controller *AdminController) AdminCompanyView(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	eng := query.Get("company")
+
+	if eng != "" {
+		company, err := controller.interactor.DetailCompany(eng)
+		response(w, err, map[string]interface{}{"data": company})
+	} else {
+		companies, err := controller.interactor.ListCompany()
+		response(w, err, map[string]interface{}{"data": companies})
+	}
+	return
+}
+
 func (controller *AdminController) InsertCompanyView(w http.ResponseWriter, r *http.Request) {
 	var p domain.CompanyInput
 	json.NewDecoder(r.Body).Decode(&p)
@@ -418,7 +432,18 @@ func (controller *AdminController) InsertCompanyView(w http.ResponseWriter, r *h
 	return
 }
 
-// @TODO:ADD update and delete
+func (controller *AdminController) UpdateCompanyView(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	eng := query.Get("company")
+
+	var p domain.CompanyInput
+	json.NewDecoder(r.Body).Decode(&p)
+	affected, err := controller.interactor.UpdateCompany(p, eng)
+	response(w, err, map[string]interface{}{"data": affected})
+	return
+}
+
+// @TODO:ADD delete
 
 /************************
          staff

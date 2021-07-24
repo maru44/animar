@@ -185,8 +185,20 @@ func (interactor *AdminInteractor) DeleteSeries(id int) (rowsAffected int, err e
 
 // company
 
+func (interactor *AdminInteractor) ListCompany() ([]domain.Company, error) {
+	return interactor.companyRepository.List()
+}
+
+func (interactor *AdminInteractor) DetailCompany(engName string) (domain.CompanyDetail, error) {
+	return interactor.companyRepository.DetailByEng(engName)
+}
+
 func (interactor *AdminInteractor) InsertCompany(com domain.CompanyInput) (int, error) {
 	return interactor.companyRepository.Insert(com)
+}
+
+func (interactor *AdminInteractor) UpdateCompany(com domain.CompanyInput, engName string) (int, error) {
+	return interactor.companyRepository.Update(com, engName)
 }
 
 // staff

@@ -151,7 +151,10 @@ type CompanyInput struct {
 }
 
 type AdminCompanyInteractor interface {
+	ListCompany() ([]Company, error)
+	DetailCompany(string) (CompanyDetail, error)
 	InsertCompany(CompanyInput) (int, error)
+	UpdateCompany(CompanyInput, string) (int, error)
 }
 
 /************************

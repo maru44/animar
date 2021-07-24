@@ -57,9 +57,6 @@ func main() {
 	staffController := controllers.NewStaffController(sqlHandler)
 	http.Handle("/staff/", base.BaseMiddleware(http.HandlerFunc(staffController.StaffListView)))
 
-	companyController := controllers.NewCompanyController(sqlHandler)
-	http.Handle("/company/", base.BaseMiddleware(http.HandlerFunc(companyController.ListCompanyView)))
-
 	roleController := controllers.NewRoleController(sqlHandler)
 	http.Handle("/staffrole/", base.BaseMiddleware(http.HandlerFunc(roleController.ListStaffRoleView))) // ?anime=
 
@@ -111,7 +108,9 @@ func main() {
 	http.Handle("/admin/relation/plat/delete/", base.BaseMiddleware(base.DeleteOnlyMiddleware(base.AdminRequiredMiddleware(http.HandlerFunc(adminController.DeleteRelationPlatformView))))) // ?anime=<anime_id>&platform=<platform_id>
 
 	// company
-	http.Handle("/admin/company/post/", base.BaseMiddleware(base.AdminRequiredMiddleware(http.HandlerFunc(adminController.InsertCompanyView))))
+	http.Handle("/admin/company/post/", base.BaseMiddleware(base.AdminRequiredMiddleware(base.PostOnlyMiddleware(http.HandlerFunc(adminController.InsertCompanyView)))))
+	http.Handle("/admin/company/edit/", base.BaseMiddleware(base.AdminRequiredMiddleware(base.PutOnlyMiddleware(http.HandlerFunc(adminController.UpdateCompanyView)))))
+	http.Handle("/admin/company/", base.BaseMiddleware(base.AdminRequiredMiddlewareGet(http.HandlerFunc(adminController.AdminCompanyView))))
 
 	// staff
 	http.Handle("/admin/staff/post/", base.BaseMiddleware(base.AdminRequiredMiddleware(base.PostOnlyMiddleware(http.HandlerFunc(adminController.InsertStaffView)))))

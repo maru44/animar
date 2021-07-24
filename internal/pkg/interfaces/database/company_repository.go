@@ -63,3 +63,18 @@ func (cr *CompanyRepository) Insert(c domain.CompanyInput) (inserted int, err er
 	inserted = int(rawInserted)
 	return
 }
+
+func (cr *CompanyRepository) Update(c domain.CompanyInput, engName string) (affected int, err error) {
+	exe, err := cr.Execute(
+		"UPDATE companies SET name = ?, eng_name = ?, official_url = ?, explanation = ?, twitter_account = ? "+
+			"WHERE eng_name = ?",
+		c.Name, c.EngName, c.OfficialUrl, c.Explanation, c.TwitterAccount, engName,
+	)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	rawAffected, _ := exe.RowsAffected()
+	affected = int(rawAffected)
+	return
+}

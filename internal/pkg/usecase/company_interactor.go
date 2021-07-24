@@ -6,12 +6,6 @@ type CompanyInteractor struct {
 	repo CompanyRepository
 }
 
-func NewCompanyInteractor(cor CompanyRepository) domain.CompanyInteractor {
-	return &CompanyInteractor{
-		repo: cor,
-	}
-}
-
 /************************
         repository
 ************************/
@@ -21,12 +15,9 @@ type CompanyRepository interface {
 	DetailByEng(string) (domain.CompanyDetail, error)
 	// admin
 	Insert(domain.CompanyInput) (int, error)
+	Update(domain.CompanyInput, string) (int, error)
 }
 
 /**********************
    interactor methods
 ***********************/
-
-func (ci *CompanyInteractor) ListCompany() ([]domain.Company, error) {
-	return ci.repo.List()
-}
