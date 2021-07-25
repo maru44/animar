@@ -57,7 +57,7 @@ func ErrorLog(err error, mode string) {
 	if tools.IsProductionEnv() {
 		today := time.Now().Format("20060102")
 		// @TODO:EDIT err --> _
-		logFile, _ := os.OpenFile(fmt.Sprintf("%s/log_%s.log", configs.LogDirectory, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+		logFile, _ := os.OpenFile(fmt.Sprintf("%s/log_%s.log", configs.ErrorLogDirectory, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 		// jsonFile, err := os.OpenFile(fmt.Sprint())
 		defer logFile.Close()
 
