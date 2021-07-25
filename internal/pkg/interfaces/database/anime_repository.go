@@ -57,13 +57,15 @@ func (repo *AnimeRepository) ListOnAirAll() (animes domain.TAnimes, err error) {
 
 func (repo *AnimeRepository) ListMinimumSearch(title string) (animes domain.TAnimeMinimums, err error) {
 	rows, err := repo.Query(
-		"SELECT DISTINCT id, slug, title from animes where title like " +
-			"'%" + title + "%' " +
-			"OR kana like " +
-			"'%" + title + "%' " +
-			"OR eng_name like " +
-			"'%" + title + "%' " +
-			"limit 12",
+		"SELECT DISTINCT id, slug, title FROM animes "+
+			"WHERE title LIKE "+
+			"CONCAT('%', ?, '%') "+
+			"OR kana LIKE "+
+			"CONCAT('%', ?, '%') "+
+			"OR eng_name LIKE "+
+			"CONCAT('%', ?, '%') "+
+			"LIMIT 12",
+		title, title, title,
 	)
 	if err != nil {
 		tools.ErrorLog(err)
@@ -84,13 +86,17 @@ func (repo *AnimeRepository) ListMinimumSearch(title string) (animes domain.TAni
 
 func (repo *AnimeRepository) ListSearch(title string) (animes domain.TAnimes, err error) {
 	rows, err := repo.Query(
-		"SELECT DISTINCT id, slug, title from animes where title like " +
-			"'%" + title + "%' " +
-			"OR kana like " +
-			"'%" + title + "%' " +
-			"OR eng_name like " +
-			"'%" + title + "%' " +
-			"limit 12",
+		"SELECT DISTINCT id, slug, title, abbreviation, thumb_url, copyright, "+
+			"description, state, series_id, count_episodes, created_at, updated_at "+
+			"FROM animes "+
+			"WHERE title LIKE "+
+			"CONCAT('%', ?, '%') "+
+			"OR kana LIKE "+
+			"CONCAT('%', ?, '%') "+
+			"OR eng_name LIKE "+
+			"CONCAT('%', ?, '%') "+
+			"ORDER BY created_at DESC",
+		title, title, title,
 	)
 	if err != nil {
 		tools.ErrorLog(err)
