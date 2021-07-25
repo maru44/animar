@@ -2,8 +2,6 @@ package tools
 
 import (
 	"animar/v1/configs"
-	"fmt"
-	"log"
 	"math/rand"
 	"os"
 	"strings"
@@ -26,14 +24,6 @@ func ConvertUintsToInts(lst []uint8) []int {
 		ret = append(ret, i)
 	}
 	return ret
-}
-
-func ErrorLog(err error) {
-	if IsProductionEnv() {
-		log.Println(err)
-	} else {
-		fmt.Println(err)
-	}
 }
 
 func IsProductionEnv() bool {

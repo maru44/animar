@@ -3,7 +3,6 @@ package controllers
 import (
 	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/interfaces/database"
-	"animar/v1/internal/pkg/tools/tools"
 	"animar/v1/internal/pkg/usecase"
 	"net/http"
 	"strconv"
@@ -83,7 +82,7 @@ func (controller *AnimeController) SearchAnimeMinimumView(w http.ResponseWriter,
 
 	animes, err := controller.interactor.AnimeSearchMinimum(title)
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 	}
 	response(w, err, map[string]interface{}{"data": animes})
 	return
@@ -92,7 +91,7 @@ func (controller *AnimeController) SearchAnimeMinimumView(w http.ResponseWriter,
 func (controller *AnimeController) AnimeMinimumsView(w http.ResponseWriter, r *http.Request) {
 	animes, err := controller.interactor.AnimeMinimums()
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 	}
 	response(w, err, map[string]interface{}{"data": animes})
 	return

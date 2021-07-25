@@ -5,7 +5,6 @@ import (
 	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/interfaces/fires"
 	"animar/v1/internal/pkg/interfaces/s3"
-	"animar/v1/internal/pkg/tools/tools"
 	"animar/v1/internal/pkg/usecase"
 	"bytes"
 	"encoding/json"
@@ -158,7 +157,7 @@ func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 	}
 	defer resp.Body.Close()
 

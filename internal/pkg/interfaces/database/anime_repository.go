@@ -2,7 +2,6 @@ package database
 
 import (
 	"animar/v1/internal/pkg/domain"
-	"animar/v1/internal/pkg/tools/tools"
 )
 
 type AnimeRepository struct {
@@ -17,7 +16,7 @@ func (repo *AnimeRepository) ListAll() (animes domain.TAnimes, err error) {
 	defer rows.Close()
 
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 		return
 	}
 	for rows.Next() {
@@ -27,7 +26,7 @@ func (repo *AnimeRepository) ListAll() (animes domain.TAnimes, err error) {
 			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			tools.ErrorLog(err)
+			domain.LogWriter(err.Error())
 		}
 		animes = append(animes, a)
 	}
@@ -48,7 +47,7 @@ func (repo *AnimeRepository) ListOnAirAll() (animes domain.TAnimes, err error) {
 			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			tools.ErrorLog(err)
+			domain.LogWriter(err.Error())
 		}
 		animes = append(animes, a)
 	}
@@ -68,7 +67,7 @@ func (repo *AnimeRepository) ListMinimumSearch(title string) (animes domain.TAni
 		title, title, title,
 	)
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 		return
 	}
 	for rows.Next() {
@@ -77,7 +76,7 @@ func (repo *AnimeRepository) ListMinimumSearch(title string) (animes domain.TAni
 			&a.ID, &a.Slug, &a.Title,
 		)
 		if err != nil {
-			tools.ErrorLog(err)
+			domain.LogWriter(err.Error())
 		}
 		animes = append(animes, a)
 	}
@@ -95,11 +94,11 @@ func (repo *AnimeRepository) ListSearch(title string) (animes domain.TAnimes, er
 			"CONCAT('%', ?, '%') "+
 			"OR eng_name LIKE "+
 			"CONCAT('%', ?, '%') "+
-			"ORDER BY created_at DESC",
+			"ORDER BY created_at DE",
 		title, title, title,
 	)
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 		return
 	}
 	for rows.Next() {
@@ -109,7 +108,7 @@ func (repo *AnimeRepository) ListSearch(title string) (animes domain.TAnimes, er
 			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			tools.ErrorLog(err)
+			domain.LogWriter(err.Error())
 		}
 		animes = append(animes, a)
 	}
@@ -128,7 +127,7 @@ func (repo *AnimeRepository) ListBySeason(year string, season string) (animes do
 			"WHERE seasons.year = ? AND seasons.season = ?", year, seasonJp,
 	)
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 		return
 	}
 	for rows.Next() {
@@ -138,7 +137,7 @@ func (repo *AnimeRepository) ListBySeason(year string, season string) (animes do
 			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			tools.ErrorLog(err)
+			domain.LogWriter(err.Error())
 		}
 		animes = append(animes, a)
 	}
@@ -156,7 +155,7 @@ func (repo *AnimeRepository) ListBySeries(id int) (animes []domain.TAnimeWithSer
 	)
 	defer rows.Close()
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 		return
 	}
 	for rows.Next() {
@@ -168,7 +167,7 @@ func (repo *AnimeRepository) ListBySeries(id int) (animes []domain.TAnimeWithSer
 			&a.CreatedAt, &a.UpdatedAt, &a.SeriesName,
 		)
 		if err != nil {
-			tools.ErrorLog(err)
+			domain.LogWriter(err.Error())
 			return
 		}
 		animes = append(animes, a)
@@ -187,7 +186,7 @@ func (repo *AnimeRepository) ListByCompany(engName string) (animes domain.TAnime
 	)
 	defer rows.Close()
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 		return
 	}
 	for rows.Next() {
@@ -199,7 +198,7 @@ func (repo *AnimeRepository) ListByCompany(engName string) (animes domain.TAnime
 			&a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			tools.ErrorLog(err)
+			domain.LogWriter(err.Error())
 			return
 		}
 		animes = append(animes, a)
@@ -213,14 +212,14 @@ func (repo *AnimeRepository) ListMinimum() (animes domain.TAnimeMinimums, err er
 	)
 	defer rows.Close()
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 		return
 	}
 	for rows.Next() {
 		var a domain.TAnimeMinimum
 		err = rows.Scan(&a.ID, &a.Slug, &a.Title)
 		if err != nil {
-			tools.ErrorLog(err)
+			domain.LogWriter(err.Error())
 			return
 		}
 		animes = append(animes, a)
@@ -240,7 +239,7 @@ func (repo *AnimeRepository) FindById(id int) (a domain.TAnime, err error) {
 	)
 	defer rows.Close()
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 		return
 	}
 	rows.Next()
@@ -251,7 +250,7 @@ func (repo *AnimeRepository) FindById(id int) (a domain.TAnime, err error) {
 		&a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 	)
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 		return
 	}
 	return
@@ -269,7 +268,7 @@ func (repo *AnimeRepository) FindBySlug(slug string) (a domain.TAnimeWithSeries,
 	)
 	defer rows.Close()
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 		return
 	}
 	rows.Next()
@@ -283,7 +282,7 @@ func (repo *AnimeRepository) FindBySlug(slug string) (a domain.TAnimeWithSeries,
 	)
 	if err != nil {
 		err = domain.ErrNotFound
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 		return
 	}
 	return
@@ -301,20 +300,20 @@ func (repo *AnimeRepository) ReviewFilterByAnime(animeId int, userId string) (re
 	defer rows.Close()
 
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 		return
 	}
 	for rows.Next() {
 		var r domain.TReview
 		err = rows.Scan(&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt)
 		if err != nil {
-			tools.ErrorLog(err)
+			domain.LogWriter(err.Error())
 			return
 		}
 		reviews = append(reviews, r)
 	}
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 		return
 	}
 	return

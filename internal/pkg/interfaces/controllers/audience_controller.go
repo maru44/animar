@@ -3,7 +3,6 @@ package controllers
 import (
 	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/interfaces/database"
-	"animar/v1/internal/pkg/tools/tools"
 	"animar/v1/internal/pkg/usecase"
 	"encoding/json"
 	"net/http"
@@ -46,7 +45,7 @@ func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, 
 	json.NewDecoder(r.Body).Decode(&p)
 	_, err := controller.interactor.UpsertAudience(p, userId)
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 	}
 	response(w, err, map[string]interface{}{"data": p.State})
 	return

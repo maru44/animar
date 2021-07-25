@@ -2,7 +2,6 @@ package database
 
 import (
 	"animar/v1/internal/pkg/domain"
-	"animar/v1/internal/pkg/tools/tools"
 )
 
 type SeasonRepository struct {
@@ -17,7 +16,7 @@ func (repo *SeasonRepository) FilterByAnimeId(animeId int) (seasons []domain.TSe
 	)
 	defer rows.Close()
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 		return
 	}
 	for rows.Next() {
@@ -27,7 +26,7 @@ func (repo *SeasonRepository) FilterByAnimeId(animeId int) (seasons []domain.TSe
 		)
 		s.SeasonEng = domain.SeasonDictReverse[s.Season]
 		if err != nil {
-			tools.ErrorLog(err)
+			domain.LogWriter(err.Error())
 		}
 		seasons = append(seasons, s)
 	}

@@ -3,7 +3,6 @@ package controllers
 import (
 	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/interfaces/database"
-	"animar/v1/internal/pkg/tools/tools"
 	"animar/v1/internal/pkg/usecase"
 	"net/http"
 	"strconv"
@@ -30,7 +29,7 @@ func (controller *SeasonController) SeasonByAnimeIdView(w http.ResponseWriter, r
 
 	seasons, err := controller.interactor.RelationSeasonByAnime(id)
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 	}
 	response(w, err, map[string]interface{}{"data": seasons})
 }

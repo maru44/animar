@@ -2,7 +2,6 @@ package database
 
 import (
 	"animar/v1/internal/pkg/domain"
-	"animar/v1/internal/pkg/tools/tools"
 )
 
 type PlatformRepository struct {
@@ -18,7 +17,7 @@ func (repo *PlatformRepository) FilterByAnime(animeId int) (platforms domain.TRe
 	defer rows.Close()
 
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 		return
 	}
 	for rows.Next() {
@@ -28,7 +27,7 @@ func (repo *PlatformRepository) FilterByAnime(animeId int) (platforms domain.TRe
 			&p.CreatedAt, &p.UpdatedAt, &p.PlatName,
 		)
 		if err != nil {
-			tools.ErrorLog(err)
+			domain.LogWriter(err.Error())
 			return
 		}
 		platforms = append(platforms, p)

@@ -2,8 +2,8 @@ package infrastructure
 
 import (
 	"animar/v1/configs"
+	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/interfaces/fires"
-	"animar/v1/internal/pkg/tools/tools"
 	"context"
 
 	firebase "firebase.google.com/go/v4"
@@ -68,7 +68,7 @@ func (fc *FirebaseClient) VerifyIDToken(ctx context.Context, idToken string) (*a
 	token := new(FirebaseToken)
 	realToken, err := fc.Client.VerifyIDToken(ctx, idToken)
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 	}
 	token.Token = realToken
 	// return token, err

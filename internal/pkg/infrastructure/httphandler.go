@@ -1,8 +1,8 @@
 package infrastructure
 
 import (
+	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/interfaces/httphandle"
-	"animar/v1/internal/pkg/tools/tools"
 	"bytes"
 	"context"
 	"io"
@@ -42,7 +42,7 @@ func NewHttpClient() httphandle.Client {
 func NewHttpRequest(method string, url string, b *bytes.Buffer) httphandle.Request {
 	req, err := http.NewRequest(method, url, b)
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 	}
 	request := new(HttpRequest)
 	request.Request = req

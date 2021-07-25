@@ -3,7 +3,6 @@ package controllers
 import (
 	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/interfaces/database"
-	"animar/v1/internal/pkg/tools/tools"
 	"animar/v1/internal/pkg/usecase"
 	"net/http"
 	"strconv"
@@ -30,7 +29,7 @@ func (controller *PlatformController) RelationPlatformByAnimeView(w http.Respons
 
 	platforms, err := controller.interactor.RelationPlatformByAnime(id)
 	if err != nil {
-		tools.ErrorLog(err)
+		domain.LogWriter(err.Error())
 	}
 	response(w, err, map[string]interface{}{"data": platforms})
 	return
