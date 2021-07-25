@@ -45,7 +45,7 @@ func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, 
 	json.NewDecoder(r.Body).Decode(&p)
 	_, err := controller.interactor.UpsertAudience(p, userId)
 	if err != nil {
-		domain.LogWriter(err.Error())
+		domain.ErrorLog(err, "")
 	}
 	response(w, err, map[string]interface{}{"data": p.State})
 	return

@@ -32,7 +32,7 @@ type SqlTransaction struct {
 func NewSqlHandler() database.SqlHandler {
 	conn, err := sql.Open("mysql", fmt.Sprintf("%s:%s%s/%s", configs.MysqlUser, configs.MysqlPassword, configs.MysqlHost, configs.MysqlDataBase))
 	if err != nil {
-		domain.LogWriter(err.Error())
+		domain.ErrorLog(err, domain.LogAlert)
 	}
 	sqlHandler := new(SqlHandler)
 	sqlHandler.Conn = conn
@@ -62,12 +62,12 @@ func (handler *SqlHandler) Execute(statement string, args ...interface{}) (datab
 	stmt, err := handler.Conn.Prepare(statement)
 	defer stmt.Close()
 	if err != nil {
-		domain.LogWriter(err.Error())
+		domain.ErrorLog(err, domain.LogCritical)
 		return res, err
 	}
 	exe, err := stmt.Exec(args...)
 	if err != nil {
-		domain.LogWriter(err.Error())
+		domain.ErrorLog(err, "")
 	}
 	res.Result = exe
 	return res, nil

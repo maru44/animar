@@ -29,7 +29,7 @@ func (controller *SeasonController) SeasonByAnimeIdView(w http.ResponseWriter, r
 
 	seasons, err := controller.interactor.RelationSeasonByAnime(id)
 	if err != nil {
-		domain.LogWriter(err.Error())
+		domain.ErrorLog(err, "")
 	}
 	response(w, err, map[string]interface{}{"data": seasons})
 }

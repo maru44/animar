@@ -17,7 +17,7 @@ func (repo *PlatformRepository) FilterByAnime(animeId int) (platforms domain.TRe
 	defer rows.Close()
 
 	if err != nil {
-		domain.LogWriter(err.Error())
+		domain.ErrorLog(err, "")
 		return
 	}
 	for rows.Next() {
@@ -27,7 +27,7 @@ func (repo *PlatformRepository) FilterByAnime(animeId int) (platforms domain.TRe
 			&p.CreatedAt, &p.UpdatedAt, &p.PlatName,
 		)
 		if err != nil {
-			domain.LogWriter(err.Error())
+			domain.ErrorLog(err, "")
 			return
 		}
 		platforms = append(platforms, p)

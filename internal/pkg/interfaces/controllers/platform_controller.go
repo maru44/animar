@@ -29,7 +29,7 @@ func (controller *PlatformController) RelationPlatformByAnimeView(w http.Respons
 
 	platforms, err := controller.interactor.RelationPlatformByAnime(id)
 	if err != nil {
-		domain.LogWriter(err.Error())
+		domain.ErrorLog(err, "")
 	}
 	response(w, err, map[string]interface{}{"data": platforms})
 	return

@@ -68,7 +68,7 @@ func (fc *FirebaseClient) VerifyIDToken(ctx context.Context, idToken string) (*a
 	token := new(FirebaseToken)
 	realToken, err := fc.Client.VerifyIDToken(ctx, idToken)
 	if err != nil {
-		domain.LogWriter(err.Error())
+		domain.ErrorLog(err, "")
 	}
 	token.Token = realToken
 	// return token, err

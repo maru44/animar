@@ -42,7 +42,7 @@ func NewHttpClient() httphandle.Client {
 func NewHttpRequest(method string, url string, b *bytes.Buffer) httphandle.Request {
 	req, err := http.NewRequest(method, url, b)
 	if err != nil {
-		domain.LogWriter(err.Error())
+		domain.ErrorLog(err, "")
 	}
 	request := new(HttpRequest)
 	request.Request = req
