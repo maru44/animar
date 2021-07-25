@@ -94,7 +94,7 @@ func (repo *AnimeRepository) ListSearch(title string) (animes domain.TAnimes, er
 			"CONCAT('%', ?, '%') "+
 			"OR eng_name LIKE "+
 			"CONCAT('%', ?, '%') "+
-			"ORDER BY created_at DE",
+			"ORDER BY created_at DESC",
 		title, title, title,
 	)
 	if err != nil {
