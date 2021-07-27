@@ -3,6 +3,7 @@ package domain
 import (
 	"animar/v1/configs"
 	"animar/v1/internal/pkg/tools/tools"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -33,6 +34,13 @@ var (
 	LogDebug = "DBG"
 )
 
+type SError struct {
+	Level   string    `json:"level"`
+	Content string    `json:"content"`
+	Place   string    `json:"place"`
+	Time    time.Time `json:"time"`
+}
+
 // @TODO:ADD mode to args
 func LogWriter(str string) {
 	if tools.IsProductionEnv() {
@@ -56,9 +64,7 @@ func LogWriter(str string) {
 func ErrorLog(err error, mode string) {
 	if tools.IsProductionEnv() {
 		today := time.Now().Format("20060102")
-		// @TODO:EDIT err --> _
 		logFile, _ := os.OpenFile(fmt.Sprintf("%s/log_%s.log", configs.ErrorLogDirectory, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-		// jsonFile, err := os.OpenFile(fmt.Sprint())
 		defer logFile.Close()
 
 		// get called place
@@ -68,15 +74,46 @@ func ErrorLog(err error, mode string) {
 		log.SetFlags(log.LstdFlags)
 
 		// set prefix
+		var level string
 		switch mode {
 		case "":
-			log.SetPrefix(LogInfo)
+			level = LogInfo
+			// log.SetPrefix(LogInfo)
 		default:
-			log.SetPrefix(mode)
+			level = mode
+			// log.SetPrefix(mode)
 		}
+		log.SetPrefix(level)
 
 		log.Println(fmt.Sprintf("%s:%d: %v", file, line, err))
+
+		/***************************
+		         json log
+		***************************/
+		e := &SError{
+			Level:   level,
+			Content: err.Error(),
+			Place:   fmt.Sprintf("%s:%d", file, line),
+			Time:    time.Now(),
+		}
+		writeJson(fmt.Sprintf("%s/log_%s.json", configs.ErrorLogDirectory, today), e)
 	} else {
 		log.Print(err)
+	}
+}
+
+func writeJson(fileName string, object interface{}) {
+	file, _ := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0600)
+	defer file.Close()
+	fi, _ := file.Stat()
+	leng := fi.Size()
+
+	json_, _ := json.Marshal(object)
+
+	if leng == 0 {
+		file.Write([]byte(fmt.Sprintf(`[%s]`, json_)))
+	} else {
+		file.WriteAt([]byte(fmt.Sprintf(`,%s]`, json_)), leng-1)
+
 	}
 }
