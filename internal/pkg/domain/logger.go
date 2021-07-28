@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var (
+const (
 	/******************
 	    probrem
 	******************/
@@ -41,26 +41,6 @@ type SError struct {
 	Time    time.Time `json:"time"`
 }
 
-// @TODO:ADD mode to args
-func LogWriter(str string) {
-	if tools.IsProductionEnv() {
-		today := time.Now().Format("20060102")
-		// @TODO:EDIT err --> _
-		logFile, _ := os.OpenFile(fmt.Sprintf("%s/log_%s.log", configs.LogDirectory, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-		// jsonFile, err := os.OpenFile(fmt.Sprint())
-		defer logFile.Close()
-
-		// get called place
-		_, file, line, _ := runtime.Caller(1)
-
-		log.SetOutput(logFile)
-		log.SetFlags(log.LstdFlags)
-		log.Println(fmt.Sprintf("%s:%d: %s", file, line, str))
-	} else {
-		log.Print(str)
-	}
-}
-
 func ErrorLog(err error, mode string) {
 	if tools.IsProductionEnv() {
 		today := time.Now().Format("20060102")
@@ -78,10 +58,8 @@ func ErrorLog(err error, mode string) {
 		switch mode {
 		case "":
 			level = LogInfo
-			// log.SetPrefix(LogInfo)
 		default:
 			level = mode
-			// log.SetPrefix(mode)
 		}
 		log.SetPrefix(level)
 
@@ -96,13 +74,13 @@ func ErrorLog(err error, mode string) {
 			Place:   fmt.Sprintf("%s:%d", file, line),
 			Time:    time.Now(),
 		}
-		writeJson(fmt.Sprintf("%s/log_%s.json", configs.ErrorLogDirectory, today), e)
+		writeJsonFile(fmt.Sprintf("%s/log_%s.json", configs.ErrorLogDirectory, today), e)
 	} else {
 		log.Print(err)
 	}
 }
 
-func writeJson(fileName string, object interface{}) {
+func writeJsonFile(fileName string, object interface{}) {
 	file, _ := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0600)
 	defer file.Close()
 	fi, _ := file.Stat()
@@ -114,6 +92,5 @@ func writeJson(fileName string, object interface{}) {
 		file.Write([]byte(fmt.Sprintf(`[%s]`, json_)))
 	} else {
 		file.WriteAt([]byte(fmt.Sprintf(`,%s]`, json_)), leng-1)
-
 	}
 }
