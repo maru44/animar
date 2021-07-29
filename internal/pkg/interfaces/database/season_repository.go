@@ -16,7 +16,8 @@ func (repo *SeasonRepository) FilterByAnimeId(animeId int) (seasons []domain.TSe
 	)
 	defer rows.Close()
 	if err != nil {
-		domain.ErrorLog(err, "")
+		lg := domain.NewErrorLog(err.Error(), "")
+		lg.Logging()
 		return
 	}
 	for rows.Next() {
@@ -26,7 +27,8 @@ func (repo *SeasonRepository) FilterByAnimeId(animeId int) (seasons []domain.TSe
 		)
 		s.SeasonEng = domain.SeasonDictReverse[s.Season]
 		if err != nil {
-			domain.ErrorLog(err, "")
+			lg := domain.NewErrorLog(err.Error(), "")
+			lg.Logging()
 		}
 		seasons = append(seasons, s)
 	}
