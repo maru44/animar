@@ -90,9 +90,6 @@ func (a *LogA) Logging(r *http.Request) {
 
 func (a *LogA) write(r *http.Request) {
 	today := time.Now().Format("20060102")
-	// logFile, _ := os.OpenFile(fmt.Sprintf("%s/%s_%s.log", configs.ErrorLogDirectory, l.Kind, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-	logFile, _ := os.OpenFile(fmt.Sprintf("%s/log_%s.log", configs.ErrorLogDirectory, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-	defer logFile.Close()
 
 	a.Time = time.Now()
 	a.Address = r.RemoteAddr
@@ -104,9 +101,6 @@ func (a *LogA) write(r *http.Request) {
 
 func (e *LogE) write(err error, level string) {
 	today := time.Now().Format("20060102")
-	// logFile, _ := os.OpenFile(fmt.Sprintf("%s/%s_%s.log", configs.ErrorLogDirectory, l.Kind, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-	logFile, _ := os.OpenFile(fmt.Sprintf("%s/log_%s.log", configs.ErrorLogDirectory, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-	defer logFile.Close()
 
 	var lev string
 	if level == "" {
