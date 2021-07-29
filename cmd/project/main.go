@@ -17,6 +17,10 @@ func main() {
 	// })
 
 	router := http.NewServeMux()
+	lg := domain.NewAccessLog()
+
+	// lgs := domain.NewAccessLog("START", "START", "START")
+	// lgs.Logging()
 
 	sqlHandler := infrastructure.NewSqlHandler()
 	uploader := infrastructure.NewS3Uploader()
@@ -124,14 +128,14 @@ func main() {
 	router.Handle("/admin/staffrole/post/", base.BaseMiddleware(base.AdminRequiredMiddleware(base.PostOnlyMiddleware(http.HandlerFunc(adminController.InsertStaffRoleView)))))
 
 	if tools.IsProductionEnv() {
-		if err := http.ListenAndServe(":8000", infrastructure.Log(router)); err != nil {
-			lg := domain.NewErrorLog(err.Error(), domain.LogAlert)
-			lg.Logging()
+		if err := http.ListenAndServe(":8000", infrastructure.Log(router, lg)); err != nil {
+			lge := domain.NewErrorLog()
+			lge.Logging(err, domain.LogAlert)
 		}
 	} else {
-		if err := http.ListenAndServe(":8000", infrastructure.Log(router)); err != nil {
-			lg := domain.NewErrorLog(err.Error(), domain.LogAlert)
-			lg.Logging()
+		if err := http.ListenAndServe(":8000", infrastructure.Log(router, lg)); err != nil {
+			lge := domain.NewErrorLog()
+			lge.Logging(err, domain.LogAlert)
 		}
 	}
 

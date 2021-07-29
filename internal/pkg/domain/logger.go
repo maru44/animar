@@ -5,6 +5,7 @@ import (
 	"animar/v1/internal/pkg/tools/tools"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"runtime"
 	"time"
@@ -52,21 +53,61 @@ type LogA struct {
 	Path    string `json:"path"`
 }
 
-func NewAccessLog(addr, method, path string) *LogA {
+func NewAccessLog() *LogA {
+	// startのlogをここで作る
 	alog := &LogA{
 		Log: Log{
 			Kind: "access",
-			Time: time.Now(),
 		},
-		Address: addr,
-		Method:  method,
-		Path:    path,
 	}
 	return alog
 }
 
-func NewErrorLog(content, level string) *LogE {
-	_, file, line, _ := runtime.Caller(1)
+func NewErrorLog() *LogE {
+	eLog := &LogE{
+		Log: Log{
+			Kind: "error",
+		},
+	}
+	return eLog
+}
+
+func (e *LogE) Logging(err error, level string) {
+	if tools.IsProductionEnv() {
+		e.write(err, level)
+	} else {
+		e.write(err, level)
+	}
+}
+
+func (a *LogA) Logging(r *http.Request) {
+	if tools.IsProductionEnv() {
+		a.write(r)
+	} else {
+		a.write(r)
+	}
+}
+
+func (a *LogA) write(r *http.Request) {
+	today := time.Now().Format("20060102")
+	// logFile, _ := os.OpenFile(fmt.Sprintf("%s/%s_%s.log", configs.ErrorLogDirectory, l.Kind, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	logFile, _ := os.OpenFile(fmt.Sprintf("%s/log_%s.log", configs.ErrorLogDirectory, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	defer logFile.Close()
+
+	a.Time = time.Now()
+	a.Address = r.RemoteAddr
+	a.Method = r.Method
+	a.Path = r.URL.Path
+
+	writeJsonFile(fmt.Sprintf("%s/log_%s.json", configs.ErrorLogDirectory, today), a)
+}
+
+func (e *LogE) write(err error, level string) {
+	today := time.Now().Format("20060102")
+	// logFile, _ := os.OpenFile(fmt.Sprintf("%s/%s_%s.log", configs.ErrorLogDirectory, l.Kind, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	logFile, _ := os.OpenFile(fmt.Sprintf("%s/log_%s.log", configs.ErrorLogDirectory, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	defer logFile.Close()
+
 	var lev string
 	if level == "" {
 		lev = LogWarn
@@ -74,48 +115,13 @@ func NewErrorLog(content, level string) *LogE {
 		lev = level
 	}
 
-	eLog := &LogE{
-		Log: Log{
-			Kind: "error",
-			Time: time.Now(),
-		},
-		Level:   lev,
-		Content: content,
-		Place:   fmt.Sprintf("%s:%d", file, line),
-	}
-	return eLog
-}
+	e.Level = lev
+	e.Content = err.Error()
 
-func (e *LogE) Logging() {
-	if tools.IsProductionEnv() {
-		e.write()
-	} else {
-		e.write()
-	}
-}
-
-func (a *LogA) Logging() {
-	if tools.IsProductionEnv() {
-		a.write()
-	} else {
-		a.write()
-	}
-}
-
-func (a *LogA) write() {
-	today := time.Now().Format("20060102")
-	// logFile, _ := os.OpenFile(fmt.Sprintf("%s/%s_%s.log", configs.ErrorLogDirectory, l.Kind, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-	logFile, _ := os.OpenFile(fmt.Sprintf("%s/log_%s.log", configs.ErrorLogDirectory, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-	defer logFile.Close()
-
-	writeJsonFile(fmt.Sprintf("%s/log_%s.json", configs.ErrorLogDirectory, today), a)
-}
-
-func (e *LogE) write() {
-	today := time.Now().Format("20060102")
-	// logFile, _ := os.OpenFile(fmt.Sprintf("%s/%s_%s.log", configs.ErrorLogDirectory, l.Kind, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-	logFile, _ := os.OpenFile(fmt.Sprintf("%s/log_%s.log", configs.ErrorLogDirectory, today), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-	defer logFile.Close()
+	// auto
+	_, file, line, _ := runtime.Caller(2)
+	e.Place = fmt.Sprintf("%s:%d", file, line)
+	e.Time = time.Now()
 
 	writeJsonFile(fmt.Sprintf("%s/log_%s.json", configs.ErrorLogDirectory, today), e)
 }

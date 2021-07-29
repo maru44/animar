@@ -42,8 +42,8 @@ func NewHttpClient() httphandle.Client {
 func NewHttpRequest(method string, url string, b *bytes.Buffer) httphandle.Request {
 	req, err := http.NewRequest(method, url, b)
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 	}
 	request := new(HttpRequest)
 	request.Request = req
@@ -113,13 +113,10 @@ func (rw HttpResponseWriter) WriteHeader(status int) {
    http logger
 *******************/
 
-func Log(h http.Handler) http.Handler {
+func Log(h http.Handler, lg *domain.LogA) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rAddress := r.RemoteAddr
-		method := r.Method
-		path := r.URL.Path
-		lg := domain.NewAccessLog(rAddress, method, path)
-		lg.Logging()
+		// lg := domain.NewAccessLog()
+		lg.Logging(r)
 		// log.Printf("Access: %s %s %s", rAddress, method, path)
 		h.ServeHTTP(w, r)
 	})

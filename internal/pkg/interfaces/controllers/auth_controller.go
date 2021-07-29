@@ -157,8 +157,8 @@ func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 	}
 	defer resp.Body.Close()
 

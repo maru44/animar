@@ -17,16 +17,16 @@ func (repo *ReviewRepository) FindAll() (reviewIds []int, err error) {
 	defer rows.Close()
 
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 		return
 	}
 	for rows.Next() {
 		var id int
 		err = rows.Scan(&id)
 		if err != nil {
-			lg := domain.NewErrorLog(err.Error(), "")
-			lg.Logging()
+			lg := domain.NewErrorLog()
+			lg.Logging(err, "")
 			return
 		}
 		reviewIds = append(reviewIds, id)
@@ -43,8 +43,8 @@ func (repo *ReviewRepository) FindById(id int) (r domain.ReviewWithAnimeSlug, er
 	defer rows.Close()
 
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 		return
 	}
 	rows.Next()
@@ -53,8 +53,8 @@ func (repo *ReviewRepository) FindById(id int) (r domain.ReviewWithAnimeSlug, er
 		&r.AnimeSlug, &r.AnimeTitle,
 	)
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 		return
 	}
 	return
@@ -67,8 +67,8 @@ func (repo *ReviewRepository) FindByAnimeAndUser(animeId int, userId string) (r 
 	defer rows.Close()
 
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 		return
 	}
 	rows.Next()
@@ -76,8 +76,8 @@ func (repo *ReviewRepository) FindByAnimeAndUser(animeId int, userId string) (r 
 		&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt,
 	)
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 		return
 	}
 	return
@@ -91,23 +91,23 @@ func (repo *ReviewRepository) FilterByAnime(animeId int, userId string) (reviews
 	defer rows.Close()
 
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 		return
 	}
 	for rows.Next() {
 		var r domain.TReview
 		err = rows.Scan(&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt)
 		if err != nil {
-			lg := domain.NewErrorLog(err.Error(), "")
-			lg.Logging()
+			lg := domain.NewErrorLog()
+			lg.Logging(err, "")
 			return
 		}
 		reviews = append(reviews, r)
 	}
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 		return
 	}
 	return
@@ -121,8 +121,8 @@ func (repo *ReviewRepository) FilterByUser(userId string) (reviews domain.TRevie
 	defer rows.Close()
 
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 		return
 	}
 	for rows.Next() {
@@ -132,15 +132,15 @@ func (repo *ReviewRepository) FilterByUser(userId string) (reviews domain.TRevie
 			&r.CreatedAt, &r.UpdatedAt, &r.Title, &r.Slug, &r.AnimeContent, &r.AState,
 		)
 		if err != nil {
-			lg := domain.NewErrorLog(err.Error(), "")
-			lg.Logging()
+			lg := domain.NewErrorLog()
+			lg.Logging(err, "")
 			return
 		}
 		reviews = append(reviews, r)
 	}
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 		return
 	}
 	return
@@ -152,14 +152,14 @@ func (repo *ReviewRepository) InsertContent(r domain.TReviewInput, userId string
 		r.AnimeId, r.Content, userId,
 	)
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 		return
 	}
 	_, err = exe.LastInsertId()
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 		return
 	}
 	content = r.Content
@@ -174,8 +174,8 @@ func (repo *ReviewRepository) UpsertContent(r domain.TReviewInput, userId string
 		)
 		content = r.Content
 		if err != nil {
-			lg := domain.NewErrorLog(err.Error(), "")
-			lg.Logging()
+			lg := domain.NewErrorLog()
+			lg.Logging(err, "")
 			return
 		}
 		return
@@ -189,14 +189,14 @@ func (repo *ReviewRepository) InsertRating(r domain.TReviewInput, userId string)
 		r.AnimeId, r.Rating, userId,
 	)
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 		return
 	}
 	_, err = exe.LastInsertId()
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 		return
 	}
 	rating = r.Rating
@@ -210,8 +210,8 @@ func (repo *ReviewRepository) UpsertRating(r domain.TReviewInput, userId string)
 			"UPDATE reviews SET rating = ? WHERE id = ?", tools.NewNullInt(r.Rating), review.GetId(),
 		)
 		if err != nil {
-			lg := domain.NewErrorLog(err.Error(), "")
-			lg.Logging()
+			lg := domain.NewErrorLog()
+			lg.Logging(err, "")
 			return
 		}
 		rating = r.Rating
@@ -224,8 +224,8 @@ func (repo *ReviewRepository) GetRatingAverage(animeId int) (rating string, err 
 	rows, err := repo.Query("SELECT COALESCE(AVG(rating), 0) FROM reviews WHERE anime_id = ?", animeId)
 	defer rows.Close()
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 		return
 	}
 	var avg float32

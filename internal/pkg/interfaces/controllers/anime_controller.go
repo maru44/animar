@@ -82,8 +82,8 @@ func (controller *AnimeController) SearchAnimeMinimumView(w http.ResponseWriter,
 
 	animes, err := controller.interactor.AnimeSearchMinimum(title)
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 	}
 	response(w, err, map[string]interface{}{"data": animes})
 	return
@@ -92,8 +92,8 @@ func (controller *AnimeController) SearchAnimeMinimumView(w http.ResponseWriter,
 func (controller *AnimeController) AnimeMinimumsView(w http.ResponseWriter, r *http.Request) {
 	animes, err := controller.interactor.AnimeMinimums()
 	if err != nil {
-		lg := domain.NewErrorLog(err.Error(), "")
-		lg.Logging()
+		lg := domain.NewErrorLog()
+		lg.Logging(err, "")
 	}
 	response(w, err, map[string]interface{}{"data": animes})
 	return
