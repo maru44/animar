@@ -19,15 +19,12 @@ const (
 	LogAlert = "ALT"
 	// urgency (at many times)
 	LogCritical = "CRT"
-	// need fix without urgency (at once)
-	LogError = "ERZR"
-	// need fix without urgency (at many times)
+	// need fix without urgency
 	LogWarn = "WAN"
 	/******************
 	   no probrem
 	******************/
-	LogNotice = "NOT"
-	LogInfo   = "INF"
+	LogInfo = "INF"
 	/******************
 	   no probrem
 	******************/
@@ -35,13 +32,13 @@ const (
 )
 
 type Log struct {
-	Kind string    `json:"kind"`
-	Time time.Time `json:"time"`
+	Kind  string    `json:"kind"`
+	Time  time.Time `json:"time"`
+	Level string    `json:"level"`
 }
 
 type LogE struct {
 	Log
-	Level   string `json:"level"`
 	Content string `json:"content"`
 	Place   string `json:"place"`
 }
@@ -72,6 +69,43 @@ func NewErrorLog() *LogE {
 	return eLog
 }
 
+// func (e *LogE) Alet(err error) {
+// 	e.Logging(err, LogAlert)
+// }
+// func (e *LogE) Critical(err error) {
+// 	e.Logging(err, LogCritical)
+// }
+// func (e *LogE) WARN(err error) {
+// 	e.Logging(err, LogWarn)
+// }
+
+func ErrorAlert(err error) {
+	e := &LogE{
+		Log: Log{
+			Kind: "error",
+		},
+	}
+	e.Logging(err, LogAlert)
+}
+
+func ErrorCritical(err error) {
+	e := &LogE{
+		Log: Log{
+			Kind: "error",
+		},
+	}
+	e.Logging(err, LogCritical)
+}
+
+func ErrorWarn(err error) {
+	e := &LogE{
+		Log: Log{
+			Kind: "error",
+		},
+	}
+	e.Logging(err, LogWarn)
+}
+
 func (e *LogE) Logging(err error, level string) {
 	if tools.IsProductionEnv() {
 		e.write(err, level)
@@ -91,6 +125,7 @@ func (a *LogA) Logging(r *http.Request) {
 func (a *LogA) write(r *http.Request) {
 	today := time.Now().Format("20060102")
 
+	a.Level = LogInfo
 	a.Time = time.Now()
 	a.Address = r.RemoteAddr
 	a.Method = r.Method
@@ -102,14 +137,7 @@ func (a *LogA) write(r *http.Request) {
 func (e *LogE) write(err error, level string) {
 	today := time.Now().Format("20060102")
 
-	var lev string
-	if level == "" {
-		lev = LogWarn
-	} else {
-		lev = level
-	}
-
-	e.Level = lev
+	e.Level = level
 	e.Content = err.Error()
 
 	// auto
