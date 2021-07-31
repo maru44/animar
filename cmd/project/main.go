@@ -129,13 +129,11 @@ func main() {
 
 	if tools.IsProductionEnv() {
 		if err := http.ListenAndServe(":8000", infrastructure.Log(router, lg)); err != nil {
-			lge := domain.NewErrorLog()
-			lge.Logging(err, domain.LogAlert)
+			domain.ErrorAlert(err)
 		}
 	} else {
 		if err := http.ListenAndServe(":8000", infrastructure.Log(router, lg)); err != nil {
-			lge := domain.NewErrorLog()
-			lge.Logging(err, domain.LogAlert)
+			domain.ErrorAlert(err)
 		}
 	}
 

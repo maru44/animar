@@ -74,8 +74,7 @@ func (controller *BaseController) getGoogleUser(accessToken string) domain.TGoog
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 	}
 	defer res.Body.Close()
 

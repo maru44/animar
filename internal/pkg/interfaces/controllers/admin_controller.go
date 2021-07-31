@@ -70,8 +70,7 @@ func (controller *AdminController) AnimeDetailAdminView(w http.ResponseWriter, r
 
 	anime, err := controller.interactor.AnimeDetailAdmin(id)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 	}
 	response(w, err, map[string]interface{}{"data": anime})
 	return
@@ -116,8 +115,7 @@ func (controller *AdminController) AnimePostAdminView(w http.ResponseWriter, r *
 	}
 	insertedId, err = controller.interactor.AnimeInsert(a)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 	}
 	response(w, err, map[string]interface{}{"data": insertedId})
 	return
@@ -163,8 +161,7 @@ func (controller *AdminController) AnimeUpdateView(w http.ResponseWriter, r *htt
 
 	rowsAffected, err := controller.interactor.AnimeUpdate(id, a)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 	}
 	response(w, err, map[string]interface{}{"data": rowsAffected})
 	return
@@ -177,8 +174,7 @@ func (controller *AdminController) AnimeDeleteView(w http.ResponseWriter, r *htt
 
 	rowsAffected, err := controller.interactor.AnimeDelete(id)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 	}
 	response(w, err, map[string]interface{}{"data": rowsAffected})
 	return
@@ -296,8 +292,7 @@ func (controller *AdminController) InsertRelationPlatformView(w http.ResponseWri
 	json.NewDecoder(r.Body).Decode(&p)
 	lastInserted, err := controller.interactor.RelationPlatformInsert(p)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 	}
 	response(w, err, map[string]interface{}{"data": lastInserted})
 	return
@@ -312,8 +307,7 @@ func (controller *AdminController) DeleteRelationPlatformView(w http.ResponseWri
 
 	rowsAffected, err := controller.interactor.RelationPlatformDelete(animeId, platformId)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 	}
 	response(w, err, map[string]interface{}{"data": rowsAffected})
 	return
@@ -343,8 +337,7 @@ func (controller *AdminController) InsertSeasonView(w http.ResponseWriter, r *ht
 	json.NewDecoder(r.Body).Decode(&p)
 	lastInserted, err := controller.interactor.InsertSeason(p)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 	}
 	response(w, err, map[string]interface{}{"data": lastInserted})
 	return
@@ -355,8 +348,7 @@ func (controller *AdminController) InsertRelationSeasonView(w http.ResponseWrite
 	json.NewDecoder(r.Body).Decode(&s)
 	lastInserted, err := controller.interactor.InsertRelationSeasonAnime(s)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 	}
 	response(w, err, map[string]interface{}{"data": lastInserted})
 	return
@@ -386,8 +378,7 @@ func (controller *AdminController) InsertSeriesView(w http.ResponseWriter, r *ht
 	json.NewDecoder(r.Body).Decode(&p)
 	lastInserted, err := controller.interactor.InsertSeries(p)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 	}
 	response(w, err, map[string]interface{}{"data": lastInserted})
 	return
@@ -402,8 +393,7 @@ func (controller *AdminController) UpdateSeriesView(w http.ResponseWriter, r *ht
 	json.NewDecoder(r.Body).Decode(&p)
 	rowsAffected, err := controller.interactor.UpdateSeries(p, id)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 	}
 	response(w, err, map[string]interface{}{"data": rowsAffected})
 	return
@@ -432,8 +422,7 @@ func (controller *AdminController) InsertCompanyView(w http.ResponseWriter, r *h
 	json.NewDecoder(r.Body).Decode(&p)
 	lastInserted, err := controller.interactor.InsertCompany(p)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 	}
 	response(w, err, map[string]interface{}{"data": lastInserted})
 	return
@@ -461,8 +450,7 @@ func (controller *AdminController) InsertStaffView(w http.ResponseWriter, r *htt
 	json.NewDecoder(r.Body).Decode(&p)
 	lastInserted, err := controller.interactor.InsertStaff(p)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 	}
 	response(w, err, map[string]interface{}{"data": lastInserted})
 	return
@@ -479,8 +467,7 @@ func (controller *AdminController) InsertRoleView(w http.ResponseWriter, r *http
 	json.NewDecoder(r.Body).Decode(&p)
 	lastInserted, err := controller.interactor.InsertRole(p)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 	}
 	response(w, err, map[string]interface{}{"data": lastInserted})
 	return
@@ -497,8 +484,7 @@ func (controller *AdminController) InsertStaffRoleView(w http.ResponseWriter, r 
 	json.NewDecoder(r.Body).Decode(&p)
 	lastInserted, err := controller.interactor.InsertStaffRole(p)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 	}
 	response(w, err, map[string]interface{}{"data": lastInserted})
 	return

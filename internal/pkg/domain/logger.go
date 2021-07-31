@@ -60,7 +60,7 @@ func NewAccessLog() *LogA {
 	return alog
 }
 
-func NewErrorLog() *LogE {
+func newErrorLog() *LogE {
 	eLog := &LogE{
 		Log: Log{
 			Kind: "error",
@@ -80,29 +80,17 @@ func NewErrorLog() *LogE {
 // }
 
 func ErrorAlert(err error) {
-	e := &LogE{
-		Log: Log{
-			Kind: "error",
-		},
-	}
+	e := newErrorLog()
 	e.Logging(err, LogAlert)
 }
 
 func ErrorCritical(err error) {
-	e := &LogE{
-		Log: Log{
-			Kind: "error",
-		},
-	}
+	e := newErrorLog()
 	e.Logging(err, LogCritical)
 }
 
 func ErrorWarn(err error) {
-	e := &LogE{
-		Log: Log{
-			Kind: "error",
-		},
-	}
+	e := newErrorLog()
 	e.Logging(err, LogWarn)
 }
 

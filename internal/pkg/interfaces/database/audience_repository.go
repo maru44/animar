@@ -13,8 +13,7 @@ func (repo *AudienceRepository) Counts(animeId int) (audiences []domain.TAudienc
 		"Select state, count(state) from audiences WHERE anime_id = ? GROUP BY state", animeId,
 	)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 		return
 	}
 	defer rows.Close()
@@ -24,8 +23,7 @@ func (repo *AudienceRepository) Counts(animeId int) (audiences []domain.TAudienc
 			&a.State, &a.Count,
 		)
 		if err != nil {
-			lg := domain.NewErrorLog()
-			lg.Logging(err, "")
+			domain.ErrorWarn(err)
 		}
 		audiences = append(audiences, a)
 	}
@@ -39,8 +37,7 @@ func (repo *AudienceRepository) FilterByUser(userId string) (audiences []domain.
 	)
 	defer rows.Close()
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 		return
 	}
 	for rows.Next() {
@@ -50,8 +47,7 @@ func (repo *AudienceRepository) FilterByUser(userId string) (audiences []domain.
 			&a.Title, &a.Slug, &a.Content, &a.AState,
 		)
 		if err != nil {
-			lg := domain.NewErrorLog()
-			lg.Logging(err, "")
+			domain.ErrorWarn(err)
 		}
 		audiences = append(audiences, a)
 	}
@@ -64,8 +60,7 @@ func (repo *AudienceRepository) Insert(a domain.TAudienceInput, userId string) (
 		a.State, a.AnimeId, userId,
 	)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 		return
 	}
 	rawId, _ := exe.LastInsertId()
@@ -81,16 +76,14 @@ func (repo *AudienceRepository) Upsert(a domain.TAudienceInput, userId string) (
 			a.State, userId, a.AnimeId,
 		)
 		if err != nil {
-			lg := domain.NewErrorLog()
-			lg.Logging(err, "")
+			domain.ErrorWarn(err)
 		}
 		rawId, _ := exe.RowsAffected()
 		rowsAffected = int(rawId)
 	} else {
 		rowsAffected, err = repo.Insert(a, userId)
 		if err != nil {
-			lg := domain.NewErrorLog()
-			lg.Logging(err, "")
+			domain.ErrorWarn(err)
 		}
 	}
 	return
@@ -102,8 +95,7 @@ func (repo *AudienceRepository) Delete(animeId int, userId string) (rowsAffected
 		animeId, userId,
 	)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 		return
 	}
 	rawId, _ := exe.RowsAffected()
@@ -118,8 +110,7 @@ func (repo *AudienceRepository) FindByAnimeAndUser(animeId int, userId string) (
 	)
 	defer rows.Close()
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 		return
 	}
 	rows.Next()
@@ -127,8 +118,7 @@ func (repo *AudienceRepository) FindByAnimeAndUser(animeId int, userId string) (
 		&a.ID, &a.State, &a.AnimeId, &a.UserId, &a.CreatedAt, &a.UpdatedAt,
 	)
 	if err != nil {
-		lg := domain.NewErrorLog()
-		lg.Logging(err, "")
+		domain.ErrorWarn(err)
 		return
 	}
 	return
