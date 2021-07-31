@@ -10,17 +10,8 @@ import (
 
 func main() {
 
-	// connection
-	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-	// 	host, _ := os.Hostname()
-	// 	w.Write([]byte(host))
-	// })
-
 	router := http.NewServeMux()
 	lg := domain.NewAccessLog()
-
-	// lgs := domain.NewAccessLog("START", "START", "START")
-	// lgs.Logging()
 
 	sqlHandler := infrastructure.NewSqlHandler()
 	uploader := infrastructure.NewS3Uploader()
