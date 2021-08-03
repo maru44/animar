@@ -72,14 +72,18 @@ func (ror *RoleRepository) Insert(r domain.RoleInput) (inserted int, err error) 
 func (ror *RoleRepository) InsertStaffRole(r domain.AnimeStaffRoleInput) (inserted int, err error) {
 	exe, err := ror.Execute(
 		"INSERT INTO anime_staff_roles(anime_id, role_id, staff_id) "+
-			"VALUES (?, ?, ?)",
+			"VALUES(?, ?, ?)",
 		r.AnimeId, r.RoleId, r.StaffId,
 	)
 	if err != nil {
 		log.Print(err)
 		return
 	}
-	rawInserted, _ := exe.LastInsertId()
+	rawInserted, err := exe.LastInsertId()
+	if err != nil {
+		log.Print(err)
+		return
+	}
 	inserted = int(rawInserted)
 	return
 }

@@ -114,9 +114,7 @@ func (rw HttpResponseWriter) WriteHeader(status int) {
 
 func Log(h http.Handler, lg *domain.LogA) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// lg := domain.NewAccessLog()
 		lg.Logging(r)
-		// log.Printf("Access: %s %s %s", rAddress, method, path)
 		h.ServeHTTP(w, r)
 	})
 }

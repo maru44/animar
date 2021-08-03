@@ -115,7 +115,7 @@ func (a *LogA) write(r *http.Request) {
 
 	a.Level = LogInfo
 	a.Time = time.Now()
-	a.Address = r.RemoteAddr
+	a.Address = r.Header.Get("X-FORWARDED-FOR")
 	a.Method = r.Method
 	a.Path = r.URL.Path
 
