@@ -24,4 +24,4 @@ tmp/*
 **/seed/production/*
 
 **/seed/backup/*.sql
-**/*.tsv
+**/seed/bulk/*.sql
