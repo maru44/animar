@@ -129,7 +129,7 @@ func (e *LogE) write(err error, level string) {
 	e.Content = err.Error()
 
 	// auto
-	_, file, line, _ := runtime.Caller(2)
+	_, file, line, _ := runtime.Caller(3)
 	e.Place = fmt.Sprintf("%s:%d", file, line)
 	e.Time = time.Now()
 
