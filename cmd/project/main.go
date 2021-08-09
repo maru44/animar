@@ -94,6 +94,7 @@ func main() {
 	// relations
 	router.Handle("/admin/season/anime/post/", base.BaseMiddleware(base.AdminRequiredMiddleware(base.PostOnlyMiddleware(http.HandlerFunc(adminController.InsertRelationSeasonView)))))
 	router.Handle("/season/anime/", base.BaseMiddleware(http.HandlerFunc(seasonController.SeasonByAnimeIdView))) // ?id=
+	router.Handle("/admin/season/anime/delete/", base.BaseMiddleware(base.AdminRequiredMiddleware(base.DeleteOnlyMiddleware(http.HandlerFunc(adminController.DeleteRelationSeasonView)))))
 
 	/*   platform   */
 	router.Handle("/admin/platform/", base.BaseMiddleware(base.AdminRequiredMiddlewareGet(http.HandlerFunc(adminController.PlatformView))))

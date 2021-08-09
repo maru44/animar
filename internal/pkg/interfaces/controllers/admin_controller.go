@@ -355,9 +355,12 @@ func (adc *AdminController) InsertRelationSeasonView(w http.ResponseWriter, r *h
 }
 
 func (adc *AdminController) DeleteRelationSeasonView(w http.ResponseWriter, r *http.Request) {
-	var s domain.TSeasonRelationInput
-	json.NewDecoder(r.Body).Decode(&s)
-	affected, err := adc.interactor.DeleteRelationSeasonAnime(s.AnimeId, s.SeasonId)
+	qs := r.URL.Query()
+	rawAnimeId := qs.Get("anime")
+	rawSeasonId := qs.Get("season")
+	animeId, _ := strconv.Atoi(rawAnimeId)
+	seasonId, _ := strconv.Atoi(rawSeasonId)
+	affected, err := adc.interactor.DeleteRelationSeasonAnime(animeId, seasonId)
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
