@@ -54,13 +54,13 @@ func NewAdminController(sqlHandler database.SqlHandler, uploader s3.Uploader) *A
          anime
 *************************/
 
-func (controller *AdminController) AnimeListAdminView(w http.ResponseWriter, r *http.Request) {
-	animes, err := controller.interactor.AnimesAllAdmin()
+func (adc *AdminController) AnimeListAdminView(w http.ResponseWriter, r *http.Request) {
+	animes, err := adc.interactor.AnimesAllAdmin()
 	response(w, err, map[string]interface{}{"data": animes})
 	return
 }
 
-func (controller *AdminController) AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) AnimeDetailAdminView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
@@ -68,7 +68,7 @@ func (controller *AdminController) AnimeDetailAdminView(w http.ResponseWriter, r
 	var posted domain.TUserToken
 	json.NewDecoder(r.Body).Decode(&posted)
 
-	anime, err := controller.interactor.AnimeDetailAdmin(id)
+	anime, err := adc.interactor.AnimeDetailAdmin(id)
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
@@ -76,14 +76,14 @@ func (controller *AdminController) AnimeDetailAdminView(w http.ResponseWriter, r
 	return
 }
 
-func (controller *AdminController) AnimePostAdminView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) AnimePostAdminView(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
 	var returnFileName string
 	var insertedId int
 	file, fileHeader, err := r.FormFile("thumb")
 	if err == nil { // w/ thumb picture
 		defer file.Close()
-		returnFileName, err = controller.s3.Image(file, fileHeader.Filename, []string{"anime"})
+		returnFileName, err = adc.s3.Image(file, fileHeader.Filename, []string{"anime"})
 
 		if err != nil {
 			response(w, err, nil)
@@ -113,7 +113,7 @@ func (controller *AdminController) AnimePostAdminView(w http.ResponseWriter, r *
 		TwitterUrl:    tools.NewNullString(r.FormValue("twitter_url")),
 		OfficialUrl:   tools.NewNullString(r.FormValue("official_url")),
 	}
-	insertedId, err = controller.interactor.AnimeInsert(a)
+	insertedId, err = adc.interactor.AnimeInsert(a)
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
@@ -121,7 +121,7 @@ func (controller *AdminController) AnimePostAdminView(w http.ResponseWriter, r *
 	return
 }
 
-func (controller *AdminController) AnimeUpdateView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) AnimeUpdateView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
@@ -132,7 +132,7 @@ func (controller *AdminController) AnimeUpdateView(w http.ResponseWriter, r *htt
 	if err == nil {
 		// w/ thumb picture
 		defer file.Close()
-		returnFileName, err = controller.s3.Image(file, fileHeader.Filename, []string{"anime"})
+		returnFileName, err = adc.s3.Image(file, fileHeader.Filename, []string{"anime"})
 		if err != nil {
 			return
 		}
@@ -159,7 +159,7 @@ func (controller *AdminController) AnimeUpdateView(w http.ResponseWriter, r *htt
 		OfficialUrl:   tools.NewNullString(r.FormValue("official_url")),
 	}
 
-	rowsAffected, err := controller.interactor.AnimeUpdate(id, a)
+	rowsAffected, err := adc.interactor.AnimeUpdate(id, a)
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
@@ -167,12 +167,12 @@ func (controller *AdminController) AnimeUpdateView(w http.ResponseWriter, r *htt
 	return
 }
 
-func (controller *AdminController) AnimeDeleteView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) AnimeDeleteView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
 
-	rowsAffected, err := controller.interactor.AnimeDelete(id)
+	rowsAffected, err := adc.interactor.AnimeDelete(id)
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
@@ -184,25 +184,25 @@ func (controller *AdminController) AnimeDeleteView(w http.ResponseWriter, r *htt
          platform
 *************************/
 
-func (controller *AdminController) PlatformView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) PlatformView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	id := query.Get("id")
 
 	if id != "" {
 		i, _ := strconv.Atoi(id)
-		platform, err := controller.interactor.PlatformDetail(i)
+		platform, err := adc.interactor.PlatformDetail(i)
 		if err != nil || platform.ID == 0 {
 			err = domain.ErrNotFound
 		}
 		response(w, err, map[string]interface{}{"data": platform})
 	} else {
-		platforms, err := controller.interactor.PlatformAllAdmin()
+		platforms, err := adc.interactor.PlatformAllAdmin()
 		response(w, err, map[string]interface{}{"data": platforms})
 	}
 	return
 }
 
-func (controller *AdminController) PlatformInsertView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) PlatformInsertView(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 40*1024*1024) // 40MB
 
 	file, fileHeader, err := r.FormFile("image")
@@ -210,7 +210,7 @@ func (controller *AdminController) PlatformInsertView(w http.ResponseWriter, r *
 	if err == nil {
 		// w/ thumb picture
 		defer file.Close()
-		returnFileName, err = controller.s3.Image(file, fileHeader.Filename, []string{"platform"})
+		returnFileName, err = adc.s3.Image(file, fileHeader.Filename, []string{"platform"})
 
 		if err != nil {
 			fmt.Print(err)
@@ -228,12 +228,12 @@ func (controller *AdminController) PlatformInsertView(w http.ResponseWriter, r *
 		Image:    tools.NewNullString(returnFileName),
 		IsValid:  isValid,
 	}
-	lastInserted, err := controller.interactor.PlatformInsert(p)
+	lastInserted, err := adc.interactor.PlatformInsert(p)
 	response(w, err, map[string]interface{}{"data": lastInserted})
 	return
 }
 
-func (controller *AdminController) PlatformUpdateView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) PlatformUpdateView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
@@ -245,7 +245,7 @@ func (controller *AdminController) PlatformUpdateView(w http.ResponseWriter, r *
 	if err == nil {
 		// w/ thumb picture
 		defer file.Close()
-		returnFileName, err = controller.s3.Image(file, fileHeader.Filename, []string{"platform"})
+		returnFileName, err = adc.s3.Image(file, fileHeader.Filename, []string{"platform"})
 
 		if err != nil {
 			fmt.Print(err)
@@ -263,34 +263,34 @@ func (controller *AdminController) PlatformUpdateView(w http.ResponseWriter, r *
 		Image:    tools.NewNullString(returnFileName),
 		IsValid:  isValid,
 	}
-	rowsAffected, err := controller.interactor.PlatformUpdate(p, id)
+	rowsAffected, err := adc.interactor.PlatformUpdate(p, id)
 	response(w, err, map[string]interface{}{"data": rowsAffected})
 	return
 }
 
-func (controller *AdminController) PlatformDeleteview(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) PlatformDeleteview(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
 
-	rowsAffected, err := controller.interactor.PlatformDelete(id)
+	rowsAffected, err := adc.interactor.PlatformDelete(id)
 	response(w, err, map[string]interface{}{"data": rowsAffected})
 	return
 }
 
-func (controller *AdminController) RelationPlatformView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) RelationPlatformView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	strId := query.Get("id") // animeId
 	id, _ := strconv.Atoi(strId)
-	relations, err := controller.interactor.RelationPlatformByAnime(id)
+	relations, err := adc.interactor.RelationPlatformByAnime(id)
 	response(w, err, map[string]interface{}{"data": relations})
 	return
 }
 
-func (controller *AdminController) InsertRelationPlatformView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) InsertRelationPlatformView(w http.ResponseWriter, r *http.Request) {
 	var p domain.TRelationPlatformInput
 	json.NewDecoder(r.Body).Decode(&p)
-	lastInserted, err := controller.interactor.RelationPlatformInsert(p)
+	lastInserted, err := adc.interactor.RelationPlatformInsert(p)
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
@@ -298,14 +298,14 @@ func (controller *AdminController) InsertRelationPlatformView(w http.ResponseWri
 	return
 }
 
-func (controller *AdminController) DeleteRelationPlatformView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) DeleteRelationPlatformView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	strAnimeId := query.Get("anime")
 	strPlatformId := query.Get("platform")
 	animeId, _ := strconv.Atoi(strAnimeId)
 	platformId, _ := strconv.Atoi(strPlatformId)
 
-	rowsAffected, err := controller.interactor.RelationPlatformDelete(animeId, platformId)
+	rowsAffected, err := adc.interactor.RelationPlatformDelete(animeId, platformId)
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
@@ -317,25 +317,25 @@ func (controller *AdminController) DeleteRelationPlatformView(w http.ResponseWri
          season
 *************************/
 
-func (controller *AdminController) SeasonView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) SeasonView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	id := query.Get("id")
 
 	if id != "" {
 		i, _ := strconv.Atoi(id)
-		s, err := controller.interactor.DetailSeason(i)
+		s, err := adc.interactor.DetailSeason(i)
 		response(w, err, map[string]interface{}{"data": s})
 	} else {
-		s, err := controller.interactor.ListSeason()
+		s, err := adc.interactor.ListSeason()
 		response(w, err, map[string]interface{}{"data": s})
 	}
 	return
 }
 
-func (controller *AdminController) InsertSeasonView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) InsertSeasonView(w http.ResponseWriter, r *http.Request) {
 	var p domain.TSeasonInput
 	json.NewDecoder(r.Body).Decode(&p)
-	lastInserted, err := controller.interactor.InsertSeason(p)
+	lastInserted, err := adc.interactor.InsertSeason(p)
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
@@ -343,14 +343,25 @@ func (controller *AdminController) InsertSeasonView(w http.ResponseWriter, r *ht
 	return
 }
 
-func (controller *AdminController) InsertRelationSeasonView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) InsertRelationSeasonView(w http.ResponseWriter, r *http.Request) {
 	var s domain.TSeasonRelationInput
 	json.NewDecoder(r.Body).Decode(&s)
-	lastInserted, err := controller.interactor.InsertRelationSeasonAnime(s)
+	lastInserted, err := adc.interactor.InsertRelationSeasonAnime(s)
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
 	response(w, err, map[string]interface{}{"data": lastInserted})
+	return
+}
+
+func (adc *AdminController) DeleteRelationSeasonView(w http.ResponseWriter, r *http.Request) {
+	var s domain.TSeasonRelationInput
+	json.NewDecoder(r.Body).Decode(&s)
+	affected, err := adc.interactor.DeleteRelationSeasonAnime(s.AnimeId, s.SeasonId)
+	if err != nil {
+		domain.ErrorWarn(err)
+	}
+	response(w, err, map[string]interface{}{"data": affected})
 	return
 }
 
@@ -358,25 +369,25 @@ func (controller *AdminController) InsertRelationSeasonView(w http.ResponseWrite
          series
 *************************/
 
-func (controller *AdminController) SeriesView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) SeriesView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	id := query.Get("id")
 
 	if id != "" {
 		i, _ := strconv.Atoi(id)
-		s, err := controller.interactor.DetailSeries(i)
+		s, err := adc.interactor.DetailSeries(i)
 		response(w, err, map[string]interface{}{"data": s})
 	} else {
-		s, err := controller.interactor.ListSeries()
+		s, err := adc.interactor.ListSeries()
 		response(w, err, map[string]interface{}{"data": s})
 	}
 	return
 }
 
-func (controller *AdminController) InsertSeriesView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) InsertSeriesView(w http.ResponseWriter, r *http.Request) {
 	var p domain.TSeriesInput
 	json.NewDecoder(r.Body).Decode(&p)
-	lastInserted, err := controller.interactor.InsertSeries(p)
+	lastInserted, err := adc.interactor.InsertSeries(p)
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
@@ -384,14 +395,14 @@ func (controller *AdminController) InsertSeriesView(w http.ResponseWriter, r *ht
 	return
 }
 
-func (controller *AdminController) UpdateSeriesView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) UpdateSeriesView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	strId := query.Get("id")
 	id, _ := strconv.Atoi(strId)
 
 	var p domain.TSeriesInput
 	json.NewDecoder(r.Body).Decode(&p)
-	rowsAffected, err := controller.interactor.UpdateSeries(p, id)
+	rowsAffected, err := adc.interactor.UpdateSeries(p, id)
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
@@ -403,24 +414,24 @@ func (controller *AdminController) UpdateSeriesView(w http.ResponseWriter, r *ht
          company
 *************************/
 
-func (controller *AdminController) AdminCompanyView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) AdminCompanyView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	eng := query.Get("company")
 
 	if eng != "" {
-		company, err := controller.interactor.DetailCompany(eng)
+		company, err := adc.interactor.DetailCompany(eng)
 		response(w, err, map[string]interface{}{"data": company})
 	} else {
-		companies, err := controller.interactor.ListCompany()
+		companies, err := adc.interactor.ListCompany()
 		response(w, err, map[string]interface{}{"data": companies})
 	}
 	return
 }
 
-func (controller *AdminController) InsertCompanyView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) InsertCompanyView(w http.ResponseWriter, r *http.Request) {
 	var p domain.CompanyInput
 	json.NewDecoder(r.Body).Decode(&p)
-	lastInserted, err := controller.interactor.InsertCompany(p)
+	lastInserted, err := adc.interactor.InsertCompany(p)
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
@@ -428,13 +439,13 @@ func (controller *AdminController) InsertCompanyView(w http.ResponseWriter, r *h
 	return
 }
 
-func (controller *AdminController) UpdateCompanyView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) UpdateCompanyView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	eng := query.Get("company")
 
 	var p domain.CompanyInput
 	json.NewDecoder(r.Body).Decode(&p)
-	affected, err := controller.interactor.UpdateCompany(p, eng)
+	affected, err := adc.interactor.UpdateCompany(p, eng)
 	response(w, err, map[string]interface{}{"data": affected})
 	return
 }
@@ -445,10 +456,10 @@ func (controller *AdminController) UpdateCompanyView(w http.ResponseWriter, r *h
          staff
 *************************/
 
-func (controller *AdminController) InsertStaffView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) InsertStaffView(w http.ResponseWriter, r *http.Request) {
 	var p domain.StaffInput
 	json.NewDecoder(r.Body).Decode(&p)
-	lastInserted, err := controller.interactor.InsertStaff(p)
+	lastInserted, err := adc.interactor.InsertStaff(p)
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
@@ -462,10 +473,10 @@ func (controller *AdminController) InsertStaffView(w http.ResponseWriter, r *htt
          role
 *************************/
 
-func (controller *AdminController) InsertRoleView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) InsertRoleView(w http.ResponseWriter, r *http.Request) {
 	var p domain.RoleInput
 	json.NewDecoder(r.Body).Decode(&p)
-	lastInserted, err := controller.interactor.InsertRole(p)
+	lastInserted, err := adc.interactor.InsertRole(p)
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
@@ -473,16 +484,16 @@ func (controller *AdminController) InsertRoleView(w http.ResponseWriter, r *http
 	return
 }
 
-func (controller *AdminController) ListRoleView(w http.ResponseWriter, r *http.Request) {
-	roles, err := controller.interactor.RoleList()
+func (adc *AdminController) ListRoleView(w http.ResponseWriter, r *http.Request) {
+	roles, err := adc.interactor.RoleList()
 	response(w, err, map[string]interface{}{"data": roles})
 	return
 }
 
-func (controller *AdminController) InsertStaffRoleView(w http.ResponseWriter, r *http.Request) {
+func (adc *AdminController) InsertStaffRoleView(w http.ResponseWriter, r *http.Request) {
 	var p domain.AnimeStaffRoleInput
 	json.NewDecoder(r.Body).Decode(&p)
-	lastInserted, err := controller.interactor.InsertStaffRole(p)
+	lastInserted, err := adc.interactor.InsertStaffRole(p)
 	if err != nil {
 		domain.ErrorWarn(err)
 	}

@@ -53,6 +53,7 @@ type AdminSeasonRepository interface {
 	FindById(int) (domain.TSeason, error)
 	Insert(domain.TSeasonInput) (int, error)
 	InsertRelation(domain.TSeasonRelationInput) (int, error)
+	DeleteRelation(seasonId, animeId int) (int, error)
 }
 
 type AdminSeriesRepository interface {
@@ -154,6 +155,10 @@ func (interactor *AdminInteractor) InsertSeason(season domain.TSeasonInput) (las
 func (interactor *AdminInteractor) InsertRelationSeasonAnime(rel domain.TSeasonRelationInput) (lastInserted int, err error) {
 	lastInserted, err = interactor.seasonRepository.InsertRelation(rel)
 	return
+}
+
+func (interactor *AdminInteractor) DeleteRelationSeasonAnime(animeId, seasonId int) (int, error) {
+	return interactor.seasonRepository.DeleteRelation(animeId, seasonId)
 }
 
 // series

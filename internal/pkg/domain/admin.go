@@ -119,6 +119,7 @@ type AdminSeasonInteractor interface {
 	ListSeason() ([]TSeason, error)
 	DetailSeason(int) (TSeason, error)
 	InsertRelationSeasonAnime(TSeasonRelationInput) (int, error)
+	DeleteRelationSeasonAnime(animeId, seasonId int) (int, error)
 }
 
 /************************

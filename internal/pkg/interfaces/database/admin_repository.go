@@ -375,6 +375,20 @@ func (repo *AdminSeasonRepository) InsertRelation(r domain.TSeasonRelationInput)
 	return
 }
 
+func (repo *AdminSeasonRepository) DeleteRelation(animeId, seasonId int) (affected int, err error) {
+	exe, err := repo.Execute(
+		"DELETE FROM relation_anime_season WHERE anime_id = ? AND season_id = ?",
+		animeId, seasonId,
+	)
+	if err != nil {
+		domain.ErrorWarn(err)
+		return
+	}
+	rawAffected, _ := exe.RowsAffected()
+	affected = int(rawAffected)
+	return
+}
+
 /************************
          series
 *************************/
