@@ -1,0 +1,2 @@
+ALTER TABLE animes
+MODIFY eng_name VARCHAR(256) COMMENT 'roman';
