@@ -34,7 +34,7 @@ type InterviewQuote struct {
 }
 
 type ArticleInput struct {
-	Slug        string  `json:"slug"`
+	// Slug        string  `json:"slug"`
 	ArticleType string  `json:"article_type"`
 	Abstract    *string `json:"abstract,omitempty"`
 	Content     *string `json:"content,omitempty"`
@@ -63,6 +63,8 @@ type ArticleInteractor interface {
 	UpdateArticle(articleInput ArticleInput, id int) (int, error)
 	DeleteArticle(id int) (int, error)
 	// character
+	FetchArticleCharas(articleId int) ([]ArticleCharacter, error)
+	FetchArticleCharasByUser(userId string) ([]ArticleCharacter, error)
 	InsertArticleChara(charaInput ArticleCharacterInput) (int, error)
 	UpdateArticleChara(charaInput ArticleCharacterInput, id int) (int, error)
 	DeleteArticleChara(id int) (int, error)

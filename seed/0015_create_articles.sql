@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS go_test.article_chara(
     article_id INT UNSIGNED NULL,
     chara_name VARCHAR(48),
     image VARCHAR(128) NULL,
+    user_id VARCHAR(128) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_article_chara FOREIGN KEY (article_id) REFERENCES articles (id) ON DELETE

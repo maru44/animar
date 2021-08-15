@@ -3,16 +3,12 @@ package usecase
 import "animar/v1/internal/pkg/domain"
 
 type ArticleInteractor struct {
-	artr  ArticleRepository
-	artcr ArticleCharacterReposiotry
-	iqr   InterviewQuoteRepository
+	artr ArticleRepository
 }
 
-func NewArticleInteractor(artr ArticleRepository, artcr ArticleCharacterReposiotry, iqr InterviewQuoteRepository) domain.ArticleInteractor {
+func NewArticleInteractor(artr ArticleRepository) domain.ArticleInteractor {
 	return &ArticleInteractor{
-		artr:  artr,
-		artcr: artcr,
-		iqr:   iqr,
+		artr: artr,
 	}
 }
 
@@ -27,19 +23,15 @@ type ArticleRepository interface {
 	Insert(articleInput domain.ArticleInput) (int, error)
 	Update(articleInput domain.ArticleInput, id int) (int, error)
 	Delete(id int) (int, error)
-}
-
-type ArticleCharacterReposiotry interface {
-	Insert(charaInput domain.ArticleCharacterInput) (int, error)
-	Update(charaInput domain.ArticleCharacterInput, id int) (int, error)
-	Delete(id int) (int, error)
-}
-
-type InterviewQuoteRepository interface {
-	Fetch(articleId int) ([]domain.InterviewQuote, error)
-	Insert(interviewInput domain.InterviewQuoteInput) (int, error)
-	Update(interviewInput domain.InterviewQuoteInput, id int) (int, error)
-	Delete(id int) (int, error)
+	FilterCharaById(articleId int) ([]domain.ArticleCharacter, error)
+	FilterCharaByUserId(userId string) ([]domain.ArticleCharacter, error)
+	InsertChara(charaInput domain.ArticleCharacterInput) (int, error)
+	UpdateChara(charaInput domain.ArticleCharacterInput, id int) (int, error)
+	DeleteChara(id int) (int, error)
+	FetchInterview(articleId int) ([]domain.InterviewQuote, error)
+	InsertInterview(interviewInput domain.InterviewQuoteInput) (int, error)
+	UpdateInterview(interviewInput domain.InterviewQuoteInput, id int) (int, error)
+	DeleteInterview(id int) (int, error)
 }
 
 /**********************
@@ -70,30 +62,38 @@ func (arti *ArticleInteractor) DeleteArticle(id int) (int, error) {
 	return arti.artr.Delete(id)
 }
 
+func (arti *ArticleInteractor) FetchArticleCharas(articleId int) ([]domain.ArticleCharacter, error) {
+	return arti.artr.FilterCharaById(articleId)
+}
+
+func (arti *ArticleInteractor) FetchArticleCharasByUser(userId string) ([]domain.ArticleCharacter, error) {
+	return arti.artr.FilterCharaByUserId(userId)
+}
+
 func (arti *ArticleInteractor) InsertArticleChara(charaInput domain.ArticleCharacterInput) (int, error) {
-	return arti.artcr.Insert(charaInput)
+	return arti.artr.InsertChara(charaInput)
 }
 
 func (arti *ArticleInteractor) UpdateArticleChara(charaInput domain.ArticleCharacterInput, id int) (int, error) {
-	return arti.artcr.Update(charaInput, id)
+	return arti.artr.UpdateChara(charaInput, id)
 }
 
 func (arti *ArticleInteractor) DeleteArticleChara(id int) (int, error) {
-	return arti.artcr.Delete(id)
+	return arti.artr.DeleteChara(id)
 }
 
 func (arti *ArticleInteractor) FetchInterviewQuotes(articleId int) ([]domain.InterviewQuote, error) {
-	return arti.iqr.Fetch(articleId)
+	return arti.artr.FetchInterview(articleId)
 }
 
 func (arti *ArticleInteractor) InsertInterviewQuote(interviewInput domain.InterviewQuoteInput) (int, error) {
-	return arti.iqr.Insert(interviewInput)
+	return arti.artr.InsertInterview(interviewInput)
 }
 
 func (arti *ArticleInteractor) UpdateInterviewQuote(interviewInput domain.InterviewQuoteInput, id int) (int, error) {
-	return arti.iqr.Update(interviewInput, id)
+	return arti.artr.UpdateInterview(interviewInput, id)
 }
 
 func (arti *ArticleInteractor) DeleteInterviewQuote(id int) (int, error) {
-	return arti.iqr.Delete(id)
+	return arti.artr.DeleteInterview(id)
 }
