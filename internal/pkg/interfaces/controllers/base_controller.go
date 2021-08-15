@@ -15,12 +15,14 @@ import (
 
 type BaseController struct {
 	interactor domain.BaseInteractor
+	CookieController
 }
 
 type ContextKey string
 
 const (
-	USER_ID ContextKey = "userId"
+	USER_ID         ContextKey = "userId"
+	CSRF_COOKIE_KEY            = "csrf-token"
 )
 
 func NewBaseController() *BaseController {
@@ -167,6 +169,16 @@ func (controller *BaseController) BaseMiddleware(next http.Handler) http.Handler
 	})
 }
 
+// func (controller *BaseController) CsrfMiddleware(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		csrfToken, err := r.Cookie("idToken")
+// 		if err != nil {
+// 			domain.ErrorWarn(err)
+// 			return
+// 		}
+// 	})
+// }
+
 /************************
     user middleware
 ************************/
@@ -294,4 +306,13 @@ func (controller *BaseController) AdminRequiredMiddlewareGet(next http.Handler) 
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+/************************
+      set cookie
+************************/
+
+func (controller *BaseController) SetCsrfCookie(w http.ResponseWriter, r *http.Request) {
+	csrfToken := tools.GenRandSlug(64)
+	controller.setCookiePackage(w, CSRF_COOKIE_KEY, csrfToken, 60*60)
 }
