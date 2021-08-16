@@ -1,39 +1,11 @@
 package domain
 
 import (
-	"sync"
+	"animar/v1/internal/pkg/tools/tools"
 	"time"
 )
 
-// // cached data
-// type CacheItem struct {
-// 	Value   string
-// 	Expires int64
-// }
-
-// // struct for caching
-// type Cache struct {
-// 	Items map[string][]*CacheItem
-// 	mu    sync.Mutex
-// }
-
-// func (c *CacheItem) Expired(time int64) bool {
-// 	if c.Expires == 0 {
-// 		return false
-// 	}
-// 	return time > c.Expires
-// }
-
-// func (c *Cache) Get(key string) (items []*CacheItem, err error) {
-// 	c.mu.Lock()
-// 	if v, ok := c.Items[key]; ok {
-// 		items = v
-// 	} else {
-// 		// err = errors.New(fmt.Sprintf("%s has Expired", key))
-// 	}
-// 	c.mu.Unlock()
-// 	return
-// }
+const cacheInterval = 120 * time.Second
 
 type CacheItem struct {
 	Expires int64
@@ -41,7 +13,7 @@ type CacheItem struct {
 
 type Cache struct {
 	Items map[string]*CacheItem
-	mu    sync.Mutex
+	// mu    sync.Mutex
 }
 
 func (i *CacheItem) Valid(time int64) bool {
@@ -53,26 +25,25 @@ func (i *CacheItem) Valid(time int64) bool {
 
 func (c *Cache) Get(key string) bool {
 	isValid := false
-	c.mu.Lock()
+	// c.mu.Lock()
 	v, ok := c.Items[key]
 	if ok {
 		isValid = v.Valid(time.Now().UnixNano())
 	}
-	c.mu.Unlock()
+	// c.mu.Unlock()
+	c.Delete(key)
 	return isValid
 }
 
 func (c *Cache) Delete(key string) {
-	_, ok := c.Items[key]
-	if ok {
-		delete(c.Items, key)
-	}
+	delete(c.Items, key)
 }
 
-// func NewCache() *Cache {
-// 	c := &Cache{
-// 		Items: CacheItem{
-// 			Expires: ,
-// 		},
-// 	}
-// }
+func NewCache() *Cache {
+	c := &Cache{
+		Items: map[string]*CacheItem{tools.GenRandSlug(48): {
+			Expires: time.Now().Add(cacheInterval).UnixNano(),
+		}},
+	}
+	return c
+}
