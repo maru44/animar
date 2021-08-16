@@ -5,15 +5,21 @@ import (
 	"time"
 )
 
-const cacheInterval = 120 * time.Second
+const (
+	// interval
+	CsrfInterval = 120 * time.Second
+
+	// type
+	CacheTypeCsrf = "CSRF"
+)
 
 type CacheItem struct {
-	Expires int64
+	Expires   int64
+	CacheType string
 }
 
 type Cache struct {
 	Items map[string]*CacheItem
-	// mu    sync.Mutex
 }
 
 func (i *CacheItem) Valid(time int64) bool {
@@ -39,10 +45,11 @@ func (c *Cache) Delete(key string) {
 	delete(c.Items, key)
 }
 
-func NewCache() *Cache {
+func NewCache(t string, d time.Duration) *Cache {
 	c := &Cache{
 		Items: map[string]*CacheItem{tools.GenRandSlug(48): {
-			Expires: time.Now().Add(cacheInterval).UnixNano(),
+			Expires:   time.Now().Add(d).UnixNano(),
+			CacheType: t,
 		}},
 	}
 	return c
