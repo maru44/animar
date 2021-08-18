@@ -5,6 +5,7 @@ import (
 	"animar/v1/internal/pkg/infrastructure"
 	"animar/v1/internal/pkg/interfaces/controllers"
 	"animar/v1/internal/pkg/tools/tools"
+	"fmt"
 	"net/http"
 )
 
@@ -119,6 +120,14 @@ func main() {
 	router.Handle("/admin/role/", base.BaseMiddleware(base.AdminRequiredMiddleware(http.HandlerFunc(adminController.ListRoleView))))
 	router.Handle("/admin/role/post/", base.BaseMiddleware(base.AdminRequiredMiddleware(base.PostOnlyMiddleware(http.HandlerFunc(adminController.InsertRoleView)))))
 	router.Handle("/admin/staffrole/post/", base.BaseMiddleware(base.AdminRequiredMiddleware(base.PostOnlyMiddleware(http.HandlerFunc(adminController.InsertStaffRoleView)))))
+
+	// test for csrf
+	router.Handle("/test/csrf/", base.BaseMiddleware(http.HandlerFunc(base.SetCsrfCookieView)))
+	router.Handle("/test/verify/", base.BaseMiddleware(base.VerifyCsrfMiddleware(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprint(w, cache.Items[domain.CacheTypeCsrf])
+		}),
+	)))
 
 	if tools.IsProductionEnv() {
 		if err := http.ListenAndServe(":8000", infrastructure.Log(router, lg)); err != nil {
