@@ -15,6 +15,7 @@ import (
 
 type BaseController struct {
 	interactor domain.BaseInteractor
+	cache      domain.Cache
 	CookieController
 }
 
@@ -25,13 +26,14 @@ const (
 	CSRF_COOKIE_KEY            = "csrf-token"
 )
 
-func NewBaseController() *BaseController {
+func NewBaseController(c domain.Cache) *BaseController {
 	return &BaseController{
 		interactor: usecase.NewBaseInteractor(
 			&fires.AuthRepository{
 				Firebase: infrastructure.NewFireBaseClient(),
 			},
 		),
+		cache: c,
 	}
 }
 
@@ -169,15 +171,20 @@ func (controller *BaseController) BaseMiddleware(next http.Handler) http.Handler
 	})
 }
 
-// func (controller *BaseController) CsrfMiddleware(next http.Handler) http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		csrfToken, err := r.Cookie("idToken")
-// 		if err != nil {
-// 			domain.ErrorWarn(err)
-// 			return
-// 		}
-// 	})
-// }
+func (controller *BaseController) VerifyCsrfMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		csrfToken, err := r.Cookie(CSRF_COOKIE_KEY)
+		if err != nil {
+			domain.ErrorWarn(err)
+			return
+		}
+		cache := controller.cache
+		if ok := cache.Get(domain.CacheTypeCsrf, csrfToken.Value); !ok {
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
 
 /************************
     user middleware
@@ -313,6 +320,8 @@ func (controller *BaseController) AdminRequiredMiddlewareGet(next http.Handler) 
 ************************/
 
 func (controller *BaseController) SetCsrfCookie(w http.ResponseWriter, r *http.Request) {
-	csrfToken := tools.GenRandSlug(64)
+	// c := domain.NewCache(domain.CacheTypeCsrf, domain.CsrfInterval) // mainで作る
+	csrfToken := tools.GenRandSlug(32)
+	controller.cache.AddCacheItem(csrfToken, domain.CsrfInterval)
 	controller.setCookiePackage(w, CSRF_COOKIE_KEY, csrfToken, 60*60)
 }

@@ -14,30 +14,27 @@ const (
 )
 
 type CacheItem struct {
-	Expires   int64
-	CacheType string
+	Expires int64
 }
 
 type Cache struct {
-	Items map[string]*CacheItem
+	Items map[string]map[string]*CacheItem
 }
 
-func (i *CacheItem) Valid(time int64) bool {
-	if i.Expires == 0 {
+func (ci *CacheItem) Valid(time int64) bool {
+	if ci.Expires == 0 {
 		return false
 	}
-	return time < i.Expires
+	return time < ci.Expires
 }
 
-func (c *Cache) Get(key string) bool {
+func (c *Cache) Get(kind, key string) bool {
 	isValid := false
-	// c.mu.Lock()
-	v, ok := c.Items[key]
+	v, ok := c.Items[kind]
 	if ok {
-		isValid = v.Valid(time.Now().UnixNano())
+		isValid = v[key].Valid(time.Now().UnixNano())
 	}
-	// c.mu.Unlock()
-	c.Delete(key)
+	// c.Delete(key)
 	return isValid
 }
 
@@ -45,12 +42,26 @@ func (c *Cache) Delete(key string) {
 	delete(c.Items, key)
 }
 
-func NewCache(t string, d time.Duration) *Cache {
+// func NewCache(t string, d time.Duration) *Cache {
+// 	c := &Cache{
+// 		Items: map[string]*CacheItem{tools.GenRandSlug(48): {
+// 			Expires:   time.Now().Add(d).UnixNano(),
+// 			CacheType: t,
+// 		}},
+// 	}
+// 	return c
+// }
+
+func NewCahce() *Cache {
 	c := &Cache{
-		Items: map[string]*CacheItem{tools.GenRandSlug(48): {
-			Expires:   time.Now().Add(d).UnixNano(),
-			CacheType: t,
-		}},
+		Items: map[string]map[string]*CacheItem{},
 	}
 	return c
+}
+
+func (c *Cache) AddCacheItem(kind string, d time.Duration) {
+	key := tools.GenRandSlug(32)
+	c.Items[kind][key] = &CacheItem{
+		Expires: time.Now().Add(d).UnixNano(),
+	}
 }

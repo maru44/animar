@@ -12,10 +12,11 @@ func main() {
 
 	router := http.NewServeMux()
 	lg := domain.NewAccessLog()
+	cache := domain.NewCahce()
 
 	sqlHandler := infrastructure.NewSqlHandler()
 	uploader := infrastructure.NewS3Uploader()
-	base := controllers.NewBaseController()
+	base := controllers.NewBaseController(*cache)
 
 	router.Handle("/", base.BaseMiddleware(http.HandlerFunc(base.GatewayView)))
 
