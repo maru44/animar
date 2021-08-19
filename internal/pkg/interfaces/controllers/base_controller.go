@@ -171,6 +171,7 @@ func (controller *BaseController) BaseMiddleware(next http.Handler) http.Handler
 	})
 }
 
+// csrf
 func (controller *BaseController) VerifyCsrfMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		csrfToken, err := r.Cookie(CSRF_COOKIE_KEY)
@@ -319,9 +320,9 @@ func (controller *BaseController) AdminRequiredMiddlewareGet(next http.Handler) 
       set cookie
 ************************/
 
-func (controller *BaseController) SetCsrfCookie(w http.ResponseWriter, r *http.Request) {
-	// c := domain.NewCache(domain.CacheTypeCsrf, domain.CsrfInterval) // mainで作る
+func (controller *BaseController) SetCsrfCookieView(w http.ResponseWriter, r *http.Request) {
 	csrfToken := tools.GenRandSlug(32)
-	controller.cache.AddCacheItem(csrfToken, domain.CsrfInterval)
+	controller.cache.AddCacheItem(domain.CacheTypeCsrf, csrfToken, domain.CsrfInterval)
 	controller.setCookiePackage(w, CSRF_COOKIE_KEY, csrfToken, 60*60)
+	return
 }

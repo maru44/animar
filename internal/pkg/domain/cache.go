@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"animar/v1/internal/pkg/tools/tools"
 	"time"
 )
 
@@ -30,38 +29,68 @@ func (ci *CacheItem) Valid(time int64) bool {
 
 func (c *Cache) Get(kind, key string) bool {
 	isValid := false
-	v, ok := c.Items[kind]
+	v, ok := c.Items[kind][key]
 	if ok {
-		isValid = v[key].Valid(time.Now().UnixNano())
+		isValid = v.Valid(time.Now().UnixNano())
 	}
-	// c.Delete(key)
 	return isValid
 }
 
-func (c *Cache) Delete(key string) {
-	delete(c.Items, key)
+func (c *Cache) delete(kind, key string) {
+	delete(c.Items[kind], key)
 }
 
-// func NewCache(t string, d time.Duration) *Cache {
-// 	c := &Cache{
-// 		Items: map[string]*CacheItem{tools.GenRandSlug(48): {
-// 			Expires:   time.Now().Add(d).UnixNano(),
-// 			CacheType: t,
-// 		}},
-// 	}
-// 	return c
-// }
+func (c *Cache) DeleteExpired(kind string) {
+	if v, ok := c.Items[kind]; !ok {
+		return
+	} else {
+		for key, ci := range v {
+			if !ci.Valid(time.Now().UnixNano()) {
+				c.delete(kind, key)
+			}
+		}
+	}
+}
 
 func NewCahce() *Cache {
 	c := &Cache{
-		Items: map[string]map[string]*CacheItem{},
+		Items: map[string]map[string]*CacheItem{
+			CacheTypeCsrf: {},
+		},
 	}
 	return c
 }
 
-func (c *Cache) AddCacheItem(kind string, d time.Duration) {
-	key := tools.GenRandSlug(32)
+func (c *Cache) AddCacheItem(kind, key string, d time.Duration) {
 	c.Items[kind][key] = &CacheItem{
 		Expires: time.Now().Add(d).UnixNano(),
 	}
+}
+
+func (c *Cache) DeleteRegularly(kind string, d time.Duration) {
+	// t := time.NewTicker(d)
+	// defer t.Stop()
+
+	// delete := make(chan bool)
+	// go func() {
+	// 	for {
+	// 		select {
+	// 		case <-delete:
+	// 			fmt.Print("aaaa")
+	// 			c.DeleteExpired(kind)
+	// 		}
+	// 	}
+	// }()
+
+	go func() {
+		t := time.NewTicker(d)
+		defer t.Stop()
+
+		for {
+			select {
+			case <-t.C:
+				c.DeleteExpired(kind)
+			}
+		}
+	}()
 }

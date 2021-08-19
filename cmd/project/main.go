@@ -5,8 +5,8 @@ import (
 	"animar/v1/internal/pkg/infrastructure"
 	"animar/v1/internal/pkg/interfaces/controllers"
 	"animar/v1/internal/pkg/tools/tools"
-	"fmt"
 	"net/http"
+	"time"
 )
 
 func main() {
@@ -18,6 +18,10 @@ func main() {
 	sqlHandler := infrastructure.NewSqlHandler()
 	uploader := infrastructure.NewS3Uploader()
 	base := controllers.NewBaseController(*cache)
+
+	go func() {
+		cache.DeleteRegularly(controllers.CSRF_COOKIE_KEY, time.Second)
+	}()
 
 	router.Handle("/", base.BaseMiddleware(http.HandlerFunc(base.GatewayView)))
 
@@ -122,12 +126,12 @@ func main() {
 	router.Handle("/admin/staffrole/post/", base.BaseMiddleware(base.AdminRequiredMiddleware(base.PostOnlyMiddleware(http.HandlerFunc(adminController.InsertStaffRoleView)))))
 
 	// test for csrf
-	router.Handle("/test/csrf/", base.BaseMiddleware(http.HandlerFunc(base.SetCsrfCookieView)))
-	router.Handle("/test/verify/", base.BaseMiddleware(base.VerifyCsrfMiddleware(
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprint(w, cache.Items[domain.CacheTypeCsrf])
-		}),
-	)))
+	router.Handle("/csrf/", base.BaseMiddleware(http.HandlerFunc(base.SetCsrfCookieView)))
+	// router.Handle("/test/verify/", base.BaseMiddleware(base.VerifyCsrfMiddleware(
+	// 	http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// 		fmt.Fprint(w, cache.Items[domain.CacheTypeCsrf])
+	// 	}),
+	// )))
 
 	if tools.IsProductionEnv() {
 		if err := http.ListenAndServe(":8000", infrastructure.Log(router, lg)); err != nil {
