@@ -10,5 +10,6 @@ var (
 	ErrBadRequest          = errors.New("Bad Request")
 	ErrUnknownType         = errors.New("Unknow Type")
 	ErrMethodNotAllowed    = errors.New("Method Not Allowed")
+	ErrCsrfNotValid        = errors.New("Csrf Not Valid")
 	StatusCreated          = errors.New("Created")
 )

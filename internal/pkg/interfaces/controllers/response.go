@@ -38,6 +38,8 @@ func getStatusCode(err error) int {
 		return http.StatusUnsupportedMediaType
 	case domain.ErrMethodNotAllowed:
 		return http.StatusMethodNotAllowed
+	case domain.ErrCsrfNotValid:
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}

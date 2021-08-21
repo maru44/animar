@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 type BaseController struct {
@@ -176,11 +177,14 @@ func (controller *BaseController) VerifyCsrfMiddleware(next http.Handler) http.H
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		csrfToken, err := r.Cookie(CSRF_COOKIE_KEY)
 		if err != nil {
-			domain.ErrorWarn(err)
+			err = domain.ErrCsrfNotValid
+			response(w, err, nil)
 			return
 		}
 		cache := controller.cache
 		if ok := cache.Get(domain.CacheTypeCsrf, csrfToken.Value); !ok {
+			err = domain.ErrCsrfNotValid
+			response(w, err, nil)
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -322,7 +326,8 @@ func (controller *BaseController) AdminRequiredMiddlewareGet(next http.Handler) 
 
 func (controller *BaseController) SetCsrfCookieView(w http.ResponseWriter, r *http.Request) {
 	csrfToken := tools.GenRandSlug(32)
-	controller.cache.AddCacheItem(domain.CacheTypeCsrf, csrfToken, domain.CsrfInterval)
-	controller.setCookiePackage(w, CSRF_COOKIE_KEY, csrfToken, 60*60)
+	controller.cache.AddCacheItem(domain.CacheTypeCsrf, csrfToken, domain.CSRF_INTERVAL_MINUTE*time.Minute)
+	controller.destroyCookie(w, CSRF_COOKIE_KEY)
+	controller.setCookiePackage(w, CSRF_COOKIE_KEY, csrfToken, 60*domain.CSRF_INTERVAL_MINUTE)
 	return
 }

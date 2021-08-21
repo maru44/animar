@@ -1,12 +1,14 @@
 package domain
 
 import (
+	"fmt"
 	"time"
 )
 
 const (
 	// interval
-	CsrfInterval = 120 * time.Second
+	// CsrfInterval = 30 * time.Minute
+	CSRF_INTERVAL_MINUTE = 30
 
 	// type
 	CacheTypeCsrf = "CSRF"
@@ -89,6 +91,7 @@ func (c *Cache) DeleteRegularly(kind string, d time.Duration) {
 		for {
 			select {
 			case <-t.C:
+				fmt.Print(c.Items[CacheTypeCsrf])
 				c.DeleteExpired(kind)
 			}
 		}
