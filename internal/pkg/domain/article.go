@@ -62,6 +62,7 @@ type ArticleInteractor interface {
 	InsertArticle(articleInput ArticleInput) (int, error)
 	UpdateArticle(articleInput ArticleInput, id int) (int, error)
 	DeleteArticle(id int) (int, error)
+	FetchArticleByAnime(animeId int) ([]Article, error)
 	// character
 	FetchArticleCharas(articleId int) ([]ArticleCharacter, error)
 	FetchArticleCharasByUser(userId string) ([]ArticleCharacter, error)

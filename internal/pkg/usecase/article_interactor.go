@@ -23,6 +23,7 @@ type ArticleRepository interface {
 	Insert(articleInput domain.ArticleInput) (int, error)
 	Update(articleInput domain.ArticleInput, id int) (int, error)
 	Delete(id int) (int, error)
+	FilterByAnime(animeId int) ([]domain.Article, error)
 	FilterCharaById(articleId int) ([]domain.ArticleCharacter, error)
 	FilterCharaByUserId(userId string) ([]domain.ArticleCharacter, error)
 	InsertChara(charaInput domain.ArticleCharacterInput) (int, error)
@@ -60,6 +61,10 @@ func (arti *ArticleInteractor) UpdateArticle(articleInput domain.ArticleInput, i
 
 func (arti *ArticleInteractor) DeleteArticle(id int) (int, error) {
 	return arti.artr.Delete(id)
+}
+
+func (arti *ArticleInteractor) FetchArticleByAnime(animeId int) ([]domain.Article, error) {
+	return arti.artr.FilterByAnime(animeId)
 }
 
 func (arti *ArticleInteractor) FetchArticleCharas(articleId int) ([]domain.ArticleCharacter, error) {
