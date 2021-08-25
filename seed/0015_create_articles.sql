@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS go_test.interview_quote;
 DROP TABLE IF EXISTS go_test.article_chara;
 DROP TABLE IF EXISTS go_test.articles;
+DROP TABLE IF EXISTS go_test.relation_article_anime;
 CREATE TABLE articles (
     id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
     slug VARCHAR(16) NOT NULL,
@@ -15,6 +16,7 @@ CREATE TABLE articles (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX slug_index(slug)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+-- character of article
 CREATE TABLE IF NOT EXISTS go_test.article_chara(
     id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
     article_id INT UNSIGNED NULL,
@@ -26,6 +28,7 @@ CREATE TABLE IF NOT EXISTS go_test.article_chara(
     CONSTRAINT fk_article_chara FOREIGN KEY (article_id) REFERENCES articles (id) ON DELETE
     SET NULL ON UPDATE CASCADE
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+-- interview section
 CREATE TABLE IF NOT EXISTS go_test.interview_quote(
     id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
     article_id INT UNSIGNED NULL,
@@ -38,4 +41,10 @@ CREATE TABLE IF NOT EXISTS go_test.interview_quote(
     SET NULL ON UPDATE CASCADE,
         CONSTRAINT fk_article_interviewer FOREIGN KEY (chara_id) REFERENCES article_chara (id) ON DELETE
     SET NULL ON UPDATE CASCADE
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+-- Relation anime + article(M/M)
+CREATE TABLE IF NOT EXISTS go_test.relation_article_anime (
+    anime_id INT UNSIGNED NOT NULL,
+    article_id INT UNSIGNED NOT NULL,
+    PRIMARY KEY(anime_id, article_id)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
