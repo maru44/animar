@@ -83,6 +83,24 @@ func (artr *ArticleRepository) Insert(a domain.ArticleInput) (inserted int, err 
 	return int(rawInserted), err
 }
 
+func (artr *ArticleRepository) Update(a domain.ArticleInput, articleId int) (affected int, err error) {
+	exe, err := artr.Execute(
+		"UPDATE articles SET article_type, abstract = ?, content = ?, image = ?, author = ?, is_public = ? "+
+			"WHERE id = ?",
+		a.ArticleType, a.Abstract, a.Content, a.Image, a.Author, a.IsPublic, articleId,
+	)
+	if err != nil {
+		domain.ErrorWarn(err)
+		return
+	}
+	rawAffected, err := exe.RowsAffected()
+	if err != nil {
+		domain.ErrorWarn(err)
+		return
+	}
+	return int(rawAffected), err
+}
+
 func (artr *ArticleRepository) FilterCharaById(articleId int) (charas []domain.ArticleCharacter, err error) {
 	rows, err := artr.Query(
 		"SELECT id, chara_name, image, created_at, updated_at ",
