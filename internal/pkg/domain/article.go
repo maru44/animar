@@ -39,7 +39,7 @@ type ArticleInput struct {
 	Image       *string `json:"image,omitempty"`
 	Author      *string `json:"author,omitempty"`
 	IsPublic    bool    `json:"is_public"`
-	UserId      string  `json:"user_id"`
+	// UserId      string  `json:"user_id"`
 }
 
 type ArticleCharacterInput struct {
@@ -67,15 +67,15 @@ type ArticleInteractor interface {
 	FetchArticles() ([]Article, error)
 	GetArticleById(id int) (Article, error)
 	GetArticleBySlug(slug string) (Article, error)
-	InsertArticle(articleInput ArticleInput) (int, error)
-	UpdateArticle(articleInput ArticleInput, id int) (int, error)
+	InsertArticle(articleInput ArticleInput, userId string) (int, error)
+	UpdateArticle(articleInput ArticleInput, id int, userId string) (int, error)
 	DeleteArticle(id int) (int, error)
 	FetchArticleByAnime(animeId int) ([]Article, error)
 	// character
 	FetchArticleCharas(articleId int) ([]ArticleCharacter, error)
 	FetchArticleCharasByUser(userId string) ([]ArticleCharacter, error)
-	InsertArticleChara(charaInput ArticleCharacterInput) (int, error)
-	UpdateArticleChara(charaInput ArticleCharacterInput, id int) (int, error)
+	InsertArticleChara(charaInput ArticleCharacterInput, animeId int, userId string) (int, error)
+	UpdateArticleChara(charaInput ArticleCharacterInput, id int, userId string) (int, error)
 	DeleteArticleChara(id int) (int, error)
 	// interview
 	FetchInterviewQuotes(articleId int) ([]InterviewQuote, error)
