@@ -17,7 +17,6 @@ type Article struct {
 
 type ArticleCharacter struct {
 	ID        int     `json:"id"`
-	ArticleId *int    `json:"article_id,omitempty"`
 	Name      string  `json:"chara_name,omitempty"`
 	Image     *string `json:"chara_image,omitempty"`
 	CreatedAt string  `json:"created_at"`
@@ -34,7 +33,6 @@ type InterviewQuote struct {
 }
 
 type ArticleInput struct {
-	// Slug        string  `json:"slug"`
 	ArticleType string  `json:"article_type"`
 	Abstract    *string `json:"abstract,omitempty"`
 	Content     *string `json:"content,omitempty"`
@@ -45,14 +43,24 @@ type ArticleInput struct {
 }
 
 type ArticleCharacterInput struct {
-	ArticleId *int   `json:"article_id,omitempty"`
-	Name      string `json:"chara_name,omitempty"`
+	Name  string  `json:"chara_name"`
+	Image *string `json:"image,omitempty"`
 }
 
 type InterviewQuoteInput struct {
 	ArticleId *int   `json:"article_id,omitempty"`
 	CharaId   *int   `json:"chara_id,omitempty"`
 	Content   string `json:"content"`
+}
+
+type RelationArticleCharacterInput struct {
+	ArticleId int `json:"article_id"`
+	CharaId   int `json:"chara_id"`
+}
+
+type RelationArticleAnimeInput struct {
+	AnimeId   int `json:"anime_id"`
+	ArticleId int `json:"article_id"`
 }
 
 type ArticleInteractor interface {
@@ -74,10 +82,7 @@ type ArticleInteractor interface {
 	InsertInterviewQuote(interviewInput InterviewQuoteInput) (int, error)
 	UpdateInterviewQuote(interviewInput InterviewQuoteInput, id int) (int, error)
 	DeleteInterviewQuote(id int) (int, error)
-}
-
-type ArticleCharacterInteractor interface {
-}
-
-type InterviewQuoteInteractor interface {
+	// input relation
+	InsertRelationArticleCharacter(in RelationArticleCharacterInput) (int, error)
+	InsertRelationArticleAnime(in RelationArticleAnimeInput) (int, error)
 }

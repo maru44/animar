@@ -33,14 +33,16 @@ type ArticleRepository struct {
 // 	InsertInterviewQuote(interviewInput InterviewQuoteInput) (int, error)
 // 	UpdateInterviewQuote(interviewInput InterviewQuoteInput, id int) (int, error)
 // 	DeleteInterviewQuote(id int) (int, error)
+// InsertRelationArticleCharacter(in domain.RelationArticleCharacterInput) (int, error)
+// InsertRelationArticleAnime(in domain.RelationArticleAnimeInput) (int, error)
 // }
 
 func (artr *ArticleRepository) Fetch() (articles []domain.Article, err error) {
 	rows, err := artr.Query(
-		"SELECT id, slug, article_type, abstract, content, image, author, is_public, user_id, created_at, updated_at, ",
-		"FROM articles ",
-		"WHERE is_public = true ",
-		"ORDER BY created_at DESC",
+		"SELECT id, slug, article_type, abstract, content, image, author, is_public, user_id, created_at, updated_at, " +
+			"FROM articles " +
+			"WHERE is_public = true " +
+			"ORDER BY created_at DESC",
 	)
 	if err != nil {
 		domain.ErrorWarn(err)
@@ -64,9 +66,9 @@ func (artr *ArticleRepository) Fetch() (articles []domain.Article, err error) {
 
 func (artr *ArticleRepository) GetById(id int) (a domain.Article, err error) {
 	rows, err := artr.Query(
-		"SELECT id, slug, article_type, abstract, content, image, author, is_public, user_id, created_at, updated_at, ",
-		"FROM articles ",
-		"WHERE id = ?",
+		"SELECT id, slug, article_type, abstract, content, image, author, is_public, user_id, created_at, updated_at, "+
+			"FROM articles "+
+			"WHERE id = ?",
 		id,
 	)
 	if err != nil {
@@ -93,9 +95,9 @@ func (artr *ArticleRepository) GetById(id int) (a domain.Article, err error) {
 
 func (artr *ArticleRepository) GetBySlug(slug string) (a domain.Article, err error) {
 	rows, err := artr.Query(
-		"SELECT id, slug, article_type, abstract, content, image, author, is_public, user_id, created_at, updated_at, ",
-		"FROM articles ",
-		"WHERE slug = ?",
+		"SELECT id, slug, article_type, abstract, content, image, author, is_public, user_id, created_at, updated_at, "+
+			"FROM articles "+
+			"WHERE slug = ?",
 		slug,
 	)
 	if err != nil {
@@ -111,19 +113,19 @@ func (artr *ArticleRepository) GetBySlug(slug string) (a domain.Article, err err
 		domain.ErrorWarn(err)
 		return
 	} else {
-		// if cs, err := artr.FilterCharaById(s); err != nil {
-		// 	domain.ErrorWarn(err)
-		// } else {
-		// 	a.Characters = cs
-		// }
+		if cs, err := artr.FilterCharaById(a.ID); err != nil {
+			domain.ErrorWarn(err)
+		} else {
+			a.Characters = cs
+		}
 	}
 	return
 }
 
 func (artr *ArticleRepository) Insert(a domain.ArticleInput) (inserted int, err error) {
 	exe, err := artr.Execute(
-		"INSERT INTO (slug, article_type, abstract, content, image, author, is_public, user_id) ",
-		"VALUES (?, ?, ?, ?, ?, ?, ?, ?) ",
+		"INSERT INTO (slug, article_type, abstract, content, image, author, is_public, user_id) "+
+			"VALUES (?, ?, ?, ?, ?, ?, ?, ?) ",
 		tools.GenRandSlug(12), a.ArticleType, a.Abstract, a.Content, a.Image, a.IsPublic, a.UserId,
 	)
 	if err != nil {
@@ -156,17 +158,57 @@ func (artr *ArticleRepository) Update(a domain.ArticleInput, articleId int) (aff
 	return int(rawAffected), err
 }
 
-// func (artr *ArticleRepository) Delete(id int) (affected int, err error) {
-// }
+func (artr *ArticleRepository) Delete(id int) (affected int, err error) {
+	exe, err := artr.Execute(
+		"DELETE FROM articles "+
+			"WHERE id = ?",
+		id,
+	)
+	if err != nil {
+		domain.ErrorWarn(err)
+		return
+	}
+	rawAffected, err := exe.RowsAffected()
+	if err != nil {
+		domain.ErrorWarn(err)
+		return
+	}
+	return int(rawAffected), err
+}
 
-// func (artr *ArticleRepository) FilterByAnime(animeId int) (as []domain.Article, err error) {
-// }
+func (artr *ArticleRepository) FilterByAnime(animeId int) (articles []domain.Article, err error) {
+	rows, err := artr.Query(
+		"SELECT id, slug, article_type, abstract, content, image, author, is_public, user_id, created_at, updated_at, "+
+			"FROM articles "+
+			"WHERE is_public = true AND id = ? "+
+			"ORDER BY created_at DESC",
+		animeId,
+	)
+	if err != nil {
+		domain.ErrorWarn(err)
+		return
+	}
+	for rows.Next() {
+		var a domain.Article
+		err = rows.Scan(
+			&a.ID, &a.Slug, &a.ArticleType, &a.Abstract, &a.Content,
+			&a.Image, &a.Author, &a.IsPublic, &a.CreatedAt, &a.UpdatedAt,
+		)
+		a.Characters, err = artr.FilterCharaById(a.ID)
+		if err != nil {
+			domain.ErrorWarn(err)
+			return
+		}
+		articles = append(articles, a)
+	}
+	return
+}
 
 func (artr *ArticleRepository) FilterCharaById(articleId int) (cs []domain.ArticleCharacter, err error) {
 	rows, err := artr.Query(
-		"SELECT id, chara_name, image, created_at, updated_at ",
-		"FROM anime_character ",
-		"WHERE article_id = ?", articleId,
+		"SELECT id, chara_name, image, created_at, updated_at "+
+			"FROM anime_character "+
+			"WHERE article_id = ?", articleId,
 	)
 	if err != nil {
 		domain.ErrorWarn(err)
@@ -180,10 +222,30 @@ func (artr *ArticleRepository) FilterCharaById(articleId int) (cs []domain.Artic
 	return
 }
 
-// func (artr *ArticleRepository) FilterCharaByUserId(userId string) (cs []domain.ArticleCharacter, err error) {
-// }
+func (artr *ArticleRepository) FilterCharaByUserId(userId string) (cs []domain.ArticleCharacter, err error) {
+	rows, err := artr.Query(
+		"SELECT id, chara_name, image, created_at, updated_at "+
+			"FROM article_chara "+
+			"WHERE user_id = ?",
+		userId,
+	)
+	if err != nil {
+		domain.ErrorWarn(err)
+		return
+	}
+	for rows.Next() {
+		var c domain.ArticleCharacter
+		rows.Scan(&c.ID, &c.Name, &c.Image, &c.CreatedAt, &c.UpdatedAt)
+		cs = append(cs, c)
+	}
+	return cs, err
+}
 
 // func (artr *ArticleRepository) InsertChara(ci domain.ArticleCharacterInput) (inserted int, err error) {
+// 	exe, err := artr.Execute(
+// 		"INSERT INTO (slug, article_type, abstract, content, image, author, is_public, user_id) "+
+// 			"VALUES (?, ?, ?, ?, ?, ?, ?, ?) ",
+// 	)
 // }
 
 // func (artr *ArticleRepository) UpdateChara(ci domain.ArticleCharacterInput, id int) (affected int, err error) {}

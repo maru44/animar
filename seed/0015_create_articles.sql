@@ -19,7 +19,6 @@ CREATE TABLE articles (
 -- character of article
 CREATE TABLE IF NOT EXISTS go_test.article_chara(
     id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    article_id INT UNSIGNED NULL,
     chara_name VARCHAR(48),
     image VARCHAR(128) NULL,
     user_id VARCHAR(128) NOT NULL,
@@ -41,6 +40,12 @@ CREATE TABLE IF NOT EXISTS go_test.interview_quote(
     SET NULL ON UPDATE CASCADE,
         CONSTRAINT fk_article_interviewer FOREIGN KEY (chara_id) REFERENCES article_chara (id) ON DELETE
     SET NULL ON UPDATE CASCADE
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+-- Relation article + character
+CREATE TABLE IF NOT EXISTS go_test.relation_article_chara (
+    article_id INT UNSIGNED NOT NULL,
+    chara_id INT UNSIGNED NOT NULL,
+    PRIMARY KEY(article_id, chara_id)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 -- Relation anime + article(M/M)
 CREATE TABLE IF NOT EXISTS go_test.relation_article_anime (

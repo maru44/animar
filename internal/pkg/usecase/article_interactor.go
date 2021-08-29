@@ -33,6 +33,8 @@ type ArticleRepository interface {
 	InsertInterview(interviewInput domain.InterviewQuoteInput) (int, error)
 	UpdateInterview(interviewInput domain.InterviewQuoteInput, id int) (int, error)
 	DeleteInterview(id int) (int, error)
+	InsertRelationArticleCharacter(in domain.RelationArticleCharacterInput) (int, error)
+	InsertRelationArticleAnime(in domain.RelationArticleAnimeInput) (int, error)
 }
 
 /**********************
@@ -101,4 +103,12 @@ func (arti *ArticleInteractor) UpdateInterviewQuote(interviewInput domain.Interv
 
 func (arti *ArticleInteractor) DeleteInterviewQuote(id int) (int, error) {
 	return arti.artr.DeleteInterview(id)
+}
+
+func (arti *ArticleInteractor) InsertRelationArticleCharacter(in domain.RelationArticleCharacterInput) (int, error) {
+	return arti.artr.InsertRelationArticleCharacter(in)
+}
+
+func (arti *ArticleInteractor) InsertRelationArticleAnime(in domain.RelationArticleAnimeInput) (int, error) {
+	return arti.artr.InsertRelationArticleAnime(in)
 }
