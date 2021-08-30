@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS go_test.interview_quote(
     id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
     article_id INT UNSIGNED NULL,
     chara_id INT UNSIGNED NULL,
+    user_id INT UNSIGNED NULL,
     sequence INT DEFAULT 0,
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

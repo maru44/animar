@@ -245,11 +245,58 @@ func (artr *ArticleRepository) UpdateChara(ci domain.ArticleCharacterInput, id i
 	return int(rawAffected), err
 }
 
-// func (artr *ArticleRepository) DeleteChara(id int) (affected int, err error) {}
+func (artr *ArticleRepository) DeleteChara(id int) (affected int, err error) {
+	exe, err := artr.Execute(
+		"DELETE FROM article_chara "+
+			"WHERE id = ?",
+		id,
+	)
+	rawAffected, err := exe.RowsAffected()
+	if err != nil {
+		return
+	}
+	return int(rawAffected), err
+}
 
-// func (artr *ArticleRepository) FetchInterview(articleId int) (ints []domain.InterviewQuote, err error) {}
+func (artr *ArticleRepository) FetchInterview(articleId int) (ints []domain.InterviewQuote, err error) {
+	rows, err := artr.Query(
+		"SELECT id, chara_id, content, user_id, sequence, created_at, updated_at "+
+			"FROM interview_quote "+
+			"WHERE article_id = ?",
+		articleId,
+	)
+	if err != nil {
+		return
+	}
+	for rows.Next() {
+		var i domain.InterviewQuote
+		err := rows.Scan(
+			&i.ID, &i.CharaId, &i.Content, &i.UserId, &i.Sequence,
+			&i.CreatedAt, &i.UpdatedAt,
+		)
+		if err != nil {
+			domain.ErrorWarn(err)
+		}
+		ints = append(ints, i)
+	}
+	return
+}
 
-// func (artr *ArticleRepository) InsertInterview(ii domain.InterviewQuoteInput) (int, error)
+func (artr *ArticleRepository) InsertInterview(ii domain.InterviewQuoteInput, userId string) (inserted int, err error) {
+	exe, err := artr.Execute(
+		"INSERT INTO interview_quote(article_id, chara_id, content, sequence, userId) "+
+			"VALUES (?, ?, ?, ?, ?)",
+		ii.ArticleId, ii.CharaId, ii.Content, ii.Sequence, userId,
+	)
+	if err != nil {
+		return
+	}
+	rawInserted, err := exe.LastInsertId()
+	if err != nil {
+		return
+	}
+	return int(rawInserted), err
+}
 
 // func (artr *ArticleRepository) UpdateInterview(ii domain.InterviewQuoteInput, id int) (int, error) {}
 

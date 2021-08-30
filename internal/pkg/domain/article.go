@@ -28,6 +28,8 @@ type InterviewQuote struct {
 	ArticleId *int   `json:"article_id,omitempty"`
 	CharaId   *int   `json:"chara_id,omitempty"`
 	Content   string `json:"content"`
+	UserId    string `json:"user_id"`
+	Sequence  int    `json:"sequence"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 }
@@ -51,6 +53,7 @@ type InterviewQuoteInput struct {
 	ArticleId *int   `json:"article_id,omitempty"`
 	CharaId   *int   `json:"chara_id,omitempty"`
 	Content   string `json:"content"`
+	Sequence  int    `json:"sequence"`
 }
 
 type RelationArticleCharacterInput struct {
@@ -79,7 +82,7 @@ type ArticleInteractor interface {
 	DeleteArticleChara(id int) (int, error)
 	// interview
 	FetchInterviewQuotes(articleId int) ([]InterviewQuote, error)
-	InsertInterviewQuote(interviewInput InterviewQuoteInput) (int, error)
+	InsertInterviewQuote(interviewInput InterviewQuoteInput, userId string) (int, error)
 	UpdateInterviewQuote(interviewInput InterviewQuoteInput, id int) (int, error)
 	DeleteInterviewQuote(id int) (int, error)
 	// input relation

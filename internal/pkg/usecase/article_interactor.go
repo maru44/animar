@@ -30,7 +30,7 @@ type ArticleRepository interface {
 	UpdateChara(charaInput domain.ArticleCharacterInput, id int, userId string) (int, error)
 	DeleteChara(id int) (int, error)
 	FetchInterview(articleId int) ([]domain.InterviewQuote, error)
-	InsertInterview(interviewInput domain.InterviewQuoteInput) (int, error)
+	InsertInterview(interviewInput domain.InterviewQuoteInput, userId string) (int, error)
 	UpdateInterview(interviewInput domain.InterviewQuoteInput, id int) (int, error)
 	DeleteInterview(id int) (int, error)
 	InsertRelationArticleCharacter(in domain.RelationArticleCharacterInput) (int, error)
@@ -93,8 +93,8 @@ func (arti *ArticleInteractor) FetchInterviewQuotes(articleId int) ([]domain.Int
 	return arti.artr.FetchInterview(articleId)
 }
 
-func (arti *ArticleInteractor) InsertInterviewQuote(interviewInput domain.InterviewQuoteInput) (int, error) {
-	return arti.artr.InsertInterview(interviewInput)
+func (arti *ArticleInteractor) InsertInterviewQuote(interviewInput domain.InterviewQuoteInput, userId string) (int, error) {
+	return arti.artr.InsertInterview(interviewInput, userId)
 }
 
 func (arti *ArticleInteractor) UpdateInterviewQuote(interviewInput domain.InterviewQuoteInput, id int) (int, error) {
