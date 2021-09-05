@@ -152,6 +152,8 @@ func (artr *ArticleRepository) Delete(id int) (affected int, err error) {
 	return int(rawAffected), err
 }
 
+/*   chara   */
+
 func (artr *ArticleRepository) FilterByAnime(animeId int) (articles []domain.Article, err error) {
 	rows, err := artr.Query(
 		"SELECT id, slug, article_type, abstract, content, image, author, is_public, user_id, created_at, updated_at, "+
@@ -251,12 +253,17 @@ func (artr *ArticleRepository) DeleteChara(id int) (affected int, err error) {
 			"WHERE id = ?",
 		id,
 	)
+	if err != nil {
+		return
+	}
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
 		return
 	}
 	return int(rawAffected), err
 }
+
+/*   interview quote   */
 
 func (artr *ArticleRepository) FetchInterview(articleId int) (ints []domain.InterviewQuote, err error) {
 	rows, err := artr.Query(
@@ -298,6 +305,35 @@ func (artr *ArticleRepository) InsertInterview(ii domain.InterviewQuoteInput, us
 	return int(rawInserted), err
 }
 
-// func (artr *ArticleRepository) UpdateInterview(ii domain.InterviewQuoteInput, id int) (int, error) {}
+func (artr *ArticleRepository) UpdateInterview(ii domain.InterviewQuoteInput, id int) (affected int, err error) {
+	exe, err := artr.Execute(
+		"UPDATE interview_quote "+
+			"SET chara_id = ?, content = ?, sequence = ? "+
+			"WHERE id = ?",
+		ii.CharaId, ii.Content, ii.Sequence, id,
+	)
+	if err != nil {
+		return
+	}
+	rawAffected, err := exe.RowsAffected()
+	if err != nil {
+		return
+	}
+	return int(rawAffected), err
+}
 
-// func (artr *ArticleRepository) DeleteInterview(id int) (int, error) {}
+func (artr *ArticleRepository) DeleteInterview(id int) (affected int, err error) {
+	exe, err := artr.Execute(
+		"DELETE FROM interview_quote "+
+			"WHERE id = ?",
+		id,
+	)
+	if err != nil {
+		return
+	}
+	rawAffected, err := exe.RowsAffected()
+	if err != nil {
+		return
+	}
+	return int(rawAffected), err
+}
