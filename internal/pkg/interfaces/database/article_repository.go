@@ -337,3 +337,39 @@ func (artr *ArticleRepository) DeleteInterview(id int) (affected int, err error)
 	}
 	return int(rawAffected), err
 }
+
+/*   relation chara   */
+
+func (artr *ArticleRepository) InsertRelationArticleCharacter(in domain.RelationArticleCharacterInput) (inserted int, err error) {
+	exe, err := artr.Execute(
+		"INSERT INTO articles(article_id, chara_id) "+
+			"VALUES (?, ?)",
+		in.ArticleId, in.CharaId,
+	)
+	if err != nil {
+		return
+	}
+	rawInserted, err := exe.LastInsertId()
+	if err != nil {
+		return
+	}
+	return int(rawInserted), err
+}
+
+/*   relation anime   */
+
+func (artr *ArticleRepository) InsertRelationArticleAnime(in domain.RelationArticleAnimeInput) (affected int, err error) {
+	exe, err := artr.Execute(
+		"INSERT INTO articles(anime_id, article_id) "+
+			"VALUES (?, ?)",
+		in.AnimeId, in.ArticleId,
+	)
+	if err != nil {
+		return
+	}
+	rawAffected, err := exe.RowsAffected()
+	if err != nil {
+		return
+	}
+	return int(rawAffected), err
+}
