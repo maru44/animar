@@ -120,7 +120,7 @@ func (artr *ArticleRepository) Insert(a domain.ArticleInput, userId string) (ins
 	return int(rawInserted), err
 }
 
-func (artr *ArticleRepository) Update(a domain.ArticleInput, articleId int, userId string) (affected int, err error) {
+func (artr *ArticleRepository) Update(a domain.ArticleInput, articleId int) (affected int, err error) {
 	exe, err := artr.Execute(
 		"UPDATE articles SET article_type, abstract = ?, content = ?, image = ?, author = ?, is_public = ? "+
 			"WHERE id = ?",
@@ -215,7 +215,7 @@ func (artr *ArticleRepository) FilterCharaByUserId(userId string) (cs []domain.A
 	return cs, err
 }
 
-func (artr *ArticleRepository) InsertChara(ci domain.ArticleCharacterInput, animeId int, userId string) (inserted int, err error) {
+func (artr *ArticleRepository) InsertChara(ci domain.ArticleCharacterInput, userId string) (inserted int, err error) {
 	exe, err := artr.Execute(
 		"INSERT INTO article_chara(chara_name, image, user_id) "+
 			"VALUES (?, ?, ?) ",

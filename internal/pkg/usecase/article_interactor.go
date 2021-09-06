@@ -21,13 +21,14 @@ type ArticleRepository interface {
 	GetById(id int) (domain.Article, error)
 	GetBySlug(slug string) (domain.Article, error)
 	Insert(articleInput domain.ArticleInput, userId string) (int, error)
-	Update(articleInput domain.ArticleInput, id int, userId string) (int, error)
+	// Update(articleInput domain.ArticleInput, id int, userId string) (int, error)
+	Update(articleInput domain.ArticleInput, id int) (int, error)
 	Delete(id int) (int, error)
 	FilterByAnime(animeId int) ([]domain.Article, error)
 	FilterCharaById(articleId int) ([]domain.ArticleCharacter, error)
 	FilterCharaByUserId(userId string) ([]domain.ArticleCharacter, error)
-	InsertChara(charaInput domain.ArticleCharacterInput, animeId int, userId string) (int, error)
-	UpdateChara(charaInput domain.ArticleCharacterInput, id int, userId string) (int, error)
+	InsertChara(charaInput domain.ArticleCharacterInput, userId string) (int, error)
+	UpdateChara(charaInput domain.ArticleCharacterInput, id int) (int, error)
 	DeleteChara(id int) (int, error)
 	FetchInterview(articleId int) ([]domain.InterviewQuote, error)
 	InsertInterview(interviewInput domain.InterviewQuoteInput, userId string) (int, error)
@@ -59,8 +60,8 @@ func (arti *ArticleInteractor) InsertArticle(articleInput domain.ArticleInput, u
 	return arti.artr.Insert(articleInput, userId)
 }
 
-func (arti *ArticleInteractor) UpdateArticle(articleInput domain.ArticleInput, id int, userId string) (int, error) {
-	return arti.artr.Update(articleInput, id, userId)
+func (arti *ArticleInteractor) UpdateArticle(articleInput domain.ArticleInput, id int) (int, error) {
+	return arti.artr.Update(articleInput, id)
 }
 
 func (arti *ArticleInteractor) DeleteArticle(id int) (int, error) {
@@ -79,12 +80,12 @@ func (arti *ArticleInteractor) FetchArticleCharasByUser(userId string) ([]domain
 	return arti.artr.FilterCharaByUserId(userId)
 }
 
-func (arti *ArticleInteractor) InsertArticleChara(charaInput domain.ArticleCharacterInput, animeId int, userId string) (int, error) {
-	return arti.artr.InsertChara(charaInput, animeId, userId)
+func (arti *ArticleInteractor) InsertArticleChara(charaInput domain.ArticleCharacterInput, userId string) (int, error) {
+	return arti.artr.InsertChara(charaInput, userId)
 }
 
-func (arti *ArticleInteractor) UpdateArticleChara(charaInput domain.ArticleCharacterInput, id int, userId string) (int, error) {
-	return arti.artr.UpdateChara(charaInput, id, userId)
+func (arti *ArticleInteractor) UpdateArticleChara(charaInput domain.ArticleCharacterInput, id int) (int, error) {
+	return arti.artr.UpdateChara(charaInput, id)
 }
 
 func (arti *ArticleInteractor) DeleteArticleChara(id int) (int, error) {
