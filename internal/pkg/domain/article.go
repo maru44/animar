@@ -87,5 +87,7 @@ type ArticleInteractor interface {
 	DeleteInterviewQuote(id int) (int, error)
 	// input relation
 	InsertRelationArticleCharacter(in RelationArticleCharacterInput) (int, error)
+	DeleteRelationArticleCharacter(in RelationArticleCharacterInput) (int, error)
 	InsertRelationArticleAnime(in RelationArticleAnimeInput) (int, error)
+	DeleteRelationArticleAnime(in RelationArticleAnimeInput) (int, error)
 }

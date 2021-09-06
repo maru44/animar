@@ -342,7 +342,7 @@ func (artr *ArticleRepository) DeleteInterview(id int) (affected int, err error)
 
 func (artr *ArticleRepository) InsertRelationArticleCharacter(in domain.RelationArticleCharacterInput) (inserted int, err error) {
 	exe, err := artr.Execute(
-		"INSERT INTO articles(article_id, chara_id) "+
+		"INSERT INTO relation_article_chara(article_id, chara_id) "+
 			"VALUES (?, ?)",
 		in.ArticleId, in.CharaId,
 	)
@@ -360,8 +360,40 @@ func (artr *ArticleRepository) InsertRelationArticleCharacter(in domain.Relation
 
 func (artr *ArticleRepository) InsertRelationArticleAnime(in domain.RelationArticleAnimeInput) (affected int, err error) {
 	exe, err := artr.Execute(
-		"INSERT INTO articles(anime_id, article_id) "+
+		"INSERT INTO relation_article_anime(anime_id, article_id) "+
 			"VALUES (?, ?)",
+		in.AnimeId, in.ArticleId,
+	)
+	if err != nil {
+		return
+	}
+	rawAffected, err := exe.RowsAffected()
+	if err != nil {
+		return
+	}
+	return int(rawAffected), err
+}
+
+func (artr *ArticleRepository) DeleteRelationArticleCharacter(in domain.RelationArticleCharacterInput) (affected int, err error) {
+	exe, err := artr.Execute(
+		"DELETE FROM relation_article_chara "+
+			"WHERE chara_id = ? AND article_id = ?",
+		in.CharaId, in.ArticleId,
+	)
+	if err != nil {
+		return
+	}
+	rawAffected, err := exe.RowsAffected()
+	if err != nil {
+		return
+	}
+	return int(rawAffected), err
+}
+
+func (artr *ArticleRepository) DeleteRelationArticleAnime(in domain.RelationArticleAnimeInput) (affected int, err error) {
+	exe, err := artr.Execute(
+		"DELETE FROM relation_article_anime "+
+			"WHERE chara_id = ? AND article_id = ?",
 		in.AnimeId, in.ArticleId,
 	)
 	if err != nil {
