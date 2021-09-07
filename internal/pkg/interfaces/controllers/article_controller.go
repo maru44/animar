@@ -4,7 +4,9 @@ import (
 	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/interfaces/database"
 	"animar/v1/internal/pkg/usecase"
+	"encoding/json"
 	"net/http"
+	"strconv"
 )
 
 // type ArticleRepository interface {
@@ -45,5 +47,53 @@ func NewArticleController(sqlHandler database.SqlHandler) *ArticleController {
 }
 
 func (artc *ArticleController) ArticleListView(w http.ResponseWriter, r *http.Request) {
+	articles, err := artc.interactor.FetchArticles()
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		response(w, err, map[string]interface{}{"data": articles})
+	}
+	return
+}
 
+func (artc *ArticleController) ArticleDetailView(w http.ResponseWriter, r *http.Request) {
+	slug := r.URL.Query().Get("slug")
+	article, err := artc.interactor.GetArticleBySlug(slug)
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		response(w, err, map[string]interface{}{"data": article})
+	}
+	return
+}
+
+func (artc *ArticleController) InsertArticleView(w http.ResponseWriter, r *http.Request) {
+	var in domain.ArticleInput
+	json.NewDecoder(r.Body).Decode(&in)
+	userId := r.Context().Value(USER_ID).(string)
+	inserted, err := artc.interactor.InsertArticle(in, userId)
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		response(w, err, map[string]interface{}{"data": inserted})
+	}
+	return
+}
+
+func (artc *ArticleController) UpdateArticleView(w http.ResponseWriter, r *http.Request) {
+	var in domain.ArticleInput
+	json.NewDecoder(r.Body).Decode(&in)
+	rawId := r.URL.Query().Get("id")
+	id, err := strconv.Atoi(rawId)
+	if err != nil {
+		response(w, err, nil)
+		return
+	}
+	affected, err := artc.interactor.UpdateArticle(in, id)
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		response(w, err, map[string]interface{}{"data": affected})
+	}
+	return
 }
