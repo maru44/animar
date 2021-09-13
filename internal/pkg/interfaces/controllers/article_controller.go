@@ -97,3 +97,105 @@ func (artc *ArticleController) UpdateArticleView(w http.ResponseWriter, r *http.
 	}
 	return
 }
+
+func (artr *ArticleController) DeleteArticleView(w http.ResponseWriter, r *http.Request) {
+	rawId := r.URL.Query().Get("id")
+	id, err := strconv.Atoi(rawId)
+	if err != nil {
+		response(w, err, nil)
+		return
+	}
+	affected, err := artr.interactor.DeleteArticle(id)
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		response(w, err, map[string]interface{}{"data": affected})
+	}
+	return
+}
+
+// 	InsertChara(charaInput domain.ArticleCharacterInput, animeId int, userId string) (int, error)
+// 	UpdateChara(charaInput domain.ArticleCharacterInput, id int, userId string) (int, error)
+// 	DeleteChara(id int) (int, error)
+
+/*  chara  */
+
+func (artr *ArticleController) FilterCharaByArticleView(w http.ResponseWriter, r *http.Request) {
+	rawId := r.URL.Query().Get("id")
+	id, err := strconv.Atoi(rawId)
+	if err != nil {
+		response(w, err, nil)
+		return
+	}
+	charas, err := artr.interactor.FetchArticleCharas(id)
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		response(w, err, map[string]interface{}{"data": charas})
+	}
+	return
+}
+
+func (artr *ArticleController) FilterCharaByUserView(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(USER_ID).(string)
+	charas, err := artr.interactor.FetchArticleCharasByUser(userId)
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		response(w, err, map[string]interface{}{"data": charas})
+	}
+	return
+}
+
+func (artr *ArticleController) InsertArticleCharaView(w http.ResponseWriter, r *http.Request) {
+	var in domain.ArticleCharacterInput
+	json.NewDecoder(r.Body).Decode(&in)
+
+	userId := r.Context().Value(USER_ID).(string)
+
+	inserted, err := artr.interactor.InsertArticleChara(in, userId)
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		response(w, err, map[string]interface{}{"data": inserted})
+	}
+	return
+}
+
+func (artr *ArticleController) UpdateArticleCharaView(w http.ResponseWriter, r *http.Request) {
+	var in domain.ArticleCharacterInput
+	json.NewDecoder(r.Body).Decode(&in)
+
+	// userId := r.Context().Value(USER_ID).(string)
+	rawId := r.URL.Query().Get("id")
+	id, err := strconv.Atoi(rawId)
+	if err != nil {
+		response(w, err, nil)
+		return
+	}
+
+	affected, err := artr.interactor.UpdateArticleChara(in, id)
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		response(w, err, map[string]interface{}{"data": affected})
+	}
+	return
+}
+
+func (artr *ArticleController) DeleteArticleCharaView(w http.ResponseWriter, r *http.Request) {
+	rawId := r.URL.Query().Get("id")
+	id, err := strconv.Atoi(rawId)
+	if err != nil {
+		response(w, err, nil)
+		return
+	}
+
+	affected, err := artr.interactor.DeleteArticleChara(id)
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		response(w, err, map[string]interface{}{"data": affected})
+	}
+	return
+}
