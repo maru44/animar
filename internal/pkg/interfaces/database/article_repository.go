@@ -9,34 +9,6 @@ type ArticleRepository struct {
 	SqlHandler
 }
 
-/*   interactor   */
-// type ArticleInteractor interface {
-// 	FetchArticles() ([]Article, error)
-// 	GetArticleById(id int) (Article, error)
-// 	GetArticleBySlug(slug string) (Article, error)
-// 	InsertArticle(articleInput ArticleInput) (int, error)
-// 	UpdateArticle(articleInput ArticleInput, id int) (int, error)
-// 	DeleteArticle(id int) (int, error)
-// 	FetchArticleByAnime(animeId int) ([]Article, error)
-
-// 	// character
-
-// 	FetchArticleCharas(articleId int) ([]ArticleCharacter, error)
-// 	FetchArticleCharasByUser(userId string) ([]ArticleCharacter, error)
-// 	InsertArticleChara(charaInput ArticleCharacterInput) (int, error)
-// 	UpdateArticleChara(charaInput ArticleCharacterInput, id int) (int, error)
-// 	DeleteArticleChara(id int) (int, error)
-
-// 	// interview
-
-// 	FetchInterviewQuotes(articleId int) ([]InterviewQuote, error)
-// 	InsertInterviewQuote(interviewInput InterviewQuoteInput) (int, error)
-// 	UpdateInterviewQuote(interviewInput InterviewQuoteInput, id int) (int, error)
-// 	DeleteInterviewQuote(id int) (int, error)
-// InsertRelationArticleCharacter(in domain.RelationArticleCharacterInput) (int, error)
-// InsertRelationArticleAnime(in domain.RelationArticleAnimeInput) (int, error)
-// }
-
 func (artr *ArticleRepository) Fetch() (articles []domain.Article, err error) {
 	rows, err := artr.Query(
 		"SELECT id, slug, article_type, abstract, content, image, author, is_public, user_id, created_at, updated_at, " +

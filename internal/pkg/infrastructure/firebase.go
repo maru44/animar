@@ -23,9 +23,6 @@ type FirebaseToken struct {
 	Token *auth.Token
 }
 
-//
-type FirebaseClaims map[string]interface{}
-
 type FirebaseRecord struct {
 	UserRecord *auth.UserRecord
 }

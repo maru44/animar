@@ -9,29 +9,6 @@ import (
 	"strconv"
 )
 
-// type ArticleRepository interface {
-// 	Fetch() ([]domain.Article, error)
-// 	GetById(id int) (domain.Article, error)
-// 	GetBySlug(slug string) (domain.Article, error)
-// 	Insert(articleInput domain.ArticleInput, userId string) (int, error)
-// 	Update(articleInput domain.ArticleInput, id int, userId string) (int, error)
-// 	Delete(id int) (int, error)
-// 	FilterByAnime(animeId int) ([]domain.Article, error)
-// 	FilterCharaById(articleId int) ([]domain.ArticleCharacter, error)
-// 	FilterCharaByUserId(userId string) ([]domain.ArticleCharacter, error)
-// 	InsertChara(charaInput domain.ArticleCharacterInput, animeId int, userId string) (int, error)
-// 	UpdateChara(charaInput domain.ArticleCharacterInput, id int, userId string) (int, error)
-// 	DeleteChara(id int) (int, error)
-// 	FetchInterview(articleId int) ([]domain.InterviewQuote, error)
-// 	InsertInterview(interviewInput domain.InterviewQuoteInput, userId string) (int, error)
-// 	UpdateInterview(interviewInput domain.InterviewQuoteInput, id int) (int, error)
-// 	DeleteInterview(id int) (int, error)
-// 	InsertRelationArticleCharacter(in domain.RelationArticleCharacterInput) (int, error)
-// 	DeleteRelationArticleCharacter(in domain.RelationArticleCharacterInput) (int, error)
-// 	InsertRelationArticleAnime(in domain.RelationArticleAnimeInput) (int, error)
-// 	DeleteRelationArticleAnime(in domain.RelationArticleAnimeInput) (int, error)
-// }
-
 type ArticleController struct {
 	interactor domain.ArticleInteractor
 }
@@ -114,10 +91,6 @@ func (artr *ArticleController) DeleteArticleView(w http.ResponseWriter, r *http.
 	return
 }
 
-// 	InsertChara(charaInput domain.ArticleCharacterInput, animeId int, userId string) (int, error)
-// 	UpdateChara(charaInput domain.ArticleCharacterInput, id int, userId string) (int, error)
-// 	DeleteChara(id int) (int, error)
-
 /*  chara  */
 
 func (artr *ArticleController) FilterCharaByArticleView(w http.ResponseWriter, r *http.Request) {
@@ -147,13 +120,13 @@ func (artr *ArticleController) FilterCharaByUserView(w http.ResponseWriter, r *h
 	return
 }
 
-func (artr *ArticleController) InsertArticleCharaView(w http.ResponseWriter, r *http.Request) {
+func (artc *ArticleController) InsertArticleCharaView(w http.ResponseWriter, r *http.Request) {
 	var in domain.ArticleCharacterInput
 	json.NewDecoder(r.Body).Decode(&in)
 
 	userId := r.Context().Value(USER_ID).(string)
 
-	inserted, err := artr.interactor.InsertArticleChara(in, userId)
+	inserted, err := artc.interactor.InsertArticleChara(in, userId)
 	if err != nil {
 		response(w, err, nil)
 	} else {
@@ -199,3 +172,125 @@ func (artr *ArticleController) DeleteArticleCharaView(w http.ResponseWriter, r *
 	}
 	return
 }
+
+/*  interview  */
+
+func (artc *ArticleController) FetchInterviewView(w http.ResponseWriter, r *http.Request) {
+	rawId := r.URL.Query().Get("id")
+	id, err := strconv.Atoi(rawId)
+	if err != nil {
+		response(w, err, nil)
+		return
+	}
+
+	ints, err := artc.interactor.FetchInterviewQuotes(id)
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		response(w, err, map[string]interface{}{"data": ints})
+	}
+	return
+}
+
+func (artc *ArticleController) InsertInterviewView(w http.ResponseWriter, r *http.Request) {
+	var res domain.InterviewQuoteInput
+	if err := json.NewDecoder(r.Body).Decode(&res); err != nil {
+		response(w, err, nil)
+		return
+	}
+
+	userId := r.Context().Value(USER_ID).(string)
+	inserted, err := artc.interactor.InsertInterviewQuote(res, userId)
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		// relation
+		rIn := domain.RelationArticleCharacterInput{
+			ArticleId: inserted,
+			CharaId:   *res.CharaId,
+		}
+		artc.interactor.InsertRelationArticleCharacter(rIn)
+
+		response(w, err, map[string]interface{}{"data": inserted})
+	}
+	return
+}
+
+func (artc *ArticleController) UpdateInterviewView(w http.ResponseWriter, r *http.Request) {
+	rawId := r.URL.Query().Get("id")
+	id, err := strconv.Atoi(rawId)
+	if err != nil {
+		response(w, err, nil)
+		return
+	}
+	var res domain.InterviewQuoteInput
+	if err := json.NewDecoder(r.Body).Decode(&res); err != nil {
+		response(w, err, nil)
+		return
+	}
+
+	// userId := r.Context().Value(USER_ID).(string)
+	affected, err := artc.interactor.UpdateInterviewQuote(res, id)
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		response(w, err, map[string]interface{}{"data": affected})
+	}
+	return
+}
+
+func (artc *ArticleController) DeleteInterviewView(w http.ResponseWriter, r *http.Request) {
+	rawId := r.URL.Query().Get("id")
+	id, err := strconv.Atoi(rawId)
+	if err != nil {
+		response(w, err, nil)
+		return
+	}
+
+	affected, err := artc.interactor.DeleteInterviewQuote(id)
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		response(w, err, map[string]interface{}{"data": affected})
+	}
+	return
+}
+
+func (artc *ArticleController) InsertRelationArticleCharacterView(w http.ResponseWriter, r *http.Request) {
+	var in domain.RelationArticleCharacterInput
+	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+		response(w, err, nil)
+		return
+	}
+
+	inserted, err := artc.interactor.InsertRelationArticleCharacter(in)
+	if err != nil {
+		response(w, err, nil)
+	} else {
+		response(w, err, map[string]interface{}{"data": inserted})
+	}
+	return
+}
+
+// type ArticleRepository interface {
+// 	Fetch() ([]domain.Article, error)
+// 	GetById(id int) (domain.Article, error)
+// 	GetBySlug(slug string) (domain.Article, error)
+// 	Insert(articleInput domain.ArticleInput, userId string) (int, error)
+// 	Update(articleInput domain.ArticleInput, id int, userId string) (int, error)
+// 	Delete(id int) (int, error)
+// 	FilterByAnime(animeId int) ([]domain.Article, error)
+// 	FilterCharaById(articleId int) ([]domain.ArticleCharacter, error)
+// 	FilterCharaByUserId(userId string) ([]domain.ArticleCharacter, error)
+// 	InsertChara(charaInput domain.ArticleCharacterInput, animeId int, userId string) (int, error)
+// 	UpdateChara(charaInput domain.ArticleCharacterInput, id int, userId string) (int, error)
+// 	DeleteChara(id int) (int, error)
+// 	FetchInterview(articleId int) ([]domain.InterviewQuote, error)
+// 	InsertInterview(interviewInput domain.InterviewQuoteInput, userId string) (int, error)
+// 	UpdateInterview(interviewInput domain.InterviewQuoteInput, id int) (int, error)
+// 	DeleteInterview(id int) (int, error)
+// 	InsertRelationArticleCharacter(in domain.RelationArticleCharacterInput) (int, error)
+// 	DeleteRelationArticleCharacter(in domain.RelationArticleCharacterInput) (int, error)
+// 	InsertRelationArticleAnime(in domain.RelationArticleAnimeInput) (int, error)
+// 	DeleteRelationArticleAnime(in domain.RelationArticleAnimeInput) (int, error)
+// }
