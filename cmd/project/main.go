@@ -64,6 +64,16 @@ func main() {
 	roleController := controllers.NewRoleController(sqlHandler)
 	router.Handle("/staffrole/", base.BaseMiddleware(http.HandlerFunc(roleController.ListStaffRoleView))) // ?anime=
 
+	// article
+	articleController := controllers.NewArticleController(sqlHandler)
+	router.Handle("/article/", base.BaseMiddleware(http.HandlerFunc(articleController.ArticleListView)))
+	router.Handle("/article/detail/", base.BaseMiddleware(http.HandlerFunc(articleController.ArticleDetailView)))
+	router.Handle("/article/post/", base.BaseMiddleware(base.PostOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(articleController.InsertArticleView)))))
+	router.Handle("/article/update/", base.BaseMiddleware(base.PutOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(articleController.UpdateArticleView)))))
+	router.Handle("/article/character/", base.BaseMiddleware(http.HandlerFunc(articleController.ArticleCharacterView)))
+	router.Handle("/article/character/post/", base.BaseMiddleware(base.PostOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(articleController.InsertArticleCharaView)))))
+	router.Handle("/article/character/update/", base.BaseMiddleware(base.PutOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(articleController.UpdateArticleCharaView)))))
+
 	/*   auth   */
 	firebase := infrastructure.NewFireBaseClient()
 	authController := controllers.NewAuthController(firebase, uploader)

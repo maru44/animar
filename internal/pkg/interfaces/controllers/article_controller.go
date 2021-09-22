@@ -23,6 +23,7 @@ func NewArticleController(sqlHandler database.SqlHandler) *ArticleController {
 	}
 }
 
+// @TODO:Add filter by userid(query params)
 func (artc *ArticleController) ArticleListView(w http.ResponseWriter, r *http.Request) {
 	articles, err := artc.interactor.FetchArticles()
 	if err != nil {
@@ -92,30 +93,23 @@ func (artr *ArticleController) DeleteArticleView(w http.ResponseWriter, r *http.
 }
 
 /*  chara  */
-
-func (artr *ArticleController) FilterCharaByArticleView(w http.ResponseWriter, r *http.Request) {
+func (artc *ArticleController) ArticleCharacterView(w http.ResponseWriter, r *http.Request) {
 	rawId := r.URL.Query().Get("id")
 	id, err := strconv.Atoi(rawId)
+	var charas []domain.ArticleCharacter
 	if err != nil {
-		response(w, err, nil)
-		return
-	}
-	charas, err := artr.interactor.FetchArticleCharas(id)
-	if err != nil {
-		response(w, err, nil)
+		userId := r.Context().Value(USER_ID).(string)
+		charas, err = artc.interactor.FetchArticleCharasByUser(userId)
+		if err != nil {
+			response(w, err, nil)
+		}
+		response(w, nil, map[string]interface{}{"data": charas})
 	} else {
-		response(w, err, map[string]interface{}{"data": charas})
-	}
-	return
-}
-
-func (artr *ArticleController) FilterCharaByUserView(w http.ResponseWriter, r *http.Request) {
-	userId := r.Context().Value(USER_ID).(string)
-	charas, err := artr.interactor.FetchArticleCharasByUser(userId)
-	if err != nil {
-		response(w, err, nil)
-	} else {
-		response(w, err, map[string]interface{}{"data": charas})
+		charas, err = artc.interactor.FetchArticleCharas(id)
+		if err != nil {
+			response(w, err, nil)
+		}
+		response(w, nil, map[string]interface{}{"data": charas})
 	}
 	return
 }
@@ -139,7 +133,6 @@ func (artr *ArticleController) UpdateArticleCharaView(w http.ResponseWriter, r *
 	var in domain.ArticleCharacterInput
 	json.NewDecoder(r.Body).Decode(&in)
 
-	// userId := r.Context().Value(USER_ID).(string)
 	rawId := r.URL.Query().Get("id")
 	id, err := strconv.Atoi(rawId)
 	if err != nil {
