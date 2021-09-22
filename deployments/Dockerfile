@@ -1,15 +1,15 @@
-FROM golang:1.16.3-alpine
-RUN apk update apk add git
+FROM golang:1.17.1-alpine
 
-ENV ROOT=/go/src/app
-WORKDIR ${ROOT}
+# ENV ROOT=/go/src/app
+# WORKDIR ${ROOT}
 
-COPY go.mod .
-COPY go.sum .
+WORKDIR /deployments
+
+COPY ../go.mod ../go.sum ./
 
 RUN go mod download
-COPY . .
+COPY ../ .
 
 EXPOSE 8080
 
-CMD ["go", "run", "/go/src/cmd/project/main.go"]
+CMD ["go", "run", "../cmd/project/main.go"]
