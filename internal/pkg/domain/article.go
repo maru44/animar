@@ -1,18 +1,25 @@
 package domain
 
+type ArticleType string
+
+const (
+	ArticleTypeInterview = "interview"
+	ArticleTypeArticle   = "article"
+)
+
 type Article struct {
-	ID          int                `json:"id"`
-	Slug        string             `json:"slug"`
-	ArticleType string             `json:"article_type"`
-	Abstract    *string            `json:"abstract,omitempty"`
-	Content     *string            `json:"content,omitempty"`
-	Image       *string            `json:"image,omitempty"`
-	Author      *string            `json:"author,omitempty"`
-	IsPublic    bool               `json:"is_public"`
-	UserId      string             `json:"user_id"`
-	CreatedAt   string             `json:"created_at"`
-	UpdatedAt   string             `json:"updated_at"`
-	Characters  []ArticleCharacter `json:"characters"`
+	ID          int         `json:"id"`
+	Slug        string      `json:"slug"`
+	ArticleType ArticleType `json:"article_type"`
+	Abstract    *string     `json:"abstract,omitempty"`
+	Content     *string     `json:"content,omitempty"`
+	Image       *string     `json:"image,omitempty"`
+	Author      *string     `json:"author,omitempty"`
+	IsPublic    bool        `json:"is_public"`
+	UserId      string      `json:"user_id"`
+	CreatedAt   string      `json:"created_at"`
+	UpdatedAt   string      `json:"updated_at"`
+	// Characters  []ArticleCharacter `json:"characters"`
 }
 
 type ArticleCharacter struct {

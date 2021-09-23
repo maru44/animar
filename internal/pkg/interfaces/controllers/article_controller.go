@@ -39,9 +39,26 @@ func (artc *ArticleController) ArticleDetailView(w http.ResponseWriter, r *http.
 	article, err := artc.interactor.GetArticleBySlug(slug)
 	if err != nil {
 		response(w, err, nil)
-	} else {
-		response(w, err, map[string]interface{}{"data": article})
+		return
 	}
+
+	charas, err := artc.interactor.FetchArticleCharas(article.ID)
+	if err != nil {
+		response(w, err, nil)
+		return
+	}
+
+	if article.ArticleType == domain.ArticleTypeInterview {
+		interviews, err := artc.interactor.FetchInterviewQuotes(article.ID)
+		if err != nil {
+			response(w, err, nil)
+			return
+		}
+		response(w, err, map[string]interface{}{"article": article, "charas": charas, "interviews": interviews})
+	} else {
+		response(w, err, map[string]interface{}{"article": article, "charas": charas})
+	}
+
 	return
 }
 
@@ -196,16 +213,8 @@ func (artc *ArticleController) InsertInterviewView(w http.ResponseWriter, r *htt
 	inserted, err := artc.interactor.InsertInterviewQuote(res, userId)
 	if err != nil {
 		response(w, err, nil)
-	} else {
-		// relation
-		rIn := domain.RelationArticleCharacterInput{
-			ArticleId: inserted,
-			CharaId:   *res.CharaId,
-		}
-		artc.interactor.InsertRelationArticleCharacter(rIn)
-
-		response(w, err, map[string]interface{}{"data": inserted})
 	}
+	response(w, err, map[string]interface{}{"data": inserted})
 	return
 }
 
@@ -281,21 +290,21 @@ func (artc *ArticleController) DeleteRelationArticleCharacterView(w http.Respons
 	return
 }
 
-func (artc *ArticleController) InsertRelationArticleAnimeView(w http.ResponseWriter, r *http.Request) {
-	var in domain.RelationArticleAnimeInput
-	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
-		response(w, err, nil)
-		return
-	}
+// func (artc *ArticleController) InsertRelationArticleAnimeView(w http.ResponseWriter, r *http.Request) {
+// 	var in domain.RelationArticleAnimeInput
+// 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+// 		response(w, err, nil)
+// 		return
+// 	}
 
-	inserted, err := artc.interactor.InsertRelationArticleAnime(in)
-	if err != nil {
-		response(w, err, nil)
-	} else {
-		response(w, err, map[string]interface{}{"data": inserted})
-	}
-	return
-}
+// 	inserted, err := artc.interactor.InsertRelationArticleAnime(in)
+// 	if err != nil {
+// 		response(w, err, nil)
+// 	} else {
+// 		response(w, err, map[string]interface{}{"data": inserted})
+// 	}
+// 	return
+// }
 
 // 	InsertRelationArticleCharacter(in domain.RelationArticleCharacterInput) (int, error)
 // 	DeleteRelationArticleCharacter(in domain.RelationArticleCharacterInput) (int, error)

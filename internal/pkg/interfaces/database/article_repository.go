@@ -25,7 +25,6 @@ func (artr *ArticleRepository) Fetch() (articles []domain.Article, err error) {
 			&a.ID, &a.Slug, &a.ArticleType, &a.Abstract, &a.Content,
 			&a.Image, &a.Author, &a.IsPublic, &a.CreatedAt, &a.UpdatedAt,
 		)
-		a.Characters, err = artr.FilterCharaById(a.ID)
 		if err != nil {
 			return
 		}
@@ -143,7 +142,6 @@ func (artr *ArticleRepository) FilterByAnime(animeId int) (articles []domain.Art
 			&a.ID, &a.Slug, &a.ArticleType, &a.Abstract, &a.Content,
 			&a.Image, &a.Author, &a.IsPublic, &a.CreatedAt, &a.UpdatedAt,
 		)
-		a.Characters, err = artr.FilterCharaById(a.ID)
 		if err != nil {
 			return
 		}

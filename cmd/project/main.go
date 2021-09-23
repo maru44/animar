@@ -73,6 +73,8 @@ func main() {
 	router.Handle("/article/character/", base.BaseMiddleware(http.HandlerFunc(articleController.ArticleCharacterView)))
 	router.Handle("/article/character/post/", base.BaseMiddleware(base.PostOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(articleController.InsertArticleCharaView)))))
 	router.Handle("/article/character/update/", base.BaseMiddleware(base.PutOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(articleController.UpdateArticleCharaView)))))
+	router.Handle("/article/character/delete/", base.BaseMiddleware(base.DeleteOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(articleController.DeleteArticleCharaView)))))
+	router.Handle("/article/interview/post/", base.BaseMiddleware(base.PostOnlyMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(articleController.InsertInterviewView)))))
 
 	/*   auth   */
 	firebase := infrastructure.NewFireBaseClient()
