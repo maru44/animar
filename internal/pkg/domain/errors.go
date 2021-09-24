@@ -8,6 +8,7 @@ var (
 	ErrNotFound            = errors.New("Not Found")
 	ErrForbidden           = errors.New("Forbidden")
 	ErrUnauthorized        = errors.New("Unauthorized")
+	ErrTokenIsExpired      = errors.New("Token is expired")
 	ErrBadRequest          = errors.New("Bad Request")
 	ErrUnknownType         = errors.New("Unknow Type")
 	ErrMethodNotAllowed    = errors.New("Method Not Allowed")
@@ -24,6 +25,9 @@ const (
 	TokenIsExpiredError
 	UnauthorizedError
 	ForbiddenError
+	MethodNotAllowedError
+	CsrfNotValidError
+	UnknownTypeError
 
 	/*  Internal not emergency  */
 	InternalServerError
@@ -56,14 +60,20 @@ func (e Error) Errors() string {
 
 func (e Error) ErrorForOutput() error {
 	switch e.Flag {
-	case ExternalServerError:
+	case ExternalServerError, CsrfNotValidError:
 		return ErrBadRequest
-	case UnauthorizedError, TokenIsExpiredError, TokenIsInvalidError:
+	case UnauthorizedError, TokenIsInvalidError:
 		return ErrUnauthorized
+	case TokenIsExpiredError:
+		return ErrTokenIsExpired
 	case ForbiddenError:
 		return ErrForbidden
 	case DataNotFoundError:
 		return ErrNotFound
+	case MethodNotAllowedError:
+		return ErrMethodNotAllowed
+	case UnknownTypeError:
+		return ErrUnknownType
 	case MySqlConnectionError, FirebaseConnectionError, S3ConnectionError, HttpConnectionError:
 		return ErrInternalServerError
 	default:
