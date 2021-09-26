@@ -48,7 +48,7 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 	case strId != "":
 		id, err := strconv.Atoi(strId)
 		if err != nil {
-			response(w, r, domain.NewWrapError(err, domain.DataNotFoundError), nil)
+			response(w, r, domain.NewWrapError(err, domain.ExternalServerError), nil)
 			return
 		}
 		a, err := controller.interactor.AnimeDetail(id)

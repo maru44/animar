@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -91,7 +90,7 @@ func (c *Cache) DeleteRegularly(kind string, d time.Duration) {
 		for {
 			select {
 			case <-t.C:
-				fmt.Print(c.Items[CacheTypeCsrf])
+				// fmt.Print(c.Items[CacheTypeCsrf])
 				c.DeleteExpired(kind)
 			}
 		}

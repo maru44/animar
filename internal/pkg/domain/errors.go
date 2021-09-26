@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -25,6 +26,14 @@ var (
 )
 
 const (
+	/*  error level  */
+	// internal emergency
+	ErrAlert ErrLevel = "ALERT"
+	// internal not emergency
+	ErrInternal ErrLevel = "INTERNAL ERROR"
+	// external
+	ErrExternal ErrLevel = "EXTERNAL ERROR"
+
 	/*  external  */
 
 	ExternalServerError uint32 = 1 << iota
@@ -53,6 +62,8 @@ type (
 		ErrorForOutput() error
 		GetFlag() uint32
 		Traces() string
+		ToDict(path, method string, status int) *ErrDict
+		Level() ErrLevel
 	}
 
 	// @TODO: add caller(for stack trace)
@@ -64,11 +75,27 @@ type (
 	}
 
 	StackTraceFrame struct {
-		File           string
-		Line           int
-		Name           string
-		ProgramCounter uintptr // origin data
+		File           string  `json:"file"`
+		Line           int     `json:"line"`
+		Name           string  `json:"name"`
+		ProgramCounter uintptr `json:"program_counter"` // origin data
 	}
+
+	ErrDict struct {
+		Error     string            `json:"error"`
+		Level     string            `json:"level"`
+		Access    access            `json:"access"`
+		Traces    []StackTraceFrame `json:"stack_traces"`
+		OccuredAt time.Time         `json:"occured_at"`
+	}
+
+	access struct {
+		Method string `json:"method"`
+		Path   string `json:"path"`
+		Status int    `json:"status"`
+	}
+
+	ErrLevel string
 )
 
 func (e Errors) Error() string {
@@ -83,8 +110,10 @@ func (e Errors) Error() string {
 
 func (e Errors) ErrorForOutput() error {
 	switch e.Flag {
-	case ExternalServerError, CsrfNotValidError:
+	case ExternalServerError:
 		return ErrBadRequest
+	case CsrfNotValidError:
+		return ErrCsrfNotValid
 	case UnauthorizedError, TokenIsInvalidError:
 		return ErrUnauthorized
 	case TokenIsExpiredError:
@@ -114,6 +143,30 @@ func (e Errors) Traces() string {
 		fmt.Fprintf(&buf, "%s: %d===>%v\n", fr.File, fr.Line, fr.Name)
 	}
 	return buf.String()
+}
+
+func (e Errors) ToDict(path, method string, status int) *ErrDict {
+	return &ErrDict{
+		Error: e.Error(),
+		Level: string(e.Level()),
+		Access: access{
+			Path:   path,
+			Method: method,
+			Status: status,
+		},
+		Traces: e.traces,
+	}
+}
+
+func (e Errors) Level() ErrLevel {
+	l := ErrExternal
+	flag := e.GetFlag()
+	if flag > InternalServerError {
+		l = ErrAlert
+	} else if flag == InternalServerError {
+		l = ErrInternal
+	}
+	return l
 }
 
 func NewError(text string, flag uint32) *Errors {
