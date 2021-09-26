@@ -31,6 +31,6 @@ func (controller *PlatformController) RelationPlatformByAnimeView(w http.Respons
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
-	response(w, err, map[string]interface{}{"data": platforms})
+	response(w, r, err, map[string]interface{}{"data": platforms})
 	return
 }

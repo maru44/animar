@@ -41,14 +41,19 @@ const (
 )
 
 type (
-	Error struct {
+	MyError interface {
+		ErrorForOutput() error
+		GetFlag() uint32
+	}
+
+	Errors struct {
 		Inner error // stores the error returned by external dependencies
 		Flag  uint32
 		text  string
 	}
 )
 
-func (e Error) Errors() string {
+func (e Errors) Error() string {
 	if e.Inner != nil {
 		return e.Inner.Error()
 	} else if e.text != "" {
@@ -58,7 +63,7 @@ func (e Error) Errors() string {
 	}
 }
 
-func (e Error) ErrorForOutput() error {
+func (e Errors) ErrorForOutput() error {
 	switch e.Flag {
 	case ExternalServerError, CsrfNotValidError:
 		return ErrBadRequest
@@ -81,8 +86,12 @@ func (e Error) ErrorForOutput() error {
 	}
 }
 
-func NewError(text string, flag uint32) *Error {
-	return &Error{
+func (e Errors) GetFlag() uint32 {
+	return e.Flag
+}
+
+func NewError(text string, flag uint32) *Errors {
+	return &Errors{
 		Flag: flag,
 		text: text,
 	}

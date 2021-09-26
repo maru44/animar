@@ -4,15 +4,33 @@ import (
 	"animar/v1/internal/pkg/domain"
 	"encoding/json"
 	"net/http"
+
+	"github.com/pkg/errors"
 )
 
-func response(w http.ResponseWriter, err error, body map[string]interface{}) error {
-	status := getStatusCode(err, w)
-	w.WriteHeader(status)
-	if status == http.StatusOK {
-		data, _ := json.Marshal(body)
-		w.Write(data)
+func response(w http.ResponseWriter, r *http.Request, err error, body map[string]interface{}) error {
+	if myErr, ok := err.(domain.MyError); ok {
+		err = myErr.ErrorForOutput()
 	}
+
+	status := getStatusCode(err, w)
+	if status == http.StatusOK {
+		data, err := json.Marshal(body)
+
+		// if failed marshal
+		if err != nil {
+			err = domain.Errors{Inner: errors.Wrap(err, "Failed to json.Marshal"), Flag: domain.InternalServerError}
+			go slackErrorLogging(r.Context(), err)
+			w.WriteHeader(http.StatusInternalServerError)
+			mess, _ := json.Marshal(map[string]interface{}{"message": domain.ErrInternalServerError.Error()})
+			w.Write(mess)
+			return err
+		}
+		w.Write(data)
+	} else {
+		go slackErrorLogging(r.Context(), err)
+	}
+	w.WriteHeader(status)
 	return err
 }
 

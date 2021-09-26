@@ -23,6 +23,6 @@ func NewStaffController(sqlHandler database.SqlHandler) *StaffController {
 
 func (sfc *StaffController) StaffListView(w http.ResponseWriter, r *http.Request) {
 	staffs, err := sfc.interactor.StaffList()
-	response(w, err, map[string]interface{}{"data": staffs})
+	response(w, r, err, map[string]interface{}{"data": staffs})
 	return
 }

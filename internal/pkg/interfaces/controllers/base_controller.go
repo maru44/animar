@@ -20,11 +20,20 @@ type BaseController struct {
 	CookieController
 }
 
-type ContextKey string
+type (
+	ContextKey string
+
+	accessContext struct {
+		Method string
+		URL    string
+	}
+)
 
 const (
 	USER_ID         ContextKey = "userId"
 	CSRF_COOKIE_KEY            = "csrf-token"
+
+	accessContextKey ContextKey = "access"
 )
 
 func NewBaseController(c domain.Cache) *BaseController {
@@ -43,7 +52,7 @@ func NewBaseController(c domain.Cache) *BaseController {
 ************************/
 
 func (controller *BaseController) GatewayView(w http.ResponseWriter, r *http.Request) {
-	response(w, domain.ErrNotFound, nil)
+	response(w, r, domain.ErrNotFound, nil)
 	return
 }
 
@@ -73,7 +82,7 @@ func (controller *BaseController) getUserIdFromToken(idToken string) (userId str
 
 func (controller *BaseController) getGoogleUser(accessToken string) domain.TGoogleOauth {
 	url := "https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + accessToken
-	req, err := http.NewRequest(
+	req, _ := http.NewRequest(
 		"GET", url, nil,
 	)
 	client := &http.Client{}
@@ -86,7 +95,7 @@ func (controller *BaseController) getGoogleUser(accessToken string) domain.TGoog
 	defer res.Body.Close()
 	byteArray, _ := ioutil.ReadAll(res.Body)
 	var user domain.TGoogleOauth
-	err = json.Unmarshal(byteArray, &user)
+	json.Unmarshal(byteArray, &user)
 	return user
 }
 
@@ -96,7 +105,7 @@ func (controller *BaseController) getGoogleUser(accessToken string) domain.TGoog
 
 func (controller *BaseController) allowOptionsMiddleware(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
-		response(w, nil, nil)
+		response(w, r, nil, nil)
 	}
 }
 
@@ -105,7 +114,7 @@ func (controller *BaseController) UpsertOnlyMiddleware(next http.Handler) http.H
 		if r.Method == "POST" || r.Method == "PUT" {
 			next.ServeHTTP(w, r)
 		} else {
-			response(w, domain.ErrMethodNotAllowed, nil)
+			response(w, r, domain.ErrMethodNotAllowed, nil)
 			return
 		}
 	})
@@ -116,7 +125,7 @@ func (controller *BaseController) PostOnlyMiddleware(next http.Handler) http.Han
 		if r.Method == "POST" {
 			next.ServeHTTP(w, r)
 		} else {
-			response(w, domain.ErrMethodNotAllowed, nil)
+			response(w, r, domain.ErrMethodNotAllowed, nil)
 			return
 		}
 	})
@@ -127,7 +136,7 @@ func (controller *BaseController) PutOnlyMiddleware(next http.Handler) http.Hand
 		if r.Method == "PUT" {
 			next.ServeHTTP(w, r)
 		} else {
-			response(w, domain.ErrMethodNotAllowed, nil)
+			response(w, r, domain.ErrMethodNotAllowed, nil)
 			return
 		}
 	})
@@ -138,7 +147,7 @@ func (controller *BaseController) DeleteOnlyMiddleware(next http.Handler) http.H
 		if r.Method == "DELETE" {
 			next.ServeHTTP(w, r)
 		} else {
-			response(w, domain.ErrMethodNotAllowed, nil)
+			response(w, r, domain.ErrMethodNotAllowed, nil)
 			return
 		}
 	})
@@ -166,6 +175,16 @@ func (controller *BaseController) corsMiddleware(w http.ResponseWriter, r *http.
 
 func (controller *BaseController) BaseMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(
+			r.Context(),
+			accessContextKey,
+			accessContext{
+				Method: r.Method,
+				URL:    r.URL.Path,
+			},
+		)
+		r = r.WithContext(ctx)
+
 		controller.corsMiddleware(w, r)
 		controller.allowOptionsMiddleware(w, r)
 		next.ServeHTTP(w, r)
@@ -178,13 +197,13 @@ func (controller *BaseController) VerifyCsrfMiddleware(next http.Handler) http.H
 		csrfToken, err := r.Cookie(CSRF_COOKIE_KEY)
 		if err != nil {
 			err = domain.ErrCsrfNotValid
-			response(w, err, nil)
+			response(w, r, err, nil)
 			return
 		}
 		cache := controller.cache
 		if ok := cache.Get(domain.CacheTypeCsrf, csrfToken.Value); !ok {
 			err = domain.ErrCsrfNotValid
-			response(w, err, nil)
+			response(w, r, err, nil)
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -245,12 +264,12 @@ func (controller *BaseController) LoginRequireMiddleware(next http.Handler) http
 		idToken, err := r.Cookie("idToken")
 		if err != nil {
 
-			response(w, domain.ErrUnauthorized, nil)
+			response(w, r, domain.ErrUnauthorized, nil)
 			return
 		}
 		userId, err := controller.interactor.UserId(idToken.Value)
 		if err != nil {
-			response(w, domain.ErrUnauthorized, nil)
+			response(w, r, domain.ErrUnauthorized, nil)
 			return
 		}
 		ctx := context.WithValue(r.Context(), USER_ID, userId)
@@ -268,18 +287,18 @@ func (controller *BaseController) AdminRequiredMiddleware(next http.Handler) htt
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		idToken, err := r.Cookie("idToken")
 		if err != nil {
-			response(w, domain.ErrForbidden, nil)
+			response(w, r, domain.ErrForbidden, nil)
 			return
 		} else if idToken.Value == "" {
-			response(w, domain.ErrForbidden, nil)
+			response(w, r, domain.ErrForbidden, nil)
 			return
 		}
 		userId, err := controller.interactor.AdminId(idToken.Value)
 		if err != nil {
-			response(w, domain.ErrForbidden, nil)
+			response(w, r, domain.ErrForbidden, nil)
 			return
 		} else if userId == "" {
-			response(w, domain.ErrForbidden, nil)
+			response(w, r, domain.ErrForbidden, nil)
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -294,7 +313,7 @@ func (controller *BaseController) AdminRequiredMiddlewareGet(next http.Handler) 
 		case "GET":
 			idTokenObj, err := r.Cookie("idToken")
 			if err != nil {
-				response(w, domain.ErrForbidden, nil)
+				response(w, r, domain.ErrForbidden, nil)
 				return
 			} else {
 				idToken = idTokenObj.Value
@@ -304,16 +323,16 @@ func (controller *BaseController) AdminRequiredMiddlewareGet(next http.Handler) 
 			json.NewDecoder(r.Body).Decode(&p)
 			idToken = p.Token
 		default:
-			response(w, domain.ErrForbidden, nil)
+			response(w, r, domain.ErrForbidden, nil)
 			return
 		}
 
 		userId, err := controller.interactor.AdminId(idToken)
 		if err != nil {
-			response(w, domain.ErrForbidden, nil)
+			response(w, r, domain.ErrForbidden, nil)
 			return
 		} else if userId == "" {
-			response(w, domain.ErrForbidden, nil)
+			response(w, r, domain.ErrForbidden, nil)
 			return
 		}
 		next.ServeHTTP(w, r)

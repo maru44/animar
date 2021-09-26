@@ -32,7 +32,7 @@ func NewBlogController(sqlHandler database.SqlHandler, uploader s3.Uploader) *Bl
 
 func (controller *BlogController) BlogListView(w http.ResponseWriter, r *http.Request) {
 	blogs, err := controller.interactor.ListBlog()
-	response(w, err, map[string]interface{}{"data": blogs})
+	response(w, r, err, map[string]interface{}{"data": blogs})
 	return
 }
 
@@ -46,18 +46,18 @@ func (controller *BlogController) BlogJoinAnimeView(w http.ResponseWriter, r *ht
 	if slug != "" {
 		blog, err := controller.interactor.DetailBlogBySlug(slug)
 		blog.Animes, _ = controller.interactor.RelationAnimeByBlog(blog.GetId())
-		response(w, err, map[string]interface{}{"data": blog})
+		response(w, r, err, map[string]interface{}{"data": blog})
 	} else if id != "" {
 		i, _ := strconv.Atoi(id)
 		blog, err := controller.interactor.DetailBlog(i)
 		blog.Animes, _ = controller.interactor.RelationAnimeByBlog(i)
-		response(w, err, map[string]interface{}{"data": blog})
+		response(w, r, err, map[string]interface{}{"data": blog})
 	} else if uid != "" {
 		blogs, err := controller.interactor.ListBlogByUser(userId, uid)
-		response(w, err, map[string]interface{}{"data": blogs})
+		response(w, r, err, map[string]interface{}{"data": blogs})
 	} else {
 		blogs, err := controller.interactor.ListBlog()
-		response(w, err, map[string]interface{}{"data": blogs})
+		response(w, r, err, map[string]interface{}{"data": blogs})
 	}
 	return
 }
@@ -71,7 +71,7 @@ func (controller *BlogController) InsertBlogWithRelationView(w http.ResponseWrit
 	for _, animeId := range p.AnimeIds {
 		controller.interactor.InsertRelationAnime(animeId, lastInserted)
 	}
-	response(w, err, map[string]interface{}{"data": lastInserted})
+	response(w, r, err, map[string]interface{}{"data": lastInserted})
 	return
 }
 
@@ -84,12 +84,12 @@ func (controller *BlogController) UpdateBlogWithRelationView(w http.ResponseWrit
 	// user 不一致
 	blogUserId, _ := controller.interactor.BlogUserId(id)
 	if blogUserId != userId {
-		response(w, domain.ErrForbidden, nil)
+		response(w, r, domain.ErrForbidden, nil)
 	} else {
 		var p domain.TBlogInsert
 		json.NewDecoder(r.Body).Decode(&p)
 		rowsAffected, err := controller.interactor.UpdateBlog(p, id)
-		response(w, err, map[string]interface{}{"data": rowsAffected})
+		response(w, r, err, map[string]interface{}{"data": rowsAffected})
 	}
 	return
 }
@@ -103,10 +103,10 @@ func (controller *BlogController) DeleteBlogView(w http.ResponseWriter, r *http.
 	// user 不一致
 	blogUserId, _ := controller.interactor.BlogUserId(id)
 	if blogUserId != userId {
-		response(w, domain.ErrForbidden, nil)
+		response(w, r, domain.ErrForbidden, nil)
 	} else {
 		deletedRow, err := controller.interactor.DeleteBlog(id)
-		response(w, err, map[string]interface{}{"data": deletedRow})
+		response(w, r, err, map[string]interface{}{"data": deletedRow})
 	}
 	return
 }
@@ -124,6 +124,6 @@ func (controller *BlogController) SimpleUploadImage(w http.ResponseWriter, r *ht
 		defer file.Close()
 		returnFileName, err = controller.s3.Image(file, fileHeader.Filename, []string{"column", "content"})
 	}
-	response(w, err, map[string]interface{}{"data": returnFileName})
+	response(w, r, err, map[string]interface{}{"data": returnFileName})
 	return
 }

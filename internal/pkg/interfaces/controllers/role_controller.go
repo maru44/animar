@@ -28,6 +28,6 @@ func (controller *RoleController) ListStaffRoleView(w http.ResponseWriter, r *ht
 	animeId, _ := strconv.Atoi(strId)
 
 	staffRoles, err := controller.interactor.StaffRoleByAnime(animeId)
-	response(w, err, map[string]interface{}{"data": staffRoles})
+	response(w, r, err, map[string]interface{}{"data": staffRoles})
 	return
 }

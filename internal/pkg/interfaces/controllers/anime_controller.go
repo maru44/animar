@@ -30,7 +30,7 @@ func NewAnimeController(sqlHandler database.SqlHandler) *AnimeController {
 
 func (controller *AnimeController) AnimeListView(w http.ResponseWriter, r *http.Request) {
 	animes, err := controller.interactor.AnimesAll()
-	response(w, err, map[string]interface{}{"data": animes})
+	response(w, r, err, map[string]interface{}{"data": animes})
 	return
 }
 
@@ -48,30 +48,30 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 	case strId != "":
 		id, _ := strconv.Atoi(strId)
 		a, err := controller.interactor.AnimeDetail(id)
-		response(w, err, map[string]interface{}{"data": a})
+		response(w, r, err, map[string]interface{}{"data": a})
 	case slug != "":
 		a, err := controller.interactor.AnimeDetailBySlug(slug)
 
 		userId := r.Context().Value(USER_ID).(string)
 		revs, _ := controller.interactor.ReviewFilterByAnime(a.GetId(), userId)
-		response(w, err, map[string]interface{}{"anime": a, "reviews": revs})
+		response(w, r, err, map[string]interface{}{"anime": a, "reviews": revs})
 	case year != "":
 		animes, err := controller.interactor.AnimesBySeason(year, season)
-		response(w, err, map[string]interface{}{"data": animes})
+		response(w, r, err, map[string]interface{}{"data": animes})
 	case keyword != "":
 		animes, err := controller.interactor.AnimesSearch(keyword)
-		response(w, err, map[string]interface{}{"data": animes})
+		response(w, r, err, map[string]interface{}{"data": animes})
 	case rawSeries != "":
 		seriesId, _ := strconv.Atoi(rawSeries)
 		animes, err := controller.interactor.AnimesBySeries(seriesId)
-		response(w, err, map[string]interface{}{"data": animes})
+		response(w, r, err, map[string]interface{}{"data": animes})
 	case company != "":
 		comp, _ := controller.interactor.DetailCompanyByEng(company)
 		animes, err := controller.interactor.AnimesByCompany(company)
-		response(w, err, map[string]interface{}{"data": animes, "company": comp})
+		response(w, r, err, map[string]interface{}{"data": animes, "company": comp})
 	default:
 		animes, err := controller.interactor.AnimesOnAir()
-		response(w, err, map[string]interface{}{"data": animes})
+		response(w, r, err, map[string]interface{}{"data": animes})
 	}
 	return
 }
@@ -84,7 +84,7 @@ func (controller *AnimeController) SearchAnimeMinimumView(w http.ResponseWriter,
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
-	response(w, err, map[string]interface{}{"data": animes})
+	response(w, r, err, map[string]interface{}{"data": animes})
 	return
 }
 
@@ -93,6 +93,6 @@ func (controller *AnimeController) AnimeMinimumsView(w http.ResponseWriter, r *h
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
-	response(w, err, map[string]interface{}{"data": animes})
+	response(w, r, err, map[string]interface{}{"data": animes})
 	return
 }

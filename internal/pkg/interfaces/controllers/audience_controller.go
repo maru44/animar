@@ -28,14 +28,14 @@ func (controller *AudienceController) AnimeAudienceCountsView(w http.ResponseWri
 	animeId, _ := strconv.Atoi(animeIdStr)
 
 	audiences, err := controller.interactor.AnimeAudienceCounts(animeId)
-	response(w, err, map[string]interface{}{"data": audiences})
+	response(w, r, err, map[string]interface{}{"data": audiences})
 	return
 }
 
 func (controller *AudienceController) AudienceWithAnimeByUserView(w http.ResponseWriter, r *http.Request) {
 	userId := r.URL.Query().Get("user")
 	audiences, err := controller.interactor.AudienceWithAnimeByUser(userId)
-	response(w, err, map[string]interface{}{"data": audiences})
+	response(w, r, err, map[string]interface{}{"data": audiences})
 	return
 }
 
@@ -47,7 +47,7 @@ func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, 
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
-	response(w, err, map[string]interface{}{"data": p.State})
+	response(w, r, err, map[string]interface{}{"data": p.State})
 	return
 }
 
@@ -57,7 +57,7 @@ func (controller *AudienceController) DeleteAudienceView(w http.ResponseWriter, 
 	animeId, _ := strconv.Atoi(animeIdStr)
 
 	_, err := controller.interactor.DeleteAudience(animeId, userId)
-	response(w, err, nil)
+	response(w, r, err, nil)
 	return
 }
 
@@ -68,6 +68,6 @@ func (controller *AudienceController) AudienceByAnimeAndUserView(w http.Response
 	userId := r.Context().Value(USER_ID).(string)
 	watch, _ := controller.interactor.AudienceByAnimeAndUser(animeId, userId)
 	// 一旦 nil にしない。これはユーザーの視聴データが無いときにも対応するため
-	response(w, nil, map[string]interface{}{"data": watch})
+	response(w, r, nil, map[string]interface{}{"data": watch})
 	return
 }

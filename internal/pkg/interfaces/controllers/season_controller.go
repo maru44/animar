@@ -31,5 +31,5 @@ func (controller *SeasonController) SeasonByAnimeIdView(w http.ResponseWriter, r
 	if err != nil {
 		domain.ErrorWarn(err)
 	}
-	response(w, err, map[string]interface{}{"data": seasons})
+	response(w, r, err, map[string]interface{}{"data": seasons})
 }
