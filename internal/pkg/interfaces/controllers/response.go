@@ -3,6 +3,7 @@ package controllers
 import (
 	"animar/v1/internal/pkg/domain"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -33,6 +34,7 @@ func response(w http.ResponseWriter, r *http.Request, err error, body map[string
 }
 
 func getStatusCode(err error, w http.ResponseWriter) int {
+	fmt.Println(err)
 	if err == nil {
 		return http.StatusOK
 	}

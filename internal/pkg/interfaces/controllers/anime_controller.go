@@ -6,6 +6,8 @@ import (
 	"animar/v1/internal/pkg/usecase"
 	"net/http"
 	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 type AnimeController struct {
@@ -48,12 +50,12 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 	case strId != "":
 		id, err := strconv.Atoi(strId)
 		if err != nil {
-			response(w, r, err, nil)
+			response(w, r, errors.Wrap(err, "must be int"), nil)
 			return
 		}
 		a, err := controller.interactor.AnimeDetail(id)
 		if err != nil {
-			response(w, r, err, nil)
+			response(w, r, errors.New("Not Found"), nil)
 			return
 		}
 		response(w, r, err, map[string]interface{}{"data": a})
