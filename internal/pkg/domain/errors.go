@@ -1,6 +1,9 @@
 package domain
 
-import "errors"
+import (
+	// "errors"
+	"github.com/pkg/errors"
+)
 
 // for response
 var (
@@ -46,10 +49,19 @@ type (
 		GetFlag() uint32
 	}
 
+	// @TODO: add caller(for stack trace)
 	Errors struct {
 		Inner error // stores the error returned by external dependencies
 		Flag  uint32
 		text  string
+		//
+	}
+
+	StackTraceFrame struct {
+		File           string
+		Line           string
+		Name           string
+		ProgramCounter uintptr // origin data
 	}
 )
 

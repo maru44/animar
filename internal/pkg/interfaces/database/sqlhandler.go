@@ -3,7 +3,7 @@ package database
 type SqlHandler interface {
 	Query(string, ...interface{}) (Rows, error)
 	Execute(string, ...interface{}) (Result, error)
-	ErrNoRows() error
+	// ErrNoRows() error
 	Begin() (Tx, error)
 }
 

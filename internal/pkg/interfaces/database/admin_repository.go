@@ -32,7 +32,6 @@ func (repo *AdminAnimeRepository) ListAll() (animes domain.TAnimes, err error) {
 	defer rows.Close()
 
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	for rows.Next() {
@@ -42,7 +41,7 @@ func (repo *AdminAnimeRepository) ListAll() (animes domain.TAnimes, err error) {
 			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
+			return animes, err
 		}
 		animes = append(animes, a)
 	}
@@ -53,12 +52,11 @@ func (repo *AdminAnimeRepository) FindById(id int) (a domain.AnimeAdmin, err err
 	rows, err := repo.Query(
 		"SELECT * FROM animes WHERE id = ?", id,
 	)
-	defer rows.Close()
-
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
+	defer rows.Close()
+
 	rows.Next()
 	err = rows.Scan(
 		&a.ID, &a.Slug, &a.Title, &a.Abbreviation,
@@ -67,10 +65,6 @@ func (repo *AdminAnimeRepository) FindById(id int) (a domain.AnimeAdmin, err err
 		&a.CountEpisodes, &a.HashTag, &a.TwitterUrl, &a.OfficialUrl,
 		&a.CreatedAt, &a.UpdatedAt,
 	)
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
-	}
 	return
 }
 
@@ -83,12 +77,10 @@ func (repo *AdminAnimeRepository) Insert(a domain.AnimeInsert) (lastInsertId int
 		a.CompanyId, a.HashTag, a.TwitterUrl, a.OfficialUrl,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	rawId, err := exe.LastInsertId()
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	lastInsertId = int(rawId)
@@ -103,12 +95,10 @@ func (repo *AdminAnimeRepository) Update(id int, a domain.AnimeInsert) (rowsAffe
 		a.HashTag, a.TwitterUrl, a.OfficialUrl, a.CompanyId, id,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	rowsAffected = int(rawAffected)
@@ -120,12 +110,10 @@ func (repo *AdminAnimeRepository) Delete(id int) (rowsAffected int, err error) {
 		"DELETE FROM animes WHERE id = ?", id,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	rowsAffected = int(rawAffected)
@@ -143,7 +131,6 @@ func (repo *AdminPlatformRepository) ListAll() (platforms domain.TPlatforms, err
 	defer rows.Close()
 
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	for rows.Next() {
@@ -154,7 +141,6 @@ func (repo *AdminPlatformRepository) ListAll() (platforms domain.TPlatforms, err
 			&p.CreatedAt, &p.UpdatedAt,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
 			return
 		}
 		platforms = append(platforms, p)
@@ -169,7 +155,6 @@ func (repo *AdminPlatformRepository) FindById(id int) (p domain.TPlatform, err e
 	defer rows.Close()
 
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	rows.Next()
@@ -178,7 +163,6 @@ func (repo *AdminPlatformRepository) FindById(id int) (p domain.TPlatform, err e
 		&p.Image, &p.IsValid, &p.CreatedAt, &p.UpdatedAt,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	return
@@ -190,12 +174,10 @@ func (repo *AdminPlatformRepository) Insert(p domain.TPlatform) (lastInserted in
 		p.EngName, p.PlatName, p.BaseUrl, p.Image, p.IsValid,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	rawId, err := exe.LastInsertId()
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	lastInserted = int(rawId)
@@ -208,12 +190,10 @@ func (repo *AdminPlatformRepository) Update(p domain.TPlatform, id int) (rowsAff
 		p.EngName, p.PlatName, p.BaseUrl, p.Image, p.IsValid, id,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	rawId, err := exe.RowsAffected()
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	rowsAffected = int(rawId)
@@ -225,12 +205,10 @@ func (repo *AdminPlatformRepository) Delete(id int) (rowsAffected int, err error
 		"DELETE FROM platforms WHERE id = ?", id,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	rowsAffected = int(rawAffected)
@@ -248,7 +226,6 @@ func (repo *AdminPlatformRepository) FilterByAnime(animeId int) (platforms domai
 	defer rows.Close()
 
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	for rows.Next() {
@@ -258,7 +235,6 @@ func (repo *AdminPlatformRepository) FilterByAnime(animeId int) (platforms domai
 			&p.CreatedAt, &p.UpdatedAt, &p.PlatName,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
 			return
 		}
 		platforms = append(platforms, p)
@@ -272,12 +248,10 @@ func (repo *AdminPlatformRepository) InsertRelation(p domain.TRelationPlatformIn
 		p.PlatformId, p.AnimeId, p.LinkUrl,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	rawId, err := exe.LastInsertId()
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	lastInserted = int(rawId)
@@ -290,12 +264,10 @@ func (repo *AdminPlatformRepository) DeleteRelation(animeId int, platformId int)
 		animeId, platformId,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	rowsAffected = int(rawAffected)
@@ -311,7 +283,6 @@ func (repo *AdminSeasonRepository) ListAll() (seasons []domain.TSeason, err erro
 		"Select * from seasons",
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	defer rows.Close()
@@ -321,7 +292,7 @@ func (repo *AdminSeasonRepository) ListAll() (seasons []domain.TSeason, err erro
 			&s.ID, &s.Year, &s.Season, &s.CreatedAt, &s.UpdatedAt,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
+			return
 		}
 		seasons = append(seasons, s)
 	}
@@ -333,7 +304,6 @@ func (repo *AdminSeasonRepository) FindById(id int) (s domain.TSeason, err error
 		"SELECT * FROM seasons WHERE id = ?", id,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	defer rows.Close()
@@ -342,7 +312,6 @@ func (repo *AdminSeasonRepository) FindById(id int) (s domain.TSeason, err error
 		s.ID, s.Year, s.Season, s.CreatedAt, s.UpdatedAt,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	return
@@ -353,10 +322,12 @@ func (repo *AdminSeasonRepository) Insert(s domain.TSeasonInput) (lastInserted i
 		"INSERT INTO seasons(year, season) VALUES(?, ?)", s.Year, s.Season,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
-	rawId, _ := exe.LastInsertId()
+	rawId, err := exe.LastInsertId()
+	if err != nil {
+		return
+	}
 	lastInserted = int(rawId)
 	return
 }
@@ -367,10 +338,12 @@ func (repo *AdminSeasonRepository) InsertRelation(r domain.TSeasonRelationInput)
 		r.SeasonId, r.AnimeId,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
-	rawId, _ := exe.LastInsertId()
+	rawId, err := exe.LastInsertId()
+	if err != nil {
+		return
+	}
 	lastInserted = int(rawId)
 	return
 }
@@ -381,10 +354,12 @@ func (repo *AdminSeasonRepository) DeleteRelation(animeId, seasonId int) (affect
 		animeId, seasonId,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
-	rawAffected, _ := exe.RowsAffected()
+	rawAffected, err := exe.RowsAffected()
+	if err != nil {
+		return
+	}
 	affected = int(rawAffected)
 	return
 }
@@ -396,7 +371,6 @@ func (repo *AdminSeasonRepository) DeleteRelation(animeId, seasonId int) (affect
 func (repo *AdminSeriesRepository) ListAll() (series []domain.TSeries, err error) {
 	rows, err := repo.Query("Select * from series")
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	defer rows.Close()
@@ -406,7 +380,7 @@ func (repo *AdminSeriesRepository) ListAll() (series []domain.TSeries, err error
 			&s.ID, &s.EngName, &s.SeriesName, &s.CreatedAt, &s.UpdatedAt,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
+			return
 		}
 		series = append(series, s)
 	}
@@ -416,8 +390,7 @@ func (repo *AdminSeriesRepository) ListAll() (series []domain.TSeries, err error
 func (repo *AdminSeriesRepository) FindById(id int) (s domain.TSeries, err error) {
 	rows, err := repo.Query("SELECT * FROM series WHERE id = ?", id)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return s, err
 	}
 	defer rows.Close()
 	rows.Next()
@@ -425,8 +398,6 @@ func (repo *AdminSeriesRepository) FindById(id int) (s domain.TSeries, err error
 		&s.ID, &s.EngName, &s.SeriesName, &s.CreatedAt, &s.UpdatedAt,
 	)
 	if err != nil {
-		err = domain.ErrNotFound
-		domain.ErrorWarn(err)
 		return
 	}
 	return
@@ -437,10 +408,12 @@ func (repo *AdminSeriesRepository) Insert(s domain.TSeriesInput) (lastInserted i
 		"INSERT INTO series(eng_name, series_name) VALUES(?, ?)", s.EngName, s.SeriesName,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
-	rawId, _ := exe.LastInsertId()
+	rawId, err := exe.LastInsertId()
+	if err != nil {
+		return
+	}
 	lastInserted = int(rawId)
 	return
 }
@@ -451,10 +424,12 @@ func (repo *AdminSeriesRepository) Update(s domain.TSeriesInput, id int) (rowsAf
 		s.EngName, s.SeriesName, id,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
-	rawId, _ := exe.LastInsertId()
+	rawId, err := exe.LastInsertId()
+	if err != nil {
+		return
+	}
 	rowsAffected = int(rawId)
 	return
 }
@@ -464,10 +439,12 @@ func (repo *AdminSeriesRepository) Delete(id int) (rowsAffected int, err error) 
 		"DELETE FROM series WHERE id = ?", id,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
-	rawId, _ := exe.LastInsertId()
+	rawId, err := exe.LastInsertId()
+	if err != nil {
+		return
+	}
 	rowsAffected = int(rawId)
 	return
 }

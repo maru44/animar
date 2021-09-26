@@ -31,15 +31,15 @@ func slackErrorLogging(ctx context.Context, in error, additional ...string) (err
 	}
 
 	errLevel := ErrExternal
-	if myErr, ok := err.(domain.MyError); ok {
+	if myErr, ok := in.(domain.MyError); ok {
 		flag := myErr.GetFlag()
-		if flag > 512 {
+		if flag > domain.InternalServerError {
 			errLevel = ErrAlert
 		} else if flag == domain.InternalServerError {
 			errLevel = ErrInternal
 		}
 	}
-	message := url.QueryEscape(fmt.Sprintf(fmt.Sprintf("%s\n%s\n\nStackTrace:\n%+v", errLevel, access, err)))
+	message := url.QueryEscape(fmt.Sprintf(fmt.Sprintf("%s\n%s\n\nStackTrace:\n%+v", errLevel, access, in)))
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://slack.com/api/chat.postMessage?channel=%s&text=%s&pretty=1", configs.SlackChannelId, message), nil)
 	if err != nil {
 		log.Println(err)

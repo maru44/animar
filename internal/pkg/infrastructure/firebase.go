@@ -54,7 +54,7 @@ func (f *Firebase) Auth(ctx context.Context) (fires.Client, error) {
 	client := new(FirebaseClient)
 	res, err := f.App.Auth(ctx)
 	if err != nil {
-		return client, err
+		return client, domain.Errors{Inner: err, Flag: domain.FirebaseConnectionError}
 	}
 	client.Client = res
 	return client, nil

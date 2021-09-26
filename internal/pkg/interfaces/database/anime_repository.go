@@ -16,7 +16,6 @@ func (repo *AnimeRepository) ListAll() (animes domain.TAnimes, err error) {
 	defer rows.Close()
 
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	for rows.Next() {
@@ -26,7 +25,7 @@ func (repo *AnimeRepository) ListAll() (animes domain.TAnimes, err error) {
 			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
+			return animes, err
 		}
 		animes = append(animes, a)
 	}
@@ -47,7 +46,7 @@ func (repo *AnimeRepository) ListOnAirAll() (animes domain.TAnimes, err error) {
 			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
+			return animes, err
 		}
 		animes = append(animes, a)
 	}
@@ -67,7 +66,6 @@ func (repo *AnimeRepository) ListMinimumSearch(title string) (animes domain.TAni
 		title, title, title,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	for rows.Next() {
@@ -76,7 +74,7 @@ func (repo *AnimeRepository) ListMinimumSearch(title string) (animes domain.TAni
 			&a.ID, &a.Slug, &a.Title,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
+			return animes, err
 		}
 		animes = append(animes, a)
 	}
@@ -98,7 +96,6 @@ func (repo *AnimeRepository) ListSearch(title string) (animes domain.TAnimes, er
 		title, title, title,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	for rows.Next() {
@@ -108,7 +105,7 @@ func (repo *AnimeRepository) ListSearch(title string) (animes domain.TAnimes, er
 			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
+			return animes, err
 		}
 		animes = append(animes, a)
 	}
@@ -127,7 +124,6 @@ func (repo *AnimeRepository) ListBySeason(year string, season string) (animes do
 			"WHERE seasons.year = ? AND seasons.season = ?", year, seasonJp,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
 	for rows.Next() {
@@ -137,7 +133,7 @@ func (repo *AnimeRepository) ListBySeason(year string, season string) (animes do
 			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
+			return animes, err
 		}
 		animes = append(animes, a)
 	}
@@ -153,11 +149,11 @@ func (repo *AnimeRepository) ListBySeries(id int) (animes []domain.TAnimeWithSer
 			"LEFT JOIN animes ON series.id = animes.series_id "+
 			"WHERE series.id = ?", id,
 	)
-	defer rows.Close()
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var a domain.TAnimeWithSeries
 		err = rows.Scan(
@@ -167,7 +163,6 @@ func (repo *AnimeRepository) ListBySeries(id int) (animes []domain.TAnimeWithSer
 			&a.CreatedAt, &a.UpdatedAt, &a.SeriesName,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
 			return
 		}
 		animes = append(animes, a)
@@ -184,11 +179,11 @@ func (repo *AnimeRepository) ListByCompany(engName string) (animes domain.TAnime
 			"LEFT JOIN animes ON co.id = animes.company_id "+
 			"WHERE co.eng_name = ?", engName,
 	)
-	defer rows.Close()
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var a domain.TAnime
 		err = rows.Scan(
@@ -198,7 +193,6 @@ func (repo *AnimeRepository) ListByCompany(engName string) (animes domain.TAnime
 			&a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
 			return
 		}
 		animes = append(animes, a)
@@ -210,16 +204,15 @@ func (repo *AnimeRepository) ListMinimum() (animes domain.TAnimeMinimums, err er
 	rows, err := repo.Query(
 		"SELECT id, slug, title from animes",
 	)
-	defer rows.Close()
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var a domain.TAnimeMinimum
 		err = rows.Scan(&a.ID, &a.Slug, &a.Title)
 		if err != nil {
-			domain.ErrorWarn(err)
 			return
 		}
 		animes = append(animes, a)
@@ -237,11 +230,11 @@ func (repo *AnimeRepository) FindById(id int) (a domain.TAnime, err error) {
 			"count_episodes, created_at, updated_at FROM animes WHERE id = ?",
 		id,
 	)
-	defer rows.Close()
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return a, err
 	}
+	defer rows.Close()
+
 	rows.Next()
 	err = rows.Scan(
 		&a.ID, &a.Slug, &a.Title, &a.Abbreviation,
@@ -250,8 +243,7 @@ func (repo *AnimeRepository) FindById(id int) (a domain.TAnime, err error) {
 		&a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return a, domain.Errors{Inner: err, Flag: domain.DataNotFoundError}
 	}
 	return
 }
@@ -266,11 +258,11 @@ func (repo *AnimeRepository) FindBySlug(slug string) (a domain.TAnimeWithSeries,
 			"LEFT JOIN companies AS co ON a.company_id = co.id "+
 			"WHERE slug = ?", slug,
 	)
-	defer rows.Close()
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
+	defer rows.Close()
+
 	rows.Next()
 	err = rows.Scan(
 		&a.ID, &a.Slug, &a.Title, &a.Abbreviation,
@@ -281,8 +273,6 @@ func (repo *AnimeRepository) FindBySlug(slug string) (a domain.TAnimeWithSeries,
 		&a.CompanyName, &a.CompanyEngName,
 	)
 	if err != nil {
-		err = domain.ErrNotFound
-		domain.ErrorWarn(err)
 		return
 	}
 	return
@@ -297,24 +287,18 @@ func (repo *AnimeRepository) ReviewFilterByAnime(animeId int, userId string) (re
 		"Select * from reviews WHERE anime_id = ? AND (user_id != ? OR user_id IS NULL)",
 		animeId, userId,
 	)
-	defer rows.Close()
-
 	if err != nil {
-		domain.ErrorWarn(err)
 		return
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var r domain.TReview
 		err = rows.Scan(&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt)
 		if err != nil {
-			domain.ErrorWarn(err)
 			return
 		}
 		reviews = append(reviews, r)
-	}
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
 	}
 	return
 }

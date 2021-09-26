@@ -63,7 +63,7 @@ func (uploader *S3Uploader) ImageUploading(file multipart.File, fileName string,
 		Key:         aws.String(key),
 	})
 	if err != nil {
-		return "", err
+		return "", domain.Errors{Inner: err, Flag: domain.S3ConnectionError}
 	}
 
 	fileUrl := fmt.Sprintf("https://%s.s3-%s.amazonaws.com/%s", configs.Bucket, "ap-northeast-1", key)

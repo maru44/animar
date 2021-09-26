@@ -46,14 +46,26 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 
 	switch {
 	case strId != "":
-		id, _ := strconv.Atoi(strId)
+		id, err := strconv.Atoi(strId)
+		if err != nil {
+			response(w, r, err, nil)
+			return
+		}
 		a, err := controller.interactor.AnimeDetail(id)
+		if err != nil {
+			response(w, r, err, nil)
+			return
+		}
 		response(w, r, err, map[string]interface{}{"data": a})
 	case slug != "":
 		a, err := controller.interactor.AnimeDetailBySlug(slug)
+		if err != nil {
+			response(w, r, err, nil)
+			return
+		}
 
 		userId := r.Context().Value(USER_ID).(string)
-		revs, _ := controller.interactor.ReviewFilterByAnime(a.GetId(), userId)
+		revs, err := controller.interactor.ReviewFilterByAnime(a.GetId(), userId)
 		response(w, r, err, map[string]interface{}{"anime": a, "reviews": revs})
 	case year != "":
 		animes, err := controller.interactor.AnimesBySeason(year, season)
@@ -62,11 +74,19 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 		animes, err := controller.interactor.AnimesSearch(keyword)
 		response(w, r, err, map[string]interface{}{"data": animes})
 	case rawSeries != "":
-		seriesId, _ := strconv.Atoi(rawSeries)
+		seriesId, err := strconv.Atoi(rawSeries)
+		if err != nil {
+			response(w, r, err, nil)
+			return
+		}
 		animes, err := controller.interactor.AnimesBySeries(seriesId)
 		response(w, r, err, map[string]interface{}{"data": animes})
 	case company != "":
-		comp, _ := controller.interactor.DetailCompanyByEng(company)
+		comp, err := controller.interactor.DetailCompanyByEng(company)
+		if err != nil {
+			response(w, r, err, nil)
+			return
+		}
 		animes, err := controller.interactor.AnimesByCompany(company)
 		response(w, r, err, map[string]interface{}{"data": animes, "company": comp})
 	default:

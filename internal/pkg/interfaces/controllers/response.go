@@ -9,28 +9,35 @@ import (
 )
 
 func response(w http.ResponseWriter, r *http.Request, err error, body map[string]interface{}) error {
-	if myErr, ok := err.(domain.MyError); ok {
-		err = myErr.ErrorForOutput()
-	}
-
 	status := getStatusCode(err, w)
 	if status == http.StatusOK {
 		data, err := json.Marshal(body)
 
 		// if failed marshal
 		if err != nil {
-			err = domain.Errors{Inner: errors.Wrap(err, "Failed to json.Marshal"), Flag: domain.InternalServerError}
+			err = domain.Errors{Inner: errors.Wrap(err, "json marshal error"), Flag: domain.InternalServerError}
 			go slackErrorLogging(r.Context(), err)
 			w.WriteHeader(http.StatusInternalServerError)
-			mess, _ := json.Marshal(map[string]interface{}{"message": domain.ErrInternalServerError.Error()})
+			mess, _ := json.Marshal(map[string]interface{}{"message": err.Error()})
 			w.Write(mess)
 			return err
 		}
+		w.WriteHeader(status)
 		w.Write(data)
 	} else {
+		w.WriteHeader(status)
 		go slackErrorLogging(r.Context(), err)
+
+		var mess map[string]interface{}
+		if myErr, ok := err.(domain.MyError); ok {
+			mess = map[string]interface{}{"message": myErr.ErrorForOutput().Error()}
+		} else {
+			mess = map[string]interface{}{"message": err.Error()}
+		}
+
+		data, _ := json.Marshal(mess)
+		w.Write(data)
 	}
-	w.WriteHeader(status)
 	return err
 }
 
@@ -39,9 +46,9 @@ func getStatusCode(err error, w http.ResponseWriter) int {
 		return http.StatusOK
 	}
 
-	mess := map[string]interface{}{"message": err.Error()}
-	data, _ := json.Marshal(mess)
-	w.Write(data)
+	if myErr, ok := err.(domain.MyError); ok {
+		err = myErr.ErrorForOutput()
+	}
 
 	switch err {
 	case domain.ErrInternalServerError:
