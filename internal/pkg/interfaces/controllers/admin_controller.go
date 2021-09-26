@@ -192,7 +192,7 @@ func (adc *AdminController) PlatformView(w http.ResponseWriter, r *http.Request)
 		i, _ := strconv.Atoi(id)
 		platform, err := adc.interactor.PlatformDetail(i)
 		if err != nil || platform.ID == 0 {
-			err = domain.ErrorUnauthorized
+			err = domain.ErrNotFound
 		}
 		response(w, r, err, map[string]interface{}{"data": platform})
 	} else {
