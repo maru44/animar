@@ -32,7 +32,7 @@ func (repo *AdminAnimeRepository) ListAll() (animes domain.TAnimes, err error) {
 	defer rows.Close()
 
 	if err != nil {
-		return
+		return animes, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	for rows.Next() {
 		var a domain.TAnime
@@ -41,7 +41,7 @@ func (repo *AdminAnimeRepository) ListAll() (animes domain.TAnimes, err error) {
 			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			return animes, err
+			return animes, domain.NewWrapError(err, domain.DataNotFoundError)
 		}
 		animes = append(animes, a)
 	}
@@ -53,7 +53,7 @@ func (repo *AdminAnimeRepository) FindById(id int) (a domain.AnimeAdmin, err err
 		"SELECT * FROM animes WHERE id = ?", id,
 	)
 	if err != nil {
-		return
+		return a, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	defer rows.Close()
 
@@ -65,6 +65,9 @@ func (repo *AdminAnimeRepository) FindById(id int) (a domain.AnimeAdmin, err err
 		&a.CountEpisodes, &a.HashTag, &a.TwitterUrl, &a.OfficialUrl,
 		&a.CreatedAt, &a.UpdatedAt,
 	)
+	if err != nil {
+		return a, domain.NewWrapError(err, domain.DataNotFoundError)
+	}
 	return
 }
 
@@ -77,11 +80,11 @@ func (repo *AdminAnimeRepository) Insert(a domain.AnimeInsert) (lastInsertId int
 		a.CompanyId, a.HashTag, a.TwitterUrl, a.OfficialUrl,
 	)
 	if err != nil {
-		return
+		return lastInsertId, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rawId, err := exe.LastInsertId()
 	if err != nil {
-		return
+		return lastInsertId, domain.NewWrapError(err, domain.ExternalServerError)
 	}
 	lastInsertId = int(rawId)
 	return
@@ -95,11 +98,11 @@ func (repo *AdminAnimeRepository) Update(id int, a domain.AnimeInsert) (rowsAffe
 		a.HashTag, a.TwitterUrl, a.OfficialUrl, a.CompanyId, id,
 	)
 	if err != nil {
-		return
+		return rowsAffected, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		return
+		return rowsAffected, domain.NewWrapError(err, domain.ExternalServerError)
 	}
 	rowsAffected = int(rawAffected)
 	return
@@ -110,11 +113,11 @@ func (repo *AdminAnimeRepository) Delete(id int) (rowsAffected int, err error) {
 		"DELETE FROM animes WHERE id = ?", id,
 	)
 	if err != nil {
-		return
+		return rowsAffected, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		return
+		return rowsAffected, domain.NewWrapError(err, domain.ExternalServerError)
 	}
 	rowsAffected = int(rawAffected)
 	return
@@ -131,7 +134,7 @@ func (repo *AdminPlatformRepository) ListAll() (platforms domain.TPlatforms, err
 	defer rows.Close()
 
 	if err != nil {
-		return
+		return platforms, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	for rows.Next() {
 		var p domain.TPlatform
@@ -141,7 +144,7 @@ func (repo *AdminPlatformRepository) ListAll() (platforms domain.TPlatforms, err
 			&p.CreatedAt, &p.UpdatedAt,
 		)
 		if err != nil {
-			return
+			return platforms, domain.NewWrapError(err, domain.DataNotFoundError)
 		}
 		platforms = append(platforms, p)
 	}
@@ -155,7 +158,7 @@ func (repo *AdminPlatformRepository) FindById(id int) (p domain.TPlatform, err e
 	defer rows.Close()
 
 	if err != nil {
-		return
+		return p, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rows.Next()
 	err = rows.Scan(
@@ -163,7 +166,7 @@ func (repo *AdminPlatformRepository) FindById(id int) (p domain.TPlatform, err e
 		&p.Image, &p.IsValid, &p.CreatedAt, &p.UpdatedAt,
 	)
 	if err != nil {
-		return
+		return p, domain.NewWrapError(err, domain.DataNotFoundError)
 	}
 	return
 }
@@ -174,11 +177,11 @@ func (repo *AdminPlatformRepository) Insert(p domain.TPlatform) (lastInserted in
 		p.EngName, p.PlatName, p.BaseUrl, p.Image, p.IsValid,
 	)
 	if err != nil {
-		return
+		return lastInserted, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rawId, err := exe.LastInsertId()
 	if err != nil {
-		return
+		return lastInserted, domain.NewWrapError(err, domain.ExternalServerError)
 	}
 	lastInserted = int(rawId)
 	return
@@ -190,11 +193,11 @@ func (repo *AdminPlatformRepository) Update(p domain.TPlatform, id int) (rowsAff
 		p.EngName, p.PlatName, p.BaseUrl, p.Image, p.IsValid, id,
 	)
 	if err != nil {
-		return
+		return rowsAffected, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rawId, err := exe.RowsAffected()
 	if err != nil {
-		return
+		return rowsAffected, domain.NewWrapError(err, domain.ExternalServerError)
 	}
 	rowsAffected = int(rawId)
 	return
@@ -205,11 +208,11 @@ func (repo *AdminPlatformRepository) Delete(id int) (rowsAffected int, err error
 		"DELETE FROM platforms WHERE id = ?", id,
 	)
 	if err != nil {
-		return
+		return rowsAffected, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		return
+		return rowsAffected, domain.NewWrapError(err, domain.ExternalServerError)
 	}
 	rowsAffected = int(rawAffected)
 	return
@@ -226,7 +229,7 @@ func (repo *AdminPlatformRepository) FilterByAnime(animeId int) (platforms domai
 	defer rows.Close()
 
 	if err != nil {
-		return
+		return platforms, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	for rows.Next() {
 		var p domain.TRelationPlatform
@@ -235,7 +238,7 @@ func (repo *AdminPlatformRepository) FilterByAnime(animeId int) (platforms domai
 			&p.CreatedAt, &p.UpdatedAt, &p.PlatName,
 		)
 		if err != nil {
-			return
+			return platforms, domain.NewWrapError(err, domain.DataNotFoundError)
 		}
 		platforms = append(platforms, p)
 	}
@@ -248,11 +251,11 @@ func (repo *AdminPlatformRepository) InsertRelation(p domain.TRelationPlatformIn
 		p.PlatformId, p.AnimeId, p.LinkUrl,
 	)
 	if err != nil {
-		return
+		return lastInserted, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rawId, err := exe.LastInsertId()
 	if err != nil {
-		return
+		return lastInserted, domain.NewWrapError(err, domain.ExternalServerError)
 	}
 	lastInserted = int(rawId)
 	return
@@ -264,11 +267,11 @@ func (repo *AdminPlatformRepository) DeleteRelation(animeId int, platformId int)
 		animeId, platformId,
 	)
 	if err != nil {
-		return
+		return rowsAffected, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		return
+		return rowsAffected, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rowsAffected = int(rawAffected)
 	return
@@ -283,7 +286,7 @@ func (repo *AdminSeasonRepository) ListAll() (seasons []domain.TSeason, err erro
 		"Select * from seasons",
 	)
 	if err != nil {
-		return
+		return seasons, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -292,7 +295,7 @@ func (repo *AdminSeasonRepository) ListAll() (seasons []domain.TSeason, err erro
 			&s.ID, &s.Year, &s.Season, &s.CreatedAt, &s.UpdatedAt,
 		)
 		if err != nil {
-			return
+			return seasons, domain.NewWrapError(err, domain.DataNotFoundError)
 		}
 		seasons = append(seasons, s)
 	}
@@ -304,7 +307,7 @@ func (repo *AdminSeasonRepository) FindById(id int) (s domain.TSeason, err error
 		"SELECT * FROM seasons WHERE id = ?", id,
 	)
 	if err != nil {
-		return
+		return s, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	defer rows.Close()
 	rows.Next()
@@ -312,7 +315,7 @@ func (repo *AdminSeasonRepository) FindById(id int) (s domain.TSeason, err error
 		s.ID, s.Year, s.Season, s.CreatedAt, s.UpdatedAt,
 	)
 	if err != nil {
-		return
+		return s, domain.NewWrapError(err, domain.DataNotFoundError)
 	}
 	return
 }
@@ -322,11 +325,11 @@ func (repo *AdminSeasonRepository) Insert(s domain.TSeasonInput) (lastInserted i
 		"INSERT INTO seasons(year, season) VALUES(?, ?)", s.Year, s.Season,
 	)
 	if err != nil {
-		return
+		return lastInserted, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rawId, err := exe.LastInsertId()
 	if err != nil {
-		return
+		return lastInserted, domain.NewWrapError(err, domain.ExternalServerError)
 	}
 	lastInserted = int(rawId)
 	return
@@ -338,11 +341,11 @@ func (repo *AdminSeasonRepository) InsertRelation(r domain.TSeasonRelationInput)
 		r.SeasonId, r.AnimeId,
 	)
 	if err != nil {
-		return
+		return lastInserted, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rawId, err := exe.LastInsertId()
 	if err != nil {
-		return
+		return lastInserted, domain.NewWrapError(err, domain.ExternalServerError)
 	}
 	lastInserted = int(rawId)
 	return
@@ -354,11 +357,11 @@ func (repo *AdminSeasonRepository) DeleteRelation(animeId, seasonId int) (affect
 		animeId, seasonId,
 	)
 	if err != nil {
-		return
+		return affected, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		return
+		return affected, domain.NewWrapError(err, domain.ExternalServerError)
 	}
 	affected = int(rawAffected)
 	return
@@ -371,7 +374,7 @@ func (repo *AdminSeasonRepository) DeleteRelation(animeId, seasonId int) (affect
 func (repo *AdminSeriesRepository) ListAll() (series []domain.TSeries, err error) {
 	rows, err := repo.Query("Select * from series")
 	if err != nil {
-		return
+		return series, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -380,7 +383,7 @@ func (repo *AdminSeriesRepository) ListAll() (series []domain.TSeries, err error
 			&s.ID, &s.EngName, &s.SeriesName, &s.CreatedAt, &s.UpdatedAt,
 		)
 		if err != nil {
-			return
+			return series, domain.NewWrapError(err, domain.DataNotFoundError)
 		}
 		series = append(series, s)
 	}
@@ -390,7 +393,7 @@ func (repo *AdminSeriesRepository) ListAll() (series []domain.TSeries, err error
 func (repo *AdminSeriesRepository) FindById(id int) (s domain.TSeries, err error) {
 	rows, err := repo.Query("SELECT * FROM series WHERE id = ?", id)
 	if err != nil {
-		return s, err
+		return s, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	defer rows.Close()
 	rows.Next()
@@ -398,7 +401,7 @@ func (repo *AdminSeriesRepository) FindById(id int) (s domain.TSeries, err error
 		&s.ID, &s.EngName, &s.SeriesName, &s.CreatedAt, &s.UpdatedAt,
 	)
 	if err != nil {
-		return
+		return s, domain.NewWrapError(err, domain.DataNotFoundError)
 	}
 	return
 }
@@ -408,11 +411,11 @@ func (repo *AdminSeriesRepository) Insert(s domain.TSeriesInput) (lastInserted i
 		"INSERT INTO series(eng_name, series_name) VALUES(?, ?)", s.EngName, s.SeriesName,
 	)
 	if err != nil {
-		return
+		return lastInserted, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rawId, err := exe.LastInsertId()
 	if err != nil {
-		return
+		return lastInserted, domain.NewWrapError(err, domain.ExternalServerError)
 	}
 	lastInserted = int(rawId)
 	return
@@ -424,11 +427,11 @@ func (repo *AdminSeriesRepository) Update(s domain.TSeriesInput, id int) (rowsAf
 		s.EngName, s.SeriesName, id,
 	)
 	if err != nil {
-		return
+		return rowsAffected, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rawId, err := exe.LastInsertId()
 	if err != nil {
-		return
+		return rowsAffected, domain.NewWrapError(err, domain.ExternalServerError)
 	}
 	rowsAffected = int(rawId)
 	return
@@ -439,11 +442,11 @@ func (repo *AdminSeriesRepository) Delete(id int) (rowsAffected int, err error) 
 		"DELETE FROM series WHERE id = ?", id,
 	)
 	if err != nil {
-		return
+		return rowsAffected, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	rawId, err := exe.LastInsertId()
 	if err != nil {
-		return
+		return rowsAffected, domain.NewWrapError(err, domain.ExternalServerError)
 	}
 	rowsAffected = int(rawId)
 	return

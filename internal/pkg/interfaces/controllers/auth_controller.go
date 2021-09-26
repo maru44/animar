@@ -105,7 +105,7 @@ func (controller *AuthController) LoginView(w http.ResponseWriter, r *http.Reque
 		controller.setCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
 		controller.setCookiePackage(w, "refreshToken", tokens.RefreshToken, 60*60*24*30)
 	} else {
-		response(w, r, domain.ErrorUnauthorized, nil)
+		response(w, r, domain.NewError("unauthorize", domain.UnauthorizedError), nil)
 	}
 	response(w, r, err, nil)
 	return
@@ -191,7 +191,7 @@ func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.
 		controller.destroyCookie(w, "idToken") // destroy cookie
 		controller.setCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
 	} else {
-		response(w, r, domain.ErrorUnauthorized, nil)
+		response(w, r, domain.NewError("unauthorize", domain.UnauthorizedError), nil)
 	}
 	return
 }

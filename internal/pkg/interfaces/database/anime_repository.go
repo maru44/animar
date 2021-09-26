@@ -16,7 +16,7 @@ func (repo *AnimeRepository) ListAll() (animes domain.TAnimes, err error) {
 	defer rows.Close()
 
 	if err != nil {
-		return
+		return animes, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	for rows.Next() {
 		var a domain.TAnime
@@ -25,7 +25,7 @@ func (repo *AnimeRepository) ListAll() (animes domain.TAnimes, err error) {
 			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			return animes, err
+			return animes, domain.NewWrapError(err, domain.DataNotFoundError)
 		}
 		animes = append(animes, a)
 	}
@@ -38,6 +38,10 @@ func (repo *AnimeRepository) ListOnAirAll() (animes domain.TAnimes, err error) {
 			"description, state, series_id, count_episodes, created_at, updated_at " +
 			"FROM animes WHERE state = 'now' ORDER BY created_at ASC",
 	)
+	if err != nil {
+		return animes, domain.NewWrapError(err, domain.MySqlConnectionError)
+	}
+
 	defer rows.Close()
 	for rows.Next() {
 		var a domain.TAnime
@@ -46,7 +50,7 @@ func (repo *AnimeRepository) ListOnAirAll() (animes domain.TAnimes, err error) {
 			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			return animes, err
+			return animes, domain.NewWrapError(err, domain.DataNotFoundError)
 		}
 		animes = append(animes, a)
 	}
@@ -66,7 +70,7 @@ func (repo *AnimeRepository) ListMinimumSearch(title string) (animes domain.TAni
 		title, title, title,
 	)
 	if err != nil {
-		return
+		return animes, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	for rows.Next() {
 		var a domain.TAnimeMinimum
@@ -74,7 +78,7 @@ func (repo *AnimeRepository) ListMinimumSearch(title string) (animes domain.TAni
 			&a.ID, &a.Slug, &a.Title,
 		)
 		if err != nil {
-			return animes, err
+			return animes, domain.NewWrapError(err, domain.DataNotFoundError)
 		}
 		animes = append(animes, a)
 	}
@@ -96,7 +100,7 @@ func (repo *AnimeRepository) ListSearch(title string) (animes domain.TAnimes, er
 		title, title, title,
 	)
 	if err != nil {
-		return
+		return animes, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	for rows.Next() {
 		var a domain.TAnime
@@ -105,7 +109,7 @@ func (repo *AnimeRepository) ListSearch(title string) (animes domain.TAnimes, er
 			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			return animes, err
+			return animes, domain.NewWrapError(err, domain.DataNotFoundError)
 		}
 		animes = append(animes, a)
 	}
@@ -124,7 +128,7 @@ func (repo *AnimeRepository) ListBySeason(year string, season string) (animes do
 			"WHERE seasons.year = ? AND seasons.season = ?", year, seasonJp,
 	)
 	if err != nil {
-		return
+		return animes, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	for rows.Next() {
 		var a domain.TAnime
@@ -133,7 +137,7 @@ func (repo *AnimeRepository) ListBySeason(year string, season string) (animes do
 			&a.State, &a.SeriesId, &a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			return animes, err
+			return animes, domain.NewWrapError(err, domain.DataNotFoundError)
 		}
 		animes = append(animes, a)
 	}
@@ -150,7 +154,7 @@ func (repo *AnimeRepository) ListBySeries(id int) (animes []domain.TAnimeWithSer
 			"WHERE series.id = ?", id,
 	)
 	if err != nil {
-		return
+		return animes, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	defer rows.Close()
 
@@ -163,7 +167,7 @@ func (repo *AnimeRepository) ListBySeries(id int) (animes []domain.TAnimeWithSer
 			&a.CreatedAt, &a.UpdatedAt, &a.SeriesName,
 		)
 		if err != nil {
-			return
+			return animes, domain.NewWrapError(err, domain.DataNotFoundError)
 		}
 		animes = append(animes, a)
 	}
@@ -180,7 +184,7 @@ func (repo *AnimeRepository) ListByCompany(engName string) (animes domain.TAnime
 			"WHERE co.eng_name = ?", engName,
 	)
 	if err != nil {
-		return
+		return animes, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	defer rows.Close()
 
@@ -193,7 +197,7 @@ func (repo *AnimeRepository) ListByCompany(engName string) (animes domain.TAnime
 			&a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			return
+			return animes, domain.NewWrapError(err, domain.DataNotFoundError)
 		}
 		animes = append(animes, a)
 	}
@@ -205,7 +209,7 @@ func (repo *AnimeRepository) ListMinimum() (animes domain.TAnimeMinimums, err er
 		"SELECT id, slug, title from animes",
 	)
 	if err != nil {
-		return
+		return animes, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	defer rows.Close()
 
@@ -213,7 +217,7 @@ func (repo *AnimeRepository) ListMinimum() (animes domain.TAnimeMinimums, err er
 		var a domain.TAnimeMinimum
 		err = rows.Scan(&a.ID, &a.Slug, &a.Title)
 		if err != nil {
-			return
+			return animes, domain.NewWrapError(err, domain.DataNotFoundError)
 		}
 		animes = append(animes, a)
 	}
@@ -231,7 +235,7 @@ func (repo *AnimeRepository) FindById(id int) (a domain.TAnime, err error) {
 		id,
 	)
 	if err != nil {
-		return a, err
+		return a, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	defer rows.Close()
 
@@ -243,7 +247,7 @@ func (repo *AnimeRepository) FindById(id int) (a domain.TAnime, err error) {
 		&a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 	)
 	if err != nil {
-		return a, domain.ErrorDataNotFound
+		return a, domain.NewWrapError(err, domain.DataNotFoundError)
 	}
 	return
 }
@@ -259,7 +263,7 @@ func (repo *AnimeRepository) FindBySlug(slug string) (a domain.TAnimeWithSeries,
 			"WHERE slug = ?", slug,
 	)
 	if err != nil {
-		return
+		return a, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	defer rows.Close()
 
@@ -273,7 +277,7 @@ func (repo *AnimeRepository) FindBySlug(slug string) (a domain.TAnimeWithSeries,
 		&a.CompanyName, &a.CompanyEngName,
 	)
 	if err != nil {
-		return
+		return a, domain.NewWrapError(err, domain.DataNotFoundError)
 	}
 	return
 }
@@ -288,7 +292,7 @@ func (repo *AnimeRepository) ReviewFilterByAnime(animeId int, userId string) (re
 		animeId, userId,
 	)
 	if err != nil {
-		return
+		return reviews, domain.NewWrapError(err, domain.MySqlConnectionError)
 	}
 	defer rows.Close()
 
@@ -296,7 +300,7 @@ func (repo *AnimeRepository) ReviewFilterByAnime(animeId int, userId string) (re
 		var r domain.TReview
 		err = rows.Scan(&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt)
 		if err != nil {
-			return
+			return reviews, domain.NewWrapError(err, domain.DataNotFoundError)
 		}
 		reviews = append(reviews, r)
 	}

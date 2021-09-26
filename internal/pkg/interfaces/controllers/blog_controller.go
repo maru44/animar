@@ -79,12 +79,16 @@ func (controller *BlogController) UpdateBlogWithRelationView(w http.ResponseWrit
 	userId := r.Context().Value(USER_ID).(string)
 	query := r.URL.Query()
 	strId := query.Get("id")
-	id, _ := strconv.Atoi(strId)
+	id, err := strconv.Atoi(strId)
+	if err != nil {
+		response(w, r, domain.NewWrapError(err, domain.ExternalServerError), nil)
+		return
+	}
 
 	// user 不一致
 	blogUserId, _ := controller.interactor.BlogUserId(id)
 	if blogUserId != userId {
-		response(w, r, domain.ErrorForbidden, nil)
+		response(w, r, domain.NewError("forbidden", domain.ForbiddenError), nil)
 	} else {
 		var p domain.TBlogInsert
 		json.NewDecoder(r.Body).Decode(&p)
@@ -103,7 +107,7 @@ func (controller *BlogController) DeleteBlogView(w http.ResponseWriter, r *http.
 	// user 不一致
 	blogUserId, _ := controller.interactor.BlogUserId(id)
 	if blogUserId != userId {
-		response(w, r, domain.ErrorForbidden, nil)
+		response(w, r, domain.NewError("forbidden", domain.ForbiddenError), nil)
 	} else {
 		deletedRow, err := controller.interactor.DeleteBlog(id)
 		response(w, r, err, map[string]interface{}{"data": deletedRow})

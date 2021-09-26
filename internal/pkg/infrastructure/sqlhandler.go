@@ -50,7 +50,7 @@ func NewSqlHandler() database.SqlHandler {
 func (handler *SqlHandler) Query(statement string, args ...interface{}) (database.Rows, error) {
 	rows, err := handler.Conn.Query(statement, args...)
 	if err != nil {
-		return new(SqlRows), domain.ErrorMySQLConncetion
+		return new(SqlRows), err
 	}
 	row := new(SqlRows)
 	row.Rows = rows
@@ -61,12 +61,12 @@ func (handler *SqlHandler) Execute(statement string, args ...interface{}) (datab
 	res := SqlResult{}
 	stmt, err := handler.Conn.Prepare(statement)
 	if err != nil {
-		return res, domain.ErrorMySQLConncetion
+		return res, err
 	}
 	defer stmt.Close()
 	exe, err := stmt.Exec(args...)
 	if err != nil {
-		return res, domain.ErrorMySQLConncetion
+		return res, err
 	}
 	res.Result = exe
 	return res, nil
@@ -77,7 +77,7 @@ func (handler *SqlHandler) Begin() (database.Tx, error) {
 	res := SqlTransaction{}
 	transaction, err := handler.Conn.Begin()
 	if err != nil {
-		return res, domain.ErrorMySQLConncetion
+		return res, err
 	}
 	res.Tx = transaction
 	return res, err

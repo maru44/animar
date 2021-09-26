@@ -3,7 +3,6 @@ package controllers
 import (
 	"animar/v1/internal/pkg/domain"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -26,7 +25,13 @@ func response(w http.ResponseWriter, r *http.Request, err error, body map[string
 		w.WriteHeader(status)
 		go slackErrorLogging(r.Context(), err)
 
-		mess := map[string]interface{}{"message": err.Error()}
+		var mess map[string]interface{}
+		if myErr, ok := err.(domain.MyError); ok {
+			mess = map[string]interface{}{"message": myErr.ErrorForOutput().Error()}
+		} else {
+			mess = map[string]interface{}{"message": err.Error()}
+		}
+
 		data, _ := json.Marshal(mess)
 		w.Write(data)
 	}
@@ -34,29 +39,32 @@ func response(w http.ResponseWriter, r *http.Request, err error, body map[string
 }
 
 func getStatusCode(err error, w http.ResponseWriter) int {
-	fmt.Println(err)
 	if err == nil {
 		return http.StatusOK
 	}
 
+	if myErr, ok := err.(domain.MyError); ok {
+		err = myErr.ErrorForOutput()
+	}
+
 	switch err {
-	case domain.ErrorInternalServer, domain.ErrorMySQLConncetion, domain.ErrorFirebaseConnection, domain.ErrorS3Connection, domain.ErrorHttpConnection:
+	case domain.ErrInternalServerError:
 		return http.StatusInternalServerError
-	case domain.ErrorDataNotFound:
+	case domain.ErrNotFound:
 		return http.StatusNotFound
-	case domain.ErrorForbidden:
+	case domain.ErrForbidden:
 		return http.StatusForbidden
-	case domain.ErrorUnauthorized, domain.ErrorTokenInValid, domain.ErrorTokenIsExpired:
+	case domain.ErrUnauthorized, domain.ErrTokenIsExpired:
 		return http.StatusUnauthorized
-	case domain.ErrorBadRequest:
+	case domain.ErrBadRequest:
 		return http.StatusBadRequest
-	case domain.SuccessCreated:
+	case domain.StatusCreated:
 		return http.StatusCreated
-	case domain.ErrorUnknownType:
+	case domain.ErrUnknownType:
 		return http.StatusUnsupportedMediaType
-	case domain.ErrorMethodNotAllowed:
+	case domain.ErrMethodNotAllowed:
 		return http.StatusMethodNotAllowed
-	case domain.ErrorCsrfInValid:
+	case domain.ErrCsrfNotValid:
 		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
