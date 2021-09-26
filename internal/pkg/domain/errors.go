@@ -2,6 +2,11 @@ package domain
 
 import (
 	// "errors"
+	"bytes"
+	"fmt"
+	"runtime"
+	"strings"
+
 	"github.com/pkg/errors"
 )
 
@@ -47,19 +52,20 @@ type (
 	MyError interface {
 		ErrorForOutput() error
 		GetFlag() uint32
+		Traces() string
 	}
 
 	// @TODO: add caller(for stack trace)
 	Errors struct {
-		Inner error // stores the error returned by external dependencies
-		Flag  uint32
-		text  string
-		//
+		Inner  error // stores the error returned by external dependencies
+		Flag   uint32
+		text   string
+		traces []StackTraceFrame
 	}
 
 	StackTraceFrame struct {
 		File           string
-		Line           string
+		Line           int
 		Name           string
 		ProgramCounter uintptr // origin data
 	}
@@ -102,9 +108,58 @@ func (e Errors) GetFlag() uint32 {
 	return e.Flag
 }
 
+func (e Errors) Traces() string {
+	var buf bytes.Buffer
+	for _, fr := range e.traces {
+		fmt.Fprintf(&buf, "%s: %d===>%v\n", fr.File, fr.Line, fr.Name)
+	}
+	return buf.String()
+}
+
 func NewError(text string, flag uint32) *Errors {
 	return &Errors{
-		Flag: flag,
-		text: text,
+		Flag:   flag,
+		text:   text,
+		traces: NewTrace(callers()),
 	}
+}
+
+func NewWrapError(e error, flag uint32) *Errors {
+	return &Errors{
+		Flag:   flag,
+		Inner:  e,
+		traces: NewTrace(callers()),
+	}
+}
+
+// https://github.com/pkg/errors/blob/816c9085562cd7ee03e7f8188a1cfd942858cded/stack.go#L133
+func callers() []uintptr {
+	const depth = 32
+	var pcs [depth]uintptr
+	n := runtime.Callers(3, pcs[:])
+	return pcs[0 : n-2]
+}
+
+func NewTrace(pcs []uintptr) []StackTraceFrame {
+	traces := []StackTraceFrame{}
+
+	for _, pc := range pcs {
+		trace := StackTraceFrame{ProgramCounter: pc}
+		fn := runtime.FuncForPC(pc)
+		if fn == nil {
+			return traces
+		}
+		trace.Name = trimPkgName(fn)
+		trace.File, trace.Line = fn.FileLine(pc - 1)
+		traces = append(traces, trace)
+	}
+	return traces
+}
+
+func trimPkgName(fn *runtime.Func) string {
+	name := fn.Name()
+	if ld := strings.LastIndex(name, "."); ld >= 0 {
+		name = name[ld+1:]
+	}
+	return name
 }
