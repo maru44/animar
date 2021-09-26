@@ -12,17 +12,6 @@ import (
 
 type ErrLevel string
 
-const (
-	// internal
-
-	ErrAlert    ErrLevel = "ALERT"
-	ErrInternal ErrLevel = "INTERNAL ERROR"
-
-	// external
-
-	ErrExternal ErrLevel = "EXTERNAL ERROR"
-)
-
 func slackErrorLogging(ctx context.Context, in error, additional ...string) (err error) {
 	cli := http.Client{}
 	var access string
@@ -30,16 +19,7 @@ func slackErrorLogging(ctx context.Context, in error, additional ...string) (err
 		access = fmt.Sprintf("URL: %s, METHOD: %s", a.URL, a.Method)
 	}
 
-	errLevel := ErrExternal
-	if myErr, ok := in.(domain.MyError); ok {
-		flag := myErr.GetFlag()
-		if flag > domain.InternalServerError {
-			errLevel = ErrAlert
-		} else if flag == domain.InternalServerError {
-			errLevel = ErrInternal
-		}
-	}
-	message := url.QueryEscape(fmt.Sprintf(fmt.Sprintf("%s\n%s\n\nStackTrace:\n%+v", errLevel, access, in)))
+	message := url.QueryEscape(fmt.Sprintf(fmt.Sprintf("%s\n%s\n\nStackTrace:\n%+v", domain.GetErrorLevel(err), access, in)))
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://slack.com/api/chat.postMessage?channel=%s&text=%s&pretty=1", configs.SlackChannelId, message), nil)
 	if err != nil {
 		log.Println(err)

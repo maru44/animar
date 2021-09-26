@@ -12,6 +12,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 type AuthController struct {
@@ -57,7 +59,7 @@ func (controller *AuthController) GetUserModelFromCookieView(w http.ResponseWrit
 	userId := r.Context().Value(USER_ID).(string)
 	user, err := controller.interactor.UserInfo(userId)
 	if err != nil {
-		response(w, r, domain.Errors{Inner: err, Flag: domain.InternalServerError}, nil)
+		response(w, r, err, nil)
 		return
 	}
 	claims, err := controller.getClaimsFromCookie(r)
@@ -83,7 +85,7 @@ func (controller *AuthController) LoginView(w http.ResponseWriter, r *http.Reque
 		bytes.NewBuffer(p_json),
 	)
 	if err != nil {
-		response(w, r, domain.Errors{Inner: err, Flag: domain.InternalServerError}, nil)
+		response(w, r, errors.Wrap(err, "firebase api error"), nil)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -103,7 +105,7 @@ func (controller *AuthController) LoginView(w http.ResponseWriter, r *http.Reque
 		controller.setCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
 		controller.setCookiePackage(w, "refreshToken", tokens.RefreshToken, 60*60*24*30)
 	} else {
-		response(w, r, domain.ErrUnauthorized, nil)
+		response(w, r, domain.ErrorUnauthorized, nil)
 	}
 	response(w, r, err, nil)
 	return
@@ -125,7 +127,7 @@ func (controller *AuthController) RegisterView(w http.ResponseWriter, r *http.Re
 		bytes.NewBuffer(p_json),
 	)
 	if err != nil {
-		response(w, r, domain.Errors{Inner: err, Flag: domain.InternalServerError}, nil)
+		response(w, r, errors.Wrap(err, "firebase api"), nil)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -133,7 +135,7 @@ func (controller *AuthController) RegisterView(w http.ResponseWriter, r *http.Re
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		response(w, r, domain.Errors{Inner: err, Flag: domain.InternalServerError}, nil)
+		response(w, r, errors.Wrap(err, "firebase api"), nil)
 		return
 	}
 	defer resp.Body.Close()
@@ -155,7 +157,7 @@ func (controller *AuthController) RegisterView(w http.ResponseWriter, r *http.Re
 func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.Request) {
 	refreshToken, err := r.Cookie("refreshToken")
 	if err != nil {
-		response(w, r, domain.ErrUnauthorized, nil)
+		response(w, r, errors.Wrap(err, "cookie error"), nil)
 		return
 	}
 	jsonStr := `{"grant_type": "refresh_token", "refresh_token": "` + refreshToken.Value + `"}`
@@ -166,7 +168,7 @@ func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.
 		bytes.NewBuffer([]byte(jsonStr)),
 	)
 	if err != nil {
-		response(w, r, domain.Errors{Inner: err, Flag: domain.InternalServerError}, nil)
+		response(w, r, errors.Wrap(err, "firebase api error"), nil)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -181,7 +183,7 @@ func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.
 	var tokens domain.TRefreshReturn
 	err = json.Unmarshal(body, &tokens)
 	if err != nil {
-		response(w, r, domain.Errors{Inner: err, Flag: domain.InternalServerError}, nil)
+		response(w, r, errors.Wrap(err, "json unmarshal"), nil)
 		return
 	}
 
@@ -189,7 +191,7 @@ func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.
 		controller.destroyCookie(w, "idToken") // destroy cookie
 		controller.setCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
 	} else {
-		response(w, r, domain.ErrUnauthorized, nil)
+		response(w, r, domain.ErrorUnauthorized, nil)
 	}
 	return
 }

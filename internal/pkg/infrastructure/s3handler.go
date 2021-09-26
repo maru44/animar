@@ -44,7 +44,7 @@ func NewS3Uploader() s3.Uploader {
 func (uploader *S3Uploader) ImageUploading(file multipart.File, fileName string, pathList []string) (string, error) {
 	contentType := getContentType(filepath.Ext(fileName))
 	if contentType == "" {
-		return "", domain.ErrUnknownType
+		return "", domain.ErrorS3Connection
 	}
 
 	slug := tools.GenRandSlug(6)
@@ -63,7 +63,7 @@ func (uploader *S3Uploader) ImageUploading(file multipart.File, fileName string,
 		Key:         aws.String(key),
 	})
 	if err != nil {
-		return "", domain.Errors{Inner: err, Flag: domain.S3ConnectionError}
+		return "", domain.ErrorS3Connection
 	}
 
 	fileUrl := fmt.Sprintf("https://%s.s3-%s.amazonaws.com/%s", configs.Bucket, "ap-northeast-1", key)

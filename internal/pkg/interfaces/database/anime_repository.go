@@ -243,7 +243,7 @@ func (repo *AnimeRepository) FindById(id int) (a domain.TAnime, err error) {
 		&a.CountEpisodes, &a.CreatedAt, &a.UpdatedAt,
 	)
 	if err != nil {
-		return a, domain.Errors{Inner: err, Flag: domain.DataNotFoundError}
+		return a, domain.ErrorDataNotFound
 	}
 	return
 }

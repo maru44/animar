@@ -63,7 +63,7 @@ func (repo *AuthRepository) GetAdminId(idToken string) (userId string, err error
 	userId = claims["user_id"].(string)
 	isAdmin := repo.IsAdmin(userId)
 	if !isAdmin {
-		err = domain.ErrForbidden
+		err = domain.ErrorForbidden
 		return
 	}
 	return

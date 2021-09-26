@@ -12,6 +12,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type BaseController struct {
@@ -52,7 +54,7 @@ func NewBaseController(c domain.Cache) *BaseController {
 ************************/
 
 func (controller *BaseController) GatewayView(w http.ResponseWriter, r *http.Request) {
-	response(w, r, domain.ErrNotFound, nil)
+	response(w, r, domain.ErrorDataNotFound, nil)
 	return
 }
 
@@ -114,7 +116,7 @@ func (controller *BaseController) UpsertOnlyMiddleware(next http.Handler) http.H
 		if r.Method == "POST" || r.Method == "PUT" {
 			next.ServeHTTP(w, r)
 		} else {
-			response(w, r, domain.ErrMethodNotAllowed, nil)
+			response(w, r, domain.ErrorMethodNotAllowed, nil)
 			return
 		}
 	})
@@ -125,7 +127,7 @@ func (controller *BaseController) PostOnlyMiddleware(next http.Handler) http.Han
 		if r.Method == "POST" {
 			next.ServeHTTP(w, r)
 		} else {
-			response(w, r, domain.ErrMethodNotAllowed, nil)
+			response(w, r, domain.ErrorMethodNotAllowed, nil)
 			return
 		}
 	})
@@ -136,7 +138,7 @@ func (controller *BaseController) PutOnlyMiddleware(next http.Handler) http.Hand
 		if r.Method == "PUT" {
 			next.ServeHTTP(w, r)
 		} else {
-			response(w, r, domain.ErrMethodNotAllowed, nil)
+			response(w, r, domain.ErrorMethodNotAllowed, nil)
 			return
 		}
 	})
@@ -147,7 +149,7 @@ func (controller *BaseController) DeleteOnlyMiddleware(next http.Handler) http.H
 		if r.Method == "DELETE" {
 			next.ServeHTTP(w, r)
 		} else {
-			response(w, r, domain.ErrMethodNotAllowed, nil)
+			response(w, r, domain.ErrorMethodNotAllowed, nil)
 			return
 		}
 	})
@@ -196,13 +198,13 @@ func (controller *BaseController) VerifyCsrfMiddleware(next http.Handler) http.H
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		csrfToken, err := r.Cookie(CSRF_COOKIE_KEY)
 		if err != nil {
-			err = domain.ErrCsrfNotValid
+			err = domain.ErrorCsrfInValid
 			response(w, r, err, nil)
 			return
 		}
 		cache := controller.cache
 		if ok := cache.Get(domain.CacheTypeCsrf, csrfToken.Value); !ok {
-			err = domain.ErrCsrfNotValid
+			err = domain.ErrorCsrfInValid
 			response(w, r, err, nil)
 			return
 		}
@@ -264,12 +266,12 @@ func (controller *BaseController) LoginRequireMiddleware(next http.Handler) http
 		idToken, err := r.Cookie("idToken")
 		if err != nil {
 
-			response(w, r, domain.ErrUnauthorized, nil)
+			response(w, r, domain.ErrorUnauthorized, nil)
 			return
 		}
 		userId, err := controller.interactor.UserId(idToken.Value)
 		if err != nil {
-			response(w, r, domain.ErrUnauthorized, nil)
+			response(w, r, domain.ErrorUnauthorized, nil)
 			return
 		}
 		ctx := context.WithValue(r.Context(), USER_ID, userId)
@@ -287,18 +289,18 @@ func (controller *BaseController) AdminRequiredMiddleware(next http.Handler) htt
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		idToken, err := r.Cookie("idToken")
 		if err != nil {
-			response(w, r, domain.ErrForbidden, nil)
+			response(w, r, errors.Wrap(err, "cookie error"), nil)
 			return
 		} else if idToken.Value == "" {
-			response(w, r, domain.ErrForbidden, nil)
+			response(w, r, domain.ErrorForbidden, nil)
 			return
 		}
 		userId, err := controller.interactor.AdminId(idToken.Value)
 		if err != nil {
-			response(w, r, domain.ErrForbidden, nil)
+			response(w, r, err, nil)
 			return
 		} else if userId == "" {
-			response(w, r, domain.ErrForbidden, nil)
+			response(w, r, domain.ErrorForbidden, nil)
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -313,7 +315,7 @@ func (controller *BaseController) AdminRequiredMiddlewareGet(next http.Handler) 
 		case "GET":
 			idTokenObj, err := r.Cookie("idToken")
 			if err != nil {
-				response(w, r, domain.ErrForbidden, nil)
+				response(w, r, domain.ErrorForbidden, nil)
 				return
 			} else {
 				idToken = idTokenObj.Value
@@ -323,16 +325,16 @@ func (controller *BaseController) AdminRequiredMiddlewareGet(next http.Handler) 
 			json.NewDecoder(r.Body).Decode(&p)
 			idToken = p.Token
 		default:
-			response(w, r, domain.ErrForbidden, nil)
+			response(w, r, domain.ErrorForbidden, nil)
 			return
 		}
 
 		userId, err := controller.interactor.AdminId(idToken)
 		if err != nil {
-			response(w, r, domain.ErrForbidden, nil)
+			response(w, r, err, nil)
 			return
 		} else if userId == "" {
-			response(w, r, domain.ErrForbidden, nil)
+			response(w, r, domain.ErrorForbidden, nil)
 			return
 		}
 		next.ServeHTTP(w, r)

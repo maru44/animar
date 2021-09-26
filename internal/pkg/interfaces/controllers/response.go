@@ -4,8 +4,6 @@ import (
 	"animar/v1/internal/pkg/domain"
 	"encoding/json"
 	"net/http"
-
-	"github.com/pkg/errors"
 )
 
 func response(w http.ResponseWriter, r *http.Request, err error, body map[string]interface{}) error {
@@ -15,7 +13,6 @@ func response(w http.ResponseWriter, r *http.Request, err error, body map[string
 
 		// if failed marshal
 		if err != nil {
-			err = domain.Errors{Inner: errors.Wrap(err, "json marshal error"), Flag: domain.InternalServerError}
 			go slackErrorLogging(r.Context(), err)
 			w.WriteHeader(http.StatusInternalServerError)
 			mess, _ := json.Marshal(map[string]interface{}{"message": err.Error()})
@@ -28,13 +25,7 @@ func response(w http.ResponseWriter, r *http.Request, err error, body map[string
 		w.WriteHeader(status)
 		go slackErrorLogging(r.Context(), err)
 
-		var mess map[string]interface{}
-		if myErr, ok := err.(domain.MyError); ok {
-			mess = map[string]interface{}{"message": myErr.ErrorForOutput().Error()}
-		} else {
-			mess = map[string]interface{}{"message": err.Error()}
-		}
-
+		mess := map[string]interface{}{"message": err.Error()}
 		data, _ := json.Marshal(mess)
 		w.Write(data)
 	}
@@ -46,28 +37,24 @@ func getStatusCode(err error, w http.ResponseWriter) int {
 		return http.StatusOK
 	}
 
-	if myErr, ok := err.(domain.MyError); ok {
-		err = myErr.ErrorForOutput()
-	}
-
 	switch err {
-	case domain.ErrInternalServerError:
+	case domain.ErrorInternalServer, domain.ErrorMySQLConncetion, domain.ErrorFirebaseConnection, domain.ErrorS3Connection, domain.ErrorHttpConnection:
 		return http.StatusInternalServerError
-	case domain.ErrNotFound:
+	case domain.ErrorDataNotFound:
 		return http.StatusNotFound
-	case domain.ErrForbidden:
+	case domain.ErrorForbidden:
 		return http.StatusForbidden
-	case domain.ErrUnauthorized, domain.ErrTokenIsExpired:
+	case domain.ErrorUnauthorized, domain.ErrorTokenInValid, domain.ErrorTokenIsExpired:
 		return http.StatusUnauthorized
-	case domain.ErrBadRequest:
+	case domain.ErrorBadRequest:
 		return http.StatusBadRequest
-	case domain.StatusCreated:
+	case domain.SuccessCreated:
 		return http.StatusCreated
-	case domain.ErrUnknownType:
+	case domain.ErrorUnknownType:
 		return http.StatusUnsupportedMediaType
-	case domain.ErrMethodNotAllowed:
+	case domain.ErrorMethodNotAllowed:
 		return http.StatusMethodNotAllowed
-	case domain.ErrCsrfNotValid:
+	case domain.ErrorCsrfInValid:
 		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
