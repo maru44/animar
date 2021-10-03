@@ -6,6 +6,8 @@ import (
 	"animar/v1/internal/pkg/usecase"
 	"net/http"
 	"strconv"
+
+	"github.com/maru44/perr"
 )
 
 type RoleController struct {
@@ -25,9 +27,13 @@ func NewRoleController(sqlHandler database.SqlHandler) *RoleController {
 func (controller *RoleController) ListStaffRoleView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	strId := query.Get("anime")
-	animeId, _ := strconv.Atoi(strId)
+	animeId, err := strconv.Atoi(strId)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
+	}
 
 	staffRoles, err := controller.interactor.StaffRoleByAnime(animeId)
-	response(w, r, err, map[string]interface{}{"data": staffRoles})
+	response(w, r, perr.Wrap(err, perr.NotFound), map[string]interface{}{"data": staffRoles})
 	return
 }

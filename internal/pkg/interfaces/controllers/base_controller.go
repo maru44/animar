@@ -12,6 +12,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/maru44/perr"
 )
 
 type BaseController struct {
@@ -52,7 +54,7 @@ func NewBaseController(c domain.Cache) *BaseController {
 ************************/
 
 func (controller *BaseController) GatewayView(w http.ResponseWriter, r *http.Request) {
-	response(w, r, domain.ErrNotFound, nil)
+	response(w, r, perr.New("", perr.NotFound), nil)
 	return
 }
 
@@ -114,7 +116,7 @@ func (controller *BaseController) UpsertOnlyMiddleware(next http.Handler) http.H
 		if r.Method == "POST" || r.Method == "PUT" {
 			next.ServeHTTP(w, r)
 		} else {
-			response(w, r, domain.NewError("Invalid method", domain.MethodNotAllowedError), nil)
+			response(w, r, perr.New("", perr.MethodNotAllowed), nil)
 			return
 		}
 	})
@@ -125,7 +127,7 @@ func (controller *BaseController) PostOnlyMiddleware(next http.Handler) http.Han
 		if r.Method == "POST" {
 			next.ServeHTTP(w, r)
 		} else {
-			response(w, r, domain.NewError("Invalid method", domain.MethodNotAllowedError), nil)
+			response(w, r, perr.New("", perr.MethodNotAllowed), nil)
 			return
 		}
 	})
@@ -136,7 +138,7 @@ func (controller *BaseController) PutOnlyMiddleware(next http.Handler) http.Hand
 		if r.Method == "PUT" {
 			next.ServeHTTP(w, r)
 		} else {
-			response(w, r, domain.NewError("Invalid method", domain.MethodNotAllowedError), nil)
+			response(w, r, perr.New("", perr.MethodNotAllowed), nil)
 			return
 		}
 	})
@@ -147,7 +149,7 @@ func (controller *BaseController) DeleteOnlyMiddleware(next http.Handler) http.H
 		if r.Method == "DELETE" {
 			next.ServeHTTP(w, r)
 		} else {
-			response(w, r, domain.NewError("Invalid method", domain.MethodNotAllowedError), nil)
+			response(w, r, perr.New("", perr.MethodNotAllowed), nil)
 			return
 		}
 	})
@@ -196,13 +198,13 @@ func (controller *BaseController) VerifyCsrfMiddleware(next http.Handler) http.H
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		csrfToken, err := r.Cookie(CSRF_COOKIE_KEY)
 		if err != nil {
-			err = domain.NewError("No csrf token", domain.CsrfNotValidError)
+			err = perr.Wrap(err, perr.BadRequest, "Invalid Csrf Token")
 			response(w, r, err, nil)
 			return
 		}
 		cache := controller.cache
 		if ok := cache.Get(domain.CacheTypeCsrf, csrfToken.Value); !ok {
-			err = domain.NewError("invalid csrf token", domain.CsrfNotValidError)
+			err = perr.New("Invalid Csrf Token", perr.BadRequest)
 			response(w, r, err, nil)
 			return
 		}
@@ -263,7 +265,7 @@ func (controller *BaseController) LoginRequireMiddleware(next http.Handler) http
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		idToken, err := r.Cookie("idToken")
 		if err != nil {
-			response(w, r, domain.NewError("No access token", domain.TokenIsExpiredError), nil)
+			response(w, r, perr.Wrap(err, perr.Expired), nil)
 			return
 		}
 		userId, err := controller.interactor.UserId(idToken.Value)
@@ -286,18 +288,18 @@ func (controller *BaseController) AdminRequiredMiddleware(next http.Handler) htt
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		idToken, err := r.Cookie("idToken")
 		if err != nil {
-			response(w, r, domain.NewError("No access token", domain.ForbiddenError), nil)
+			response(w, r, perr.Wrap(err, perr.Forbidden), nil)
 			return
 		} else if idToken.Value == "" {
-			response(w, r, domain.NewError("No access token", domain.ForbiddenError), nil)
+			response(w, r, perr.New("", perr.Unauthorized), nil)
 			return
 		}
 		userId, err := controller.interactor.AdminId(idToken.Value)
 		if err != nil {
-			response(w, r, err, nil)
+			response(w, r, perr.Wrap(err, perr.Unauthorized), nil)
 			return
 		} else if userId == "" {
-			response(w, r, domain.NewError("invalid user", domain.TokenIsExpiredError), nil)
+			response(w, r, perr.New("", perr.Unauthorized), nil)
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -312,7 +314,7 @@ func (controller *BaseController) AdminRequiredMiddlewareGet(next http.Handler) 
 		case "GET":
 			idTokenObj, err := r.Cookie("idToken")
 			if err != nil {
-				response(w, r, domain.NewError("No access token", domain.ForbiddenError), nil)
+				response(w, r, perr.Wrap(err, perr.Forbidden), nil)
 				return
 			} else {
 				idToken = idTokenObj.Value
@@ -322,7 +324,7 @@ func (controller *BaseController) AdminRequiredMiddlewareGet(next http.Handler) 
 			json.NewDecoder(r.Body).Decode(&p)
 			idToken = p.Token
 		default:
-			response(w, r, domain.NewError("forbidden", domain.ForbiddenError), nil)
+			response(w, r, perr.New("", perr.Forbidden), nil)
 			return
 		}
 
@@ -331,7 +333,7 @@ func (controller *BaseController) AdminRequiredMiddlewareGet(next http.Handler) 
 			response(w, r, err, nil)
 			return
 		} else if userId == "" {
-			response(w, r, domain.NewError("forbidden", domain.ForbiddenError), nil)
+			response(w, r, perr.New("", perr.Forbidden), nil)
 			return
 		}
 		next.ServeHTTP(w, r)

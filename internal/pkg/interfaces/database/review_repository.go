@@ -4,6 +4,8 @@ import (
 	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/tools/tools"
 	"fmt"
+
+	"github.com/maru44/perr"
 )
 
 type ReviewRepository struct {
@@ -14,18 +16,16 @@ func (repo *ReviewRepository) FindAll() (reviewIds []int, err error) {
 	rows, err := repo.Query(
 		"SELECT id FROM reviews",
 	)
+	if err != nil {
+		return reviewIds, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
+	}
 	defer rows.Close()
 
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
-	}
 	for rows.Next() {
 		var id int
 		err = rows.Scan(&id)
 		if err != nil {
-			domain.ErrorWarn(err)
-			return
+			return reviewIds, perr.Wrap(err, perr.NotFound)
 		}
 		reviewIds = append(reviewIds, id)
 	}
@@ -38,43 +38,33 @@ func (repo *ReviewRepository) FindById(id int) (r domain.ReviewWithAnimeSlug, er
 			"LEFT JOIN animes AS a ON r.anime_id = a.id "+
 			"WHERE r.id = ?", id,
 	)
+	if err != nil {
+		return r, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
+	}
 	defer rows.Close()
 
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
-	}
 	rows.Next()
 	err = rows.Scan(
 		&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt,
 		&r.AnimeSlug, &r.AnimeTitle,
 	)
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
-	}
-	return
+	return r, perr.Wrap(err, perr.NotFound)
 }
 
 func (repo *ReviewRepository) FindByAnimeAndUser(animeId int, userId string) (r domain.TReview, err error) {
 	rows, err := repo.Query(
 		"SELECT * FROM reviews WHERE anime_id = ? AND user_id = ?", animeId, userId,
 	)
+	if err != nil {
+		return r, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
+	}
 	defer rows.Close()
 
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
-	}
 	rows.Next()
 	err = rows.Scan(
 		&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt,
 	)
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
-	}
-	return
+	return r, perr.Wrap(err, perr.NotFound)
 }
 
 func (repo *ReviewRepository) FilterByAnime(animeId int, userId string) (reviews domain.TReviews, err error) {
@@ -82,24 +72,18 @@ func (repo *ReviewRepository) FilterByAnime(animeId int, userId string) (reviews
 		"Select * from reviews WHERE anime_id = ? AND (user_id != ? OR user_id IS NULL)",
 		animeId, userId,
 	)
+	if err != nil {
+		return reviews, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
+	}
 	defer rows.Close()
 
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
-	}
 	for rows.Next() {
 		var r domain.TReview
 		err = rows.Scan(&r.ID, &r.Content, &r.Rating, &r.AnimeId, &r.UserId, &r.CreatedAt, &r.UpdatedAt)
 		if err != nil {
-			domain.ErrorWarn(err)
-			return
+			return reviews, perr.Wrap(err, perr.NotFound)
 		}
 		reviews = append(reviews, r)
-	}
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
 	}
 	return
 }
@@ -109,12 +93,11 @@ func (repo *ReviewRepository) FilterByUser(userId string) (reviews domain.TRevie
 		"SELECT reviews.*, animes.title, animes.slug, animes.description, animes.state "+
 			"FROM reviews LEFT JOIN animes ON reviews.anime_id = animes.id WHERE user_id = ?", userId,
 	)
+	if err != nil {
+		return reviews, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
+	}
 	defer rows.Close()
 
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
-	}
 	for rows.Next() {
 		var r domain.TReviewJoinAnime
 		err = rows.Scan(
@@ -122,14 +105,9 @@ func (repo *ReviewRepository) FilterByUser(userId string) (reviews domain.TRevie
 			&r.CreatedAt, &r.UpdatedAt, &r.Title, &r.Slug, &r.AnimeContent, &r.AState,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
-			return
+			return reviews, perr.Wrap(err, perr.NotFound)
 		}
 		reviews = append(reviews, r)
-	}
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
 	}
 	return
 }
@@ -140,32 +118,27 @@ func (repo *ReviewRepository) InsertContent(r domain.TReviewInput, userId string
 		r.AnimeId, r.Content, userId,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return content, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	_, err = exe.LastInsertId()
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
-	}
 	content = r.Content
-	return
+	return content, perr.Wrap(err, perr.BadRequest)
 }
 
 func (repo *ReviewRepository) UpsertContent(r domain.TReviewInput, userId string) (content string, err error) {
 	review, err := repo.FindByAnimeAndUser(r.AnimeId, userId)
-	if err == nil && review.GetId() != 0 {
+	if err != nil {
+		return content, perr.Wrap(err, nil)
+	} else if review.GetId() == 0 {
+		return content, perr.New("", perr.NotFound)
+	} else {
 		_, err = repo.Execute(
 			"UPDATE reviews SET content = ? WHERE id = ?", r.Content, review.GetId(),
 		)
-		content = r.Content
-		if err != nil {
-			domain.ErrorWarn(err)
-			return
-		}
-		return
+
+		return content, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
-	return repo.InsertContent(r, userId)
 }
 
 func (repo *ReviewRepository) InsertRating(r domain.TReviewInput, userId string) (rating int, err error) {
@@ -174,43 +147,41 @@ func (repo *ReviewRepository) InsertRating(r domain.TReviewInput, userId string)
 		r.AnimeId, r.Rating, userId,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return rating, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	_, err = exe.LastInsertId()
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
-	}
 	rating = r.Rating
-	return
+	return rating, perr.Wrap(err, perr.BadRequest)
 }
 
 func (repo *ReviewRepository) UpsertRating(r domain.TReviewInput, userId string) (rating int, err error) {
 	review, err := repo.FindByAnimeAndUser(r.AnimeId, userId)
-	if err == nil {
+	if err != nil {
+		return rating, perr.Wrap(err, nil)
+	} else if review.GetId() == 0 {
+		return rating, perr.New("", perr.NotFound)
+	} else {
 		_, err = repo.Execute(
 			"UPDATE reviews SET rating = ? WHERE id = ?", tools.NewNullInt(r.Rating), review.GetId(),
 		)
-		if err != nil {
-			domain.ErrorWarn(err)
-			return
-		}
 		rating = r.Rating
-		return
+		return rating, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
-	return repo.InsertRating(r, userId)
 }
 
 func (repo *ReviewRepository) GetRatingAverage(animeId int) (rating string, err error) {
-	rows, err := repo.Query("SELECT COALESCE(AVG(rating), 0) FROM reviews WHERE anime_id = ?", animeId)
-	defer rows.Close()
+	rows, err := repo.Query(
+		"SELECT COALESCE(AVG(rating), 0) FROM reviews WHERE anime_id = ?",
+		animeId,
+	)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return rating, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+	defer rows.Close()
+
 	var avg float32
 	rows.Next()
-	rows.Scan(&avg)
-	return fmt.Sprintf("%.1f", avg), err
+	err = rows.Scan(&avg)
+	return fmt.Sprintf("%.1f", avg), perr.Wrap(err, perr.NotFound)
 }

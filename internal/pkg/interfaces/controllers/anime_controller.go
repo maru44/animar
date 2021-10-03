@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/maru44/perr"
 	"github.com/pkg/errors"
 )
 
@@ -50,7 +51,7 @@ func (controller *AnimeController) AnimeView(w http.ResponseWriter, r *http.Requ
 	case strId != "":
 		id, err := strconv.Atoi(strId)
 		if err != nil {
-			response(w, r, domain.NewWrapError(err, domain.ExternalServerError), nil)
+			response(w, r, perr.Wrap(err, perr.BadRequest), nil)
 			return
 		}
 		a, err := controller.interactor.AnimeDetail(id)

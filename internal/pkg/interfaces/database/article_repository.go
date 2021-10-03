@@ -136,6 +136,7 @@ func (artr *ArticleRepository) FilterByAnime(animeId int) (articles []domain.Art
 	if err != nil {
 		return
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var a domain.Article
 		err = rows.Scan(

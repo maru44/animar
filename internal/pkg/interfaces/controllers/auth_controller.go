@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/maru44/perr"
 )
 
 type AuthController struct {
@@ -50,7 +50,7 @@ func (controller *AuthController) GetUserModelFromQueryView(w http.ResponseWrite
 	uid := query.Get("uid")
 	user, err := controller.interactor.UserInfo(uid)
 
-	response(w, r, err, map[string]interface{}{"user": user})
+	response(w, r, perr.Wrap(err, perr.Unauthorized), map[string]interface{}{"user": user})
 	return
 }
 
@@ -59,15 +59,11 @@ func (controller *AuthController) GetUserModelFromCookieView(w http.ResponseWrit
 	userId := r.Context().Value(USER_ID).(string)
 	user, err := controller.interactor.UserInfo(userId)
 	if err != nil {
-		response(w, r, err, nil)
+		response(w, r, perr.Wrap(err, perr.Unauthorized), nil)
 		return
 	}
 	claims, err := controller.getClaimsFromCookie(r)
-	if err != nil {
-		response(w, r, err, map[string]interface{}{"user": user, "is_verify": true})
-	} else {
-		response(w, r, err, map[string]interface{}{"user": user, "is_verify": claims["email_verified"]})
-	}
+	response(w, r, perr.Wrap(err, perr.Unauthorized), map[string]interface{}{"user": user, "is_verify": claims["email_verified"]})
 	return
 }
 
@@ -85,14 +81,14 @@ func (controller *AuthController) LoginView(w http.ResponseWriter, r *http.Reque
 		bytes.NewBuffer(p_json),
 	)
 	if err != nil {
-		response(w, r, errors.Wrap(err, "firebase api error"), nil)
+		response(w, r, perr.Wrap(err, perr.InternalServerError), nil)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		response(w, r, err, nil)
+		response(w, r, perr.Wrap(err, perr.InternalServerError), nil)
 		return
 	}
 	defer resp.Body.Close()
@@ -105,9 +101,9 @@ func (controller *AuthController) LoginView(w http.ResponseWriter, r *http.Reque
 		controller.setCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
 		controller.setCookiePackage(w, "refreshToken", tokens.RefreshToken, 60*60*24*30)
 	} else {
-		response(w, r, domain.NewError("unauthorize", domain.UnauthorizedError), nil)
+		response(w, r, perr.New("", perr.Unauthorized), nil)
 	}
-	response(w, r, err, nil)
+	response(w, r, perr.Wrap(err, perr.BadRequest), nil)
 	return
 }
 
@@ -127,7 +123,7 @@ func (controller *AuthController) RegisterView(w http.ResponseWriter, r *http.Re
 		bytes.NewBuffer(p_json),
 	)
 	if err != nil {
-		response(w, r, errors.Wrap(err, "firebase api"), nil)
+		response(w, r, perr.Wrap(err, perr.InternalServerError), nil)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -135,7 +131,7 @@ func (controller *AuthController) RegisterView(w http.ResponseWriter, r *http.Re
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		response(w, r, errors.Wrap(err, "firebase api"), nil)
+		response(w, r, perr.Wrap(err, perr.InternalServerError), nil)
 		return
 	}
 	defer resp.Body.Close()
@@ -143,13 +139,13 @@ func (controller *AuthController) RegisterView(w http.ResponseWriter, r *http.Re
 	var d domain.TCreateReturn
 	err = json.Unmarshal(body, &d)
 	if err != nil {
-		response(w, r, err, nil)
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
 	} else {
 		controller.setCookiePackage(w, "idToken", d.IdToken, 60*60*24)
 		controller.setCookiePackage(w, "refreshToken", d.RefreshToken, 60*60*24*30)
 
 		err = controller.interactor.SendVerify(p.Email)
-		response(w, r, err, nil)
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
 	}
 	return
 }
@@ -157,7 +153,7 @@ func (controller *AuthController) RegisterView(w http.ResponseWriter, r *http.Re
 func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.Request) {
 	refreshToken, err := r.Cookie("refreshToken")
 	if err != nil {
-		response(w, r, errors.Wrap(err, "cookie error"), nil)
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
 		return
 	}
 	jsonStr := `{"grant_type": "refresh_token", "refresh_token": "` + refreshToken.Value + `"}`
@@ -168,14 +164,15 @@ func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.
 		bytes.NewBuffer([]byte(jsonStr)),
 	)
 	if err != nil {
-		response(w, r, errors.Wrap(err, "firebase api error"), nil)
+		response(w, r, perr.Wrap(err, perr.InternalServerError), nil)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		domain.ErrorWarn(err)
+		response(w, r, perr.Wrap(err, perr.InternalServerError), nil)
+		return
 	}
 	defer resp.Body.Close()
 
@@ -183,7 +180,7 @@ func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.
 	var tokens domain.TRefreshReturn
 	err = json.Unmarshal(body, &tokens)
 	if err != nil {
-		response(w, r, errors.Wrap(err, "json unmarshal"), nil)
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
 		return
 	}
 
@@ -191,7 +188,7 @@ func (controller *AuthController) RenewTokenView(w http.ResponseWriter, r *http.
 		controller.destroyCookie(w, "idToken") // destroy cookie
 		controller.setCookiePackage(w, "idToken", tokens.IdToken, 60*60*24)
 	} else {
-		response(w, r, domain.NewError("unauthorize", domain.UnauthorizedError), nil)
+		response(w, r, perr.New("", perr.Unauthorized), nil)
 	}
 	return
 }
@@ -220,7 +217,7 @@ func (controller *AuthController) UpdateProfileView(w http.ResponseWriter, r *ht
 	}
 
 	user, err := controller.interactor.UpdateProfile(userId, params)
-	response(w, r, err, map[string]interface{}{"user": user})
+	response(w, r, perr.Wrap(err, perr.BadRequest), map[string]interface{}{"user": user})
 	return
 }
 
@@ -228,7 +225,7 @@ func (controller *AuthController) SetJwtTokenView(w http.ResponseWriter, r *http
 	var p domain.TTokensForm
 	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
-		response(w, r, err, nil)
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
 	} else {
 		controller.setCookiePackage(w, "idToken", p.IdToken, 60*60*24)
 		controller.setCookiePackage(w, "refreshToken", p.RefreshToken, 60*60*24*30)

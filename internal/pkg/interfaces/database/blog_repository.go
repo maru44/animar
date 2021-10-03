@@ -4,6 +4,8 @@ import (
 	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/tools/tools"
 	"strconv"
+
+	"github.com/maru44/perr"
 )
 
 type BlogRepository struct {
@@ -14,12 +16,11 @@ func (repo *BlogRepository) ListAll() (blogs domain.TBlogJoinAnimes, err error) 
 	rows, err := repo.Query(
 		"SELECT * FROM blogs WHERE is_public = true",
 	)
+	if err != nil {
+		return blogs, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
+	}
 	defer rows.Close()
 
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
-	}
 	for rows.Next() {
 		var b domain.TBlogJoinAnime
 		err := rows.Scan(
@@ -28,7 +29,7 @@ func (repo *BlogRepository) ListAll() (blogs domain.TBlogJoinAnimes, err error) 
 		)
 		b.Animes, _ = repo.FilterByBlog(b.GetId())
 		if err != nil {
-			domain.ErrorWarn(err)
+			return blogs, perr.Wrap(err, perr.NotFound)
 		}
 		blogs = append(blogs, b)
 	}
@@ -47,10 +48,10 @@ func (repo *BlogRepository) FilterByUser(accessUserId string, blogUserId string)
 		)
 	}
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return blogs, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
 	defer rows.Close()
+
 	for rows.Next() {
 		var b domain.TBlogJoinAnime
 		err = rows.Scan(
@@ -59,8 +60,7 @@ func (repo *BlogRepository) FilterByUser(accessUserId string, blogUserId string)
 		)
 		b.Animes, _ = repo.FilterByBlog(b.GetId())
 		if err != nil {
-			domain.ErrorWarn(err)
-			return
+			return blogs, perr.Wrap(err, perr.NotFound)
 		}
 		blogs = append(blogs, b)
 	}
@@ -72,15 +72,14 @@ func (repo *BlogRepository) GetUserId(id int) (userId string, err error) {
 		"SELECT user_id FROM blogs WHERE id = ?", id,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return userId, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
 	defer rows.Close()
+
 	rows.Next()
 	err = rows.Scan(&userId)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return userId, perr.Wrap(err, perr.NotFound)
 	}
 	return
 }
@@ -90,18 +89,17 @@ func (repo *BlogRepository) FindById(id int) (b domain.TBlogJoinAnime, err error
 		"SELECT blogs.* FROM blogs WHERE id = ?", id,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return b, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
 	defer rows.Close()
+
 	rows.Next()
 	err = rows.Scan(
 		&b.ID, &b.Slug, &b.Title, &b.Abstract, &b.Content,
 		&b.UserId, &b.IsPublic, &b.CreatedAt, &b.UpdatedAt,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return b, perr.Wrap(err, perr.NotFound)
 	}
 	return
 }
@@ -111,18 +109,17 @@ func (repo *BlogRepository) FindBySlug(slug string) (b domain.TBlogJoinAnime, er
 		"SELECT blogs.* FROM blogs WHERE slug = ?", slug,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return b, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
 	defer rows.Close()
+
 	rows.Next()
 	err = rows.Scan(
 		&b.ID, &b.Slug, &b.Title, &b.Abstract, &b.Content,
 		&b.UserId, &b.IsPublic, &b.CreatedAt, &b.UpdatedAt,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return b, perr.Wrap(err, perr.NotFound)
 	}
 	return
 }
@@ -134,13 +131,12 @@ func (repo *BlogRepository) Insert(b domain.TBlogInsert, userId string) (lastIns
 			"VALUES(?, ?, ?, ?, ?, ?)", slug, b.Title, tools.NewNullString(b.Abstract), b.Content, userId, b.IsPublic,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return lastInserted, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	rawId, err := exe.LastInsertId()
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return lastInserted, perr.Wrap(err, perr.BadRequest)
 	}
 	lastInserted = int(rawId)
 	return
@@ -152,13 +148,12 @@ func (repo *BlogRepository) Update(b domain.TBlogInsert, id int) (rowsAffected i
 		b.Title, tools.NewNullString(b.Abstract), b.Content, b.IsPublic, id,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return rowsAffected, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	rawId, err := exe.RowsAffected()
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return rowsAffected, perr.Wrap(err, perr.BadRequest)
 	}
 	rowsAffected = int(rawId)
 	return
@@ -169,13 +164,12 @@ func (repo *BlogRepository) Delete(id int) (rowsAffected int, err error) {
 		"DELETE FROM blogs WHERE id = ?", id,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return rowsAffected, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	rawId, err := exe.RowsAffected()
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return rowsAffected, perr.Wrap(err, perr.BadRequest)
 	}
 	rowsAffected = int(rawId)
 	return
@@ -189,14 +183,18 @@ func (repo *BlogRepository) FilterByBlog(blogId int) (animes []domain.TJoinedAni
 			"LEFT JOIN animes ON animes.id = relation_blog_animes.anime_id " +
 			"WHERE blog_id = " + strconv.Itoa(blogId),
 	)
+	if err != nil {
+		return animes, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
+	}
 	defer rows.Close()
+
 	for rows.Next() {
 		var a domain.TJoinedAnime
 		err := rows.Scan(
 			&a.AnimeId, &a.Slug, &a.Title,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
+			return animes, perr.Wrap(err, perr.NotFound)
 		}
 		animes = append(animes, a)
 	}
@@ -237,13 +235,12 @@ func (repo *BlogRepository) InsertRelation(animeId int, blogId int) (is_success 
 		animeId, blogId,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return is_success, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	_, err = exe.RowsAffected()
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return is_success, perr.Wrap(err, perr.BadRequest)
 	}
 	is_success = true
 	return
@@ -255,13 +252,9 @@ func (repo *BlogRepository) DeleteRelation(animeId int, blogId int) (err error) 
 		animeId, blogId,
 	)
 	if err != nil {
-		domain.ErrorWarn(err)
-		return
+		return perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	_, err = exe.RowsAffected()
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
-	}
-	return nil
+	return perr.Wrap(err, perr.BadRequest)
 }

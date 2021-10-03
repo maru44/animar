@@ -6,6 +6,8 @@ import (
 	"animar/v1/internal/pkg/usecase"
 	"net/http"
 	"strconv"
+
+	"github.com/maru44/perr"
 )
 
 type SeasonController struct {
@@ -25,11 +27,12 @@ func NewSeasonController(sqlHandler database.SqlHandler) *SeasonController {
 func (controller *SeasonController) SeasonByAnimeIdView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	strId := query.Get("id")
-	id, _ := strconv.Atoi(strId)
+	id, err := strconv.Atoi(strId)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+	}
 
 	seasons, err := controller.interactor.RelationSeasonByAnime(id)
-	if err != nil {
-		domain.ErrorWarn(err)
-	}
-	response(w, r, err, map[string]interface{}{"data": seasons})
+	response(w, r, perr.Wrap(err, perr.NotFound), map[string]interface{}{"data": seasons})
+	return
 }

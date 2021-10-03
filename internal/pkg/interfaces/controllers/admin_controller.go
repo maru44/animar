@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/maru44/perr"
 )
 
 type AdminController struct {
@@ -191,8 +193,10 @@ func (adc *AdminController) PlatformView(w http.ResponseWriter, r *http.Request)
 	if id != "" {
 		i, _ := strconv.Atoi(id)
 		platform, err := adc.interactor.PlatformDetail(i)
-		if err != nil || platform.ID == 0 {
-			err = domain.ErrNotFound
+		if err != nil {
+			err = perr.Wrap(err, perr.NotFound)
+		} else if platform.ID == 0 {
+			err = perr.New("", perr.NotFound)
 		}
 		response(w, r, err, map[string]interface{}{"data": platform})
 	} else {

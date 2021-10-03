@@ -2,7 +2,8 @@ package database
 
 import (
 	"animar/v1/internal/pkg/domain"
-	"log"
+
+	"github.com/maru44/perr"
 )
 
 type RoleRepository struct {
@@ -19,15 +20,19 @@ func (ror *RoleRepository) FilterByAnime(animeId int) (rs []domain.AnimeStaffRol
 		animeId,
 	)
 	if err != nil {
-		log.Print(err)
-		return
+		return rs, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var r domain.AnimeStaffRole
 		var givenName string
-		rows.Scan(
+		err = rows.Scan(
 			&r.Num, &r.Role, &r.Name, &givenName, &r.EngName,
 		)
+		if err != nil {
+			return rs, perr.Wrap(err, perr.NotFound)
+		}
 		r.Name += givenName
 		rs = append(rs, r)
 	}
@@ -42,14 +47,18 @@ func (ror *RoleRepository) List() (rs []domain.Role, err error) {
 			"FROM roles",
 	)
 	if err != nil {
-		log.Print(err)
-		return
+		return rs, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var r domain.Role
-		rows.Scan(
+		err = rows.Scan(
 			&r.ID, &r.Num, &r.Role, &r.CreatedAt, &r.UpdatedAt,
 		)
+		if err != nil {
+			return rs, perr.Wrap(err, perr.NotFound)
+		}
 		rs = append(rs, r)
 	}
 	return
@@ -61,10 +70,13 @@ func (ror *RoleRepository) Insert(r domain.RoleInput) (inserted int, err error) 
 		r.Num, r.Role,
 	)
 	if err != nil {
-		log.Print(err)
-		return
+		return inserted, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
-	rawInserted, _ := exe.LastInsertId()
+
+	rawInserted, err := exe.LastInsertId()
+	if err != nil {
+		return inserted, perr.Wrap(err, perr.BadRequest)
+	}
 	inserted = int(rawInserted)
 	return
 }
@@ -76,13 +88,12 @@ func (ror *RoleRepository) InsertStaffRole(r domain.AnimeStaffRoleInput) (insert
 		r.AnimeId, r.RoleId, r.StaffId,
 	)
 	if err != nil {
-		log.Print(err)
-		return
+		return inserted, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	rawInserted, err := exe.LastInsertId()
 	if err != nil {
-		log.Print(err)
-		return
+		return inserted, perr.Wrap(err, perr.BadRequest)
 	}
 	inserted = int(rawInserted)
 	return

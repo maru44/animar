@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+
+	"github.com/maru44/perr"
 )
 
 type AudienceController struct {
@@ -28,14 +30,14 @@ func (controller *AudienceController) AnimeAudienceCountsView(w http.ResponseWri
 	animeId, _ := strconv.Atoi(animeIdStr)
 
 	audiences, err := controller.interactor.AnimeAudienceCounts(animeId)
-	response(w, r, err, map[string]interface{}{"data": audiences})
+	response(w, r, perr.Wrap(err, perr.NotFound), map[string]interface{}{"data": audiences})
 	return
 }
 
 func (controller *AudienceController) AudienceWithAnimeByUserView(w http.ResponseWriter, r *http.Request) {
 	userId := r.URL.Query().Get("user")
 	audiences, err := controller.interactor.AudienceWithAnimeByUser(userId)
-	response(w, r, err, map[string]interface{}{"data": audiences})
+	response(w, r, perr.Wrap(err, perr.NotFound), map[string]interface{}{"data": audiences})
 	return
 }
 
@@ -44,26 +46,29 @@ func (controller *AudienceController) UpsertAudienceView(w http.ResponseWriter, 
 	var p domain.TAudienceInput
 	json.NewDecoder(r.Body).Decode(&p)
 	_, err := controller.interactor.UpsertAudience(p, userId)
-	if err != nil {
-		domain.ErrorWarn(err)
-	}
-	response(w, r, err, map[string]interface{}{"data": p.State})
+	response(w, r, perr.Wrap(err, perr.BadRequest), map[string]interface{}{"data": p.State})
 	return
 }
 
 func (controller *AudienceController) DeleteAudienceView(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(USER_ID).(string)
 	animeIdStr := r.URL.Query().Get("anime")
-	animeId, _ := strconv.Atoi(animeIdStr)
+	animeId, err := strconv.Atoi(animeIdStr)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+	}
 
-	_, err := controller.interactor.DeleteAudience(animeId, userId)
-	response(w, r, err, nil)
+	_, err = controller.interactor.DeleteAudience(animeId, userId)
+	response(w, r, perr.Wrap(err, perr.BadRequest), nil)
 	return
 }
 
 func (controller *AudienceController) AudienceByAnimeAndUserView(w http.ResponseWriter, r *http.Request) {
 	animeIdStr := r.URL.Query().Get("anime")
-	animeId, _ := strconv.Atoi(animeIdStr)
+	animeId, err := strconv.Atoi(animeIdStr)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+	}
 
 	userId := r.Context().Value(USER_ID).(string)
 	watch, _ := controller.interactor.AudienceByAnimeAndUser(animeId, userId)

@@ -2,6 +2,8 @@ package database
 
 import (
 	"animar/v1/internal/pkg/domain"
+
+	"github.com/maru44/perr"
 )
 
 type PlatformRepository struct {
@@ -14,12 +16,11 @@ func (repo *PlatformRepository) FilterByAnime(animeId int) (platforms domain.TRe
 			"LEFT JOIN platforms ON relation_anime_platform.platform_id = platforms.id "+
 			"WHERE anime_id = ?", animeId,
 	)
+	if err != nil {
+		return platforms, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
+	}
 	defer rows.Close()
 
-	if err != nil {
-		domain.ErrorWarn(err)
-		return
-	}
 	for rows.Next() {
 		var p domain.TRelationPlatform
 		err = rows.Scan(
@@ -27,8 +28,7 @@ func (repo *PlatformRepository) FilterByAnime(animeId int) (platforms domain.TRe
 			&p.CreatedAt, &p.UpdatedAt, &p.PlatName,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
-			return
+			return platforms, perr.Wrap(err, perr.NotFound)
 		}
 		platforms = append(platforms, p)
 	}

@@ -1,9 +1,11 @@
 package controllers
 
 import (
-	"animar/v1/internal/pkg/domain"
 	"encoding/json"
 	"net/http"
+	"reflect"
+
+	"github.com/maru44/perr"
 )
 
 func response(w http.ResponseWriter, r *http.Request, err error, body map[string]interface{}) error {
@@ -26,8 +28,8 @@ func response(w http.ResponseWriter, r *http.Request, err error, body map[string
 		go slackErrorLogging(r.Context(), err)
 
 		var mess map[string]interface{}
-		if myErr, ok := err.(domain.MyError); ok {
-			mess = map[string]interface{}{"message": myErr.ErrorForOutput().Error()}
+		if perror, ok := perr.IsPerror(err); ok {
+			mess = map[string]interface{}{"message": perror.Output().Error()}
 		} else {
 			mess = map[string]interface{}{"message": err.Error()}
 		}
@@ -39,33 +41,29 @@ func response(w http.ResponseWriter, r *http.Request, err error, body map[string
 }
 
 func getStatusCode(err error, w http.ResponseWriter) int {
-	if err == nil {
+	if err == nil || reflect.ValueOf(err).IsNil() {
 		return http.StatusOK
 	}
 
-	if myErr, ok := err.(domain.MyError); ok {
-		err = myErr.ErrorForOutput()
-	}
-
 	switch err {
-	case domain.ErrInternalServerError:
+	case perr.InternalServerError, perr.InternalServerErrorWithUrgency:
 		return http.StatusInternalServerError
-	case domain.ErrNotFound:
+	case perr.NotFound:
 		return http.StatusNotFound
-	case domain.ErrForbidden:
+	case perr.Forbidden:
 		return http.StatusForbidden
-	case domain.ErrUnauthorized, domain.ErrTokenIsExpired:
+	case perr.Unauthorized, perr.Expired, perr.InvalidToken:
 		return http.StatusUnauthorized
-	case domain.ErrBadRequest:
+	case perr.BadRequest:
 		return http.StatusBadRequest
-	case domain.StatusCreated:
+	case perr.Created:
 		return http.StatusCreated
-	case domain.ErrUnknownType:
+	case perr.UnsupportedMediaType:
 		return http.StatusUnsupportedMediaType
-	case domain.ErrMethodNotAllowed:
+	case perr.MethodNotAllowed:
 		return http.StatusMethodNotAllowed
-	case domain.ErrCsrfNotValid:
-		return http.StatusBadRequest
+	case perr.UnsupportedMediaType:
+		return http.StatusUnsupportedMediaType
 	default:
 		return http.StatusInternalServerError
 	}

@@ -2,7 +2,8 @@ package database
 
 import (
 	"animar/v1/internal/pkg/domain"
-	"log"
+
+	"github.com/maru44/perr"
 )
 
 type CompanyRepository struct {
@@ -15,15 +16,16 @@ func (cr *CompanyRepository) List() (cs []domain.Company, err error) {
 			"FROM companies",
 	)
 	if err != nil {
-		log.Print(err)
-		return
+		return cs, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var c domain.Company
 		if err := rows.Scan(
 			&c.ID, &c.Name, &c.EngName, &c.OfficialUrl, &c.CreatedAt, &c.UpdatedAt,
 		); err != nil {
-			log.Print(err)
+			return cs, perr.Wrap(err, perr.NotFound)
 		}
 		cs = append(cs, c)
 	}
@@ -38,14 +40,15 @@ func (cr *CompanyRepository) DetailByEng(engName string) (c domain.CompanyDetail
 		engName,
 	)
 	if err != nil {
-		log.Print(err)
-		return
+		return c, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+	defer rows.Close()
+
 	rows.Next()
-	rows.Scan(
+	err = rows.Scan(
 		&c.ID, &c.Name, &c.EngName, &c.OfficialUrl, &c.Explanation, &c.TwitterAccount, &c.CreatedAt, &c.UpdatedAt,
 	)
-	return
+	return c, perr.Wrap(err, perr.NotFound)
 }
 
 // this is for admin
@@ -56,10 +59,13 @@ func (cr *CompanyRepository) Insert(c domain.CompanyInput) (inserted int, err er
 		c.Name, c.EngName, c.OfficialUrl, c.Explanation, c.TwitterAccount,
 	)
 	if err != nil {
-		log.Print(err)
-		return
+		return inserted, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
-	rawInserted, _ := exe.LastInsertId()
+
+	rawInserted, err := exe.LastInsertId()
+	if err != nil {
+		return inserted, perr.Wrap(err, perr.BadRequest)
+	}
 	inserted = int(rawInserted)
 	return
 }
@@ -71,10 +77,12 @@ func (cr *CompanyRepository) Update(c domain.CompanyInput, engName string) (affe
 		c.Name, c.EngName, c.OfficialUrl, c.Explanation, c.TwitterAccount, engName,
 	)
 	if err != nil {
-		log.Print(err)
-		return
+		return affected, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
-	rawAffected, _ := exe.RowsAffected()
+	rawAffected, err := exe.RowsAffected()
+	if err != nil {
+		return affected, perr.Wrap(err, perr.BadRequest)
+	}
 	affected = int(rawAffected)
 	return
 }

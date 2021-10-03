@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"firebase.google.com/go/v4/auth"
+	"github.com/maru44/perr"
 )
 
 type AuthRepository struct {
@@ -63,7 +64,7 @@ func (repo *AuthRepository) GetAdminId(idToken string) (userId string, err error
 	userId = claims["user_id"].(string)
 	isAdmin := repo.IsAdmin(userId)
 	if !isAdmin {
-		err = domain.NewError("forbidden", domain.ForbiddenError)
+		err = perr.New("", perr.Forbidden)
 		return
 	}
 	return

@@ -2,7 +2,8 @@ package database
 
 import (
 	"animar/v1/internal/pkg/domain"
-	"log"
+
+	"github.com/maru44/perr"
 )
 
 type StaffRepository struct {
@@ -15,13 +16,18 @@ func (sfr *StaffRepository) List() (sfs []domain.Staff, err error) {
 			"FROM staffs",
 	)
 	if err != nil {
-		log.Print(err)
+		return sfs, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var sf domain.Staff
-		rows.Scan(
+		err = rows.Scan(
 			&sf.ID, &sf.EngName, &sf.FamilyName, &sf.GivenName, &sf.CreatedAt, &sf.UpdatedAt,
 		)
+		if err != nil {
+			return sfs, perr.Wrap(err, perr.NotFound)
+		}
 		sfs = append(sfs, sf)
 	}
 	return
@@ -35,10 +41,13 @@ func (sfr *StaffRepository) Insert(sf domain.StaffInput) (inserted int, err erro
 		sf.EngName, sf.FamilyName, sf.GivenName,
 	)
 	if err != nil {
-		log.Print(err)
-		return
+		return inserted, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
-	rawInserted, _ := exe.LastInsertId()
+
+	rawInserted, err := exe.LastInsertId()
+	if err != nil {
+		return inserted, perr.Wrap(err, perr.BadRequest)
+	}
 	inserted = int(rawInserted)
 	return
 }

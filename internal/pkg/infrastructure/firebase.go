@@ -8,6 +8,7 @@ import (
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
+	"github.com/maru44/perr"
 	"google.golang.org/api/option"
 )
 
@@ -54,7 +55,7 @@ func (f *Firebase) Auth(ctx context.Context) (fires.Client, error) {
 	client := new(FirebaseClient)
 	res, err := f.App.Auth(ctx)
 	if err != nil {
-		return client, domain.NewWrapError(err, domain.FirebaseConnectionError)
+		return client, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
 	client.Client = res
 	return client, nil

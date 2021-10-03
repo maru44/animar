@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+
+	"github.com/maru44/perr"
 )
 
 type BlogController struct {
@@ -32,7 +34,7 @@ func NewBlogController(sqlHandler database.SqlHandler, uploader s3.Uploader) *Bl
 
 func (controller *BlogController) BlogListView(w http.ResponseWriter, r *http.Request) {
 	blogs, err := controller.interactor.ListBlog()
-	response(w, r, err, map[string]interface{}{"data": blogs})
+	response(w, r, perr.Wrap(err, perr.NotFound), map[string]interface{}{"data": blogs})
 	return
 }
 
@@ -45,19 +47,31 @@ func (controller *BlogController) BlogJoinAnimeView(w http.ResponseWriter, r *ht
 
 	if slug != "" {
 		blog, err := controller.interactor.DetailBlogBySlug(slug)
+		if err != nil {
+			response(w, r, perr.Wrap(err, perr.NotFound), nil)
+			return
+		}
 		blog.Animes, _ = controller.interactor.RelationAnimeByBlog(blog.GetId())
-		response(w, r, err, map[string]interface{}{"data": blog})
+		response(w, r, nil, map[string]interface{}{"data": blog})
 	} else if id != "" {
-		i, _ := strconv.Atoi(id)
+		i, err := strconv.Atoi(id)
+		if err != nil {
+			response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+			return
+		}
 		blog, err := controller.interactor.DetailBlog(i)
+		if err != nil {
+			response(w, r, perr.Wrap(err, perr.NotFound), nil)
+			return
+		}
 		blog.Animes, _ = controller.interactor.RelationAnimeByBlog(i)
 		response(w, r, err, map[string]interface{}{"data": blog})
 	} else if uid != "" {
 		blogs, err := controller.interactor.ListBlogByUser(userId, uid)
-		response(w, r, err, map[string]interface{}{"data": blogs})
+		response(w, r, perr.Wrap(err, perr.NotFound), map[string]interface{}{"data": blogs})
 	} else {
 		blogs, err := controller.interactor.ListBlog()
-		response(w, r, err, map[string]interface{}{"data": blogs})
+		response(w, r, perr.Wrap(err, perr.NotFound), map[string]interface{}{"data": blogs})
 	}
 	return
 }
@@ -66,12 +80,24 @@ func (controller *BlogController) InsertBlogWithRelationView(w http.ResponseWrit
 	userId := r.Context().Value(USER_ID).(string)
 
 	var p domain.TBlogInsert
-	json.NewDecoder(r.Body).Decode(&p)
-	lastInserted, err := controller.interactor.InsertBlog(p, userId)
-	for _, animeId := range p.AnimeIds {
-		controller.interactor.InsertRelationAnime(animeId, lastInserted)
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
 	}
-	response(w, r, err, map[string]interface{}{"data": lastInserted})
+	lastInserted, err := controller.interactor.InsertBlog(p, userId)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
+	}
+	for _, animeId := range p.AnimeIds {
+		_, err = controller.interactor.InsertRelationAnime(animeId, lastInserted)
+		if err != nil {
+			response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+			return
+		}
+	}
+	response(w, r, nil, map[string]interface{}{"data": lastInserted})
 	return
 }
 
@@ -81,19 +107,24 @@ func (controller *BlogController) UpdateBlogWithRelationView(w http.ResponseWrit
 	strId := query.Get("id")
 	id, err := strconv.Atoi(strId)
 	if err != nil {
-		response(w, r, domain.NewWrapError(err, domain.ExternalServerError), nil)
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
 		return
 	}
 
 	// user 不一致
-	blogUserId, _ := controller.interactor.BlogUserId(id)
-	if blogUserId != userId {
-		response(w, r, domain.NewError("forbidden", domain.ForbiddenError), nil)
+	blogUserId, err := controller.interactor.BlogUserId(id)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.Forbidden), nil)
+	} else if blogUserId != userId {
+		response(w, r, perr.New("", perr.Forbidden), nil)
 	} else {
 		var p domain.TBlogInsert
-		json.NewDecoder(r.Body).Decode(&p)
+		err = json.NewDecoder(r.Body).Decode(&p)
+		if err != nil {
+			response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		}
 		rowsAffected, err := controller.interactor.UpdateBlog(p, id)
-		response(w, r, err, map[string]interface{}{"data": rowsAffected})
+		response(w, r, perr.Wrap(err, perr.BadRequest), map[string]interface{}{"data": rowsAffected})
 	}
 	return
 }
@@ -102,15 +133,21 @@ func (controller *BlogController) DeleteBlogView(w http.ResponseWriter, r *http.
 	userId := r.Context().Value(USER_ID).(string)
 	query := r.URL.Query()
 	strId := query.Get("id")
-	id, _ := strconv.Atoi(strId)
+	id, err := strconv.Atoi(strId)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
+	}
 
 	// user 不一致
-	blogUserId, _ := controller.interactor.BlogUserId(id)
-	if blogUserId != userId {
-		response(w, r, domain.NewError("forbidden", domain.ForbiddenError), nil)
+	blogUserId, err := controller.interactor.BlogUserId(id)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.Forbidden), nil)
+	} else if blogUserId != userId {
+		response(w, r, perr.New("", perr.Forbidden), nil)
 	} else {
 		deletedRow, err := controller.interactor.DeleteBlog(id)
-		response(w, r, err, map[string]interface{}{"data": deletedRow})
+		response(w, r, perr.Wrap(err, perr.BadRequest), map[string]interface{}{"data": deletedRow})
 	}
 	return
 }
@@ -128,6 +165,6 @@ func (controller *BlogController) SimpleUploadImage(w http.ResponseWriter, r *ht
 		defer file.Close()
 		returnFileName, err = controller.s3.Image(file, fileHeader.Filename, []string{"column", "content"})
 	}
-	response(w, r, err, map[string]interface{}{"data": returnFileName})
+	response(w, r, perr.Wrap(err, perr.BadRequest), map[string]interface{}{"data": returnFileName})
 	return
 }
