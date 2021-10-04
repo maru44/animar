@@ -5,6 +5,7 @@ import (
 	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/interfaces/fires"
 	"context"
+	"log"
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
@@ -45,7 +46,10 @@ func NewFireBaseClient() fires.Firebase {
 	ctx := context.Background()
 	opt := option.WithCredentialsFile("../../configs/secret_key.json")
 	config := &firebase.Config{ProjectID: configs.ProjectId} // for Google Oauth
-	app, _ := firebase.NewApp(ctx, config, opt)
+	app, err := firebase.NewApp(ctx, config, opt)
+	if err != nil {
+		log.Println(err)
+	}
 	firebase_ := new(Firebase)
 	firebase_.App = app
 	return firebase_

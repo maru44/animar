@@ -24,9 +24,12 @@ const (
 func (repo *AuthRepository) GetUserInfo(userId string) (uInfo domain.TUserInfo, err error) {
 	ctx := context.Background()
 	client, err := repo.Firebase.Auth(ctx)
+	if err != nil {
+		return uInfo, perr.Wrap(err, perr.Unauthorized)
+	}
 	u, err := client.GetUser(ctx, userId)
 	if err != nil {
-		return
+		return uInfo, perr.Wrap(err, perr.Unauthorized)
 	}
 	info := u.UserInfo
 	uInfo = domain.TUserInfo{
@@ -41,10 +44,13 @@ func (repo *AuthRepository) GetUserInfo(userId string) (uInfo domain.TUserInfo, 
 
 func (repo *AuthRepository) GetClaims(idToken string) (claims map[string]interface{}, err error) {
 	ctx := context.Background()
-	client, _ := repo.Firebase.Auth(ctx)
+	client, err := repo.Firebase.Auth(ctx)
+	if err != nil {
+		return claims, perr.Wrap(err, perr.Unauthorized)
+	}
 	token, err := client.VerifyIDToken(ctx, idToken)
 	if err != nil {
-		return
+		return claims, perr.Wrap(err, perr.Unauthorized)
 	}
 	claims = token.Claims
 	return
@@ -90,12 +96,20 @@ func (repo *AuthRepository) SendVerifyEmail(email string) (err error) {
 func (repo *AuthRepository) Update(userId string, params domain.TProfileForm) (domain.TUserInfo, error) {
 	ctx := context.Background()
 	client, err := repo.Firebase.Auth(ctx)
+	if err != nil {
+		return domain.TUserInfo{}, perr.Wrap(err, perr.Unauthorized)
+	}
+
 	var params_ auth.UserToUpdate
 	if params.PhotoUrl != "" {
 		params_.PhotoURL(params.PhotoUrl)
 	}
 	params_.DisplayName(params.DisplayName)
 	u, err := client.UpdateUser(ctx, userId, &params_)
+	if err != nil {
+		return domain.TUserInfo{}, perr.Wrap(err, perr.BadRequest)
+	}
+
 	user := domain.TUserInfo{
 		DisplayName: u.UserInfo.DisplayName,
 		Email:       u.UserInfo.Email,
@@ -109,7 +123,7 @@ func (repo *AuthRepository) Update(userId string, params domain.TProfileForm) (d
 func (repo *AuthRepository) GetUserId(idToken string) (userId string, err error) {
 	claims, err := repo.GetClaims(idToken)
 	if err != nil {
-		return
+		return userId, perr.Wrap(err, perr.BadRequest)
 	}
 	userId = claims["user_id"].(string)
 	return
