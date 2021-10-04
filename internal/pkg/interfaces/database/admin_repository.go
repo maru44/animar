@@ -255,6 +255,7 @@ func (repo *AdminPlatformRepository) InsertRelation(p domain.TRelationPlatformIn
 	if err != nil {
 		return lastInserted, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	rawId, err := exe.LastInsertId()
 	if err != nil {
 		return lastInserted, perr.Wrap(err, perr.BadRequest)
@@ -271,6 +272,7 @@ func (repo *AdminPlatformRepository) DeleteRelation(animeId int, platformId int)
 	if err != nil {
 		return rowsAffected, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
 		return rowsAffected, perr.Wrap(err, perr.BadRequest)
@@ -331,6 +333,7 @@ func (repo *AdminSeasonRepository) Insert(s domain.TSeasonInput) (lastInserted i
 	if err != nil {
 		return lastInserted, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	rawId, err := exe.LastInsertId()
 	if err != nil {
 		return lastInserted, perr.Wrap(err, perr.BadRequest)
@@ -347,6 +350,7 @@ func (repo *AdminSeasonRepository) InsertRelation(r domain.TSeasonRelationInput)
 	if err != nil {
 		return lastInserted, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	rawId, err := exe.LastInsertId()
 	if err != nil {
 		return lastInserted, perr.Wrap(err, perr.BadRequest)
@@ -363,6 +367,7 @@ func (repo *AdminSeasonRepository) DeleteRelation(animeId, seasonId int) (affect
 	if err != nil {
 		return affected, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
 		return affected, perr.Wrap(err, perr.BadRequest)
@@ -419,6 +424,7 @@ func (repo *AdminSeriesRepository) Insert(s domain.TSeriesInput) (lastInserted i
 	if err != nil {
 		return lastInserted, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	rawId, err := exe.LastInsertId()
 	if err != nil {
 		return lastInserted, perr.Wrap(err, perr.BadRequest)
@@ -435,6 +441,7 @@ func (repo *AdminSeriesRepository) Update(s domain.TSeriesInput, id int) (rowsAf
 	if err != nil {
 		return rowsAffected, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	rawId, err := exe.LastInsertId()
 	if err != nil {
 		return rowsAffected, perr.Wrap(err, perr.BadRequest)
@@ -450,6 +457,7 @@ func (repo *AdminSeriesRepository) Delete(id int) (rowsAffected int, err error) 
 	if err != nil {
 		return rowsAffected, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	rawId, err := exe.LastInsertId()
 	if err != nil {
 		return rowsAffected, perr.Wrap(err, perr.BadRequest)

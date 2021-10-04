@@ -104,6 +104,7 @@ func (repo *AudienceRepository) Delete(animeId int, userId string) (rowsAffected
 	if err != nil {
 		return rowsAffected, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+
 	rawId, err := exe.RowsAffected()
 	if err != nil {
 		return rowsAffected, perr.Wrap(err, perr.BadRequest)

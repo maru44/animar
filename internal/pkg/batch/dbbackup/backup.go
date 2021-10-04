@@ -33,33 +33,3 @@ func BackupMainDatabase() {
 		fmt.Print(err)
 	}
 }
-
-// func Bad() {
-// 	cmd := exec.Command(
-// 		"mysqldump", "--single-transaction", "--skip-lock-tables",
-// 		fmt.Sprintf("-u%s", configs.MysqlUser),
-// 		fmt.Sprintf("-p%s", configs.MysqlPassword),
-// 		fmt.Sprintf("%s", configs.MysqlDataBase),
-// 		fmt.Sprintf("> %s", backupFileName),
-// 	)
-// 	cmd.Stdout = os.Stdout
-// 	cmd.Stderr = os.Stderr
-// 	if err := cmd.Run(); err != nil {
-// 		log.Print(err)
-// 	}
-// }
-
-// func Sample() {
-// 	cmd := exec.Command("pwd")
-// 	if result, err := cmd.Output(); err != nil {
-// 		log.Print(err)
-// 	} else {
-// 		log.Print(string(result))
-// 	}
-// }
-
-// func Test() {
-// 	cmd := exec.Command("pwd")
-// 	result, _ := cmd.Output()
-// 	fmt.Print(string(result))
-// }

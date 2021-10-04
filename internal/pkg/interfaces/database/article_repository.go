@@ -3,6 +3,8 @@ package database
 import (
 	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/tools/tools"
+
+	"github.com/maru44/perr"
 )
 
 type ArticleRepository struct {
@@ -17,8 +19,10 @@ func (artr *ArticleRepository) Fetch() (articles []domain.Article, err error) {
 			"ORDER BY created_at DESC",
 	)
 	if err != nil {
-		return
+		return articles, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var a domain.Article
 		err = rows.Scan(
@@ -26,7 +30,7 @@ func (artr *ArticleRepository) Fetch() (articles []domain.Article, err error) {
 			&a.Image, &a.Author, &a.IsPublic, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			return
+			return articles, perr.Wrap(err, perr.NotFound)
 		}
 		articles = append(articles, a)
 	}
@@ -41,15 +45,17 @@ func (artr *ArticleRepository) GetById(id int) (a domain.Article, err error) {
 		id,
 	)
 	if err != nil {
-		return
+		return a, perr.Wrap(err, perr.InsufficientStorageWithUrgency)
 	}
+	defer rows.Close()
+
 	rows.Next()
 	err = rows.Scan(
 		&a.ID, &a.Slug, &a.ArticleType, &a.Abstract, &a.Content, &a.Image,
 		&a.Author, &a.CreatedAt, &a.UpdatedAt,
 	)
 	if err != nil {
-		return
+		return a, perr.Wrap(err, perr.NotFound)
 	}
 	return
 }
@@ -62,15 +68,17 @@ func (artr *ArticleRepository) GetBySlug(slug string) (a domain.Article, err err
 		slug,
 	)
 	if err != nil {
-		return
+		return a, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
+	defer rows.Close()
+
 	rows.Next()
 	err = rows.Scan(
 		&a.ID, &a.Slug, &a.ArticleType, &a.Abstract, &a.Content, &a.Image,
 		&a.Author, &a.CreatedAt, &a.UpdatedAt,
 	)
 	if err != nil {
-		return
+		return a, perr.Wrap(err, perr.NotFound)
 	}
 	return
 }
@@ -82,11 +90,12 @@ func (artr *ArticleRepository) Insert(a domain.ArticleInput, userId string) (ins
 		tools.GenRandSlug(12), a.ArticleType, a.Abstract, a.Content, a.Image, a.IsPublic, userId,
 	)
 	if err != nil {
-		return
+		return inserted, perr.Wrap(err, perr.BadRequest)
 	}
+
 	rawInserted, err := exe.LastInsertId()
 	if err != nil {
-		return
+		return inserted, perr.Wrap(err, perr.BadRequest)
 	}
 	return int(rawInserted), err
 }
@@ -98,13 +107,14 @@ func (artr *ArticleRepository) Update(a domain.ArticleInput, articleId int) (aff
 		a.ArticleType, a.Abstract, a.Content, a.Image, a.Author, a.IsPublic, articleId,
 	)
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
+
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
-	return int(rawAffected), err
+	return int(rawAffected), nil
 }
 
 func (artr *ArticleRepository) Delete(id int) (affected int, err error) {
@@ -114,13 +124,14 @@ func (artr *ArticleRepository) Delete(id int) (affected int, err error) {
 		id,
 	)
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
+
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
-	return int(rawAffected), err
+	return int(rawAffected), nil
 }
 
 /*   chara   */
@@ -134,9 +145,10 @@ func (artr *ArticleRepository) FilterByAnime(animeId int) (articles []domain.Art
 		animeId,
 	)
 	if err != nil {
-		return
+		return articles, perr.Wrap(err, perr.InsufficientStorageWithUrgency)
 	}
 	defer rows.Close()
+
 	for rows.Next() {
 		var a domain.Article
 		err = rows.Scan(
@@ -144,7 +156,7 @@ func (artr *ArticleRepository) FilterByAnime(animeId int) (articles []domain.Art
 			&a.Image, &a.Author, &a.IsPublic, &a.CreatedAt, &a.UpdatedAt,
 		)
 		if err != nil {
-			return
+			return articles, perr.Wrap(err, perr.NotFound)
 		}
 		articles = append(articles, a)
 	}
@@ -158,11 +170,16 @@ func (artr *ArticleRepository) FilterCharaById(articleId int) (cs []domain.Artic
 			"WHERE article_id = ?", articleId,
 	)
 	if err != nil {
-		return
+		return cs, perr.Wrap(err, perr.InsufficientStorageWithUrgency)
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var c domain.ArticleCharacter
-		rows.Scan(&c.ID, &c.Name, &c.Image, &c.CreatedAt, &c.UpdatedAt)
+		err = rows.Scan(&c.ID, &c.Name, &c.Image, &c.CreatedAt, &c.UpdatedAt)
+		if err != nil {
+			return cs, perr.Wrap(err, perr.NotFound)
+		}
 		cs = append(cs, c)
 	}
 	return
@@ -176,14 +193,19 @@ func (artr *ArticleRepository) FilterCharaByUserId(userId string) (cs []domain.A
 		userId,
 	)
 	if err != nil {
-		return
+		return cs, perr.Wrap(err, perr.InsufficientStorageWithUrgency)
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var c domain.ArticleCharacter
-		rows.Scan(&c.ID, &c.Name, &c.Image, &c.CreatedAt, &c.UpdatedAt)
+		err = rows.Scan(&c.ID, &c.Name, &c.Image, &c.CreatedAt, &c.UpdatedAt)
+		if err != nil {
+			return cs, perr.Wrap(err, perr.NotFound)
+		}
 		cs = append(cs, c)
 	}
-	return cs, err
+	return cs, nil
 }
 
 func (artr *ArticleRepository) InsertChara(ci domain.ArticleCharacterInput, userId string) (inserted int, err error) {
@@ -193,13 +215,14 @@ func (artr *ArticleRepository) InsertChara(ci domain.ArticleCharacterInput, user
 		ci.Name, ci.Image, userId,
 	)
 	if err != nil {
-		return
+		return inserted, perr.Wrap(err, perr.BadRequest)
 	}
+
 	rawInserted, err := exe.LastInsertId()
 	if err != nil {
-		return
+		return inserted, perr.Wrap(err, perr.BadRequest)
 	}
-	return int(rawInserted), err
+	return int(rawInserted), nil
 }
 
 func (artr *ArticleRepository) UpdateChara(ci domain.ArticleCharacterInput, id int) (affected int, err error) {
@@ -209,13 +232,14 @@ func (artr *ArticleRepository) UpdateChara(ci domain.ArticleCharacterInput, id i
 		id,
 	)
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
+
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
-	return int(rawAffected), err
+	return int(rawAffected), nil
 }
 
 func (artr *ArticleRepository) DeleteChara(id int) (affected int, err error) {
@@ -225,13 +249,14 @@ func (artr *ArticleRepository) DeleteChara(id int) (affected int, err error) {
 		id,
 	)
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
+
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
-	return int(rawAffected), err
+	return int(rawAffected), nil
 }
 
 /*   interview quote   */
@@ -244,8 +269,10 @@ func (artr *ArticleRepository) FetchInterview(articleId int) (ints []domain.Inte
 		articleId,
 	)
 	if err != nil {
-		return
+		return ints, perr.Wrap(err, perr.InsufficientStorageWithUrgency)
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var i domain.InterviewQuote
 		err := rows.Scan(
@@ -253,7 +280,7 @@ func (artr *ArticleRepository) FetchInterview(articleId int) (ints []domain.Inte
 			&i.CreatedAt, &i.UpdatedAt,
 		)
 		if err != nil {
-			domain.ErrorWarn(err)
+			return ints, perr.Wrap(err, perr.NotFound)
 		}
 		ints = append(ints, i)
 	}
@@ -267,11 +294,12 @@ func (artr *ArticleRepository) InsertInterview(ii domain.InterviewQuoteInput, us
 		ii.ArticleId, ii.CharaId, ii.Content, ii.Sequence, userId,
 	)
 	if err != nil {
-		return
+		return inserted, perr.Wrap(err, perr.BadRequest)
 	}
+
 	rawInserted, err := exe.LastInsertId()
 	if err != nil {
-		return
+		return inserted, perr.Wrap(err, perr.BadRequest)
 	}
 	return int(rawInserted), err
 }
@@ -284,11 +312,12 @@ func (artr *ArticleRepository) UpdateInterview(ii domain.InterviewQuoteInput, id
 		ii.CharaId, ii.Content, ii.Sequence, id,
 	)
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
+
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
 	return int(rawAffected), err
 }
@@ -300,11 +329,12 @@ func (artr *ArticleRepository) DeleteInterview(id int) (affected int, err error)
 		id,
 	)
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
+
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
 	return int(rawAffected), err
 }
@@ -318,13 +348,14 @@ func (artr *ArticleRepository) InsertRelationArticleCharacter(in domain.Relation
 		in.ArticleId, in.CharaId,
 	)
 	if err != nil {
-		return
+		return inserted, perr.Wrap(err, perr.BadRequest)
 	}
+
 	rawInserted, err := exe.LastInsertId()
 	if err != nil {
-		return
+		return inserted, perr.Wrap(err, perr.BadRequest)
 	}
-	return int(rawInserted), err
+	return int(rawInserted), nil
 }
 
 /*   relation anime   */
@@ -336,11 +367,12 @@ func (artr *ArticleRepository) InsertRelationArticleAnime(in domain.RelationArti
 		in.AnimeId, in.ArticleId,
 	)
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
+
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
 	return int(rawAffected), err
 }
@@ -352,11 +384,12 @@ func (artr *ArticleRepository) DeleteRelationArticleCharacter(in domain.Relation
 		in.CharaId, in.ArticleId,
 	)
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
+
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
 	return int(rawAffected), err
 }
@@ -368,11 +401,12 @@ func (artr *ArticleRepository) DeleteRelationArticleAnime(in domain.RelationArti
 		in.AnimeId, in.ArticleId,
 	)
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
+
 	rawAffected, err := exe.RowsAffected()
 	if err != nil {
-		return
+		return affected, perr.Wrap(err, perr.BadRequest)
 	}
 	return int(rawAffected), err
 }

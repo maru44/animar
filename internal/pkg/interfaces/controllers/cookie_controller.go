@@ -42,30 +42,5 @@ func (c *CookieController) setCookiePackage(w http.ResponseWriter, key string, v
 }
 
 func (c *CookieController) destroyCookie(w http.ResponseWriter, key string) bool {
-	var cookie *http.Cookie
-	if tools.IsProductionEnv() {
-		cookie = &http.Cookie{
-			Name:     key,
-			Value:    "",
-			Path:     "",
-			Domain:   configs.FrontHost,
-			MaxAge:   -1,
-			SameSite: http.SameSiteNoneMode,
-			Secure:   true,
-			HttpOnly: true,
-		}
-	} else {
-		cookie = &http.Cookie{
-			Name:     key,
-			Value:    "",
-			Path:     "",
-			Domain:   configs.FrontHost,
-			MaxAge:   -1,
-			SameSite: http.SameSiteLaxMode,
-			Secure:   false,
-			HttpOnly: true,
-		}
-	}
-	http.SetCookie(w, cookie)
-	return true
+	return c.setCookiePackage(w, key, "", -1)
 }
