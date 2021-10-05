@@ -130,16 +130,18 @@ func (repo *ReviewRepository) UpsertContent(r domain.TReviewInput, userId string
 		"UPDATE reviews SET content = ? WHERE anime_id = ? AND user_id = ?",
 		r.Content, r.AnimeId, userId,
 	)
-
-	// insert
 	if err != nil {
-		c, err := repo.InsertContent(r, userId)
-		return c, perr.Wrap(err, perr.BadRequest)
+		return "", perr.Wrap(err, perr.BadRequest)
 	}
 
-	_, err = exe.RowsAffected()
+	rawAffected, err := exe.RowsAffected()
 	if err != nil {
 		return content, perr.Wrap(err, perr.BadRequest)
+	}
+	// insert
+	if rawAffected == 0 {
+		c, err := repo.InsertContent(r, userId)
+		return c, perr.Wrap(err, perr.BadRequest)
 	}
 	return r.Content, nil
 }
@@ -162,14 +164,19 @@ func (repo *ReviewRepository) UpsertRating(r domain.TReviewInput, userId string)
 		"UPDATE reviews SET rating = ? WHERE anime_id = ? AND user_id = ?",
 		tools.NewNullInt(r.Rating), r.AnimeId, userId,
 	)
-
-	// insert
 	if err != nil {
+		return 0, perr.Wrap(err, perr.BadRequest)
+	}
+
+	rawAffected, err := exe.RowsAffected()
+	if err != nil {
+		return 0, perr.Wrap(err, perr.BadRequest)
+	}
+	// insert
+	if rawAffected == 0 {
 		r, err := repo.InsertRating(r, userId)
 		return r, perr.Wrap(err, perr.BadRequest)
 	}
-
-	_, err = exe.RowsAffected()
 	return r.Rating, perr.Wrap(err, perr.BadRequest)
 }
 
