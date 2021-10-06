@@ -45,6 +45,31 @@ func getStatusCode(err error, w http.ResponseWriter) int {
 		return http.StatusOK
 	}
 
+	if perror, ok := perr.IsPerror(err); ok {
+		switch perror.Output() {
+		case perr.InternalServerError, perr.InternalServerErrorWithUrgency:
+			return http.StatusInternalServerError
+		case perr.NotFound:
+			return http.StatusNotFound
+		case perr.Forbidden:
+			return http.StatusForbidden
+		case perr.Unauthorized, perr.Expired, perr.InvalidToken:
+			return http.StatusUnauthorized
+		case perr.BadRequest:
+			return http.StatusBadRequest
+		case perr.Created:
+			return http.StatusCreated
+		case perr.UnsupportedMediaType:
+			return http.StatusUnsupportedMediaType
+		case perr.MethodNotAllowed:
+			return http.StatusMethodNotAllowed
+		case perr.UnsupportedMediaType:
+			return http.StatusUnsupportedMediaType
+		default:
+			return http.StatusInternalServerError
+		}
+	}
+
 	switch err {
 	case perr.InternalServerError, perr.InternalServerErrorWithUrgency:
 		return http.StatusInternalServerError
