@@ -26,3 +26,4 @@ tmp/*
 **/seed/backup/*.sql
 **/seed/bulk/*.sql
 **/tmp/
+**/bin/

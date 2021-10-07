@@ -1,6 +1,7 @@
-.PHONY: run build help print
+.PHONY: run build help exe
 
 PROJECT:=project
+BATCH:=batch
 
 BIN_DIR:=bin/
 BIN_NAME:=main
@@ -23,5 +24,10 @@ run:
 build:
 	@go build -o $(BIN_DIR)${t}/$(BIN_NAME) $(CMD_DIR)${t}/$(CMD_NAME)
 
-print:
-	@echo ${t}
+# execute binary
+exe:
+	@./$(BIN_DIR)$(PROJECT)/$(BIN_NAME) &
+
+# execute batch binary
+batch:
+	@./$(BIN_DIR)$(BATCH)/$(BIN_NAME) &
