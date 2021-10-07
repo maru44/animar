@@ -1,4 +1,4 @@
-.PHONY: run build help exe
+.PHONY: run build help exe test
 
 PROJECT:=project
 BATCH:=batch
@@ -9,6 +9,11 @@ BIN_NAME:=main
 CMD_DIR:=cmd/
 CMD_NAME:=main.go
 
+TEST_USE:=./internal/pkg/usecase/test
+TEST_REPO:=./internal/pkg/interfaces/database/test
+TEST_CON:=./internal/pkg/interfaces/controllers/test
+
+# args
 t:=$(PROJECT)
 
 # help
@@ -31,3 +36,7 @@ exe:
 # execute batch binary
 batch:
 	@./$(BIN_DIR)$(BATCH)/$(BIN_NAME) &
+
+# testing
+test:
+	@go test $(TEST_USE) $(TEST_REPO)
