@@ -9,6 +9,7 @@ import (
 	"log"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/maru44/perr"
 )
 
 type SqlHandler struct {
@@ -61,7 +62,7 @@ func (handler *SqlHandler) Execute(statement string, args ...interface{}) (datab
 	res := SqlResult{}
 	stmt, err := handler.Conn.Prepare(statement)
 	if err != nil {
-		return res, err
+		return res, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
 	defer stmt.Close()
 	exe, err := stmt.Exec(args...)

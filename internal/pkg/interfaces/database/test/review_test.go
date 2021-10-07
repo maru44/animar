@@ -4,168 +4,152 @@ import (
 	"animar/v1/internal/pkg/domain"
 	infrastructure_test "animar/v1/internal/pkg/infrastructure/test"
 	"animar/v1/internal/pkg/interfaces/database"
+	"animar/v1/internal/pkg/tools/tools"
 	"regexp"
 	"testing"
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/maru44/perr"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestReviewFilterAnime(t *testing.T) {
-	/*   prepare   */
+func Test_FilterByAnime(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
-		t.Error("sqlmock not work")
+		t.Fatal(err)
 	}
 	defer db.Close()
-
-	animeId := 1
-	var content1, content2, content3 *string
-	var rating1, rating2, rating3 *int
-	rawContent1 := "よかった"
-	rawContent3 := "神アニメ"
-	rawRating2 := 8
-	rawRating3 := 10
-	userId1 := "aaaaaaaa"
-	userId2 := "aaaaaaab"
-	userId3 := "aaaaaaac"
-	userId4 := ""
-	content1 = &rawContent1
-	content3 = &rawContent3
-	rating2 = &rawRating2
-	rating3 = &rawRating3
-
-	rows := sqlmock.NewRows([]string{
-		"id", "content", "rating", "anime_id", "user_id", "created_at", "updated_at",
-	}).
-		AddRow(1, content1, rating1, animeId, userId1, time.Now(), time.Now()).
-		AddRow(2, content2, rating2, animeId, userId2, time.Now(), time.Now()).
-		// AddRow(3, "良くなかった", 3, 2, "aaaaaaaa", time.Now(), time.Now()).
-		AddRow(4, content3, rating3, animeId, userId3, time.Now(), time.Now())
-
-	query := "Select * from reviews WHERE anime_id = ? AND (user_id != ? OR user_id IS NULL)"
-	mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(animeId, userId4).WillReturnRows(rows)
 
 	repo := &database.ReviewRepository{
 		SqlHandler: infrastructure_test.NewDummyHandler(db),
 	}
 
-	/*   prepare end   */
-	/*   execute repository function   */
+	table := []struct {
+		testName string
+		animeId  int
+		userId   string
+		reviews  domain.TReviews
+		err      error
+	}{
+		{
+			"success 1",
+			24,
+			"user_no_054",
+			domain.TReviews{
+				{
+					ID:        800,
+					Content:   tools.NewNullString("素晴らしいアニメダス"),
+					Rating:    nil,
+					AnimeId:   24,
+					UserId:    tools.NewNullString("user_no_754"),
+					CreatedAt: time.Now().Format("2006-01-02T15:04:05Z07:00"),
+					UpdatedAt: time.Now().Format("2006-01-02T15:04:05Z07:00"),
+				},
+				{
+					ID:        933,
+					Content:   nil,
+					Rating:    tools.NewNullInt(9),
+					AnimeId:   24,
+					UserId:    tools.NewNullString("user_akwaejjf"),
+					CreatedAt: time.Now().Format("2006-01-02T15:04:05Z07:00"),
+					UpdatedAt: time.Now().Format("2006-01-02T15:04:05Z07:00"),
+				},
+			},
+			nil,
+		},
+	}
 
-	reviews, err := repo.FilterByAnime(animeId, "")
+	q := "Select * from reviews WHERE anime_id = ? AND (user_id != ? OR user_id IS NULL)"
 
-	/*   execute repository function end   */
-	/*   evaluation   */
+	for _, tt := range table {
+		t.Run(tt.testName, func(t *testing.T) {
+			rows := sqlmock.NewRows([]string{
+				"reviews_id", "reviews_content", "reviews_rating",
+				"reviews_anime_id", "reviews_user_id",
+				"reviews_created_at", "reviews_updated_at",
+			})
+			for _, r := range tt.reviews {
+				rows.AddRow(r.ID, r.Content, r.Rating, r.AnimeId, r.UserId, r.CreatedAt, r.UpdatedAt)
+			}
 
-	assert.Equal(t, err, nil)
-	assert.Equal(t, len(reviews), 3)
-	assert.Equal(t, reviews[0].Rating, rating1)
-	assert.Equal(t, reviews[1].Content, content2)
-	assert.Equal(t, reviews[2].Content, content3)
+			mock.ExpectQuery(regexp.QuoteMeta(q)).WithArgs(tt.animeId, tt.userId).WillReturnRows(rows)
 
-	if err = mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("Test GetAnimeReviews: %s", err)
+			rs, err := repo.FilterByAnime(tt.animeId, tt.userId)
+
+			assert.Equal(t, tt.err, err)
+			assert.Equal(t, tt.reviews, rs)
+		})
 	}
 }
 
-// update
-func TestUpdateReviewContent(t *testing.T) {
-	/*   prepare   */
+func Test_UpsertContent(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
-		t.Error("sqlmock not work")
+		t.Fatal(err)
 	}
 	defer db.Close()
-
-	rawContent := "面白かった。\n\n大満足!!"
-	animeId := 1
-	userId := "aaaaaaaa"
-	testReviewId := 1
-
-	rows := sqlmock.NewRows([]string{
-		"id", "content", "rating", "anime_id", "user_id", "created_at", "updated_at",
-	}).
-		AddRow(testReviewId, "よかった", 6, animeId, userId, time.Now(), time.Now())
-
-	query1 := "SELECT * FROM reviews WHERE anime_id = ? AND user_id = ?"
-	mock.ExpectQuery(regexp.QuoteMeta(query1)).WithArgs(animeId, userId).WillReturnRows(rows)
-
-	query2 := "UPDATE reviews SET content = ? WHERE id = ?" // 対象がある場合のUPDATE
-	stmt := mock.ExpectPrepare(regexp.QuoteMeta(query2))
-	stmt.ExpectExec().WithArgs(rawContent, testReviewId).
-		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	repo := &database.ReviewRepository{
 		SqlHandler: infrastructure_test.NewDummyHandler(db),
 	}
-	r1 := &domain.TReviewInput{
-		AnimeId: animeId,
-		Content: rawContent,
+
+	q1 := "UPDATE reviews SET content = ? WHERE anime_id = ? AND user_id = ?"
+	q2 := "INSERT INTO reviews(anime_id, content, user_id) VALUES(?, ?, ?)"
+
+	table := []struct {
+		name         string
+		ri           domain.TReviewInput
+		userId       string
+		affected     int64
+		lastInserted int64
+		retContent   string
+		noError      bool
+	}{
+		{
+			"success update",
+			domain.TReviewInput{
+				AnimeId: 122,
+				Content: "つまらないと思ったけど実は面白かった",
+				Rating:  0,
+			},
+			"user+desuyo",
+			1,
+			0,
+			"つまらないと思ったけど実は面白かった",
+			true,
+		},
+		{
+			"success insert",
+			domain.TReviewInput{
+				AnimeId: 134,
+				Content: "初見 最高でした",
+				Rating:  0,
+			},
+			"user+desuyo",
+			0,
+			64,
+			"初見 最高でした",
+			true,
+		},
 	}
 
-	/*   prepare end   */
-	/*   execute repository function   */
+	for _, tt := range table {
+		t.Run(tt.name, func(t *testing.T) {
+			stmt1 := mock.ExpectPrepare(regexp.QuoteMeta(q1))
+			stmt1.ExpectExec().WithArgs(tt.ri.Content, tt.ri.AnimeId, tt.userId).
+				WillReturnResult(sqlmock.NewResult(0, tt.affected))
 
-	insertContent, err := repo.UpsertContent(*r1, userId)
+			if tt.affected == 0 {
+				stmt2 := mock.ExpectPrepare(regexp.QuoteMeta(q2))
+				stmt2.ExpectExec().WithArgs(tt.ri.AnimeId, tt.ri.Content, tt.userId).
+					WillReturnResult(sqlmock.NewResult(tt.lastInserted, 0))
+			}
 
-	/*   execute repository function end   */
-	/*   evaluation   */
+			result, err := repo.UpsertContent(tt.ri, tt.userId)
 
-	assert.Equal(t, err, nil)
-	assert.Equal(t, insertContent, rawContent)
-
-	if err = mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("Test InsertReviewContent: %s", err)
-	}
-}
-
-// insert
-func TestInsertReviewContent(t *testing.T) {
-	/*   prepare   */
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Error("sqlmock not work")
-	}
-	defer db.Close()
-
-	animeId := 1
-	userId := "aaaaaaaa"
-	content := "面白かった。\n\n大満足!!"
-
-	rows := sqlmock.NewRows([]string{
-		"id", "content", "rating", "anime_id", "user_id", "created_at", "updated_at",
-	})
-
-	query1 := "SELECT * FROM reviews WHERE anime_id = ? AND user_id = ?"
-	mock.ExpectQuery(regexp.QuoteMeta(query1)).WithArgs(animeId, userId).WillReturnRows(rows)
-
-	query2 := "INSERT INTO reviews(anime_id, content, user_id) VALUES(?, ?, ?)"
-	stmt := mock.ExpectPrepare(regexp.QuoteMeta(query2))
-	stmt.ExpectExec().WithArgs(animeId, content, userId).
-		WillReturnResult(sqlmock.NewResult(20, 1))
-
-	repo := &database.ReviewRepository{
-		SqlHandler: infrastructure_test.NewDummyHandler(db),
-	}
-	r1 := &domain.TReviewInput{
-		AnimeId: 1,
-		Content: content,
-	}
-
-	/*   prepare end   */
-	/*   execute repository function   */
-
-	insertContent, err := repo.UpsertContent(*r1, userId)
-
-	/*   execute repository function end   */
-	/*   evaluation   */
-
-	assert.Equal(t, err, nil)
-	assert.Equal(t, insertContent, content)
-
-	if err = mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("Test InsertReviewContent: %s", err)
+			assert.Equal(t, tt.noError, perr.IsNoError(err))
+			assert.Equal(t, tt.retContent, result)
+		})
 	}
 }

@@ -1,0 +1,5 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/mnt/c/codes/animar'
+echo "build: build t=*** if t==nil project\nrun: localhost:8000"
+make: Leaving directory '/mnt/c/codes/animar'
+ 
