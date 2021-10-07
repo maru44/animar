@@ -11,7 +11,7 @@ CMD_NAME:=main.go
 
 TEST_USE:=./internal/pkg/usecase/test
 TEST_REPO:=./internal/pkg/interfaces/database/test
-TEST_CON:=./internal/pkg/interfaces/controllers/test
+TEST_CON:=./internal/pkg/interfaces/controllers
 
 # args
 t:=$(PROJECT)
@@ -39,4 +39,4 @@ batch:
 
 # testing
 test:
-	@go test $(TEST_USE) $(TEST_REPO)
+	@go test $(TEST_USE) $(TEST_REPO) $(TEST_CON)
