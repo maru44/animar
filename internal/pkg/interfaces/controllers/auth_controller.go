@@ -62,6 +62,7 @@ func (controller *AuthController) GetUserModelFromCookieView(w http.ResponseWrit
 		response(w, r, perr.Wrap(err, perr.Unauthorized), nil)
 		return
 	}
+
 	claims, err := controller.getClaimsFromCookie(r)
 	response(w, r, perr.Wrap(err, perr.Unauthorized), map[string]interface{}{"user": user, "is_verify": claims["email_verified"]})
 	return
@@ -70,10 +71,18 @@ func (controller *AuthController) GetUserModelFromCookieView(w http.ResponseWrit
 // set cookie
 func (controller *AuthController) LoginView(w http.ResponseWriter, r *http.Request) {
 	var p domain.TLoginForm
-	json.NewDecoder(r.Body).Decode(&p)
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
+	}
 	p.ReturnSecureToken = true
+	p_json, err := json.Marshal(p)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
+	}
 
-	p_json, _ := json.Marshal(p)
 	url := `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=` + configs.FirebaseApiKey
 	req, err := http.NewRequest(
 		"POST",
@@ -109,13 +118,22 @@ func (controller *AuthController) LoginView(w http.ResponseWriter, r *http.Reque
 
 func (controller *AuthController) RegisterView(w http.ResponseWriter, r *http.Request) {
 	var p domain.TLoginForm
-	json.NewDecoder(r.Body).Decode(&p)
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
+	}
 	p.ReturnSecureToken = true
-
 	if p.DisplayName == "" {
 		p.DisplayName = strings.Split(p.Email, "@")[0]
 	}
-	p_json, _ := json.Marshal(p)
+
+	p_json, err := json.Marshal(p)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
+	}
+
 	url := `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=` + configs.FirebaseApiKey
 	req, err := http.NewRequest(
 		"POST",
@@ -226,10 +244,11 @@ func (controller *AuthController) SetJwtTokenView(w http.ResponseWriter, r *http
 	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
 		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
-	} else {
-		controller.setCookiePackage(w, "idToken", p.IdToken, 60*60*24)
-		controller.setCookiePackage(w, "refreshToken", p.RefreshToken, 60*60*24*30)
-		response(w, r, err, nil)
+		return
 	}
+
+	controller.setCookiePackage(w, "idToken", p.IdToken, 60*60*24)
+	controller.setCookiePackage(w, "refreshToken", p.RefreshToken, 60*60*24*30)
+	response(w, r, err, nil)
 	return
 }

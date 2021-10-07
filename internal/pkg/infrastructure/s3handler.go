@@ -50,7 +50,7 @@ func (uploader *S3Uploader) ImageUploading(file multipart.File, fileName string,
 	slug := tools.GenRandSlug(6)
 	buf := bytes.NewBuffer(nil)
 	if _, err := io.Copy(buf, file); err != nil {
-		fmt.Print(err)
+		return "", err
 	}
 
 	path := strings.Join(pathList, "/")

@@ -64,8 +64,8 @@ func (controller *BlogController) BlogJoinAnimeView(w http.ResponseWriter, r *ht
 			response(w, r, perr.Wrap(err, perr.NotFound), nil)
 			return
 		}
-		blog.Animes, _ = controller.interactor.RelationAnimeByBlog(i)
-		response(w, r, err, map[string]interface{}{"data": blog})
+		blog.Animes, err = controller.interactor.RelationAnimeByBlog(i)
+		response(w, r, perr.Wrap(err, perr.NotFound), map[string]interface{}{"data": blog})
 	} else if uid != "" {
 		blogs, err := controller.interactor.ListBlogByUser(userId, uid)
 		response(w, r, perr.Wrap(err, perr.NotFound), map[string]interface{}{"data": blogs})

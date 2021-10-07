@@ -49,9 +49,9 @@ func (artc *ArticleController) ArticleDetailView(w http.ResponseWriter, r *http.
 	if article.ArticleType == domain.ArticleTypeInterview {
 		interviews, err := artc.interactor.FetchInterviewQuotes(article.ID)
 		response(w, r, perr.Wrap(err, perr.NotFound), map[string]interface{}{"article": article, "charas": charas, "interviews": interviews})
-	} else {
-		response(w, r, nil, map[string]interface{}{"article": article, "charas": charas})
+		return
 	}
+	response(w, r, nil, map[string]interface{}{"article": article, "charas": charas})
 
 	return
 }
@@ -98,21 +98,30 @@ func (artr *ArticleController) DeleteArticleView(w http.ResponseWriter, r *http.
 func (artc *ArticleController) ArticleCharacterView(w http.ResponseWriter, r *http.Request) {
 	rawId := r.URL.Query().Get("id")
 	id, err := strconv.Atoi(rawId)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
+	}
 	var charas []domain.ArticleCharacter
 	if err != nil {
 		userId := r.Context().Value(USER_ID).(string)
 		charas, err = artc.interactor.FetchArticleCharasByUser(userId)
 		response(w, r, perr.Wrap(err, perr.BadRequest), map[string]interface{}{"data": charas})
-	} else {
-		charas, err = artc.interactor.FetchArticleCharas(id)
-		response(w, r, perr.Wrap(err, perr.BadRequest), map[string]interface{}{"data": charas})
+		return
 	}
+	charas, err = artc.interactor.FetchArticleCharas(id)
+	response(w, r, perr.Wrap(err, perr.BadRequest), map[string]interface{}{"data": charas})
+
 	return
 }
 
 func (artc *ArticleController) InsertArticleCharaView(w http.ResponseWriter, r *http.Request) {
 	var in domain.ArticleCharacterInput
-	json.NewDecoder(r.Body).Decode(&in)
+	err := json.NewDecoder(r.Body).Decode(&in)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
+	}
 
 	userId := r.Context().Value(USER_ID).(string)
 
@@ -123,7 +132,11 @@ func (artc *ArticleController) InsertArticleCharaView(w http.ResponseWriter, r *
 
 func (artr *ArticleController) UpdateArticleCharaView(w http.ResponseWriter, r *http.Request) {
 	var in domain.ArticleCharacterInput
-	json.NewDecoder(r.Body).Decode(&in)
+	err := json.NewDecoder(r.Body).Decode(&in)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
+	}
 
 	rawId := r.URL.Query().Get("id")
 	id, err := strconv.Atoi(rawId)
