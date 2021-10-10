@@ -7,7 +7,6 @@ import (
 	"animar/v1/internal/pkg/interfaces/fires"
 	"animar/v1/internal/pkg/tools/tools"
 	"animar/v1/internal/pkg/usecase"
-	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -22,20 +21,8 @@ type BaseController struct {
 	CookieController
 }
 
-type (
-	ContextKey string
-
-	accessContext struct {
-		Method string
-		URL    string
-	}
-)
-
 const (
-	USER_ID         ContextKey = "userId"
-	CSRF_COOKIE_KEY            = "csrf-token"
-
-	accessContextKey ContextKey = "access"
+	CSRF_COOKIE_KEY = "csrf-token"
 )
 
 func NewBaseController(c domain.Cache) *BaseController {
@@ -168,7 +155,6 @@ func (controller *BaseController) corsMiddleware(w http.ResponseWriter, r *http.
 	}
 	w.Header().Set("Access-Control-Allow-Origin", protocol+host)
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	//w.Header().Set("Content-Type", "application/json, multipart/formdata, text/plain")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, Origin, X-Csrftoken, Accept, Cookie")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT")
 	w.Header().Set("Access-Control-Max-Age", "3600")
@@ -177,15 +163,7 @@ func (controller *BaseController) corsMiddleware(w http.ResponseWriter, r *http.
 
 func (controller *BaseController) BaseMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.WithValue(
-			r.Context(),
-			accessContextKey,
-			accessContext{
-				Method: r.Method,
-				URL:    r.URL.Path,
-			},
-		)
-		r = r.WithContext(ctx)
+		r = setAccessData(r)
 
 		controller.corsMiddleware(w, r)
 		controller.allowOptionsMiddleware(w, r)
@@ -229,8 +207,7 @@ func (controller *BaseController) GiveUserIdMiddleware(next http.Handler) http.H
 				userId = ""
 			}
 		}
-		ctx := context.WithValue(r.Context(), USER_ID, userId)
-		r = r.WithContext(ctx)
+		r = setUserToContext(r, userId)
 		next.ServeHTTP(w, r)
 	})
 }
@@ -254,8 +231,7 @@ func (controller *BaseController) GiveUserIdMiddlewareAbleSSR(next http.Handler)
 		default:
 			userId = ""
 		}
-		ctx := context.WithValue(r.Context(), USER_ID, userId)
-		r = r.WithContext(ctx)
+		r = setUserToContext(r, userId)
 		next.ServeHTTP(w, r)
 	})
 }
@@ -270,11 +246,10 @@ func (controller *BaseController) LoginRequireMiddleware(next http.Handler) http
 		}
 		userId, err := controller.interactor.UserId(idToken.Value)
 		if err != nil {
-			response(w, r, err, nil)
+			response(w, r, perr.Wrap(err, perr.Unauthorized), nil)
 			return
 		}
-		ctx := context.WithValue(r.Context(), USER_ID, userId)
-		r = r.WithContext(ctx)
+		r = setUserToContext(r, userId)
 		next.ServeHTTP(w, r)
 	})
 }
