@@ -44,7 +44,7 @@ type FirebaseUpdate struct {
 // initialize firebase sdk
 func NewFireBaseClient() fires.Firebase {
 	ctx := context.Background()
-	opt := option.WithCredentialsFile("../../configs/secret_key.json")
+	opt := option.WithCredentialsFile("./configs/secret_key.json")
 	config := &firebase.Config{ProjectID: configs.ProjectId} // for Google Oauth
 	app, err := firebase.NewApp(ctx, config, opt)
 	if err != nil {

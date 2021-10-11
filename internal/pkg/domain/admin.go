@@ -89,7 +89,10 @@ type AdminPlatformInteractor interface {
 	PlatformInsert(TPlatform) (int, error)
 	PlatformUpdate(TPlatform, int) (int, error)
 	PlatformDelete(int) (int, error)
+	//relation
+
 	RelationPlatformInsert(TRelationPlatformInput) (int, error)
+	RelationPlatformUpdate(TRelationPlatformInput) (int, error)
 	RelationPlatformDelete(int, int) (int, error)
 	RelationPlatformByAnime(int) (TRelationPlatforms, error)
 }

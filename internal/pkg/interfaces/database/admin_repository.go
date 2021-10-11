@@ -249,10 +249,6 @@ func (repo *AdminPlatformRepository) FilterByAnime(animeId int) (platforms domai
 }
 
 func (repo *AdminPlatformRepository) InsertRelation(p domain.TRelationPlatformInput) (lastInserted int, err error) {
-	// if p.FirstBroadcast != nil {
-	// 	time.Parse(time.RFC3339, *p.FirstBroadcast)
-	// }
-	// return
 	exe, err := repo.Execute(
 		"INSERT INTO relation_anime_platform(platform_id, anime_id, link_url, delivery_interval, first_broadcast) "+
 			"VALUES(?, ?, ?, ?, ?)",
@@ -268,6 +264,24 @@ func (repo *AdminPlatformRepository) InsertRelation(p domain.TRelationPlatformIn
 	}
 	lastInserted = int(rawId)
 	return
+}
+
+func (repo *AdminPlatformRepository) UpdateRelation(p domain.TRelationPlatformInput) (affected int, err error) {
+	exe, err := repo.Execute(
+		"UPDATE relation_anime_platform SET link_url = ?, delivery_interval = ?, first_broadcast = ? "+
+			"WHERE anime_id = ? AND platform_id = ?",
+		p.LinkUrl, p.DeliveryInterval, p.FirstBroadcast,
+		p.AnimeId, p.PlatformId,
+	)
+	if err != nil {
+		return affected, perr.Wrap(err, perr.BadRequest)
+	}
+
+	rawAffected, err := exe.RowsAffected()
+	if err != nil {
+		return affected, perr.Wrap(err, perr.BadRequest)
+	}
+	return int(rawAffected), nil
 }
 
 func (repo *AdminPlatformRepository) DeleteRelation(animeId int, platformId int) (rowsAffected int, err error) {

@@ -45,6 +45,7 @@ type AdminPlatformRepository interface {
 	// relation
 	FilterByAnime(int) (domain.TRelationPlatforms, error)
 	InsertRelation(domain.TRelationPlatformInput) (int, error)
+	UpdateRelation(domain.TRelationPlatformInput) (int, error)
 	DeleteRelation(int, int) (int, error)
 }
 
@@ -123,6 +124,10 @@ func (interactor *AdminInteractor) PlatformDelete(id int) (rowsAffected int, err
 func (interactor *AdminInteractor) RelationPlatformInsert(platform domain.TRelationPlatformInput) (lastInserted int, err error) {
 	lastInserted, err = interactor.platformRepository.InsertRelation(platform)
 	return
+}
+
+func (interactor *AdminInteractor) RelationPlatformUpdate(platform domain.TRelationPlatformInput) (int, error) {
+	return interactor.platformRepository.UpdateRelation(platform)
 }
 
 func (interactor *AdminInteractor) RelationPlatformDelete(animeId int, platformId int) (rowsAffected int, err error) {
