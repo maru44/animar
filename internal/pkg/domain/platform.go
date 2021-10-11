@@ -12,12 +12,14 @@ type TPlatform struct {
 }
 
 type TRelationPlatform struct {
-	PlatformId int     `json:"platform_id"`
-	AnimeId    int     `json:"anime_id"`
-	LinkUrl    *string `json:"link_url"`
-	CreatedAt  *string `json:"created_at"`
-	UpdatedAt  *string `json:"updated_at"`
-	PlatName   *string `json:"plat_name"`
+	PlatformId       int     `json:"platform_id"`
+	AnimeId          int     `json:"anime_id"`
+	LinkUrl          *string `json:"link_url"`
+	DeliveryInterval *string `json:"interval"`
+	FirstBroadcast   *string `json:"first_broadcast"`
+	CreatedAt        *string `json:"created_at"`
+	UpdatedAt        *string `json:"updated_at"`
+	PlatName         *string `json:"plat_name"`
 }
 
 type TPlatforms []TPlatform

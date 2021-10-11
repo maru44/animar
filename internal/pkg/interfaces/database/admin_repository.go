@@ -237,6 +237,7 @@ func (repo *AdminPlatformRepository) FilterByAnime(animeId int) (platforms domai
 		var p domain.TRelationPlatform
 		err = rows.Scan(
 			&p.PlatformId, &p.AnimeId, &p.LinkUrl,
+			&p.DeliveryInterval, &p.FirstBroadcast,
 			&p.CreatedAt, &p.UpdatedAt, &p.PlatName,
 		)
 		if err != nil {
@@ -248,9 +249,14 @@ func (repo *AdminPlatformRepository) FilterByAnime(animeId int) (platforms domai
 }
 
 func (repo *AdminPlatformRepository) InsertRelation(p domain.TRelationPlatformInput) (lastInserted int, err error) {
+	// if p.FirstBroadcast != nil {
+	// 	time.Parse(time.RFC3339, *p.FirstBroadcast)
+	// }
+	// return
 	exe, err := repo.Execute(
-		"INSERT INTO relation_anime_platform(platform_id, anime_id, link_url) VALUES(?, ?, ?)",
-		p.PlatformId, p.AnimeId, p.LinkUrl,
+		"INSERT INTO relation_anime_platform(platform_id, anime_id, link_url, delivery_interval, first_broadcast) "+
+			"VALUES(?, ?, ?, ?, ?)",
+		p.PlatformId, p.AnimeId, p.LinkUrl, p.DeliveryInterval, p.FirstBroadcast,
 	)
 	if err != nil {
 		return lastInserted, perr.Wrap(err, perr.InternalServerErrorWithUrgency)

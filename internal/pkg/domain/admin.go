@@ -76,9 +76,11 @@ type TPlatformInput struct {
 }
 
 type TRelationPlatformInput struct {
-	PlatformId int    `json:"platform_id"`
-	AnimeId    int    `json:"anime_id"`
-	LinkUrl    string `json:"link_url"`
+	PlatformId       int     `json:"platform_id"`
+	AnimeId          int     `json:"anime_id"`
+	LinkUrl          string  `json:"link_url"`
+	DeliveryInterval *string `json:"interval,omitempty"`
+	FirstBroadcast   *string `json:"first_broadcast,omitempty"`
 }
 
 type AdminPlatformInteractor interface {
