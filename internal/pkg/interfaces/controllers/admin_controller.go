@@ -341,9 +341,25 @@ func (adc *AdminController) RelationPlatformView(w http.ResponseWriter, r *http.
 
 func (adc *AdminController) InsertRelationPlatformView(w http.ResponseWriter, r *http.Request) {
 	var p domain.TRelationPlatformInput
-	json.NewDecoder(r.Body).Decode(&p)
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
+	}
 	lastInserted, err := adc.interactor.RelationPlatformInsert(p)
 	response(w, r, perr.Wrap(err, perr.BadRequest), map[string]interface{}{"data": lastInserted})
+	return
+}
+
+func (adc *AdminController) UpdateRelationPlatformView(w http.ResponseWriter, r *http.Request) {
+	var p domain.TRelationPlatformInput
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
+	}
+	affected, err := adc.interactor.RelationPlatformUpdate(p)
+	response(w, r, perr.Wrap(err, perr.BadRequest), map[string]interface{}{"data": affected})
 	return
 }
 

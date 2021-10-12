@@ -123,6 +123,7 @@ func main() {
 	router.Handle("/relation/plat/", base.BaseMiddleware(http.HandlerFunc(adminController.RelationPlatformView))) // ?id=<anime_id>
 	router.Handle("/admin/relation/plat/post/", base.BaseMiddleware(base.PostOnlyMiddleware(base.AdminRequiredMiddleware(base.VerifyCsrfMiddleware(http.HandlerFunc(adminController.InsertRelationPlatformView))))))
 	router.Handle("/admin/relation/plat/delete/", base.BaseMiddleware(base.DeleteOnlyMiddleware(base.AdminRequiredMiddleware(base.VerifyCsrfMiddleware(http.HandlerFunc(adminController.DeleteRelationPlatformView)))))) // ?anime=<anime_id>&platform=<platform_id>
+	router.Handle("/admin/relation/plat/update/", base.BaseMiddleware(base.PutOnlyMiddleware(base.AdminRequiredMiddleware(base.VerifyCsrfMiddleware(http.HandlerFunc(adminController.UpdateRelationPlatformView))))))
 
 	// company
 	router.Handle("/admin/company/post/", base.BaseMiddleware(base.AdminRequiredMiddleware(base.PostOnlyMiddleware(base.VerifyCsrfMiddleware(http.HandlerFunc(adminController.InsertCompanyView))))))
