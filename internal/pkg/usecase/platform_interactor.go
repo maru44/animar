@@ -18,13 +18,19 @@ func NewPlatformInteractor(platform PlatformRepository) domain.PlatformInteracto
 
 type PlatformRepository interface {
 	FilterByAnime(int) (domain.TRelationPlatforms, error)
+	// relation
+	FilterTodaysBroadCast() ([]domain.NotificationBroadcast, error)
 }
 
 /**********************
    interactor methods
 ***********************/
 
-func (interactor *PlatformInteractor) RelationPlatformByAnime(animeId int) (platforms domain.TRelationPlatforms, err error) {
-	platforms, err = interactor.repository.FilterByAnime(animeId)
+func (in *PlatformInteractor) RelationPlatformByAnime(animeId int) (platforms domain.TRelationPlatforms, err error) {
+	platforms, err = in.repository.FilterByAnime(animeId)
 	return
+}
+
+func (in *PlatformInteractor) TargetNotificationBroadcast() ([]domain.NotificationBroadcast, error) {
+	return in.repository.FilterTodaysBroadCast()
 }
