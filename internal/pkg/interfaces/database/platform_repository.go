@@ -2,7 +2,9 @@ package database
 
 import (
 	"animar/v1/internal/pkg/domain"
+	"animar/v1/internal/pkg/interfaces/database/queryset"
 	"animar/v1/internal/pkg/tools/tools"
+	"fmt"
 	"strings"
 	"time"
 
@@ -14,11 +16,7 @@ type PlatformRepository struct {
 }
 
 func (repo *PlatformRepository) FilterByAnime(animeId int) (platforms domain.TRelationPlatforms, err error) {
-	rows, err := repo.Query(
-		"Select relation_anime_platform.*, platforms.plat_name FROM relation_anime_platform "+
-			"LEFT JOIN platforms ON relation_anime_platform.platform_id = platforms.id "+
-			"WHERE anime_id = ?", animeId,
-	)
+	rows, err := repo.Query(queryset.PlatformFilterByAnimeQuery, animeId)
 	if err != nil {
 		return platforms, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
 	}
@@ -40,22 +38,9 @@ func (repo *PlatformRepository) FilterByAnime(animeId int) (platforms domain.TRe
 }
 
 func (repo *PlatformRepository) FilterTodaysBroadCast() ([]domain.NotificationBroadcast, error) {
-	rows, err := repo.Query(
-		"SELECT plat.plat_name, animes.title, rel.link_url, plat.base_url, rel.first_broadcast, rel.delivery_interval, animes.state " +
-			"FROM relation_anime_platform AS rel " +
-			"LEFT JOIN animes ON rel.anime_id = animes.id " +
-			"LEFT JOIN platforms AS plat ON rel.platform_id = plat.id " +
-			"WHERE animes.state = 'now' " +
-			"OR ((animes.state = 'pre' OR (rel.delivery_interval = 'once' AND animes.state NOT IN ('now','pre'))) AND " +
-			"rel.first_broadcast BETWEEN DATE_ADD(DATE(NOW()), INTERVAL 4 HOUR)) " +
-			"AND DATE_ADD(DATE(NOW()), INTERVAL 28 HOUR))",
-	)
+	rows, err := repo.Query(queryset.TodaysBroadcastQuery)
 	if err != nil {
 		return nil, perr.Wrap(err, perr.BadRequest)
-	}
-
-	if !rows.Next() {
-		return nil, perr.New("", perr.NotFound)
 	}
 
 	var out []domain.NotificationBroadcast
@@ -69,41 +54,48 @@ func (repo *PlatformRepository) FilterTodaysBroadCast() ([]domain.NotificationBr
 			return nil, perr.Wrap(err, perr.BadRequest)
 		}
 
-		b := repo.modifyBroadcastTime(&m)
-		out = append(out, *b)
+		b, err := repo.modifyBroadcastTime(&m)
+		if err != nil {
+			return nil, perr.Wrap(err, perr.BadRequest)
+		}
+		if b != nil {
+			out = append(out, *b)
+		}
 	}
 
 	return out, nil
 }
 
-func (repo *PlatformRepository) modifyBroadcastTime(m *domain.RawNotificationMaterial) *domain.NotificationBroadcast {
+func (repo *PlatformRepository) modifyBroadcastTime(m *domain.RawNotificationMaterial) (*domain.NotificationBroadcast, error) {
 	if m.Interval == nil {
-		return nil
+		return nil, nil
+	}
+
+	link := m.LinkUrl
+	if link == nil {
+		link = m.BaseUrl
 	}
 
 	switch m.State {
 	case "now":
-		if *m.Interval == "once" {
+		if *m.Interval == "once" || *m.Interval == "daily" {
 			return &domain.NotificationBroadcast{
 				Platform: m.Platform,
 				Title:    m.Title,
-				LinkUrl:  m.LinkUrl,
+				LinkUrl:  link,
 				Time:     extractFristTime(m.FirstTime),
-			}
-		} else if *m.Interval == "daily" {
-			return &domain.NotificationBroadcast{
-				Platform: m.Platform,
-				Title:    m.Title,
-				LinkUrl:  m.LinkUrl,
-				Time:     extractFristTime(m.FirstTime),
-			}
+			}, nil
 		} else if *m.Interval == "weekly" {
-			if repo.isBroadcastDay(m.FirstTime) {
-				return &domain.NotificationBroadcast{
-					Platform: m.Platform,
-					Title:    m.Title,
-					LinkUrl:  m.LinkUrl,
-					Time:     extractFristTime(m.FirstTime),
+			if b, err := repo.isBroadcastDay(m.FirstTime); err != nil {
+				return nil, perr.Wrap(err, perr.BadRequest)
+			} else {
+				if b {
+					return &domain.NotificationBroadcast{
+						Platform: m.Platform,
+						Title:    m.Title,
+						LinkUrl:  link,
+						Time:     extractFristTime(m.FirstTime),
+					}, nil
 				}
 			}
 		}
@@ -111,40 +103,42 @@ func (repo *PlatformRepository) modifyBroadcastTime(m *domain.RawNotificationMat
 		return &domain.NotificationBroadcast{
 			Platform: m.Platform,
 			Title:    m.Title,
-			LinkUrl:  m.LinkUrl,
+			LinkUrl:  link,
 			Time:     extractFristTime(m.FirstTime),
-		}
+		}, nil
 	default:
 		return &domain.NotificationBroadcast{
 			Platform: m.Platform,
 			Title:    m.Title,
-			LinkUrl:  m.LinkUrl,
+			LinkUrl:  link,
 			Time:     extractFristTime(m.FirstTime),
-		}
+		}, nil
 	}
 
-	return nil
+	return nil, nil
 }
 
-func (repo *PlatformRepository) isBroadcastDay(ft *string) bool {
+func (repo *PlatformRepository) isBroadcastDay(ft *string) (bool, error) {
 	firstDay, err := time.Parse("2006-01-02 15:04:05", *ft)
 	if err != nil {
-		return false
+		return false, perr.Wrap(err, perr.BadRequest)
 	}
-	strToday := time.Now().Format("2006-01-02 15:04:05")
-	today, err := time.Parse("2006-01-02 04:00:00", strToday)
+
+	strToday := time.Now().Format("2006-01-02")
+	today, err := time.Parse("2006-01-02 15:04:05", strToday+" 04:00:00")
 	if err != nil {
-		return false
+		return false, perr.Wrap(err, perr.BadRequest)
 	}
 
 	diff := today.Sub(firstDay)
 	diffHour := diff / time.Hour
 	diffDay := int(diffHour / 24)
+	fmt.Println(diffDay)
 
 	if diffDay%7 == 0 {
-		return true
+		return true, nil
 	}
-	return false
+	return false, nil
 }
 
 func extractFristTime(ft *string) *string {
