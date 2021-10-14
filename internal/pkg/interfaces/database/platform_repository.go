@@ -119,13 +119,13 @@ func (repo *PlatformRepository) modifyBroadcastTime(m *domain.RawNotificationMat
 }
 
 func (repo *PlatformRepository) isBroadcastDay(ft *string) (bool, error) {
-	firstDay, err := time.Parse("2006-01-02 15:04:05", *ft)
+	firstDay, err := time.Parse("2006-01-02 15:04:05 MST", *ft+" JST")
 	if err != nil {
 		return false, perr.Wrap(err, perr.BadRequest)
 	}
 
-	strToday := time.Now().Format("2006-01-02")
-	today, err := time.Parse("2006-01-02 15:04:05", strToday+" 04:00:00")
+	strToday := time.Now().Add(24 * time.Hour).Format("2006-01-02")
+	today, err := time.Parse("2006-01-02 15:04:05 MST", strToday+" 04:00:00 JST")
 	if err != nil {
 		return false, perr.Wrap(err, perr.BadRequest)
 	}

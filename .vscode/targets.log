@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Oct 14 20:39:39 2021
+# Make data base, printed on Fri Oct 15 05:19:43 2021
 
 # Variables
 
@@ -85,9 +85,9 @@ VSCODE_PIPE_LOGGING = true
 # environment
 PWD = /mnt/c/codes/animar
 # environment
-VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-7d6b957f-d3be-48cf-b4f7-31af1b9d5f9b.sock
+VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-c26c6415-1355-4015-9ed6-7068e8a8e633.sock
 # environment
-WSL_INTEROP = /run/WSL/5453_interop
+WSL_INTEROP = /run/WSL/12_interop
 # environment
 GOMODCACHE = /home/takumaru/go/1.17.1/pkg/mod
 # environment
@@ -191,7 +191,7 @@ WSL_DISTRO_NAME = Ubuntu-18.04
 
 # Directories
 
-# . (device 28, inode 26740122787544083): 16 files, no impossibilities.
+# . (device 44, inode 26740122787544083): 16 files, no impossibilities.
 
 # 16 files, no impossibilities in 1 directories.
 
@@ -279,8 +279,8 @@ run:
 # VPATH Search Paths
 
 # No 'vpath' search paths.
- 
 
+ 
 # No general ('VPATH' variable) search path.
 
 # strcache buffers: 1 (0) / strings = 28 / storage = 203 B / avg = 7 B
@@ -289,6 +289,6 @@ run:
 # strcache performance: lookups = 44 / hit rate = 36%
 # hash-table stats:
 # Load=28/8192=0%, Rehash=0, Collisions=1/44=2%
-# Finished Make data base on Thu Oct 14 20:39:39 2021
+# Finished Make data base on Fri Oct 15 05:19:43 2021
 
  
