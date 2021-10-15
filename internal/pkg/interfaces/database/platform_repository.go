@@ -4,7 +4,7 @@ import (
 	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/interfaces/database/queryset"
 	"animar/v1/internal/pkg/tools/tools"
-	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -119,21 +119,29 @@ func (repo *PlatformRepository) modifyBroadcastTime(m *domain.RawNotificationMat
 }
 
 func (repo *PlatformRepository) isBroadcastDay(ft *string) (bool, error) {
-	firstDay, err := time.Parse("2006-01-02 15:04:05 MST", *ft+" JST")
+	jst, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
 		return false, perr.Wrap(err, perr.BadRequest)
 	}
+	firstDay, err := time.Parse("2006-01-02 15:04:05", *ft)
+	if err != nil {
+		return false, perr.Wrap(err, perr.BadRequest)
+	}
+	firstDay = firstDay.In(jst)
 
-	strToday := time.Now().Add(24 * time.Hour).Format("2006-01-02")
-	today, err := time.Parse("2006-01-02 15:04:05 MST", strToday+" 04:00:00 JST")
+	strToday := time.Now().Add(time.Hour * 24).Format("2006-01-02")
+	today, err := time.Parse("2006-01-02 15:04:05", strToday+" 04:00:00")
 	if err != nil {
 		return false, perr.Wrap(err, perr.BadRequest)
 	}
+	today = today.In(jst)
 
 	diff := today.Sub(firstDay)
-	diffHour := diff / time.Hour
-	diffDay := int(diffHour / 24)
-	fmt.Println(diffDay)
+	if diff < 0 {
+		return false, nil
+	}
+	diffHour := int(math.Floor(float64(diff / time.Hour)))
+	diffDay := diffHour / 24
 
 	if diffDay%7 == 0 {
 		return true, nil

@@ -33,8 +33,17 @@ func TestPlatform_FilterTodaysBroadcast(t *testing.T) {
 		err           error
 	}{
 		{
-			"now filtering",
+			"Success: state = now & interval = weekly",
 			[]domain.RawNotificationMaterial{
+				{
+					Platform:  "dani",
+					Title:     "攻殻機動隊S.A.C.",
+					LinkUrl:   nil,
+					BaseUrl:   tools.NewNullString("https://danime.com"),
+					FirstTime: tools.NewNullString(time.Now().Add(-time.Hour*24*7).Format("2006-01-02") + " 03:59:00"),
+					Interval:  tools.NewNullString("weekly"),
+					State:     "now",
+				},
 				{
 					Platform:  "netflix",
 					Title:     "宇宙よりも遠い場所",
@@ -55,28 +64,10 @@ func TestPlatform_FilterTodaysBroadcast(t *testing.T) {
 				},
 				{
 					Platform:  "dani",
-					Title:     "攻殻機動隊S.A.C.",
-					LinkUrl:   nil,
-					BaseUrl:   tools.NewNullString("https://danime.com"),
-					FirstTime: tools.NewNullString(time.Now().Add(-time.Hour*24*7).Format("2006-01-02") + " 03:59:00"),
-					Interval:  tools.NewNullString("weekly"),
-					State:     "now",
-				},
-				{
-					Platform:  "dani",
 					Title:     "おジャ魔女ドレミ",
 					LinkUrl:   tools.NewNullString("https://oja.majo"),
 					BaseUrl:   tools.NewNullString("https://danime.com"),
-					FirstTime: tools.NewNullString(time.Now().Add(time.Hour*24).Format("2006-01-02") + " 14:01:00"),
-					Interval:  tools.NewNullString("weekly"),
-					State:     "now",
-				},
-				{
-					Platform:  "dani",
-					Title:     "おジャ魔女ドレミ#",
-					LinkUrl:   tools.NewNullString("https://oja.majo"),
-					BaseUrl:   tools.NewNullString("https://danime.com"),
-					FirstTime: tools.NewNullString(time.Now().Add(time.Hour*24*2).Format("2006-01-02") + " 05:01:00"),
+					FirstTime: tools.NewNullString(time.Now().Add(time.Hour*24).Format("2006-01-02") + " 04:01:00"),
 					Interval:  tools.NewNullString("weekly"),
 					State:     "now",
 				},
