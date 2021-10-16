@@ -12,14 +12,29 @@ func NewPlatformInteractor(platform PlatformRepository) domain.PlatformInteracto
 	}
 }
 
+type PlatformBatchInteractor struct {
+	repo PlatformBatchRepository
+}
+
+func NewPlatformBatchInteractor(platform PlatformBatchRepository) domain.PlatformBatchInteractor {
+	return &PlatformBatchInteractor{
+		repo: platform,
+	}
+}
+
 /************************
         repository
 ************************/
 
 type PlatformRepository interface {
 	FilterByAnime(int) (domain.TRelationPlatforms, error)
-	// relation
+}
+
+// batch
+
+type PlatformBatchRepository interface {
 	FilterTodaysBroadCast() ([]domain.NotificationBroadcast, error)
+	MakeSlackMessage([]domain.NotificationBroadcast) string
 }
 
 /**********************
@@ -31,6 +46,12 @@ func (in *PlatformInteractor) RelationPlatformByAnime(animeId int) (platforms do
 	return
 }
 
-func (in *PlatformInteractor) TargetNotificationBroadcast() ([]domain.NotificationBroadcast, error) {
-	return in.repository.FilterTodaysBroadCast()
+// batch
+
+func (in *PlatformBatchInteractor) TargetNotificationBroadcast() ([]domain.NotificationBroadcast, error) {
+	return in.repo.FilterTodaysBroadCast()
+}
+
+func (in *PlatformBatchInteractor) MakeSlackMessage(nbs []domain.NotificationBroadcast) string {
+	return in.repo.MakeSlackMessage(nbs)
 }

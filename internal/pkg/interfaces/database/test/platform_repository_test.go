@@ -22,7 +22,7 @@ func TestPlatform_FilterTodaysBroadcast(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &database.PlatformRepository{
+	repo := &database.PlatformBatchRepository{
 		SqlHandler: infrastructure_test.NewDummyHandler(db),
 	}
 
@@ -112,10 +112,6 @@ func TestPlatform_FilterTodaysBroadcast(t *testing.T) {
 			mock.ExpectQuery(regexp.QuoteMeta(queryset.TodaysBroadcastQuery)).WillReturnRows(rows)
 
 			bs, err := repo.FilterTodaysBroadCast()
-
-			if err != nil {
-				fmt.Println(err.Error())
-			}
 
 			assert.Equal(t, tt.err, err)
 			assert.Equal(t, tt.broadcasts, bs)
