@@ -1,7 +1,7 @@
 package queryset
 
 const (
-	TodaysBroadcastQuery = "SELECT plat.plat_name, animes.title, rel.link_url, plat.base_url, rel.first_broadcast, rel.delivery_interval, animes.state " +
+	TodaysBroadcastQuery = "SELECT plat.plat_name, animes.title, animes.slug, rel.link_url, plat.base_url, rel.first_broadcast, rel.delivery_interval, animes.state " +
 		"FROM relation_anime_platform AS rel " +
 		"LEFT JOIN animes ON rel.anime_id = animes.id " +
 		"LEFT JOIN platforms AS plat ON rel.platform_id = plat.id " +

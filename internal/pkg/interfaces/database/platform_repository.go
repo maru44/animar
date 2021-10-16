@@ -1,9 +1,11 @@
 package database
 
 import (
+	"animar/v1/configs"
 	"animar/v1/internal/pkg/domain"
 	"animar/v1/internal/pkg/interfaces/database/queryset"
 	"animar/v1/internal/pkg/tools/tools"
+	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -47,7 +49,7 @@ func (repo *PlatformRepository) FilterTodaysBroadCast() ([]domain.NotificationBr
 	for rows.Next() {
 		var m domain.RawNotificationMaterial
 		err := rows.Scan(
-			&m.Platform, &m.Title, &m.LinkUrl, &m.BaseUrl,
+			&m.Platform, &m.Title, &m.Slug, &m.LinkUrl, &m.BaseUrl,
 			&m.FirstTime, &m.Interval, &m.State,
 		)
 		if err != nil {
@@ -66,6 +68,29 @@ func (repo *PlatformRepository) FilterTodaysBroadCast() ([]domain.NotificationBr
 	return out, nil
 }
 
+func (repo *PlatformRepository) MakeSlackMessage(nbs []domain.NotificationBroadcast) (out string) {
+	animesMap := map[string]string{}
+	for _, n := range nbs {
+		if n.Time != nil && n.LinkUrl != nil {
+			if _, ok := animesMap[n.Slug]; ok {
+				animesMap[n.Slug] += fmt.Sprintf(
+					"* \t%s %s <%s|:link:> <https://%s%s/anime/%s|:heart:>\n",
+					n.Platform, *n.Time, *n.LinkUrl, configs.FrontHost, configs.FrontPort, n.Slug,
+				)
+			}
+			animesMap[n.Slug] = fmt.Sprintf(
+				"* %s\n* \t%s %s <%s|:link:> <https://%s%s/anime/%s|:heart:>\n",
+				n.Title, n.Platform, *n.Time, *n.LinkUrl, configs.FrontHost, configs.FrontPort, n.Slug,
+			)
+		}
+	}
+
+	for _, s := range animesMap {
+		out += s
+	}
+	return out
+}
+
 func (repo *PlatformRepository) modifyBroadcastTime(m *domain.RawNotificationMaterial) (*domain.NotificationBroadcast, error) {
 	if m.Interval == nil {
 		return nil, nil
@@ -76,43 +101,31 @@ func (repo *PlatformRepository) modifyBroadcastTime(m *domain.RawNotificationMat
 		link = m.BaseUrl
 	}
 
+	out := &domain.NotificationBroadcast{
+		Platform: m.Platform,
+		Title:    m.Title,
+		Slug:     m.Slug,
+		LinkUrl:  link,
+		Time:     extractFristTime(m.FirstTime),
+	}
+
 	switch m.State {
 	case "now":
 		if *m.Interval == "once" || *m.Interval == "daily" {
-			return &domain.NotificationBroadcast{
-				Platform: m.Platform,
-				Title:    m.Title,
-				LinkUrl:  link,
-				Time:     extractFristTime(m.FirstTime),
-			}, nil
+			return out, nil
 		} else if *m.Interval == "weekly" {
 			if b, err := repo.isBroadcastDay(m.FirstTime); err != nil {
 				return nil, perr.Wrap(err, perr.BadRequest)
 			} else {
 				if b {
-					return &domain.NotificationBroadcast{
-						Platform: m.Platform,
-						Title:    m.Title,
-						LinkUrl:  link,
-						Time:     extractFristTime(m.FirstTime),
-					}, nil
+					return out, nil
 				}
 			}
 		}
 	case "pre":
-		return &domain.NotificationBroadcast{
-			Platform: m.Platform,
-			Title:    m.Title,
-			LinkUrl:  link,
-			Time:     extractFristTime(m.FirstTime),
-		}, nil
+		return out, nil
 	default:
-		return &domain.NotificationBroadcast{
-			Platform: m.Platform,
-			Title:    m.Title,
-			LinkUrl:  link,
-			Time:     extractFristTime(m.FirstTime),
-		}, nil
+		return out, nil
 	}
 
 	return nil, nil

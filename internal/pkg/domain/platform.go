@@ -25,6 +25,7 @@ type TRelationPlatform struct {
 type RawNotificationMaterial struct {
 	Platform  string
 	Title     string
+	Slug      string
 	LinkUrl   *string
 	BaseUrl   *string
 	FirstTime *string
@@ -35,6 +36,7 @@ type RawNotificationMaterial struct {
 type NotificationBroadcast struct {
 	Platform string  `json:"platform"` // Platform PlatName
 	Title    string  `json:"title"`
+	Slug     string  `json:"slug"`
 	LinkUrl  *string `json:"link_url"`
 	Time     *string `json:"time"`
 }
@@ -47,3 +49,5 @@ type PlatformInteractor interface {
 	RelationPlatformByAnime(int) (TRelationPlatforms, error)
 	TargetNotificationBroadcast() ([]NotificationBroadcast, error)
 }
+
+type PlatformBatchInteractor interface{}

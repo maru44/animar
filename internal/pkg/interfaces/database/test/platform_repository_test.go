@@ -38,6 +38,7 @@ func TestPlatform_FilterTodaysBroadcast(t *testing.T) {
 				{
 					Platform:  "dani",
 					Title:     "攻殻機動隊S.A.C.",
+					Slug:      "a01",
 					LinkUrl:   nil,
 					BaseUrl:   tools.NewNullString("https://danime.com"),
 					FirstTime: tools.NewNullString(time.Now().Add(-time.Hour*24*7).Format("2006-01-02") + " 03:59:00"),
@@ -47,6 +48,7 @@ func TestPlatform_FilterTodaysBroadcast(t *testing.T) {
 				{
 					Platform:  "netflix",
 					Title:     "宇宙よりも遠い場所",
+					Slug:      "a02",
 					LinkUrl:   tools.NewNullString("https://abc.example.com"),
 					BaseUrl:   tools.NewNullString("https://netflix.com"),
 					FirstTime: tools.NewNullString(time.Now().Add(-time.Hour*24*7*4).Format("2006-01-02") + " 04:01:00"),
@@ -56,6 +58,7 @@ func TestPlatform_FilterTodaysBroadcast(t *testing.T) {
 				{
 					Platform:  "amapri",
 					Title:     "ガンダム",
+					Slug:      "a03",
 					LinkUrl:   nil,
 					BaseUrl:   tools.NewNullString("https://amazon.com"),
 					FirstTime: tools.NewNullString(time.Now().Add(time.Hour*24).Format("2006-01-02") + " 04:00:00"),
@@ -65,6 +68,7 @@ func TestPlatform_FilterTodaysBroadcast(t *testing.T) {
 				{
 					Platform:  "dani",
 					Title:     "おジャ魔女ドレミ",
+					Slug:      "a04",
 					LinkUrl:   tools.NewNullString("https://oja.majo"),
 					BaseUrl:   tools.NewNullString("https://danime.com"),
 					FirstTime: tools.NewNullString(time.Now().Add(time.Hour*24).Format("2006-01-02") + " 04:01:00"),
@@ -76,12 +80,14 @@ func TestPlatform_FilterTodaysBroadcast(t *testing.T) {
 				{
 					Platform: "netflix",
 					Title:    "宇宙よりも遠い場所",
+					Slug:     "a02",
 					LinkUrl:  tools.NewNullString("https://abc.example.com"),
 					Time:     tools.NewNullString("04:01:00"),
 				},
 				{
 					Platform: "amapri",
 					Title:    "ガンダム",
+					Slug:     "a03",
 					LinkUrl:  tools.NewNullString("https://amazon.com"),
 					Time:     tools.NewNullString("04:00:00"),
 				},
@@ -93,13 +99,13 @@ func TestPlatform_FilterTodaysBroadcast(t *testing.T) {
 	for _, tt := range table {
 		t.Run(tt.testName, func(t *testing.T) {
 			rows := sqlmock.NewRows([]string{
-				"plat_plat_name", "animes_title", "rel_link_url",
+				"plat_plat_name", "animes_title", "animes_slug", "rel_link_url",
 				"plat_base_url", "rel_first_broadcast", "rel_delivery_interval", "animes_state",
 			})
 			for _, rb := range tt.rawBroadCasts {
 				fmt.Println(*rb.FirstTime)
 				rows.AddRow(
-					rb.Platform, rb.Title, rb.LinkUrl, rb.BaseUrl,
+					rb.Platform, rb.Title, rb.Slug, rb.LinkUrl, rb.BaseUrl,
 					rb.FirstTime, rb.Interval, rb.State,
 				)
 			}
