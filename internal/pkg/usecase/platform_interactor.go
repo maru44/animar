@@ -33,6 +33,7 @@ type PlatformRepository interface {
 // batch
 
 type PlatformBatchRepository interface {
+	FilterNotificationTarget() ([]string, error)
 	FilterTodaysBroadCast() ([]domain.NotificationBroadcast, error)
 	MakeSlackMessage([]domain.NotificationBroadcast) string
 }
@@ -47,6 +48,10 @@ func (in *PlatformInteractor) RelationPlatformByAnime(animeId int) (platforms do
 }
 
 // batch
+
+func (in *PlatformBatchInteractor) FilterNotificationTarget() ([]string, error) {
+	return in.repo.FilterNotificationTarget()
+}
 
 func (in *PlatformBatchInteractor) TargetNotificationBroadcast() ([]domain.NotificationBroadcast, error) {
 	return in.repo.FilterTodaysBroadCast()

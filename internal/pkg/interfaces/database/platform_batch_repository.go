@@ -17,6 +17,23 @@ type PlatformBatchRepository struct {
 	SqlHandler
 }
 
+func (repo *PlatformBatchRepository) FilterNotificationTarget() ([]string, error) {
+	rows, err := repo.Query(queryset.NotificationTarget)
+	if err != nil {
+		return nil, perr.Wrap(err, perr.BadRequest)
+	}
+
+	rows.Next()
+	var targetsStr string
+	err = rows.Scan(&targetsStr)
+	if err != nil {
+		return nil, perr.Wrap(err, perr.BadRequest)
+	}
+
+	targets := strings.Split(targetsStr, ",")
+	return targets, nil
+}
+
 func (repo *PlatformBatchRepository) FilterTodaysBroadCast() ([]domain.NotificationBroadcast, error) {
 	rows, err := repo.Query(queryset.TodaysBroadcastQuery)
 	if err != nil {

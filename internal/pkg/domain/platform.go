@@ -51,6 +51,7 @@ type (
 	}
 
 	PlatformBatchInteractor interface {
+		FilterNotificationTarget() ([]string, error)
 		TargetNotificationBroadcast() ([]NotificationBroadcast, error)
 		MakeSlackMessage(nbs []NotificationBroadcast) string
 	}

@@ -1,6 +1,10 @@
 package queryset
 
 const (
+	NotificationTarget = "SELECT GROUP_CONCAT(slack_channel) " +
+		"FROM slack_channel " +
+		"WHERE is_active = true"
+
 	TodaysBroadcastQuery = "SELECT plat.plat_name, animes.title, animes.slug, rel.link_url, plat.base_url, rel.first_broadcast, rel.delivery_interval, animes.state " +
 		"FROM relation_anime_platform AS rel " +
 		"LEFT JOIN animes ON rel.anime_id = animes.id " +
