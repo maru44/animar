@@ -96,21 +96,30 @@ func (adc *AdminController) AnimePostAdminView(w http.ResponseWriter, r *http.Re
 		returnFileName = r.FormValue("pre_thumb")
 	}
 	slug := tools.GenRandSlug(12)
-	series, err := strconv.Atoi(r.FormValue("series_id"))
-	if err != nil {
-		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
-		return
+
+	var series, episodes, companyId int
+	if f := r.FormValue("series_id"); f != "" {
+		series, err = strconv.Atoi(f)
+		if err != nil {
+			response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+			return
+		}
 	}
-	episodes, err := strconv.Atoi(r.FormValue("count_episodes"))
-	if err != nil {
-		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
-		return
+	if f := r.FormValue("count_episodes"); f != "" {
+		episodes, err = strconv.Atoi(f)
+		if err != nil {
+			response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+			return
+		}
 	}
-	companyId, err := strconv.Atoi(r.FormValue("company_id"))
-	if err != nil {
-		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
-		return
+	if f := r.FormValue("company_id"); f != "" {
+		companyId, err = strconv.Atoi(f)
+		if err != nil {
+			response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+			return
+		}
 	}
+
 	a := domain.AnimeInsert{
 		Title:         r.FormValue("title"),
 		Slug:          slug,
@@ -152,22 +161,30 @@ func (adc *AdminController) AnimeUpdateView(w http.ResponseWriter, r *http.Reque
 	} else {
 		returnFileName = r.FormValue("pre_thumb")
 	}
-	// @TODO confirm OK?
-	series, err := strconv.Atoi(r.FormValue("series_id"))
-	if err != nil {
-		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
-		return
+
+	var series, episodes, companyId int
+	if f := r.FormValue("series_id"); f != "" {
+		series, err = strconv.Atoi(f)
+		if err != nil {
+			response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+			return
+		}
 	}
-	episodes, err := strconv.Atoi(r.FormValue("count_episodes"))
-	if err != nil {
-		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
-		return
+	if f := r.FormValue("count_episodes"); f != "" {
+		episodes, err = strconv.Atoi(f)
+		if err != nil {
+			response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+			return
+		}
 	}
-	companyId, err := strconv.Atoi(r.FormValue("company_id"))
-	if err != nil {
-		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
-		return
+	if f := r.FormValue("company_id"); f != "" {
+		companyId, err = strconv.Atoi(f)
+		if err != nil {
+			response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+			return
+		}
 	}
+
 	a := domain.AnimeInsert{
 		Title:         r.FormValue("title"),
 		Abbreviation:  tools.NewNullString(r.FormValue("abbreviation")),

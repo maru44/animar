@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sun Oct 17 20:25:21 2021
+# Make data base, printed on Mon Oct 18 05:20:12 2021
 
 # Variables
 
@@ -85,9 +85,9 @@ VSCODE_PIPE_LOGGING = true
 # environment
 PWD = /mnt/c/codes/animar
 # environment
-VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-2605413d-638d-4992-a0e9-cacf7ed9be93.sock
+VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-7a5e81d8-b5a0-4c7b-aae0-79bc5805064d.sock
 # environment
-WSL_INTEROP = /run/WSL/30402_interop
+WSL_INTEROP = /run/WSL/12_interop
 # environment
 GOMODCACHE = /home/takumaru/go/1.17.1/pkg/mod
 # environment
@@ -289,6 +289,6 @@ run:
 # strcache performance: lookups = 44 / hit rate = 36%
 # hash-table stats:
 # Load=28/8192=0%, Rehash=0, Collisions=1/44=2%
-# Finished Make data base on Sun Oct 17 20:25:21 2021
+# Finished Make data base on Mon Oct 18 05:20:12 2021
 
  

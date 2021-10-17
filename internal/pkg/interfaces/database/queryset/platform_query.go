@@ -11,7 +11,7 @@ const (
 		"LEFT JOIN platforms AS plat ON rel.platform_id = plat.id " +
 		"WHERE animes.state = 'now' " +
 		"OR ((animes.state = 'pre' OR (rel.delivery_interval = 'once' AND animes.state NOT IN ('now','pre'))) AND " +
-		"rel.first_broadcast BETWEEN DATE_ADD(DATE(NOW()), INTERVAL 4 HOUR)) " +
+		"rel.first_broadcast BETWEEN DATE_ADD(DATE(NOW()), INTERVAL 4 HOUR) " +
 		"AND DATE_ADD(DATE(NOW()), INTERVAL 28 HOUR))"
 
 	PlatformFilterByAnimeQuery = "Select relation_anime_platform.*, platforms.plat_name FROM relation_anime_platform " +

@@ -7,6 +7,7 @@ import (
 	"animar/v1/internal/pkg/usecase"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/maru44/perr"
 )
@@ -36,7 +37,8 @@ func (pb *PlatformBatch) SendBatch() error {
 		return perr.Wrap(err, perr.BadRequest)
 	}
 
-	message := pb.interactor.MakeSlackMessage(broadCasts)
+	unEscMess := pb.interactor.MakeSlackMessage(broadCasts)
+	message := url.QueryEscape(unEscMess)
 
 	cli := http.Client{}
 	// @TODO multiplize
