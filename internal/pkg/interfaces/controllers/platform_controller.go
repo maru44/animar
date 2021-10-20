@@ -57,3 +57,15 @@ func (con *PlatformController) RegisterNotifiedTargetView(w http.ResponseWriter,
 	response(w, r, nil, map[string]interface{}{"data": inserted})
 	return
 }
+
+func (con *PlatformController) GetUsersChannelView(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(USER_ID).(string)
+	channelId, err := con.interactor.UsersChannel(userId)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.NotFound), nil)
+		return
+	}
+
+	response(w, r, nil, map[string]interface{}{"channel_id": channelId})
+	return
+}

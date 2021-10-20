@@ -66,6 +66,7 @@ func main() {
 
 	platController := controllers.NewPlatformController(sqlHandler)
 	router.Handle("/notification/register/", base.BaseMiddleware(base.PostOnlyMiddleware(base.LoginRequireMiddleware(base.VerifyCsrfMiddleware(http.HandlerFunc(platController.RegisterNotifiedTargetView))))))
+	router.Handle("/notification/user/slack/", base.BaseMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(platController.GetUsersChannelView))))
 
 	// article
 	articleController := controllers.NewArticleController(sqlHandler)

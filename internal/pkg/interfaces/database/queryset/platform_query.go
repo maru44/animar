@@ -19,4 +19,6 @@ const (
 		"WHERE anime_id = ?"
 
 	RegisterNotifiedTargetQuery = "INSERT INTO slacks(slack_channel, user_id) VALUES (?, ?)"
+
+	GetUsersSlackChannelQuery = "SELECT slack_channel FROM slacks WHERE user_id = ?"
 )

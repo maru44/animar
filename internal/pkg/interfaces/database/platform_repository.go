@@ -45,3 +45,18 @@ func (repo *PlatformRepository) RegisterTarget(in domain.NotifiedTargetInput) (i
 	}
 	return int(rawInserted), nil
 }
+
+func (repo *PlatformRepository) GetUsersChannel(userId string) (*string, error) {
+	rows, err := repo.Query(queryset.GetUsersSlackChannelQuery, userId)
+	if err != nil {
+		return nil, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
+	}
+
+	rows.Next()
+	var channelId *string
+	if err := rows.Scan(&channelId); err != nil {
+		return nil, perr.Wrap(err, perr.NotFound)
+	}
+
+	return channelId, nil
+}

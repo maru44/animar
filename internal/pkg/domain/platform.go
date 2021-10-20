@@ -53,7 +53,9 @@ type (
 
 	PlatformInteractor interface {
 		RelationPlatformByAnime(int) (TRelationPlatforms, error)
+		// notification
 		RegisterNotifiedTarget(in NotifiedTargetInput) (int, error)
+		UsersChannel(userId string) (*string, error)
 	}
 
 	PlatformBatchInteractor interface {
