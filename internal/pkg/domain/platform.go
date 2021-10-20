@@ -44,7 +44,7 @@ type (
 
 	NotifiedTargetInput struct {
 		SlackID string `json:"slack_id"`
-		UserID  string `json:"user_id"`
+		UserID  string
 	}
 
 	TPlatforms []TPlatform

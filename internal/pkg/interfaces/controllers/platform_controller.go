@@ -39,12 +39,14 @@ func (con *PlatformController) RelationPlatformByAnimeView(w http.ResponseWriter
 }
 
 func (con *PlatformController) RegisterNotifiedTargetView(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(USER_ID).(string)
 	var p domain.NotifiedTargetInput
 	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
 		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
 		return
 	}
+	p.UserID = userId
 
 	inserted, err := con.interactor.RegisterNotifiedTarget(p)
 	if err != nil {
