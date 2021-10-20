@@ -26,11 +26,11 @@ func NewPlatformBatch(sql database.SqlHandler) *PlatformBatch {
 	}
 }
 
-func (pb *PlatformBatch) SendBatch() error {
-	// targets, err := pb.interactor.FilterNotificationTarget() // @TODO enable
-	// if err != nil {
-	// 	return perr.Wrap(err, perr.BadRequest)
-	// }
+func (pb *PlatformBatch) SendSlackBatch() error {
+	targets, err := pb.interactor.FilterNotificationTarget()
+	if err != nil {
+		return perr.Wrap(err, perr.BadRequest)
+	}
 
 	broadCasts, err := pb.interactor.TargetNotificationBroadcast()
 	if err != nil {
@@ -40,16 +40,18 @@ func (pb *PlatformBatch) SendBatch() error {
 	unEscMess := pb.interactor.MakeSlackMessage(broadCasts)
 	message := url.QueryEscape(unEscMess)
 
-	cli := http.Client{}
-	// @TODO multiplize
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://slack.com/api/chat.postMessage?channel=%s&text=%s&pretty=1", configs.SlackChannelId, message), nil)
-	if err != nil {
-		return perr.Wrap(err, perr.BadRequest)
-	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", configs.SlackBotToken))
-	_, err = cli.Do(req)
-	if err != nil {
-		return perr.Wrap(err, perr.BadRequest)
+	for _, t := range targets {
+		cli := http.Client{}
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://slack.com/api/chat.postMessage?channel=%s&text=%s&pretty=1", t, message), nil)
+		if err != nil {
+			return perr.Wrap(err, perr.BadRequest)
+		}
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", configs.SlackBotToken))
+		res, err := cli.Do(req)
+		if err != nil {
+			return perr.Wrap(err, perr.BadRequest)
+		}
+		defer res.Body.Close()
 	}
 	return nil
 }
