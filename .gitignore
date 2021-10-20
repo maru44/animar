@@ -27,3 +27,4 @@ tmp/*
 **/seed/bulk/*.sql
 **/tmp/
 **/bin/
+**/.vscode/

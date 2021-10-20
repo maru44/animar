@@ -64,6 +64,9 @@ func main() {
 	roleController := controllers.NewRoleController(sqlHandler)
 	router.Handle("/staffrole/", base.BaseMiddleware(http.HandlerFunc(roleController.ListStaffRoleView))) // ?anime=
 
+	platController := controllers.NewPlatformController(sqlHandler)
+	router.Handle("/notification/register/", base.BaseMiddleware(base.PostOnlyMiddleware(base.LoginRequireMiddleware(base.VerifyCsrfMiddleware(http.HandlerFunc(platController.RegisterNotifiedTargetView))))))
+
 	// article
 	articleController := controllers.NewArticleController(sqlHandler)
 	router.Handle("/article/", base.BaseMiddleware(http.HandlerFunc(articleController.ArticleListView)))

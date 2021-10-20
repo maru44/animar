@@ -32,3 +32,16 @@ func (repo *PlatformRepository) FilterByAnime(animeId int) (platforms domain.TRe
 	}
 	return
 }
+
+func (repo *PlatformRepository) RegisterTarget(in domain.NotifiedTargetInput) (int, error) {
+	exe, err := repo.Execute(queryset.RegisterNotifiedTargetQuery, in.SlackID, in.UserID)
+	if err != nil {
+		return 0, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
+	}
+
+	rawInserted, err := exe.LastInsertId()
+	if err != nil {
+		return 0, perr.Wrap(err, perr.BadRequest)
+	}
+	return int(rawInserted), nil
+}

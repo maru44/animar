@@ -14,7 +14,9 @@ const (
 		"rel.first_broadcast BETWEEN DATE_ADD(DATE(NOW()), INTERVAL 4 HOUR) " +
 		"AND DATE_ADD(DATE(NOW()), INTERVAL 28 HOUR))"
 
-	PlatformFilterByAnimeQuery = "Select relation_anime_platform.*, platforms.plat_name FROM relation_anime_platform " +
+	PlatformFilterByAnimeQuery = "SELECT relation_anime_platform.*, platforms.plat_name FROM relation_anime_platform " +
 		"LEFT JOIN platforms ON relation_anime_platform.platform_id = platforms.id " +
 		"WHERE anime_id = ?"
+
+	RegisterNotifiedTargetQuery = "INSERT INTO slacks(slack_channel, user_id) VALUES (?, ?)"
 )

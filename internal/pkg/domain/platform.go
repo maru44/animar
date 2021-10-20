@@ -42,12 +42,18 @@ type (
 		Time     *string `json:"time"`
 	}
 
+	NotifiedTargetInput struct {
+		SlackID string `json:"slack_id"`
+		UserID  string `json:"user_id"`
+	}
+
 	TPlatforms []TPlatform
 
 	TRelationPlatforms []TRelationPlatform
 
 	PlatformInteractor interface {
 		RelationPlatformByAnime(int) (TRelationPlatforms, error)
+		RegisterNotifiedTarget(in NotifiedTargetInput) (int, error)
 	}
 
 	PlatformBatchInteractor interface {

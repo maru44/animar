@@ -28,6 +28,8 @@ func NewPlatformBatchInteractor(platform PlatformBatchRepository) domain.Platfor
 
 type PlatformRepository interface {
 	FilterByAnime(int) (domain.TRelationPlatforms, error)
+	// slack notification
+	RegisterTarget(in domain.NotifiedTargetInput) (int, error)
 }
 
 // batch
@@ -45,6 +47,10 @@ type PlatformBatchRepository interface {
 func (in *PlatformInteractor) RelationPlatformByAnime(animeId int) (platforms domain.TRelationPlatforms, err error) {
 	platforms, err = in.repository.FilterByAnime(animeId)
 	return
+}
+
+func (in *PlatformInteractor) RegisterNotifiedTarget(input domain.NotifiedTargetInput) (int, error) {
+	return in.repository.RegisterTarget(input)
 }
 
 // batch
