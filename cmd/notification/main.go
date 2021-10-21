@@ -1,4 +1,4 @@
-package notification
+package main
 
 import (
 	"animar/v1/internal/pkg/infrastructure"

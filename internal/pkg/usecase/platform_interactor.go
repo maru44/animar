@@ -30,6 +30,8 @@ type PlatformRepository interface {
 	FilterByAnime(int) (domain.TRelationPlatforms, error)
 	// slack notification
 	RegisterTarget(in domain.NotifiedTargetInput) (int, error)
+	UpdateTarget(in domain.NotifiedTargetInput) (int, error)
+	DeleteTarget(userId string) (int, error)
 	GetUsersChannel(userId string) (*string, error)
 }
 
@@ -52,6 +54,14 @@ func (in *PlatformInteractor) RelationPlatformByAnime(animeId int) (platforms do
 
 func (in *PlatformInteractor) RegisterNotifiedTarget(input domain.NotifiedTargetInput) (int, error) {
 	return in.repository.RegisterTarget(input)
+}
+
+func (in *PlatformInteractor) UpdateNotifiedTarget(input domain.NotifiedTargetInput) (int, error) {
+	return in.repository.UpdateTarget(input)
+}
+
+func (in *PlatformInteractor) DeleteNotifiedTarget(userId string) (int, error) {
+	return in.repository.DeleteTarget(userId)
 }
 
 func (in *PlatformInteractor) UsersChannel(userId string) (*string, error) {

@@ -46,6 +46,32 @@ func (repo *PlatformRepository) RegisterTarget(in domain.NotifiedTargetInput) (i
 	return int(rawInserted), nil
 }
 
+func (repo *PlatformRepository) UpdateTarget(in domain.NotifiedTargetInput) (int, error) {
+	exe, err := repo.Execute(queryset.UpdateNotifiedTargetQuery, in.SlackID, in.UserID)
+	if err != nil {
+		return 0, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
+	}
+
+	rawAffected, err := exe.RowsAffected()
+	if err != nil {
+		return 0, perr.Wrap(err, perr.BadRequest)
+	}
+	return int(rawAffected), nil
+}
+
+func (repo *PlatformRepository) DeleteTarget(userId string) (int, error) {
+	exe, err := repo.Execute(queryset.DeleteNotifiedTargetQuery, userId)
+	if err != nil {
+		return 0, perr.Wrap(err, perr.InternalServerErrorWithUrgency)
+	}
+
+	rawAffected, err := exe.RowsAffected()
+	if err != nil {
+		return 0, perr.Wrap(err, perr.BadRequest)
+	}
+	return int(rawAffected), nil
+}
+
 func (repo *PlatformRepository) GetUsersChannel(userId string) (*string, error) {
 	rows, err := repo.Query(queryset.GetUsersSlackChannelQuery, userId)
 	if err != nil {

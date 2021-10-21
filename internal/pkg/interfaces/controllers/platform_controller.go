@@ -58,6 +58,38 @@ func (con *PlatformController) RegisterNotifiedTargetView(w http.ResponseWriter,
 	return
 }
 
+func (con *PlatformController) UpdateNotifiedTargetView(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(USER_ID).(string)
+	var p domain.NotifiedTargetInput
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
+	}
+	p.UserID = userId
+
+	affected, err := con.interactor.UpdateNotifiedTarget(p)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
+	}
+
+	response(w, r, nil, map[string]interface{}{"data": affected})
+	return
+}
+
+func (con *PlatformController) DeleteNotifiedTargetView(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(USER_ID).(string)
+	affected, err := con.interactor.DeleteNotifiedTarget(userId)
+	if err != nil {
+		response(w, r, perr.Wrap(err, perr.BadRequest), nil)
+		return
+	}
+
+	response(w, r, nil, map[string]interface{}{"data": affected})
+	return
+}
+
 func (con *PlatformController) GetUsersChannelView(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(USER_ID).(string)
 	channelId, err := con.interactor.UsersChannel(userId)

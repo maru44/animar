@@ -66,6 +66,8 @@ func main() {
 
 	platController := controllers.NewPlatformController(sqlHandler)
 	router.Handle("/notification/register/", base.BaseMiddleware(base.PostOnlyMiddleware(base.LoginRequireMiddleware(base.VerifyCsrfMiddleware(http.HandlerFunc(platController.RegisterNotifiedTargetView))))))
+	router.Handle("/notification/update/", base.BaseMiddleware(base.PutOnlyMiddleware(base.LoginRequireMiddleware(base.VerifyCsrfMiddleware(http.HandlerFunc(platController.UpdateNotifiedTargetView))))))
+	router.Handle("/notification/delete/", base.BaseMiddleware(base.DeleteOnlyMiddleware(base.LoginRequireMiddleware(base.VerifyCsrfMiddleware(http.HandlerFunc(platController.DeleteNotifiedTargetView))))))
 	router.Handle("/notification/user/slack/", base.BaseMiddleware(base.LoginRequireMiddleware(http.HandlerFunc(platController.GetUsersChannelView))))
 
 	// article

@@ -55,6 +55,8 @@ type (
 		RelationPlatformByAnime(int) (TRelationPlatforms, error)
 		// notification
 		RegisterNotifiedTarget(in NotifiedTargetInput) (int, error)
+		UpdateNotifiedTarget(in NotifiedTargetInput) (int, error)
+		DeleteNotifiedTarget(userId string) (int, error)
 		UsersChannel(userId string) (*string, error)
 	}
 
