@@ -6,6 +6,6 @@ CREATE TABLE slacks (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX user_index(user_id),
-    INDEX slack_index(slack_channel)
+    UNIQUE INDEX user_index(user_id),
+    UNIQUE INDEX slack_index(slack_channel)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
