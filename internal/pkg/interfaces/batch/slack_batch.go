@@ -41,7 +41,6 @@ func (pb *PlatformBatch) SendSlackBatch() error {
 	message := url.QueryEscape(unEscMess)
 
 	for _, t := range targets {
-		fmt.Println(t)
 		cli := http.Client{}
 		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://slack.com/api/chat.postMessage?channel=%s&text=%s&pretty=1", t, message), nil)
 		if err != nil {
