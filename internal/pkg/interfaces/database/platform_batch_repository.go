@@ -72,11 +72,12 @@ func (repo *PlatformBatchRepository) MakeSlackMessage(nbs []domain.NotificationB
 					"\t◦ %s %s <%s|:link:> <https://%s%s/anime/%s|:heart:>\n",
 					n.Platform, *n.Time, *n.LinkUrl, configs.FrontHost, configs.FrontPort, n.Slug,
 				)
+			} else {
+				animesMap[n.Slug] = fmt.Sprintf(
+					"• %s\n\t◦ %s %s <%s|:link:> <https://%s%s/anime/%s|:heart:>\n",
+					n.Title, n.Platform, *n.Time, *n.LinkUrl, configs.FrontHost, configs.FrontPort, n.Slug,
+				)
 			}
-			animesMap[n.Slug] = fmt.Sprintf(
-				"• %s\n\t◦ %s %s <%s|:link:> <https://%s%s/anime/%s|:heart:>\n",
-				n.Title, n.Platform, *n.Time, *n.LinkUrl, configs.FrontHost, configs.FrontPort, n.Slug,
-			)
 		}
 	}
 
