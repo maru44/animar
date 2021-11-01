@@ -72,7 +72,7 @@ func (controller *BaseController) getUserIdFromToken(idToken string) (userId str
 func (controller *BaseController) getGoogleUser(accessToken string) domain.TGoogleOauth {
 	url := "https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + accessToken
 	req, _ := http.NewRequest(
-		"GET", url, nil,
+		http.MethodGet, url, nil,
 	)
 	client := &http.Client{}
 	res, err := client.Do(req)
@@ -94,9 +94,9 @@ func (controller *BaseController) getGoogleUser(accessToken string) domain.TGoog
 
 func (controller *BaseController) UpsertOnlyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" || r.Method == "PUT" {
+		if r.Method == http.MethodPost || r.Method == http.MethodPut {
 			next.ServeHTTP(w, r)
-		} else if r.Method == "OPTIONS" {
+		} else if r.Method == http.MethodOptions {
 			response(w, r, nil, nil)
 		} else {
 			response(w, r, perr.New("", perr.MethodNotAllowed), nil)
@@ -107,9 +107,9 @@ func (controller *BaseController) UpsertOnlyMiddleware(next http.Handler) http.H
 
 func (controller *BaseController) PostOnlyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" {
+		if r.Method == http.MethodPost {
 			next.ServeHTTP(w, r)
-		} else if r.Method == "OPTIONS" {
+		} else if r.Method == http.MethodOptions {
 			response(w, r, nil, nil)
 		} else {
 			response(w, r, perr.New("", perr.MethodNotAllowed), nil)
@@ -120,9 +120,9 @@ func (controller *BaseController) PostOnlyMiddleware(next http.Handler) http.Han
 
 func (controller *BaseController) PutOnlyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "PUT" {
+		if r.Method == http.MethodPut {
 			next.ServeHTTP(w, r)
-		} else if r.Method == "OPTIONS" {
+		} else if r.Method == http.MethodOptions {
 			response(w, r, nil, nil)
 		} else {
 			response(w, r, perr.New("", perr.MethodNotAllowed), nil)
@@ -133,9 +133,9 @@ func (controller *BaseController) PutOnlyMiddleware(next http.Handler) http.Hand
 
 func (controller *BaseController) DeleteOnlyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "DELETE" {
+		if r.Method == http.MethodDelete {
 			next.ServeHTTP(w, r)
-		} else if r.Method == "OPTIONS" {
+		} else if r.Method == http.MethodOptions {
 			response(w, r, nil, nil)
 		} else {
 			response(w, r, perr.New("", perr.MethodNotAllowed), nil)
@@ -218,14 +218,14 @@ func (controller *BaseController) GiveUserIdMiddlewareAbleSSR(next http.Handler)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var userId string
 		switch r.Method {
-		case "GET":
+		case http.MethodGet:
 			idToken, err := r.Cookie("idToken")
 			if err != nil {
 				userId = ""
 			} else {
 				userId, _ = controller.interactor.UserId(idToken.Value)
 			}
-		case "POST":
+		case http.MethodPost:
 			var posted domain.TUserToken
 			json.NewDecoder(r.Body).Decode(&posted)
 			userId, _ = controller.getUserIdFromToken(posted.Token)
@@ -287,7 +287,7 @@ func (controller *BaseController) AdminRequiredMiddlewareGet(next http.Handler) 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var idToken string
 		switch r.Method {
-		case "GET":
+		case http.MethodGet:
 			idTokenObj, err := r.Cookie("idToken")
 			if err != nil {
 				response(w, r, perr.Wrap(err, perr.Forbidden), nil)
@@ -295,7 +295,7 @@ func (controller *BaseController) AdminRequiredMiddlewareGet(next http.Handler) 
 			} else {
 				idToken = idTokenObj.Value
 			}
-		case "POST":
+		case http.MethodPost:
 			var p domain.TUserToken
 			json.NewDecoder(r.Body).Decode(&p)
 			idToken = p.Token
