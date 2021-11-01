@@ -92,16 +92,12 @@ func (controller *BaseController) getGoogleUser(accessToken string) domain.TGoog
     method middleware
 ************************/
 
-func (controller *BaseController) allowOptionsMiddleware(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "OPTIONS" {
-		response(w, r, nil, nil)
-	}
-}
-
 func (controller *BaseController) UpsertOnlyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" || r.Method == "PUT" {
 			next.ServeHTTP(w, r)
+		} else if r.Method == "OPTIONS" {
+			response(w, r, nil, nil)
 		} else {
 			response(w, r, perr.New("", perr.MethodNotAllowed), nil)
 			return
@@ -113,6 +109,8 @@ func (controller *BaseController) PostOnlyMiddleware(next http.Handler) http.Han
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			next.ServeHTTP(w, r)
+		} else if r.Method == "OPTIONS" {
+			response(w, r, nil, nil)
 		} else {
 			response(w, r, perr.New("", perr.MethodNotAllowed), nil)
 			return
@@ -124,6 +122,8 @@ func (controller *BaseController) PutOnlyMiddleware(next http.Handler) http.Hand
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "PUT" {
 			next.ServeHTTP(w, r)
+		} else if r.Method == "OPTIONS" {
+			response(w, r, nil, nil)
 		} else {
 			response(w, r, perr.New("", perr.MethodNotAllowed), nil)
 			return
@@ -135,6 +135,8 @@ func (controller *BaseController) DeleteOnlyMiddleware(next http.Handler) http.H
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "DELETE" {
 			next.ServeHTTP(w, r)
+		} else if r.Method == "OPTIONS" {
+			response(w, r, nil, nil)
 		} else {
 			response(w, r, perr.New("", perr.MethodNotAllowed), nil)
 			return
@@ -166,7 +168,6 @@ func (controller *BaseController) BaseMiddleware(next http.Handler) http.Handler
 		r = setAccessData(r)
 
 		controller.corsMiddleware(w, r)
-		controller.allowOptionsMiddleware(w, r)
 		next.ServeHTTP(w, r)
 	})
 }
