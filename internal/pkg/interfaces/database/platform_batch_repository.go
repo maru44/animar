@@ -6,7 +6,9 @@ import (
 	"animar/v1/internal/pkg/interfaces/database/queryset"
 	"animar/v1/internal/pkg/tools/tools"
 	"fmt"
+	"log"
 	"math"
+	"strconv"
 	"strings"
 	"time"
 
@@ -159,6 +161,23 @@ func (repo *PlatformBatchRepository) isBroadcastDay(ft *string) (bool, error) {
 }
 
 func extractFristTime(ft *string) *string {
+	if ft == nil {
+		return nil
+	}
 	ftSlice := strings.Split(*ft, " ")
-	return tools.NewNullString(ftSlice[1])
+	t := ftSlice[1]
+	// 00 ~ 03 hour  >> 24 ~ 27
+	// if strings.HasPrefix(t, "00") {
+	// 	strings.Replace()
+	// }
+	hour := string([]rune(t)[:2])
+	min := string([]rune(t)[2:5])
+	hourInt, err := strconv.Atoi(hour)
+	if err != nil {
+		log.Print(err)
+	}
+	if hourInt < 4 {
+		hourInt += 24
+	}
+	return tools.NewNullString(strconv.Itoa(hourInt) + min)
 }
