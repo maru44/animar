@@ -167,9 +167,6 @@ func extractFristTime(ft *string) *string {
 	ftSlice := strings.Split(*ft, " ")
 	t := ftSlice[1]
 	// 00 ~ 03 hour  >> 24 ~ 27
-	// if strings.HasPrefix(t, "00") {
-	// 	strings.Replace()
-	// }
 	hour := string([]rune(t)[:2])
 	min := string([]rune(t)[2:5])
 	hourInt, err := strconv.Atoi(hour)
