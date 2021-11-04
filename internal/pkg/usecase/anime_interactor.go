@@ -32,6 +32,7 @@ type AnimeRepository interface {
 	// detail
 	FindById(int) (domain.TAnime, error)
 	FindBySlug(string) (domain.TAnimeWithSeries, error)
+	// change on air state
 }
 
 type ReviewAnimeRepository interface {
@@ -43,66 +44,66 @@ type ReviewAnimeRepository interface {
    interactor methods
 ***********************/
 
-func (interactor *AnimeInteractor) AnimesAll() (animes domain.TAnimes, err error) {
-	animes, err = interactor.animeRepository.ListAll()
+func (in *AnimeInteractor) AnimesAll() (animes domain.TAnimes, err error) {
+	animes, err = in.animeRepository.ListAll()
 	return
 }
 
-func (interactor *AnimeInteractor) AnimesOnAir() (animes domain.TAnimes, err error) {
-	animes, err = interactor.animeRepository.ListOnAirAll()
+func (in *AnimeInteractor) AnimesOnAir() (animes domain.TAnimes, err error) {
+	animes, err = in.animeRepository.ListOnAirAll()
 	return
 }
 
-func (interactor *AnimeInteractor) AnimeMinimums() (animes domain.TAnimeMinimums, err error) {
-	animes, err = interactor.animeRepository.ListMinimum()
+func (in *AnimeInteractor) AnimeMinimums() (animes domain.TAnimeMinimums, err error) {
+	animes, err = in.animeRepository.ListMinimum()
 	return
 }
 
-func (interactor *AnimeInteractor) AnimesSearch(title string) (animes domain.TAnimes, err error) {
-	animes, err = interactor.animeRepository.ListSearch(title)
+func (in *AnimeInteractor) AnimesSearch(title string) (animes domain.TAnimes, err error) {
+	animes, err = in.animeRepository.ListSearch(title)
 	return
 }
 
-func (interactor *AnimeInteractor) AnimesBySeason(year string, season string) (animes domain.TAnimes, err error) {
-	animes, err = interactor.animeRepository.ListBySeason(year, season)
+func (in *AnimeInteractor) AnimesBySeason(year string, season string) (animes domain.TAnimes, err error) {
+	animes, err = in.animeRepository.ListBySeason(year, season)
 	return
 }
 
-func (interactor *AnimeInteractor) AnimeSearchMinimum(title string) (animes domain.TAnimeMinimums, err error) {
-	animes, err = interactor.animeRepository.ListMinimumSearch(title)
+func (in *AnimeInteractor) AnimeSearchMinimum(title string) (animes domain.TAnimeMinimums, err error) {
+	animes, err = in.animeRepository.ListMinimumSearch(title)
 	return
 }
 
-func (interactor *AnimeInteractor) AnimesBySeries(id int) (animes []domain.TAnimeWithSeries, err error) {
-	animes, err = interactor.animeRepository.ListBySeries(id)
+func (in *AnimeInteractor) AnimesBySeries(id int) (animes []domain.TAnimeWithSeries, err error) {
+	animes, err = in.animeRepository.ListBySeries(id)
 	return
 }
 
-func (interactor *AnimeInteractor) AnimesByCompany(engName string) (domain.TAnimes, error) {
-	return interactor.animeRepository.ListByCompany(engName)
+func (in *AnimeInteractor) AnimesByCompany(engName string) (domain.TAnimes, error) {
+	return in.animeRepository.ListByCompany(engName)
 }
 
 // detail
 
-func (interactor *AnimeInteractor) AnimeDetail(id int) (anime domain.TAnime, err error) {
-	anime, err = interactor.animeRepository.FindById(id)
+func (in *AnimeInteractor) AnimeDetail(id int) (anime domain.TAnime, err error) {
+	anime, err = in.animeRepository.FindById(id)
 	return
 }
 
-func (interactor *AnimeInteractor) AnimeDetailBySlug(slug string) (anime domain.TAnimeWithSeries, err error) {
-	anime, err = interactor.animeRepository.FindBySlug(slug)
+func (in *AnimeInteractor) AnimeDetailBySlug(slug string) (anime domain.TAnimeWithSeries, err error) {
+	anime, err = in.animeRepository.FindBySlug(slug)
 	return
 }
 
 // review
 
-func (interactor *AnimeInteractor) ReviewFilterByAnime(animeId int, userId string) (reviews domain.TReviews, err error) {
-	reviews, err = interactor.reviewRepository.FilterByAnime(animeId, userId)
+func (in *AnimeInteractor) ReviewFilterByAnime(animeId int, userId string) (reviews domain.TReviews, err error) {
+	reviews, err = in.reviewRepository.FilterByAnime(animeId, userId)
 	return
 }
 
 // company
 
-func (interactor *AnimeInteractor) DetailCompanyByEng(engName string) (domain.CompanyDetail, error) {
-	return interactor.companyRepository.DetailByEng(engName)
+func (in *AnimeInteractor) DetailCompanyByEng(engName string) (domain.CompanyDetail, error) {
+	return in.companyRepository.DetailByEng(engName)
 }

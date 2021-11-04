@@ -64,5 +64,6 @@ type (
 		FilterNotificationTarget() ([]string, error)
 		TargetNotificationBroadcast() ([]NotificationBroadcast, error)
 		MakeSlackMessage(nbs []NotificationBroadcast) string
+		ChangeOnAirState(state string, slug string) (int, error)
 	}
 )

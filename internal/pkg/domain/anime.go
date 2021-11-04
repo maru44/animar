@@ -72,4 +72,12 @@ type AnimeInteractor interface {
 	ReviewFilterByAnime(int, string) (TReviews, error)
 	/*   company   */
 	DetailCompanyByEng(string) (CompanyDetail, error)
+	/*   change on air   */
 }
+
+const (
+	StateNow = "now"
+	StatePre = "pre"
+	StateCut = "cut"
+	StateFin = "fin"
+)

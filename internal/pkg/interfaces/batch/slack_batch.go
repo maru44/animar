@@ -13,12 +13,12 @@ import (
 )
 
 type PlatformBatch struct {
-	interactor domain.PlatformBatchInteractor
+	pi domain.PlatformBatchInteractor
 }
 
 func NewPlatformBatch(sql database.SqlHandler) *PlatformBatch {
 	return &PlatformBatch{
-		interactor: usecase.NewPlatformBatchInteractor(
+		pi: usecase.NewPlatformBatchInteractor(
 			&database.PlatformBatchRepository{
 				SqlHandler: sql,
 			},
@@ -27,17 +27,17 @@ func NewPlatformBatch(sql database.SqlHandler) *PlatformBatch {
 }
 
 func (pb *PlatformBatch) SendSlackBatch() error {
-	targets, err := pb.interactor.FilterNotificationTarget()
+	targets, err := pb.pi.FilterNotificationTarget()
 	if err != nil {
 		return perr.Wrap(err, perr.BadRequest)
 	}
 
-	broadCasts, err := pb.interactor.TargetNotificationBroadcast()
+	broadCasts, err := pb.pi.TargetNotificationBroadcast()
 	if err != nil {
 		return perr.Wrap(err, perr.BadRequest)
 	}
 
-	unEscMess := pb.interactor.MakeSlackMessage(broadCasts)
+	unEscMess := pb.pi.MakeSlackMessage(broadCasts)
 	message := url.QueryEscape(unEscMess)
 
 	for _, t := range targets {

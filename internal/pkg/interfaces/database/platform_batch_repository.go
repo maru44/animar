@@ -89,6 +89,22 @@ func (repo *PlatformBatchRepository) MakeSlackMessage(nbs []domain.NotificationB
 	return out
 }
 
+func (repo *PlatformBatchRepository) ChangeOnAirState(state string, slug string) (int, error) {
+	exe, err := repo.Execute(
+		"UPDATE animes SET state = ? WHERE slug = ?",
+		state, slug,
+	)
+	if err != nil {
+		return 0, perr.Wrap(err, perr.BadRequest)
+	}
+
+	rawAffected, err := exe.LastInsertId()
+	if err != nil {
+		return 0, perr.Wrap(err, perr.BadRequest)
+	}
+	return int(rawAffected), nil
+}
+
 func (repo *PlatformBatchRepository) modifyBroadcastTime(m *domain.RawNotificationMaterial) (*domain.NotificationBroadcast, error) {
 	if m.Interval == nil {
 		return nil, nil
@@ -108,7 +124,7 @@ func (repo *PlatformBatchRepository) modifyBroadcastTime(m *domain.RawNotificati
 	}
 
 	switch m.State {
-	case "now":
+	case domain.StateNow:
 		if *m.Interval == "once" || *m.Interval == "daily" {
 			return out, nil
 		} else if *m.Interval == "weekly" {
@@ -120,7 +136,8 @@ func (repo *PlatformBatchRepository) modifyBroadcastTime(m *domain.RawNotificati
 				}
 			}
 		}
-	case "pre":
+	case domain.StatePre:
+		repo.ChangeOnAirState(domain.StateNow, out.Slug)
 		return out, nil
 	default:
 		return out, nil

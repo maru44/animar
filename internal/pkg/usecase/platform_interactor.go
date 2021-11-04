@@ -41,6 +41,7 @@ type PlatformBatchRepository interface {
 	FilterNotificationTarget() ([]string, error)
 	FilterTodaysBroadCast() ([]domain.NotificationBroadcast, error)
 	MakeSlackMessage([]domain.NotificationBroadcast) string
+	ChangeOnAirState(state string, slug string) (int, error)
 }
 
 /**********************
@@ -80,4 +81,8 @@ func (in *PlatformBatchInteractor) TargetNotificationBroadcast() ([]domain.Notif
 
 func (in *PlatformBatchInteractor) MakeSlackMessage(nbs []domain.NotificationBroadcast) string {
 	return in.repo.MakeSlackMessage(nbs)
+}
+
+func (in *PlatformBatchInteractor) ChangeOnAirState(state string, slug string) (int, error) {
+	return in.repo.ChangeOnAirState(state, slug)
 }
