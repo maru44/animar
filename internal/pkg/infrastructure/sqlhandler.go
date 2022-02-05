@@ -6,7 +6,6 @@ import (
 	"animar/v1/internal/pkg/interfaces/database"
 	"database/sql"
 	"fmt"
-	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/maru44/perr"
@@ -99,13 +98,13 @@ func (t SqlTransaction) Rollback() error {
 func (t SqlTransaction) Execute(statement string, args ...interface{}) (database.Result, error) {
 	res := SqlResult{}
 	stmt, err := t.Tx.Prepare(statement)
-	defer stmt.Close()
 	if err != nil {
 		return res, err
 	}
+	defer stmt.Close()
 	exe, err := stmt.Exec(args...)
 	if err != nil {
-		log.Print(err)
+		return res, err
 	}
 	res.Result = exe
 	return res, nil
